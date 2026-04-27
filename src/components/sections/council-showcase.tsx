@@ -151,8 +151,7 @@ export function CouncilShowcase({
           {/* Gigantic ghost word behind */}
           <span
             aria-hidden
-            className="pointer-events-none absolute -top-10 left-0 select-none whitespace-nowrap font-display italic leading-none text-ink/[0.035]"
-            style={{ fontSize: "clamp(10rem, 22vw, 28rem)" }}
+            className="pointer-events-none absolute -top-4 left-1/2 -translate-x-1/2 select-none whitespace-nowrap font-display text-[clamp(3rem,15.5vw,5.8rem)] italic leading-none text-ink/[0.045] sm:-top-10 sm:left-0 sm:translate-x-0 sm:text-[clamp(10rem,22vw,28rem)] sm:text-ink/[0.035]"
           >
             President.
           </span>
