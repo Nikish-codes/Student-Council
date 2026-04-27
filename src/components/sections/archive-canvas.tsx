@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { gsap, SplitText, useGSAP } from "@/lib/gsap";
+import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import type { EventItem } from "@/lib/schemas";
 
@@ -91,11 +91,14 @@ export function ArchiveCanvas({ events }: ArchiveCanvasProps) {
   useGSAP(
     () => {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const simpleText = prefersSimpleTextMotion();
       const ctx = gsap.context(() => {
         const headline = root.current?.querySelector<HTMLElement>("[data-archive-headline]");
         if (headline) {
           gsap.set(headline, { opacity: 1 });
-          if (!reduced) {
+          if (!reduced && simpleText) {
+            gsap.from(headline, { opacity: 0, y: 24, duration: 0.7, ease: "power2.out" });
+          } else if (!reduced) {
             const split = new SplitText(headline, { type: "chars" });
             gsap.from(split.chars, {
               opacity: 0,

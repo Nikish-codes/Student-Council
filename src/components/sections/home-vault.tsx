@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { gsap, SplitText, useGSAP } from "@/lib/gsap";
+import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import type { VaultStory } from "@/lib/schemas";
 
@@ -210,17 +210,20 @@ export function HomeVault({ entries }: { entries?: VaultStory[] }) {
   useGSAP(
     () => {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const simpleText = prefersSimpleTextMotion();
       const ctx = gsap.context(() => {
         const headline = root.current?.querySelector<HTMLElement>("[data-vault-title]");
         const meta = root.current?.querySelectorAll<HTMLElement>("[data-vault-bit]");
         const chips = root.current?.querySelectorAll<HTMLElement>("[data-vault-chip]");
 
         if (headline) {
-          const split = new SplitText(headline, { type: "chars,words" });
           gsap.set(headline, { opacity: 1 });
           if (reduced) {
-            gsap.set(split.chars, { opacity: 1, y: 0 });
+            gsap.set(headline, { opacity: 1, y: 0 });
+          } else if (simpleText) {
+            gsap.from(headline, { opacity: 0, y: 24, duration: 0.7, ease: "power2.out" });
           } else {
+            const split = new SplitText(headline, { type: "chars,words" });
             gsap.from(split.chars, {
               opacity: 0,
               y: 80,

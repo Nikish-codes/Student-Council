@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { gsap, SplitText, useGSAP } from "@/lib/gsap";
+import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { Picture } from "@/components/ui/picture";
 import { cn } from "@/lib/utils";
 import type { Club } from "@/lib/schemas";
@@ -18,26 +18,37 @@ export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
   useGSAP(
     () => {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const simpleText = prefersSimpleTextMotion();
       const headline = root.current?.querySelector<HTMLElement>("[data-wall-headline]");
       if (headline && !reduced) {
-        const split = new SplitText(headline, { type: "chars,words", charsClass: "char" });
         gsap.set(headline, { opacity: 1 });
-        gsap.set(split.chars, {
-          opacity: 0,
-          y: 100,
-          rotateX: -70,
-          filter: "blur(10px)",
-        });
-        gsap.to(split.chars, {
-          opacity: 1,
-          y: 0,
-          rotateX: 0,
-          filter: "blur(0px)",
-          duration: 1,
-          ease: "expo.out",
-          stagger: { each: 0.022 },
-          scrollTrigger: { trigger: headline, start: "top 85%", once: true },
-        });
+        if (simpleText) {
+          gsap.from(headline, {
+            opacity: 0,
+            y: 24,
+            duration: 0.7,
+            ease: "power2.out",
+            scrollTrigger: { trigger: headline, start: "top 85%", once: true },
+          });
+        } else {
+          const split = new SplitText(headline, { type: "chars,words", charsClass: "char" });
+          gsap.set(split.chars, {
+            opacity: 0,
+            y: 100,
+            rotateX: -70,
+            filter: "blur(10px)",
+          });
+          gsap.to(split.chars, {
+            opacity: 1,
+            y: 0,
+            rotateX: 0,
+            filter: "blur(0px)",
+            duration: 1,
+            ease: "expo.out",
+            stagger: { each: 0.022 },
+            scrollTrigger: { trigger: headline, start: "top 85%", once: true },
+          });
+        }
       }
 
       const tiles = root.current?.querySelectorAll<HTMLElement>("[data-tile]");

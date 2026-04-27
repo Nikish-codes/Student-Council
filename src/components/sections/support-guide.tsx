@@ -10,7 +10,7 @@ import {
   Check,
   type LucideIcon,
 } from "lucide-react";
-import { gsap, SplitText, useGSAP } from "@/lib/gsap";
+import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { GrievanceForm } from "@/components/sections/grievance-form";
 import { cn } from "@/lib/utils";
 import type { SupportChannel } from "@/lib/schemas";
@@ -28,12 +28,23 @@ export function SupportGuide({ channels }: { channels: SupportChannel[] }) {
   useGSAP(
     () => {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const simpleText = prefersSimpleTextMotion();
       if (reduced) return;
       const ctx = gsap.context(() => {
         // SplitText section titles
         root.current?.querySelectorAll<HTMLElement>("[data-split]").forEach((el) => {
-          const split = new SplitText(el, { type: "chars,words", charsClass: "char" });
           gsap.set(el, { opacity: 1 });
+          if (simpleText) {
+            gsap.from(el, {
+              opacity: 0,
+              y: 24,
+              duration: 0.7,
+              ease: "power2.out",
+              scrollTrigger: { trigger: el, start: "top 85%", once: true },
+            });
+            return;
+          }
+          const split = new SplitText(el, { type: "chars,words", charsClass: "char" });
           gsap.set(split.chars, {
             opacity: 0,
             y: 60,

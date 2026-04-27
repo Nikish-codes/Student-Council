@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { gsap, SplitText, useGSAP } from "@/lib/gsap";
+import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import type { ManifestoLine } from "@/lib/schemas";
 
 const FALLBACK_LINES: ManifestoLine[] = [
@@ -26,12 +26,23 @@ export function ManifestoKinetic({
   useGSAP(
     () => {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const simpleText = prefersSimpleTextMotion();
       if (reduced) return;
 
       const ctx = gsap.context(() => {
         root.current?.querySelectorAll<HTMLElement>("[data-line]").forEach((line) => {
-          const split = new SplitText(line, { type: "words,chars", charsClass: "char" });
           gsap.set(line, { opacity: 1 });
+          if (simpleText) {
+            gsap.from(line, {
+              opacity: 0,
+              y: 22,
+              duration: 0.65,
+              ease: "power2.out",
+              scrollTrigger: { trigger: line, start: "top 82%", once: true },
+            });
+            return;
+          }
+          const split = new SplitText(line, { type: "words,chars", charsClass: "char" });
           gsap.set(split.chars, {
             opacity: 0.08,
             y: 10,

@@ -7,7 +7,7 @@ import { HeroCanvas } from "@/components/webgl/hero-canvas";
 import { Button } from "@/components/ui/button";
 import { Magnetic } from "@/components/motion/magnetic";
 import { HeroLiveBadge } from "@/components/sections/hero-live-badge";
-import { gsap, SplitText, useGSAP } from "@/lib/gsap";
+import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import type { CampusSettings, HomepageHero } from "@/lib/schemas";
 
 const FALLBACK_WORDS = ["voices.", "futures.", "ideas.", "stories."];
@@ -29,23 +29,31 @@ export function Hero({
   useGSAP(
     () => {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const simpleText = prefersSimpleTextMotion();
       const headline = root.current!.querySelector<HTMLElement>("[data-headline]")!;
       const subline = root.current!.querySelector<HTMLElement>("[data-subline]")!;
 
-      const splitH = new SplitText(headline, {
-        type: "chars,words",
-        charsClass: "char",
-        wordsClass: "word",
-      });
-      const splitS = new SplitText(subline, {
-        type: "chars,words",
-        charsClass: "char",
-        wordsClass: "word",
-      });
+      const splitH = simpleText
+        ? null
+        : new SplitText(headline, {
+            type: "chars,words",
+            charsClass: "char",
+            wordsClass: "word",
+          });
+      const splitS = simpleText
+        ? null
+        : new SplitText(subline, {
+            type: "chars,words",
+            charsClass: "char",
+            wordsClass: "word",
+          });
 
       if (reduced) {
         gsap.set("[data-anim]", { opacity: 1, y: 0, scale: 1 });
-        gsap.set([splitH.chars, splitS.chars], { opacity: 1, y: 0, rotateX: 0, filter: "none" });
+        gsap.set([headline, subline], { opacity: 1, y: 0, rotateX: 0, filter: "none" });
+        if (splitH && splitS) {
+          gsap.set([splitH.chars, splitS.chars], { opacity: 1, y: 0, rotateX: 0, filter: "none" });
+        }
         return;
       }
 
@@ -62,8 +70,12 @@ export function Hero({
         filter: "blur(20px)",
       });
       gsap.set("[data-logo-ring]", { scale: 0.6, opacity: 0 });
-      gsap.set(splitH.chars, { opacity: 0, y: 140, rotateX: -85, filter: "blur(12px)" });
-      gsap.set(splitS.chars, { opacity: 0, y: 80, filter: "blur(10px)" });
+      if (simpleText) {
+        gsap.set([headline, subline], { opacity: 0, y: 28, filter: "none" });
+      } else if (splitH && splitS) {
+        gsap.set(splitH.chars, { opacity: 0, y: 140, rotateX: -85, filter: "blur(12px)" });
+        gsap.set(splitS.chars, { opacity: 0, y: 80, filter: "blur(10px)" });
+      }
       gsap.set("[data-sub]", { opacity: 0, y: 20 });
       gsap.set("[data-cta]", { opacity: 0, y: 24, scale: 0.96 });
       gsap.set("[data-meta]", { opacity: 0 });
@@ -71,6 +83,8 @@ export function Hero({
 
       // ── Cinematic intro ──
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      const headlineTarget = simpleText || !splitH ? headline : splitH.chars;
+      const sublineTarget = simpleText || !splitS ? subline : splitS.chars;
 
       tl.to("[data-vignette]", { opacity: 1, duration: 1.2, ease: "power2.inOut" })
         .to("[data-kicker-line]", { scaleX: 1, duration: 0.7, ease: "expo.out" }, "-=0.9")
@@ -82,29 +96,33 @@ export function Hero({
         )
         .to("[data-logo-ring]", { scale: 1, opacity: 1, duration: 1.6, ease: "expo.out" }, "<")
         .to(
-          splitH.chars,
-          {
-            opacity: 1,
-            y: 0,
-            rotateX: 0,
-            filter: "blur(0px)",
-            duration: 1.1,
-            ease: "expo.out",
-            stagger: { each: 0.035, from: "start" },
-          },
+          headlineTarget,
+          simpleText
+            ? { opacity: 1, y: 0, duration: 0.75, ease: "power3.out" }
+            : {
+                opacity: 1,
+                y: 0,
+                rotateX: 0,
+                filter: "blur(0px)",
+                duration: 1.1,
+                ease: "expo.out",
+                stagger: { each: 0.035, from: "start" },
+              },
           "-=1",
         )
         .to(
-          splitS.chars,
-          {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            duration: 0.9,
-            ease: "power4.out",
-            stagger: { each: 0.025, from: "start" },
-          },
-          "-=0.7",
+          sublineTarget,
+          simpleText
+            ? { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" }
+            : {
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)",
+                duration: 0.9,
+                ease: "power4.out",
+                stagger: { each: 0.025, from: "start" },
+              },
+          "-=0.55",
         )
         .to("[data-sub]", { opacity: 1, y: 0, duration: 0.8 }, "-=0.5")
         .to(

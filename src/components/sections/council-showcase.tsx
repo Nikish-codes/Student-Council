@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Mail, ExternalLink } from "lucide-react";
-import { gsap, SplitText, useGSAP } from "@/lib/gsap";
+import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { CutoutPortrait } from "@/components/ui/cutout-portrait";
 import { cn } from "@/lib/utils";
 import type { CouncilMember } from "@/lib/schemas";
@@ -24,13 +24,24 @@ export function CouncilShowcase({
   useGSAP(
     () => {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const simpleText = prefersSimpleTextMotion();
 
       const ctx = gsap.context(() => {
         // ── SplitText big titles ──
         root.current?.querySelectorAll<HTMLElement>("[data-split]").forEach((el) => {
-          const split = new SplitText(el, { type: "chars,words", charsClass: "char" });
           gsap.set(el, { opacity: 1 });
           if (reduced) return;
+          if (simpleText) {
+            gsap.from(el, {
+              opacity: 0,
+              y: 24,
+              duration: 0.7,
+              ease: "power2.out",
+              scrollTrigger: { trigger: el, start: "top 88%", once: true },
+            });
+            return;
+          }
+          const split = new SplitText(el, { type: "chars,words", charsClass: "char" });
           gsap.set(split.chars, {
             opacity: 0,
             y: 80,

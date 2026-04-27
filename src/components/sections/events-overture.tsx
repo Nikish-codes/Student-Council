@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowUpRight, MapPin } from "lucide-react";
 import { Picture } from "@/components/ui/picture";
-import { gsap, SplitText, useGSAP } from "@/lib/gsap";
+import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import type { EventItem } from "@/lib/schemas";
 
@@ -32,11 +32,16 @@ export function EventsOverture({
   useGSAP(
     () => {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const simpleText = prefersSimpleTextMotion();
       const ctx = gsap.context(() => {
         root.current?.querySelectorAll<HTMLElement>("[data-split]").forEach((el) => {
-          const split = new SplitText(el, { type: "chars,words", charsClass: "char" });
           gsap.set(el, { opacity: 1 });
           if (reduced) return;
+          if (simpleText) {
+            gsap.from(el, { opacity: 0, y: 24, duration: 0.7, ease: "power2.out" });
+            return;
+          }
+          const split = new SplitText(el, { type: "chars,words", charsClass: "char" });
           gsap.set(split.chars, { opacity: 0, y: 80, rotateX: -70, filter: "blur(10px)" });
           gsap.to(split.chars, {
             opacity: 1,

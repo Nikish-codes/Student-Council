@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { gsap, SplitText, useGSAP } from "@/lib/gsap";
+import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 
 type Effect = "rise" | "fade" | "mask" | "split-words" | "split-chars" | "split-lines";
@@ -45,6 +45,7 @@ export function ScrollReveal({
       if (!el) return;
 
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const simpleText = prefersSimpleTextMotion();
       if (reduced) {
         gsap.set(el, { opacity: 1, clearProps: "all" });
         gsap.set(el.children, { opacity: 1, y: 0, clearProps: "all" });
@@ -68,7 +69,8 @@ export function ScrollReveal({
           fromVars = { clipPath: "inset(0 0 100% 0)", opacity: 1 };
           toVars = { clipPath: "inset(0 0 0% 0)", duration: 1.1, ease: "expo.out" };
         } else if (effect.startsWith("split-")) {
-          const type = effect.replace("split-", "") as "words" | "chars" | "lines";
+          const requestedType = effect.replace("split-", "") as "words" | "chars" | "lines";
+          const type = simpleText && requestedType === "chars" ? "words" : requestedType;
           split = new SplitText(el.querySelectorAll("h1,h2,h3,h4,p,span"), {
             type: type === "lines" ? "lines,words" : type,
             linesClass: "line",
@@ -78,14 +80,16 @@ export function ScrollReveal({
           const items =
             type === "words" ? split.words : type === "chars" ? split.chars : split.lines;
           targets = items;
-          fromVars = { opacity: 0, y: type === "chars" ? 60 : 80, filter: "blur(8px)", rotateX: type === "chars" ? -45 : 0 };
+          fromVars = simpleText
+            ? { opacity: 0, y: 24 }
+            : { opacity: 0, y: type === "chars" ? 60 : 80, filter: "blur(8px)", rotateX: type === "chars" ? -45 : 0 };
           toVars = {
             opacity: 1,
             y: 0,
             rotateX: 0,
-            filter: "blur(0px)",
-            duration: type === "chars" ? 0.7 : 0.9,
-            stagger: type === "chars" ? 0.025 : type === "words" ? 0.06 : 0.12,
+            filter: simpleText ? undefined : "blur(0px)",
+            duration: simpleText ? 0.65 : type === "chars" ? 0.7 : 0.9,
+            stagger: simpleText ? 0.04 : type === "chars" ? 0.025 : type === "words" ? 0.06 : 0.12,
             ease: "power4.out",
           };
         }

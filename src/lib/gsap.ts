@@ -14,4 +14,9 @@ if (typeof window !== "undefined") {
   ScrollTrigger.config({ ignoreMobileResize: true });
 }
 
+export function prefersSimpleTextMotion() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(max-width: 767px), (pointer: coarse)").matches;
+}
+
 export { gsap, ScrollTrigger, SplitText, useGSAP };

@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowUpRight, MapPin, Users } from "lucide-react";
 import { Picture } from "@/components/ui/picture";
-import { gsap, ScrollTrigger, SplitText, useGSAP } from "@/lib/gsap";
+import { gsap, prefersSimpleTextMotion, ScrollTrigger, SplitText, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import type { EventCategory, EventItem } from "@/lib/schemas";
 
@@ -65,12 +65,21 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
   useGSAP(
     () => {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const simpleText = prefersSimpleTextMotion();
       const ctx = gsap.context(() => {
         const headline = root.current?.querySelector<HTMLElement>("[data-almanac-headline]");
         if (headline) {
-          const split = new SplitText(headline, { type: "chars,words", charsClass: "char" });
           gsap.set(headline, { opacity: 1 });
-          if (!reduced) {
+          if (!reduced && simpleText) {
+            gsap.from(headline, {
+              opacity: 0,
+              y: 24,
+              duration: 0.7,
+              ease: "power2.out",
+              scrollTrigger: { trigger: headline, start: "top 85%", once: true },
+            });
+          } else if (!reduced) {
+            const split = new SplitText(headline, { type: "chars,words", charsClass: "char" });
             gsap.set(split.chars, { opacity: 0, y: 50, rotateX: -50, filter: "blur(8px)" });
             gsap.to(split.chars, {
               opacity: 1,

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { gsap, SplitText, useGSAP } from "@/lib/gsap";
+import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { ClubCard } from "@/components/sections/club-card";
 import { CountUp } from "@/components/motion/count-up";
 import { cn } from "@/lib/utils";
@@ -50,12 +50,23 @@ export function ClubsExplorer({ clubs }: { clubs: Club[] }) {
   useGSAP(
     () => {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const simpleText = prefersSimpleTextMotion();
       const ctx = gsap.context(() => {
         // ── Section headers: split chars, rise + blur out ──
         root.current?.querySelectorAll<HTMLElement>("[data-group-title]").forEach((el) => {
-          const split = new SplitText(el, { type: "chars,words", charsClass: "char" });
           gsap.set(el, { opacity: 1 });
           if (reduced) return;
+          if (simpleText) {
+            gsap.from(el, {
+              opacity: 0,
+              y: 24,
+              duration: 0.7,
+              ease: "power2.out",
+              scrollTrigger: { trigger: el, start: "top 85%", once: true },
+            });
+            return;
+          }
+          const split = new SplitText(el, { type: "chars,words", charsClass: "char" });
           gsap.set(split.chars, { opacity: 0, y: 80, rotateX: -70, filter: "blur(10px)" });
           gsap.to(split.chars, {
             opacity: 1,
