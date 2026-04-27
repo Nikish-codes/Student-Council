@@ -1,12 +1,6 @@
 import { Hero } from "@/components/sections/hero";
 import { AnnouncementsTicker } from "@/components/sections/announcements-ticker";
-import { StatsSymphony } from "@/components/sections/stats-symphony";
-import { HomeVault } from "@/components/sections/home-vault";
-import { HomeFeaturedEvent } from "@/components/sections/home-featured-event";
-import { HomeUpcomingStrip } from "@/components/sections/home-upcoming-strip";
-import { ManifestoKinetic } from "@/components/sections/manifesto-kinetic";
-import { ClubsLogoWall } from "@/components/sections/clubs-logo-wall";
-import { ClosingCTA } from "@/components/sections/closing-cta";
+import { HomeLazySections } from "@/components/sections/home-lazy-sections";
 import {
   getClubs,
   getEvent,
@@ -38,17 +32,12 @@ export default async function HomePage() {
     <>
       <Hero data={homepage.hero} campus={settings.campus} />
       <AnnouncementsTicker />
-      <HomeVault entries={homepage.vaultStories} />
-      <HomeFeaturedEvent event={featuredEvent} />
-      <HomeUpcomingStrip events={upcoming} totalCount={upcoming.length} />
-      <StatsSymphony kicker={homepage.statsKicker} stats={homepage.stats} />
-      <ManifestoKinetic
-        kicker={homepage.manifestoKicker}
-        lines={homepage.manifestoLines}
-        footer={homepage.manifestoFooter}
+      <HomeLazySections
+        homepage={homepage}
+        upcoming={upcoming}
+        featuredEvent={featuredEvent}
+        clubs={clubs}
       />
-      <ClubsLogoWall clubs={clubs} />
-      <ClosingCTA data={homepage.closingCta} />
     </>
   );
 }
