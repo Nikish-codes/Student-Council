@@ -38,7 +38,7 @@ import {
 } from "./actions";
 
 export const metadata: Metadata = {
-  title: "Operations Dashboard",
+  title: "Council Ops Dashboard",
   description: "Role-aware shadcn-style operations tools for the Council CMS.",
 };
 

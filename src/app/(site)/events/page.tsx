@@ -6,7 +6,7 @@ import { EventsRecap } from "@/components/sections/events-recap";
 import { getEvents } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "Events",
+  title: "Events Calendar",
   description:
     "Bootcamps, hackathons, cultural nights and sports cups — every event run by the Woxsen Student Council.",
 };

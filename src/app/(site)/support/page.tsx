@@ -4,7 +4,7 @@ import { SupportGuide } from "@/components/sections/support-guide";
 import { getSupportChannels } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "Support",
+  title: "Student Support",
   description:
     "How to reach the right desk at Woxsen — and what the Student Council can (and can't) do to help.",
 };

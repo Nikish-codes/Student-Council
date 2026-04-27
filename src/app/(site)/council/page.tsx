@@ -6,7 +6,7 @@ import { CouncilShowcase } from "@/components/sections/council-showcase";
 import { getCouncil, getFaqs, getPresident } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "Council",
+  title: "Council Team",
   description:
     "The 2025/26 Woxsen Student Council — eight people, one council, one job: every voice gets heard.",
 };

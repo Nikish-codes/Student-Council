@@ -4,7 +4,7 @@ import { ClubsExplorer } from "@/components/sections/clubs-explorer";
 import { getClubs } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "Clubs",
+  title: "Student Clubs",
   description:
     "29 student-run clubs across tech, design, performing arts, sports and entrepreneurship at Woxsen.",
 };

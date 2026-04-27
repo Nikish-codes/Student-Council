@@ -24,17 +24,27 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://council.woxsen.edu.in"),
-  title: {
-    default: "Woxsen Student Council",
-    template: "%s — Woxsen Student Council",
-  },
   description:
     "The official portal of the Woxsen University Student Council — events, clubs, leadership, and student support.",
+  title: {
+    default: "Woxsen Student Council",
+    template: "%s | Woxsen Student Council",
+  },
+  applicationName: "Woxsen Student Council",
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/brand/sc-black.png", type: "image/png" },
+    ],
+    shortcut: "/icon.png",
+    apple: "/brand/sc-black.png",
+  },
   openGraph: {
     title: "Woxsen Student Council",
     description:
       "Empowering student voices @ Woxsen — events, clubs, leadership and support.",
     type: "website",
+    images: ["/brand/sc-black.png"],
   },
 };
 
