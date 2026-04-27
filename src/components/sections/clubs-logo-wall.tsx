@@ -101,13 +101,7 @@ export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
         </div>
       </div>
 
-      {/* Full-bleed grid */}
-      <div
-        className={cn(
-          "group/wall mt-12 grid gap-px bg-line/10",
-          "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8",
-        )}
-      >
+      <div className="mx-auto mt-14 flex max-w-[1720px] flex-wrap justify-center gap-3 px-4 sm:gap-4 sm:px-6 lg:px-10">
         {clubs.map((club, i) => (
           <Link
             key={club.slug}
@@ -115,21 +109,19 @@ export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
             data-tile
             aria-label={club.name}
             className={cn(
-              "group/tile relative flex aspect-square items-center justify-center bg-bg p-5 sm:p-7",
-              "transition-opacity duration-300 ease-out",
-              "hover:!opacity-100 hover:z-10",
-              "group-hover/wall:opacity-30",
+              "group/tile relative flex aspect-square w-[min(42vw,10rem)] items-center justify-center overflow-hidden border border-line/12 bg-surface/30 p-5 sm:w-40 sm:p-6 md:w-44 lg:w-48 xl:w-52",
+              "transition duration-300 ease-out hover:-translate-y-1 hover:border-line/35 hover:bg-surface/55 hover:shadow-2xl hover:shadow-black/30",
             )}
           >
             <span className="absolute left-3 top-3 font-mono text-[10px] text-subtle opacity-0 transition-opacity duration-300 group-hover/tile:opacity-100">
               {String(i + 1).padStart(2, "0")}
             </span>
-            <div className="relative h-full w-full">
+            <div className="relative h-full w-full transition-transform duration-300 group-hover/tile:scale-95">
               <Picture
                 src={club.logo}
                 alt={club.name}
                 fill
-                sizes="(min-width: 1280px) 12vw, (min-width: 768px) 20vw, 33vw"
+                sizes="(min-width: 1280px) 13rem, (min-width: 768px) 11rem, 42vw"
                 fallbackLabel={club.name.slice(0, 2).toUpperCase()}
                 className="object-contain"
               />
