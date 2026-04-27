@@ -1,0 +1,451 @@
+/* ─────────────────────────────────────────────────────────────────
+   Woxsen Council — Payload Admin Skin
+   Re-themes the default Payload admin to match the public site's
+   editorial dark palette (bg/surface/ink/muted) and adds polish:
+   refined sidebar, glassy header, accent focus rings, nicer inputs,
+   smoother cards, better tables. No JS required.
+   ───────────────────────────────────────────────────────────────── */
+
+:root,
+[data-theme="dark"],
+[data-theme="light"] {
+  /* Brand palette mapped to Payload's theme variables */
+  --color-base-0: 10 10 10;
+  --color-base-50: 17 17 17;
+  --color-base-100: 22 22 22;
+  --color-base-150: 28 28 28;
+  --color-base-200: 38 38 38;
+  --color-base-300: 64 64 64;
+  --color-base-400: 115 115 115;
+  --color-base-500: 163 163 163;
+  --color-base-600: 212 212 212;
+  --color-base-700: 229 229 229;
+  --color-base-800: 245 245 244;
+  --color-base-850: 250 250 249;
+  --color-base-1000: 255 255 255;
+
+  --color-success-500: 134 239 172;
+  --color-warning-500: 251 191 36;
+  --color-error-500: 248 113 113;
+
+  /* Editorial accents */
+  --wc-bg: 10 10 10;
+  --wc-surface: 17 17 17;
+  --wc-surface-2: 24 24 24;
+  --wc-ink: 245 245 244;
+  --wc-muted: 163 163 163;
+  --wc-line: 255 255 255;
+  --wc-accent: 245 245 244;
+}
+
+/* Force dark theme baseline regardless of user toggle — the brand is dark */
+html[data-theme="light"] body,
+html[data-theme="dark"] body,
+html body {
+  background: rgb(var(--wc-bg)) !important;
+  color: rgb(var(--wc-ink)) !important;
+  font-family:
+    var(--font-sans),
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle dotted background to echo the public site */
+.template-default,
+.template-default__wrap,
+.app-header__wrapper,
+.payload__document-fields,
+.dashboard,
+.list,
+.collection-edit,
+.global-edit {
+  background:
+    radial-gradient(
+      circle at 1px 1px,
+      rgb(var(--wc-line) / 0.04) 1px,
+      transparent 0
+    )
+    0 0 / 22px 22px,
+    rgb(var(--wc-bg)) !important;
+}
+
+/* ── Top bar / app header ─────────────────────────────────────── */
+.app-header,
+.step-nav,
+.doc-header {
+  background: rgb(var(--wc-bg) / 0.7) !important;
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid rgb(var(--wc-line) / 0.08) !important;
+}
+
+.step-nav a,
+.step-nav span {
+  color: rgb(var(--wc-muted)) !important;
+  letter-spacing: 0.02em;
+}
+.step-nav a:hover {
+  color: rgb(var(--wc-ink)) !important;
+}
+
+/* ── Sidebar / nav ────────────────────────────────────────────── */
+.nav,
+.nav-wrap,
+aside.nav {
+  background: rgb(var(--wc-surface)) !important;
+  border-right: 1px solid rgb(var(--wc-line) / 0.06) !important;
+}
+
+.nav__scroll,
+.nav__content {
+  padding-top: 1.25rem !important;
+}
+
+.nav-group__label,
+.nav__label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem !important;
+  letter-spacing: 0.22em !important;
+  text-transform: uppercase;
+  color: rgb(var(--wc-muted) / 0.85) !important;
+  padding: 0.75rem 1rem 0.5rem !important;
+}
+
+.nav a,
+.nav__link {
+  position: relative;
+  border-radius: 8px !important;
+  margin: 2px 8px !important;
+  padding: 0.55rem 0.75rem !important;
+  color: rgb(var(--wc-ink) / 0.78) !important;
+  font-size: 0.875rem !important;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.nav a:hover,
+.nav__link:hover {
+  background: rgb(var(--wc-line) / 0.06) !important;
+  color: rgb(var(--wc-ink)) !important;
+}
+
+.nav a.active,
+.nav__link--active,
+.nav a[aria-current="page"] {
+  background: rgb(var(--wc-line) / 0.1) !important;
+  color: rgb(var(--wc-ink)) !important;
+}
+
+.nav a.active::before,
+.nav__link--active::before,
+.nav a[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 18%;
+  bottom: 18%;
+  width: 2px;
+  background: rgb(var(--wc-ink));
+  border-radius: 2px;
+}
+
+/* ── Headings ─────────────────────────────────────────────────── */
+h1,
+h2,
+h3,
+h4,
+.dashboard__label,
+.collection-list__sub-header,
+.doc-header__title-bar h1 {
+  font-family: var(--font-display), Georgia, serif !important;
+  letter-spacing: -0.02em !important;
+  color: rgb(var(--wc-ink)) !important;
+}
+
+h1 {
+  font-size: clamp(1.75rem, 2.4vw, 2.25rem) !important;
+  font-weight: 500 !important;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+.btn,
+button.btn {
+  border-radius: 10px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  transition:
+    background 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease,
+    transform 140ms ease;
+}
+
+.btn--style-primary,
+.btn--icon-style-without-border.btn--style-primary {
+  background: rgb(var(--wc-ink)) !important;
+  color: rgb(var(--wc-bg)) !important;
+  border: 1px solid rgb(var(--wc-ink)) !important;
+}
+.btn--style-primary:hover {
+  transform: translateY(-1px);
+  background: rgb(var(--wc-ink) / 0.92) !important;
+}
+
+.btn--style-secondary {
+  background: transparent !important;
+  color: rgb(var(--wc-ink)) !important;
+  border: 1px solid rgb(var(--wc-line) / 0.18) !important;
+}
+.btn--style-secondary:hover {
+  border-color: rgb(var(--wc-line) / 0.4) !important;
+  background: rgb(var(--wc-line) / 0.04) !important;
+}
+
+.btn--style-error,
+.btn--style-error-outline {
+  background: rgb(var(--color-error-500) / 0.12) !important;
+  color: rgb(var(--color-error-500)) !important;
+  border: 1px solid rgb(var(--color-error-500) / 0.4) !important;
+}
+
+/* ── Cards / sections / fieldsets ─────────────────────────────── */
+.card,
+.gutter,
+.collapsible,
+.collapsible__content,
+.tabs-field,
+.field-type.group,
+.field-type.array,
+.field-type.blocks {
+  background: rgb(var(--wc-surface) / 0.65) !important;
+  border: 1px solid rgb(var(--wc-line) / 0.08) !important;
+  border-radius: 14px !important;
+}
+
+.collapsible__toggle,
+.tabs-field__tabs {
+  border-bottom: 1px solid rgb(var(--wc-line) / 0.06) !important;
+}
+
+/* ── Inputs ───────────────────────────────────────────────────── */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="url"],
+textarea,
+.field-type__wrap input,
+.field-type__wrap textarea,
+.rs__control {
+  background: rgb(var(--wc-surface-2)) !important;
+  border: 1px solid rgb(var(--wc-line) / 0.1) !important;
+  color: rgb(var(--wc-ink)) !important;
+  border-radius: 10px !important;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
+}
+
+input:focus,
+textarea:focus,
+.rs__control--is-focused {
+  border-color: rgb(var(--wc-ink) / 0.6) !important;
+  box-shadow: 0 0 0 3px rgb(var(--wc-ink) / 0.1) !important;
+  outline: none !important;
+}
+
+label,
+.field-label {
+  color: rgb(var(--wc-ink) / 0.85) !important;
+  font-size: 0.8125rem !important;
+  letter-spacing: 0.01em !important;
+  font-weight: 500 !important;
+}
+
+.field-description,
+.tooltip,
+small {
+  color: rgb(var(--wc-muted)) !important;
+}
+
+/* react-select dropdowns */
+.rs__menu {
+  background: rgb(var(--wc-surface-2)) !important;
+  border: 1px solid rgb(var(--wc-line) / 0.1) !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+}
+.rs__option {
+  background: transparent !important;
+  color: rgb(var(--wc-ink) / 0.9) !important;
+}
+.rs__option--is-focused {
+  background: rgb(var(--wc-line) / 0.06) !important;
+}
+.rs__option--is-selected {
+  background: rgb(var(--wc-line) / 0.1) !important;
+  color: rgb(var(--wc-ink)) !important;
+}
+.rs__multi-value {
+  background: rgb(var(--wc-line) / 0.08) !important;
+  border-radius: 6px !important;
+}
+.rs__multi-value__label {
+  color: rgb(var(--wc-ink)) !important;
+}
+
+/* ── Tables ───────────────────────────────────────────────────── */
+.table,
+table {
+  border-collapse: separate !important;
+  border-spacing: 0;
+  width: 100%;
+}
+.table thead th,
+table thead th {
+  background: rgb(var(--wc-surface)) !important;
+  color: rgb(var(--wc-muted)) !important;
+  font-weight: 500 !important;
+  text-transform: uppercase;
+  font-size: 0.6875rem !important;
+  letter-spacing: 0.18em !important;
+  border-bottom: 1px solid rgb(var(--wc-line) / 0.08) !important;
+  padding: 0.85rem 1rem !important;
+}
+.table tbody tr,
+table tbody tr {
+  transition: background 140ms ease;
+}
+.table tbody tr:hover,
+table tbody tr:hover {
+  background: rgb(var(--wc-line) / 0.04) !important;
+}
+.table tbody td,
+table tbody td {
+  border-bottom: 1px solid rgb(var(--wc-line) / 0.05) !important;
+  padding: 0.85rem 1rem !important;
+  color: rgb(var(--wc-ink) / 0.9) !important;
+}
+
+/* ── Pills / badges / status chips ────────────────────────────── */
+.pill,
+.status,
+.badge {
+  border-radius: 999px !important;
+  padding: 0.2rem 0.6rem !important;
+  font-size: 0.6875rem !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase;
+  border: 1px solid rgb(var(--wc-line) / 0.12) !important;
+  background: rgb(var(--wc-line) / 0.06) !important;
+  color: rgb(var(--wc-ink)) !important;
+}
+
+/* ── Dashboard cards ──────────────────────────────────────────── */
+.dashboard__group {
+  margin-bottom: 2rem !important;
+}
+.dashboard__card,
+.card-list__item {
+  background: rgb(var(--wc-surface) / 0.7) !important;
+  border: 1px solid rgb(var(--wc-line) / 0.08) !important;
+  border-radius: 16px !important;
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 220ms ease,
+    background 220ms ease;
+}
+.dashboard__card:hover,
+.card-list__item:hover {
+  transform: translateY(-2px);
+  border-color: rgb(var(--wc-line) / 0.18) !important;
+  background: rgb(var(--wc-surface) / 0.9) !important;
+}
+
+/* ── Doc controls / save bar ──────────────────────────────────── */
+.doc-controls,
+.doc-controls__wrapper {
+  background: rgb(var(--wc-surface) / 0.7) !important;
+  border-bottom: 1px solid rgb(var(--wc-line) / 0.08) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────── */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgb(var(--wc-line) / 0.12);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--wc-line) / 0.22);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+/* ── Login screen ─────────────────────────────────────────────── */
+.login,
+.template-minimal {
+  background:
+    radial-gradient(
+      ellipse at top,
+      rgb(var(--wc-surface)) 0%,
+      rgb(var(--wc-bg)) 60%
+    ) !important;
+}
+.login__brand {
+  filter: invert(0) brightness(1.1);
+}
+.login__form {
+  background: rgb(var(--wc-surface) / 0.8) !important;
+  border: 1px solid rgb(var(--wc-line) / 0.08) !important;
+  border-radius: 16px !important;
+  padding: 2rem !important;
+  box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.6);
+}
+
+/* ── Tooltips, popups, modals ─────────────────────────────────── */
+.popup,
+.popup__content,
+.tooltip,
+.modal,
+.drawer__content {
+  background: rgb(var(--wc-surface-2)) !important;
+  border: 1px solid rgb(var(--wc-line) / 0.1) !important;
+  border-radius: 14px !important;
+  color: rgb(var(--wc-ink)) !important;
+  box-shadow: 0 24px 60px -12px rgb(0 0 0 / 0.6);
+}
+
+/* ── Smooth focus rings everywhere ────────────────────────────── */
+:focus-visible {
+  outline: 2px solid rgb(var(--wc-ink) / 0.6) !important;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ── Reduced motion ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+}

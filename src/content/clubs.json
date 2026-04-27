@@ -1,0 +1,263 @@
+[
+  {
+    "slug": "tantra",
+    "name": "Tantra",
+    "logo": "/clubs/Tantra Logo.png",
+    "blurb": "The Operations Club — events and activities on operations management that connect students to the resources, careers and alumni network shaping how the business world really runs.",
+    "joinUrl": "https://forms.gle/example-tantra",
+    "tags": ["Business", "Operations"],
+    "members": 240
+  },
+  {
+    "slug": "technology-club",
+    "name": "Technology Club",
+    "logo": "/clubs/technology_club_logo.png",
+    "blurb": "Where every student gets engaged in tech — knowledge, networks and a practical playground for invention, resourcefulness and innovation. A place to master coding and stop fearing the debugger.",
+    "joinUrl": "https://forms.gle/example-tech",
+    "tags": ["Tech", "Engineering"],
+    "members": 180
+  },
+  {
+    "slug": "nexus",
+    "name": "Nexus — AI & Robotics",
+    "logo": "/clubs/nexus logo.png",
+    "blurb": "Explores new technologies and supports deep research — training students to build, prototype and showcase creative work in AI and robotics.",
+    "joinUrl": "https://forms.gle/example-nexus",
+    "tags": ["Tech", "AI & Robotics"],
+    "members": 130
+  },
+  {
+    "slug": "ignite",
+    "name": "Ignite",
+    "logo": "/clubs/Ignite logo.png",
+    "blurb": "The Entrepreneurship Club — intensive founder skills, real business-world exposure, and a platform to run ventures and compete in external entrepreneurship forums.",
+    "joinUrl": "https://forms.gle/example-ignite",
+    "tags": ["Business", "Entrepreneurship"],
+    "members": 200
+  },
+  {
+    "slug": "finwiz",
+    "name": "Finwiz",
+    "logo": "/clubs/Finwiz Logo.png",
+    "blurb": "The community for finance enthusiasts — learn, share and network with industry to make informed financial choices and build the skills to act on them.",
+    "joinUrl": "https://forms.gle/example-finwiz",
+    "tags": ["Business", "Finance"],
+    "members": 150
+  },
+  {
+    "slug": "arthaverse",
+    "name": "Arthaverse",
+    "logo": "/clubs/Arthaverse Logo 2.jpg",
+    "blurb": "The economics society — policy debates, research papers, and macro reading groups.",
+    "joinUrl": "https://forms.gle/example-arthaverse",
+    "tags": ["Business", "Economics"],
+    "members": 90
+  },
+  {
+    "slug": "mdc",
+    "name": "Marketing Director's Club",
+    "logo": "/clubs/Marketing Director's Club_MDC.jpg",
+    "blurb": "Brand strategy, growth experiments and case competitions for marketing-minded students.",
+    "joinUrl": "https://forms.gle/example-mdc",
+    "tags": ["Business", "Marketing"],
+    "members": 160
+  },
+  {
+    "slug": "humanique",
+    "name": "Humanique",
+    "logo": "/clubs/Humanique HR logo.jpeg",
+    "blurb": "The HR Club — a year-round continuum of activities to help students build a compelling personality, sharpen domain knowledge and grow their network.",
+    "joinUrl": "https://forms.gle/example-humanique",
+    "tags": ["Business", "HR"],
+    "members": 80
+  },
+  {
+    "slug": "spectrum",
+    "name": "Spectrum",
+    "logo": "/clubs/Spectrum Logo.png",
+    "blurb": "The performing arts society — music, theatre and stagecraft for every campus event.",
+    "joinUrl": "https://forms.gle/example-spectrum",
+    "tags": ["Cultural", "Performing"],
+    "members": 140
+  },
+  {
+    "slug": "jashn",
+    "name": "Jashn",
+    "logo": "/clubs/Jashn-The Cultural Club Logo.jpeg",
+    "blurb": "The Cultural Club — sparks the creative, fun side of campus through festivals all year, from Bollytolly Retro Fest to Bollytolly Ethnic Fest.",
+    "joinUrl": "https://forms.gle/example-jashn",
+    "tags": ["Cultural", "Festival"],
+    "members": 220
+  },
+  {
+    "slug": "just-naach",
+    "name": "Just Naach",
+    "logo": "/clubs/Just Naach.jpg",
+    "blurb": "Woxsen's Dance Club — a stage to showcase originality and explore every dance form, built to lift student morale through movement.",
+    "joinUrl": "https://forms.gle/example-naach",
+    "tags": ["Cultural", "Dance"],
+    "members": 110
+  },
+  {
+    "slug": "distortion",
+    "name": "Distortion",
+    "logo": "/clubs/distortion logo .jpg",
+    "blurb": "The campus rock & alt-music collective — bands, jam rooms and live nights.",
+    "joinUrl": "https://forms.gle/example-distortion",
+    "tags": ["Cultural", "Music"],
+    "members": 75
+  },
+  {
+    "slug": "crowdcore",
+    "name": "Crowdcore",
+    "logo": "/clubs/crowdcore logo.PNG",
+    "blurb": "The Marketing Club — the art and science of limitless marketing, surfacing the most innovative and unconventional techniques through events and blogs that upskill aspiring marketers.",
+    "joinUrl": "https://forms.gle/example-crowdcore",
+    "tags": ["Business", "Marketing"],
+    "members": 95
+  },
+  {
+    "slug": "drishyakala",
+    "name": "Drishyakala",
+    "logo": "/clubs/Drishyakala_png.png",
+    "blurb": "The film club — Friday screenings, short film productions and the annual student film festival.",
+    "joinUrl": "https://forms.gle/example-drishyakala",
+    "tags": ["Creative", "Film"],
+    "members": 70
+  },
+  {
+    "slug": "paparazzi",
+    "name": "Paparazzi",
+    "logo": "/clubs/Paparazzi logo.jpg",
+    "blurb": "The Photography & Media Club — composition, artistic expression and the crew documenting campus life, sport and culture from a to z.",
+    "joinUrl": "https://forms.gle/example-paparazzi",
+    "tags": ["Creative", "Photography"],
+    "members": 85
+  },
+  {
+    "slug": "skribble",
+    "name": "Skribble",
+    "logo": "/clubs/Skribble logo.svg",
+    "blurb": "Where students who share a love for art gather, work with a wide range of materials and techniques, and find creative expression beyond the classroom.",
+    "joinUrl": "https://forms.gle/example-skribble",
+    "tags": ["Creative", "Art"],
+    "members": 60
+  },
+  {
+    "slug": "wdc",
+    "name": "Woxsen Design Club",
+    "logo": "/clubs/wdc logo other.png.PNG",
+    "blurb": "Visual identity, product design and the team that ships work for campus events.",
+    "joinUrl": "https://forms.gle/example-wdc",
+    "tags": ["Creative", "Design"],
+    "members": 105
+  },
+  {
+    "slug": "communication-design",
+    "name": "Visual Communication Club",
+    "logo": "/clubs/Communication Design Club.png",
+    "blurb": "Introduces students to digital media — thought-provoking visuals, stimulating motion graphics and captivating stories.",
+    "joinUrl": "https://forms.gle/example-cdc",
+    "tags": ["Creative", "Visual Communication"],
+    "members": 55
+  },
+  {
+    "slug": "fashion-design",
+    "name": "Fashion Club",
+    "logo": "/clubs/FASHION DESIGN CLUB LOGO.png",
+    "blurb": "Taps into every fashion department and explores different fashion realms — a community where experiments are appreciated and nobody's afraid to try something new.",
+    "joinUrl": "https://forms.gle/example-fdc",
+    "tags": ["Creative", "Fashion"],
+    "members": 65
+  },
+  {
+    "slug": "interior-design",
+    "name": "Interior Design Club",
+    "logo": "/clubs/Interior Design Club Logo.jpg",
+    "blurb": "A co-curricular forum to swap ideas on materials, trends, innovations and the aesthetics of space — exploring the workings of design hands-on.",
+    "joinUrl": "https://forms.gle/example-idc",
+    "tags": ["Creative", "Design"],
+    "members": 45
+  },
+  {
+    "slug": "aesthetrix",
+    "name": "Aesthetrix",
+    "logo": "/clubs/AESTHETRIX.logo.jpeg",
+    "blurb": "The Product Design Club — function-first design made visible, with sketching and collaborative making at the core of how members learn and improve.",
+    "joinUrl": "https://forms.gle/example-aesthetrix",
+    "tags": ["Creative", "Product Design"],
+    "members": 50
+  },
+  {
+    "slug": "sustainability",
+    "name": "James A.F. Stoner Global Sustainability Club",
+    "logo": "/clubs/SUSTAINABILITY CLUB LOGO.png",
+    "blurb": "Builds a community of environmentally conscious leaders — driving change through Collaboration, Research and Engagement on and beyond campus.",
+    "joinUrl": "https://forms.gle/example-sustain",
+    "tags": ["Impact", "Sustainability"],
+    "members": 75
+  },
+  {
+    "slug": "rotaract",
+    "name": "Rotaract Club",
+    "logo": "/clubs/Rotaract Logo.jpeg",
+    "blurb": "Empowers young leaders through service projects and leadership labs — promoting social responsibility, sustainable development and a culture of empathy.",
+    "joinUrl": "https://forms.gle/example-rotaract",
+    "tags": ["Impact", "Service"],
+    "members": 110
+  },
+  {
+    "slug": "awc",
+    "name": "Animal Welfare Club",
+    "logo": "/clubs/AWC logo text.png",
+    "blurb": "Looks after the animals living on campus — care, food, regular vet check-ups and vaccination drives, building a community grounded in kindness.",
+    "joinUrl": "https://forms.gle/example-awc",
+    "tags": ["Impact", "Welfare"],
+    "members": 70
+  },
+  {
+    "slug": "law-club",
+    "name": "The Law Club",
+    "logo": "/clubs/thelawclublogo.png",
+    "blurb": "Moot courts, legal aid clinics and the journal of student jurisprudence.",
+    "joinUrl": "https://forms.gle/example-law",
+    "tags": ["Academic", "Law"],
+    "members": 60
+  },
+  {
+    "slug": "literature",
+    "name": "Literature Club",
+    "logo": "/clubs/Literature Club logo .jpg",
+    "blurb": "A book a month, daily reading and writing — building cognitive sharpness, verbal craft and the intellectual life of campus on commitment, curiosity and critical thinking.",
+    "joinUrl": "https://forms.gle/example-lit",
+    "tags": ["Academic", "Writing"],
+    "members": 90
+  },
+  {
+    "slug": "genesis",
+    "name": "Genesis",
+    "logo": "/clubs/Genesis.jpeg",
+    "blurb": "The psychology & behavioural science circle — talks, experiments and reading groups.",
+    "joinUrl": "https://forms.gle/example-genesis",
+    "tags": ["Academic", "Psychology"],
+    "members": 50
+  },
+  {
+    "slug": "utopia",
+    "name": "Utopia",
+    "logo": "/clubs/UTOPIA logo.png",
+    "blurb": "Speculative design and futures thinking — building the campus of tomorrow.",
+    "joinUrl": "https://forms.gle/example-utopia",
+    "tags": ["Creative", "Futures"],
+    "members": 40
+  },
+  {
+    "slug": "60cm",
+    "name": "60cm Janspadan",
+    "logo": "/clubs/60cm logo janspadan.png",
+    "blurb": "Folk arts, regional crafts and traditions — celebrating India's cultural diversity.",
+    "joinUrl": "https://forms.gle/example-60cm",
+    "tags": ["Cultural", "Folk"],
+    "members": 55
+  }
+]

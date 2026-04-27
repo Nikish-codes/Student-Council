@@ -1,0 +1,7 @@
+[
+  { "id": "h1", "src": "/images/highlights/1.jpg", "alt": "Students at Woxsen amphitheatre", "span": "lg" },
+  { "id": "h2", "src": "/images/highlights/2.jpg", "alt": "Hackathon team coding late at night", "span": "md" },
+  { "id": "h3", "src": "/images/highlights/3.jpg", "alt": "Cultural performance on stage", "span": "md" },
+  { "id": "h4", "src": "/images/highlights/4.jpg", "alt": "Campus aerial view at sunset", "span": "xl" },
+  { "id": "h5", "src": "/images/highlights/5.jpg", "alt": "Students discussing in the library", "span": "sm" }
+]

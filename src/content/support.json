@@ -1,0 +1,44 @@
+[
+  {
+    "id": "gateway",
+    "name": "Gateway",
+    "purpose": "Hostel, mess, transport & campus facilities",
+    "description": "Anything tied to your room, the mess, transport routes, housekeeping, maintenance or day-to-day campus life.",
+    "icon": "DoorOpen",
+    "ownedBy": "Hostel Office & Campus Operations",
+    "bring": [
+      "Your room / block number",
+      "A short description of the issue with photos if relevant",
+      "When the issue started"
+    ],
+    "councilRole": "We'll point you to the right warden, hostel supervisor or operations desk and follow up if a ticket goes unanswered."
+  },
+  {
+    "id": "bridge",
+    "name": "Bridge",
+    "purpose": "Faculty access, exams, attendance & academics",
+    "description": "Faculty meetings, exam-related concerns, attendance, course registration, grading clarifications and anything routed through your school office.",
+    "icon": "BookOpen",
+    "ownedBy": "Your School Office & the Office of the Dean",
+    "bring": [
+      "Your roll number and program",
+      "The faculty / course name involved",
+      "Any prior emails or screenshots"
+    ],
+    "councilRole": "We can help you frame the request, identify the right office and escalate to the academic representative if needed."
+  },
+  {
+    "id": "career-connect",
+    "name": "Career Connect",
+    "purpose": "Internships, placements & career prep",
+    "description": "Career counselling, internship leads, placement preparation, alumni mentorship and CV reviews — coordinated entirely by the Career Services Office.",
+    "icon": "Briefcase",
+    "ownedBy": "Career Services Office (CSO)",
+    "bring": [
+      "An up-to-date CV (single page)",
+      "What you're hoping to figure out",
+      "Any specific roles, companies or sectors in mind"
+    ],
+    "councilRole": "We can introduce you to the right CSO point of contact and the alumni / senior students working in that space."
+  }
+]

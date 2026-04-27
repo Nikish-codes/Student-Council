@@ -1,0 +1,82 @@
+[
+  {
+    "id": "president",
+    "name": "Aarav Mehta",
+    "role": "President",
+    "program": "B.Tech CSE, Class of 2026",
+    "photo": "/images/council/president.png",
+    "email": "president.council@woxsen.edu.in",
+    "linkedin": "https://linkedin.com/in/example",
+    "message": "The Council exists to make sure every student at Woxsen has a voice that's heard, an idea that's backed, and a campus that feels like theirs. This year, we're focused on radical transparency, more student-led events, and a stronger bridge between you and the administration.",
+    "quote": "Every voice on this campus deserves a desk it can actually reach.",
+    "featured": true,
+    "order": 1
+  },
+  {
+    "id": "vp",
+    "name": "Diya Reddy",
+    "role": "Vice President",
+    "program": "BBA, Class of 2027",
+    "photo": "/images/council/vp.png",
+    "email": "vp.council@woxsen.edu.in",
+    "quote": "Our job isn't to speak for you. It's to make sure you're heard.",
+    "featured": true,
+    "order": 2
+  },
+  {
+    "id": "secretary",
+    "name": "Kabir Shah",
+    "role": "General Secretary",
+    "program": "B.Tech AI, Class of 2026",
+    "photo": "/images/council/secretary.png",
+    "email": "secretary.council@woxsen.edu.in",
+    "quote": "If a request goes unanswered, that's on us — write to me directly.",
+    "featured": true,
+    "order": 3
+  },
+  {
+    "id": "treasurer",
+    "name": "Ishita Rao",
+    "role": "Treasurer",
+    "program": "MBA, Class of 2026",
+    "photo": "/images/council/treasurer.png",
+    "quote": "Every rupee the Council spends will be on a public ledger this year.",
+    "order": 4
+  },
+  {
+    "id": "cultural",
+    "name": "Rohan Verma",
+    "role": "Cultural Secretary",
+    "program": "BBA, Class of 2027",
+    "photo": "/images/council/cultural.png",
+    "quote": "Campus should feel like a festival you didn't have to leave home for.",
+    "order": 5
+  },
+  {
+    "id": "sports",
+    "name": "Meera Iyer",
+    "role": "Sports Secretary",
+    "program": "B.Tech ME, Class of 2026",
+    "photo": "/images/council/sports.png",
+    "quote": "Whether you train daily or just play on weekends — the arena is yours.",
+    "order": 6
+  },
+  {
+    "id": "tech",
+    "name": "Aditya Nair",
+    "role": "Tech Secretary",
+    "program": "B.Tech CSE, Class of 2027",
+    "photo": "/images/council/tech.png",
+    "quote": "Every tool the Council uses should be open, fast, and built by us.",
+    "order": 7
+  },
+  {
+    "id": "outreach",
+    "name": "Sara Khan",
+    "role": "Outreach Lead",
+    "program": "BBA, Class of 2028",
+    "photo": "/images/council/outreach.png",
+    "quote": "Belonging isn't a perk. It's the whole point — and we're scaling it.",
+    "order": 8
+  }
+]

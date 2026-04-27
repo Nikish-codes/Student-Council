@@ -24,6 +24,19 @@
 .DS_Store
 *.pem
 
+# personal AI/editor agent tooling
+.agents/
+.claude/
+.cursor/
+.vscode/
+skills/
+skills-lock.json
+.commandcode/
+.cortex/
+.vibe/
+plan-admin.md
+plan.md
+
 # debug
 npm-debug.log*
 yarn-debug.log*

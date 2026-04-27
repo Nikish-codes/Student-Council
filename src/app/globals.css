@@ -2,20 +2,347 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ─────────────────────────────────────────────────────────────────
+   BOOT OVERLAY — must be defined OUTSIDE @layer so it loads first
+   and paints solid black from the very first frame, hiding any
+   un-hydrated SSR content underneath.
+   ───────────────────────────────────────────────────────────────── */
+.boot-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #050505;
+  display: grid;
+  place-items: center;
+  opacity: 1;
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: auto;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.boot-overlay[data-hide="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+.boot-overlay__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+}
+.boot-overlay__mark {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-style: italic;
+  font-size: clamp(3rem, 9vw, 6rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: rgb(245 245 244);
+}
+.boot-overlay__mark-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.3em);
+  animation: boot-letter 900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.boot-overlay__mark-letter:nth-child(1) {
+  animation-delay: 60ms;
+}
+.boot-overlay__mark-letter:nth-child(2) {
+  animation-delay: 180ms;
+}
+.boot-overlay__mark-letter:nth-child(3) {
+  animation-delay: 300ms;
+}
+.boot-overlay__bar {
+  position: relative;
+  width: clamp(180px, 28vw, 320px);
+  height: 1px;
+  background: rgb(255 255 255 / 0.08);
+  overflow: hidden;
+}
+.boot-overlay__bar-fill {
+  position: absolute;
+  inset: 0;
+  width: 30%;
+  background: rgb(245 245 244);
+  animation: boot-bar 1400ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+.boot-overlay__caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgb(102 102 102);
+  opacity: 0;
+  animation: boot-fade 700ms 400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.boot-overlay__caption span:first-child {
+  color: rgb(163 163 163);
+}
+@keyframes boot-letter {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes boot-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+@keyframes boot-fade {
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .boot-overlay {
+    transition: opacity 200ms linear;
+  }
+  .boot-overlay__mark-letter,
+  .boot-overlay__caption {
+    animation-duration: 1ms;
+    animation-delay: 0ms;
+    opacity: 1;
+    transform: none;
+  }
+  .boot-overlay__bar-fill {
+    animation: none;
+    width: 100%;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  :root {
+    --bg: 10 10 10;
+    --surface: 17 17 17;
+    --surface-2: 22 22 22;
+    --ink: 245 245 244;
+    --muted: 163 163 163;
+    --subtle: 102 102 102;
+    --line: 255 255 255;
+    --radius: 16px;
+    color-scheme: dark;
+  }
+
+  * {
+    border-color: rgb(var(--line) / 0.08);
+  }
+
+  html,
+  body {
+    background-color: rgb(var(--bg));
+    color: rgb(var(--ink));
+    font-family: var(--font-sans), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: rgb(var(--ink));
+    color: rgb(var(--bg));
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display), Georgia, serif;
+    letter-spacing: -0.02em;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--ink));
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  .kicker {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 0.6875rem;
+    line-height: 1;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgb(var(--muted));
+  }
+
+  .display {
+    font-family: var(--font-display), Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+  }
+
+  .hairline {
+    height: 1px;
+    background: rgb(var(--line) / 0.08);
+  }
+
+  .surface-card {
+    background: rgb(var(--surface) / 0.6);
+    border: 1px solid rgb(var(--line) / 0.08);
+    border-radius: var(--radius);
+    transition:
+      border-color 400ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 400ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .surface-card:hover {
+    border-color: rgb(var(--line) / 0.18);
+    background: rgb(var(--surface) / 0.9);
+  }
+
+  .glass {
+    background: rgb(var(--bg) / 0.55);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-bottom: 1px solid rgb(var(--line) / 0.08);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .mask-fade-x {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 8%,
+      black 92%,
+      transparent
+    );
+  }
+  /* GSAP initial states - hidden until JS hydrates and animates in.
+     Falls back to visible if JS is disabled via :where + no-js class. */
+  .gsap-fade,
+  .gsap-rise,
+  .gsap-mask {
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  .gsap-rise {
+    transform: translate3d(0, 40px, 0);
+  }
+  .gsap-mask {
+    clip-path: inset(0 0 100% 0);
+  }
+  .char,
+  .word,
+  .line {
+    display: inline-block;
+    will-change: transform, opacity, filter;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────
+     FOUC GUARD — anything GSAP will animate in must be invisible
+     from first paint, so SSR HTML doesn't flash before hydration.
+     Reduced-motion handlers and useGSAP itself flip these to visible.
+     ───────────────────────────────────────────────────────────────── */
+  [data-headline],
+  [data-subline],
+  [data-sub],
+  [data-cta],
+  [data-kicker-text],
+  [data-meta],
+  [data-logo],
+  [data-logo-ring],
+  [data-vignette],
+  [data-stat],
+  [data-split],
+  [data-line],
+  [data-tile],
+  [data-channel-watermark],
+  [data-channel-meta] > *,
+  [data-bring-item],
+  [data-truth-row],
+  [data-group-title],
+  [data-group-meta],
+  [data-club-card],
+  [data-rail-headline],
+  [data-wall-headline],
+  [data-cycle-word],
+  [data-meta-row] > *,
+  [data-feat-bit],
+  [data-almanac-headline],
+  [data-slab-date],
+  [data-slab-bit],
+  [data-recap-headline],
+  [data-recap-bit] {
+    opacity: 0;
+  }
+  [data-kicker-line],
+  [data-meta-line] {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  /* If reduced-motion is on, JS skips animation; reveal everything */
+  @media (prefers-reduced-motion: reduce) {
+    [data-headline],
+    [data-subline],
+    [data-sub],
+    [data-cta],
+    [data-kicker-text],
+    [data-meta],
+    [data-logo],
+    [data-logo-ring],
+    [data-vignette],
+    [data-stat],
+    [data-split],
+    [data-line],
+    [data-tile],
+    [data-channel-watermark],
+    [data-channel-meta] > *,
+    [data-bring-item],
+    [data-truth-row],
+    [data-group-title],
+    [data-group-meta],
+    [data-club-card],
+    [data-rail-headline],
+    [data-wall-headline],
+    [data-cycle-word],
+    [data-meta-row] > *,
+    [data-feat-bit],
+    [data-almanac-headline],
+    [data-slab-date],
+    [data-slab-bit],
+    [data-recap-headline],
+    [data-recap-bit] {
+      opacity: 1;
+    }
+    [data-kicker-line],
+    [data-meta-line] {
+      transform: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

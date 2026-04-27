@@ -1,0 +1,141 @@
+[
+  {
+    "slug": "infinity-26",
+    "title": "Infinity '26 — Annual Cultural Fest",
+    "category": "flagship",
+    "date": "2026-03-12",
+    "endDate": "2026-03-14",
+    "venue": "Across Campus · 12 stages",
+    "banner": "/recap/infinity-26-trailer.jpg",
+    "excerpt": "Three days. Twelve venues. Unstructured infinity — the council's biggest production of the year.",
+    "description": "Infinity '26 was the council's flagship cultural fest — three days, twelve venues, headline acts on the main stage and underground sets running till 2 AM. We pulled 8K+ footfall across the weekend, with 40+ student clubs running their own sub-events under the umbrella.",
+    "attendees": 8000,
+    "featured": false
+  },
+  {
+    "slug": "utopia-esports-26",
+    "title": "Utopia · Esports Cup",
+    "category": "tech",
+    "date": "2026-02-18",
+    "venue": "Innovation Hub · Esports Arena",
+    "banner": "/recap/infinity-26-logo.jpg",
+    "excerpt": "FC25, MK, and the gaming community in one room — the post-game glow, on tape.",
+    "description": "Utopia's first esports cup of the year. FC25 and Mortal Kombat tournaments ran across two days, with the community turning up in force. The vibes after the final match — that's what this video captured."
+  },
+  {
+    "slug": "kathakriti-25",
+    "title": "Kathakriti — Literature Festival",
+    "category": "cultural",
+    "date": "2025-11-22",
+    "endDate": "2025-11-23",
+    "venue": "Liberal Arts Block",
+    "banner": "/recap/kathakriti-day1.webp",
+    "excerpt": "From game stalls to verbal-olympics-level debates — the kind of energy you want every literature event to have.",
+    "description": "Kathakriti opened with a debate that turned into a verbal olympics, and the energy never dropped. Slam poetry, book swaps, panel talks with visiting authors, and a closing night open mic that ran 90 minutes over schedule."
+  },
+  {
+    "slug": "halloween-25",
+    "title": "Halloween '25 — Jashn",
+    "category": "cultural",
+    "date": "2025-10-31",
+    "venue": "Open Air Amphitheatre",
+    "banner": "/recap/halloween-25-a.jpg",
+    "excerpt": "When the lights dimmed and the spooky took over — costumes, chills, and pure chaos under the campus sky.",
+    "description": "The Council turned the amphitheatre into a haunted house for one night. Costume contest, themed photobooth, three DJs across the night and a midnight horror screening on the lawn projector."
+  },
+  {
+    "slug": "woxsen-immersion-bootcamp",
+    "title": "Woxsen Immersion Bootcamp",
+    "category": "flagship",
+    "date": "2026-08-16",
+    "endDate": "2026-08-20",
+    "venue": "Main Auditorium",
+    "banner": "/images/events/bootcamp.jpg",
+    "excerpt": "Five days of design thinking, founder talks and immersive workshops that kick off the academic year.",
+    "description": "The Immersion Bootcamp is the Council's flagship onboarding programme — a five-day intensive that blends design thinking studios, founder fireside chats, peer-led workshops and campus exploration. Open to all incoming and continuing students.",
+    "registrationUrl": "https://forms.gle/example-bootcamp",
+    "attendees": 420,
+    "featured": true
+  },
+  {
+    "slug": "woxathon-2026",
+    "title": "Woxathon 2026 — 48hr Hackathon",
+    "category": "tech",
+    "date": "2026-09-12",
+    "endDate": "2026-09-14",
+    "venue": "AI & Robotics Lab",
+    "banner": "/images/events/hackathon.jpg",
+    "excerpt": "48 hours. Open theme. Real prizes. Build something that matters with mentors from across industry.",
+    "description": "Woxathon is Woxsen's flagship hackathon — open theme, 48 hours, hardware and software tracks. Mentors from leading tech companies, ₹2L+ in prizes, and a chance to ship a prototype investors actually look at.",
+    "registrationUrl": "https://forms.gle/example-hack",
+    "attendees": 180,
+    "featured": true
+  },
+  {
+    "slug": "rhythms-cultural-night",
+    "title": "Rhythms — Cultural Night",
+    "category": "cultural",
+    "date": "2026-10-04",
+    "venue": "Open Air Amphitheatre",
+    "banner": "/images/events/rhythms.jpg",
+    "excerpt": "An evening of music, dance and student-led performances under the open sky.",
+    "description": "Rhythms is the Council's signature cultural night — student bands, classical performances, dance battles and a headline act. Pull up with your hostel block, claim your spot.",
+    "registrationUrl": "https://forms.gle/example-rhythms",
+    "attendees": 1200,
+    "featured": true
+  },
+  {
+    "slug": "founders-circle-q3",
+    "title": "Founders Circle — Q3 Edition",
+    "category": "tech",
+    "date": "2026-07-22",
+    "venue": "Innovation Hub",
+    "banner": "/images/events/founders.jpg",
+    "excerpt": "An intimate fireside with three Woxsen alumni who've raised seed rounds in the last year.",
+    "description": "Three Woxsen alumni founders, one room, off-the-record stories about raising, hiring, breaking, and shipping. Limited to 60 seats — first come, first served.",
+    "registrationUrl": "https://forms.gle/example-founders",
+    "attendees": 60
+  },
+  {
+    "slug": "inter-college-football",
+    "title": "Inter-College Football Cup",
+    "category": "sports",
+    "date": "2026-11-14",
+    "endDate": "2026-11-17",
+    "venue": "Woxsen Sports Complex",
+    "banner": "/images/events/football.jpg",
+    "excerpt": "Eight colleges. Four days. One trophy. Come for the football, stay for the chaos.",
+    "description": "The Inter-College Football Cup brings teams from eight regional universities to Woxsen for four days of group-stage football. Free entry, food trucks on the sidelines."
+  },
+  {
+    "slug": "global-week",
+    "title": "Global Week",
+    "category": "academic",
+    "date": "2026-12-01",
+    "endDate": "2026-12-05",
+    "venue": "Across Campus",
+    "banner": "/images/events/global.jpg",
+    "excerpt": "Visiting faculty, international student panels, food fairs — a week that brings the world to Woxsen.",
+    "description": "Global Week is a campus-wide celebration of Woxsen's international partnerships — visiting professors run masterclasses, international students host their countries' food stalls, and the week closes with a panel on studying abroad."
+  },
+  {
+    "slug": "design-jam",
+    "title": "24hr Design Jam",
+    "category": "tech",
+    "date": "2026-06-28",
+    "venue": "Design Studio",
+    "banner": "/images/events/design.jpg",
+    "excerpt": "Pick a brief at midnight. Ship a prototype by midnight tomorrow.",
+    "description": "Cross-discipline design jam. Briefs are released at 00:00, teams form on the spot, and prototypes are presented to a panel of working designers 24 hours later."
+  },
+  {
+    "slug": "open-mic-night",
+    "title": "Open Mic Night",
+    "category": "cultural",
+    "date": "2026-05-30",
+    "venue": "Café Lawn",
+    "banner": "/images/events/openmic.jpg",
+    "excerpt": "Bring a song, a poem, a stand-up set, or just a chair. Low stakes, full vibes.",
+    "description": "The Council's monthly open mic — sign up at the door, get five minutes, walk away with applause (or a polite cough). Run by students, for students."
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "ieee-launch",
+    "title": "IEEE Student Branch officially launched at Woxsen",
+    "date": "2026-04-15",
+    "pinned": true
+  },
+  {
+    "id": "fest-2026",
+    "title": "Wox Fest 2026 registrations are now open",
+    "date": "2026-04-10",
+    "pinned": true
+  },
+  {
+    "id": "council-elections",
+    "title": "Student Council elections — nominations close 30 April",
+    "date": "2026-04-08",
+    "pinned": false
+  },
+  {
+    "id": "hackathon",
+    "title": "Woxathon 48-hour hackathon — register your team",
+    "date": "2026-04-02",
+    "pinned": false
+  },
+  {
+    "id": "library-hours",
+    "title": "Extended library hours during exam week",
+    "date": "2026-03-28",
+    "pinned": false
+  },
+  {
+    "id": "mental-health",
+    "title": "Mental health support — drop-in counselling every Wednesday",
+    "date": "2026-03-20",
+    "pinned": false
+  }
+]
