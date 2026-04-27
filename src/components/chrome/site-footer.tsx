@@ -71,7 +71,7 @@ export function SiteFooter() {
           <span className="font-mono">
             © {new Date().getFullYear()} Woxsen Student Council
           </span>
-          <span className="font-mono">v1.0 · Hyderabad, IN</span>
+          <span className="font-mono">v1.0 · Hyderabad, IN · Designed and built by Nikish</span>
         </div>
       </div>
     </footer>

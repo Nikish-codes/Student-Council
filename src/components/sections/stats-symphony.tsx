@@ -14,7 +14,7 @@ const FALLBACK_STATS: HomepageStat[] = [
 ];
 
 export function StatsSymphony({
-  kicker = "By the numbers · 2025/26",
+  kicker = "By the numbers · 2026/27",
   stats,
 }: {
   kicker?: string;

@@ -47,7 +47,7 @@ export const HomepageConfig: GlobalConfig = {
                   name: "kicker",
                   type: "text",
                   maxLength: 80,
-                  defaultValue: "Woxsen Student Council · Session 2025/26",
+                  defaultValue: "Woxsen Student Council · Session 2026/27",
                   admin: { description: "Tiny eyebrow line above the headline." },
                 },
                 {
@@ -141,7 +141,7 @@ export const HomepageConfig: GlobalConfig = {
               name: "statsKicker",
               type: "text",
               maxLength: 80,
-              defaultValue: "By the numbers · 2025/26",
+              defaultValue: "By the numbers · 2026/27",
             },
             {
               name: "stats",
@@ -185,7 +185,7 @@ export const HomepageConfig: GlobalConfig = {
               name: "manifestoKicker",
               type: "text",
               maxLength: 80,
-              defaultValue: "Manifesto · 2025/26",
+              defaultValue: "Manifesto · 2026/27",
             },
             {
               name: "manifestoLines",

@@ -38,6 +38,10 @@ function asString(v: unknown): string {
   return v == null ? "" : String(v);
 }
 
+function currentSessionCopy(v: unknown): string {
+  return asString(v).replace(/2025\/26|2025-26|25\/26/g, "2026/27");
+}
+
 /** Pull a usable URL out of an upload field that may be id|object|null. */
 function mediaUrl(v: unknown): string {
   if (!v) return "";
@@ -308,7 +312,7 @@ export const getHighlights = cache(async (): Promise<Highlight[]> => {
 
 const HOMEPAGE_DEFAULTS: HomepageConfigData = {
   hero: {
-    kicker: "Woxsen Student Council · Session 2025/26",
+    kicker: "Woxsen Student Council · Session 2026/27",
     headline: "Empowering",
     sublineLead: "student",
     sublineWords: ["voices.", "futures.", "ideas.", "stories."],
@@ -321,7 +325,7 @@ const HOMEPAGE_DEFAULTS: HomepageConfigData = {
     ],
     marqueeText: "Of the students. For the students. By the students.",
   },
-  statsKicker: "By the numbers · 2025/26",
+  statsKicker: "By the numbers · 2026/27",
   stats: [
     { value: 29, label: "Student-run clubs" },
     { value: 8, label: "Schools represented" },
@@ -329,7 +333,7 @@ const HOMEPAGE_DEFAULTS: HomepageConfigData = {
     { value: 5000, suffix: "+", label: "Active students", displayValue: "5K+" },
     { value: 1, label: "Council, of you" },
   ],
-  manifestoKicker: "Manifesto · 2025/26",
+  manifestoKicker: "Manifesto · 2026/27",
   manifestoLines: [
     { lead: "We don't run", tail: "the desks." },
     { lead: "We open", tail: "the doors." },
@@ -515,7 +519,7 @@ export const getHomepageConfig = cache(
 
     const out: HomepageConfigData = {
       hero: {
-        kicker: asString(heroRaw.kicker) || HOMEPAGE_DEFAULTS.hero.kicker,
+        kicker: currentSessionCopy(heroRaw.kicker) || HOMEPAGE_DEFAULTS.hero.kicker,
         headline:
           asString(heroRaw.headline) || HOMEPAGE_DEFAULTS.hero.headline,
         sublineLead:
@@ -533,10 +537,10 @@ export const getHomepageConfig = cache(
           HOMEPAGE_DEFAULTS.hero.marqueeText,
       },
       statsKicker:
-        asString(raw.statsKicker) || HOMEPAGE_DEFAULTS.statsKicker,
+        currentSessionCopy(raw.statsKicker) || HOMEPAGE_DEFAULTS.statsKicker,
       stats: statsRaw.length > 0 ? statsRaw : HOMEPAGE_DEFAULTS.stats,
       manifestoKicker:
-        asString(raw.manifestoKicker) || HOMEPAGE_DEFAULTS.manifestoKicker,
+        currentSessionCopy(raw.manifestoKicker) || HOMEPAGE_DEFAULTS.manifestoKicker,
       manifestoLines:
         manifestoLinesRaw.length > 0
           ? manifestoLinesRaw

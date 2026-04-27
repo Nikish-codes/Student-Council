@@ -8,7 +8,7 @@ import { getCouncil, getFaqs, getPresident } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Council Team",
   description:
-    "The 2025/26 Woxsen Student Council — eight people, one council, one job: every voice gets heard.",
+    "The 2026/27 Woxsen Student Council — eight people, one council, one job: every voice gets heard.",
 };
 
 export const revalidate = 60;
@@ -25,7 +25,7 @@ export default async function CouncilPage() {
         <Reveal className="max-w-5xl">
           <div className="mb-8 flex items-center gap-3">
             <span className="h-px w-14 bg-line/30" aria-hidden />
-            <span className="kicker">Session 2025/26 · {members.length} members</span>
+            <span className="kicker">Session 2026/27 · {members.length} members</span>
           </div>
           <h1 className="display text-balance text-6xl leading-[0.92] sm:text-8xl lg:text-[10rem]">
             <span className="block">The faces</span>

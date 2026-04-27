@@ -12,7 +12,7 @@ const FALLBACK_LINES: ManifestoLine[] = [
 ];
 
 export function ManifestoKinetic({
-  kicker = "Manifesto · 2025/26",
+  kicker = "Manifesto · 2026/27",
   lines,
   footer = "Read in: 9 seconds",
 }: {

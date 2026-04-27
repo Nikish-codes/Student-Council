@@ -23,7 +23,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://council.woxsen.edu.in"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://woxsenstudentcouncil.com"),
   description:
     "The official portal of the Woxsen University Student Council — events, clubs, leadership, and student support.",
   title: {
@@ -31,6 +31,9 @@ export const metadata: Metadata = {
     template: "%s | Woxsen Student Council",
   },
   applicationName: "Woxsen Student Council",
+  alternates: {
+    canonical: "/",
+  },
   icons: {
     icon: [
       { url: "/icon.png", type: "image/png" },

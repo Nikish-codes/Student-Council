@@ -67,7 +67,7 @@ export function BootOverlay() {
         </div>
         <div className="boot-overlay__caption">
           <span>Woxsen Student Council</span>
-          <span>Loading session 2025/26</span>
+          <span>Loading session 2026/27</span>
         </div>
       </div>
     </div>

@@ -267,7 +267,7 @@ export function Hero({
                   letterSpacing="3"
                 >
                   <textPath href="#ring-path" startOffset="0">
-                    WOXSEN UNIVERSITY · STUDENT COUNCIL · SESSION 2025/26 · EMPOWERING STUDENT VOICES · 
+                    WOXSEN UNIVERSITY · STUDENT COUNCIL · SESSION 2026/27 · EMPOWERING STUDENT VOICES · 
                   </textPath>
                 </text>
               </svg>
@@ -286,7 +286,7 @@ export function Hero({
             <div className="flex items-center gap-3">
               <span data-kicker-line className="block h-px w-14 bg-line/50" aria-hidden />
               <span data-kicker-text className="kicker">
-                {data?.kicker ?? "Woxsen Student Council · Session 2025/26"}
+                {data?.kicker ?? "Woxsen Student Council · Session 2026/27"}
               </span>
             </div>
 

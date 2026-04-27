@@ -17,7 +17,7 @@ export default async function ClubsPage() {
         <Reveal className="max-w-5xl">
           <div className="mb-8 flex items-center gap-3">
             <span className="h-px w-14 bg-line/30" aria-hidden />
-            <span className="kicker">{clubs.length} communities · 2025/26</span>
+            <span className="kicker">{clubs.length} communities · 2026/27</span>
           </div>
           <h1 className="display text-balance text-6xl leading-[0.92] sm:text-8xl lg:text-[10rem]">
             <span className="block">Run by</span>
