@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { Marquee } from "@/components/motion/marquee";
@@ -308,6 +309,16 @@ function SpotlightCard({
   );
 }
 
+/**
+ * Monochrome logo tile.
+ *
+ * The default state is a flat ink-white silhouette rendered via a CSS
+ * `mask-image` of the logo (the logo's alpha channel becomes the shape, filled
+ * with the ink colour). This means NO next/image optimizer round-trips — the
+ * browser fetches each unique logo URL once and reuses it across every tile.
+ * On hover (or when the tile is the active spotlight) the real, full-colour
+ * logo blooms in over the silhouette.
+ */
 function RailLogo({
   club,
   active,
@@ -319,6 +330,7 @@ function RailLogo({
   compact?: boolean;
   onSelect: () => void;
 }) {
+  const hasLogo = Boolean(club.logo);
   return (
     <button
       type="button"
@@ -333,15 +345,44 @@ function RailLogo({
       )}
     >
       <div className="relative h-14 w-full sm:h-16">
-        <Picture
-          src={club.logo}
-          alt=""
-          fill
-          sizes={compact ? "160px" : "192px"}
-          quality={60}
-          fallbackLabel={club.name.slice(0, 2).toUpperCase()}
-          className="object-contain"
-        />
+        {hasLogo ? (
+          <>
+            {/* Monochrome silhouette (default) — CSS mask, no optimizer. */}
+            <span
+              aria-hidden
+              className={cn(
+                "absolute inset-0 bg-ink/70 transition-opacity duration-300 group-hover/rail:opacity-0",
+                active && "opacity-0",
+              )}
+              style={{
+                maskImage: `url("${club.logo}")`,
+                WebkitMaskImage: `url("${club.logo}")`,
+                maskRepeat: "no-repeat",
+                WebkitMaskRepeat: "no-repeat",
+                maskPosition: "center",
+                WebkitMaskPosition: "center",
+                maskSize: "contain",
+                WebkitMaskSize: "contain",
+              }}
+            />
+            {/* Full-colour logo — blooms in on hover / when active. */}
+            <Image
+              src={club.logo}
+              alt=""
+              fill
+              unoptimized
+              sizes={compact ? "160px" : "192px"}
+              className={cn(
+                "object-contain opacity-0 transition-opacity duration-300 group-hover/rail:opacity-100",
+                active && "opacity-100",
+              )}
+            />
+          </>
+        ) : (
+          <div className="grid h-full w-full place-items-center font-mono text-xs uppercase tracking-[0.2em] text-subtle">
+            {club.name.slice(0, 2).toUpperCase()}
+          </div>
+        )}
       </div>
       <span className="pointer-events-none absolute inset-x-2 bottom-2 truncate text-center font-mono text-[9px] uppercase tracking-[0.18em] text-muted opacity-0 transition-opacity duration-200 group-hover/rail:opacity-100 group-focus-visible/rail:opacity-100">
         {club.name}
