@@ -26,7 +26,7 @@ export function Marquee({
       <div
         className={cn(
           "flex shrink-0 items-center gap-12 pr-12",
-          "animate-marquee will-change-transform",
+          "animate-marquee will-change-transform motion-reduce:animate-none motion-reduce:transform-none",
           pauseOnHover && "group-hover:[animation-play-state:paused]",
         )}
         style={{

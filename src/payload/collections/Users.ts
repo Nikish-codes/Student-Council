@@ -27,14 +27,18 @@ export const Users: CollectionConfig = {
   admin: {
     useAsTitle: "email",
     defaultColumns: ["name", "email", "role", "createdAt"],
-    group: "👥 People",
+    group: "⚙️ Settings",
     description:
-      "Anyone who can sign in. Roles control what they can edit. Only super_admins can create new users.",
+      "💡 Anyone who can sign into the admin. Roles control what each person can edit: super_admin/admin can do everything, council_member/editor can publish content, club_lead can only manage their own club. Only super_admins can create new users.",
     hidden: ({ user: u }) => {
       // Hide entire collection nav from non-admins; principals see it.
       if (!u) return true;
       const role = (u as { role?: string }).role;
-      return !(role === "super_admin" || role === "admin" || isRtPrincipal((u as { email?: string }).email));
+      return !(
+        role === "super_admin" ||
+        role === "admin" ||
+        isRtPrincipal((u as { email?: string }).email)
+      );
     },
   },
   access: {
@@ -46,9 +50,13 @@ export const Users: CollectionConfig = {
       const u = req.user;
       if (!u) return false;
       if (isRtPrincipal((u as { email?: string }).email)) return true;
-      return ["super_admin", "admin", "council_member", "club_lead", "editor"].includes(
-        (u as { role?: string }).role ?? "",
-      );
+      return [
+        "super_admin",
+        "admin",
+        "council_member",
+        "club_lead",
+        "editor",
+      ].includes((u as { role?: string }).role ?? "");
     },
   },
   hooks: {
@@ -112,7 +120,9 @@ export const Users: CollectionConfig = {
         update: roleFieldAccess,
         create: roleFieldAccess,
       },
-      options: (Object.keys(ROLE_LABELS) as Array<keyof typeof ROLE_LABELS>).map((value) => ({
+      options: (
+        Object.keys(ROLE_LABELS) as Array<keyof typeof ROLE_LABELS>
+      ).map((value) => ({
         label: ROLE_LABELS[value],
         value,
       })),

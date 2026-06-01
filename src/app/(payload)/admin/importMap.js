@@ -21,7 +21,11 @@ import { StrikethroughFeatureClient as StrikethroughFeatureClient_e70f5e05f09f93
 import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { default as default_0bf477d7c7d3c0b3b66da04a4bd9f300 } from '@/admin/components/dashboard/BeforeDashboard'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
+import { default as default_9a98d4a8d3742b7b81bdf33119f4d3c9 } from '@/admin/components/wizards/views/NewEventView'
+import { default as default_f147f110a399a1d32066e6d5c823bde7 } from '@/admin/components/wizards/views/NewAnnouncementView'
+import { default as default_11c5cd730b4e86d8ec5303a7e975e5e3 } from '@/admin/components/wizards/views/NewRecapView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -49,6 +53,10 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UnderlineFeatureClient": UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@/admin/components/dashboard/BeforeDashboard#default": default_0bf477d7c7d3c0b3b66da04a4bd9f300,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
+  "@/admin/components/wizards/views/NewEventView#default": default_9a98d4a8d3742b7b81bdf33119f4d3c9,
+  "@/admin/components/wizards/views/NewAnnouncementView#default": default_f147f110a399a1d32066e6d5c823bde7,
+  "@/admin/components/wizards/views/NewRecapView#default": default_11c5cd730b4e86d8ec5303a7e975e5e3,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

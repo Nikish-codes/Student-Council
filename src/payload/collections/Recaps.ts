@@ -11,9 +11,9 @@ export const Recaps: CollectionConfig = {
   admin: {
     useAsTitle: "title",
     defaultColumns: ["title", "event", "publishedAt"],
-    group: "📅 Editorial",
+    group: "📅 Events",
     description:
-      "Cinematic post-event recaps. These power the rotating Vault on the homepage and the recap pages.",
+      "💡 Cinematic post-event recaps. Each one needs a hero image (and optionally a video), plus stats and a gallery. These power the rotating Vault on the homepage — and the more recaps you have, the more variety the Vault shows. Tip: use the 'Add a recap' wizard on the dashboard for new ones.",
     pagination: { defaultLimit: 25 },
     livePreview: {
       url: ({ data }) =>
@@ -64,7 +64,10 @@ export const Recaps: CollectionConfig = {
               name: "kicker",
               type: "text",
               maxLength: 60,
-              admin: { description: "Tiny eyebrow line, e.g. 'FLAGSHIP · CULTURAL FEST'." },
+              admin: {
+                description:
+                  "Tiny eyebrow line, e.g. 'FLAGSHIP · CULTURAL FEST'.",
+              },
             },
             {
               name: "blurb",
@@ -130,7 +133,9 @@ export const Recaps: CollectionConfig = {
             {
               name: "stats",
               type: "array",
-              admin: { description: "Headline numbers (attendance, hours, etc)." },
+              admin: {
+                description: "Headline numbers (attendance, hours, etc).",
+              },
               fields: [
                 { name: "label", type: "text", required: true, maxLength: 40 },
                 { name: "value", type: "text", required: true, maxLength: 20 },

@@ -12,9 +12,9 @@ export const HomepageConfig: GlobalConfig = {
   slug: "homepage-config",
   label: "Homepage",
   admin: {
-    group: "⚙️ Configuration",
+    group: "🏠 Homepage",
     description:
-      "Everything visible on the homepage — hero copy, manifesto, stats, quick actions, the closing CTA, and the rotating Vault.",
+      "💡 Everything visible on the homepage — hero copy, manifesto, stats, quick actions, the closing CTA, and the rotating Vault. Use the tabs at the top to jump between sections. Changes save automatically every ~1 second; the homepage rebuilds itself within a few seconds of you saving.",
     livePreview: {
       url: () => `${SITE}/`,
       breakpoints: [
@@ -48,7 +48,9 @@ export const HomepageConfig: GlobalConfig = {
                   type: "text",
                   maxLength: 80,
                   defaultValue: "Woxsen Student Council · Session 2026/27",
-                  admin: { description: "Tiny eyebrow line above the headline." },
+                  admin: {
+                    description: "Tiny eyebrow line above the headline.",
+                  },
                 },
                 {
                   name: "headline",
@@ -62,7 +64,9 @@ export const HomepageConfig: GlobalConfig = {
                   type: "text",
                   maxLength: 30,
                   defaultValue: "student",
-                  admin: { description: "First word on line 2 (e.g. 'student')." },
+                  admin: {
+                    description: "First word on line 2 (e.g. 'student').",
+                  },
                 },
                 {
                   name: "sublineWords",
@@ -80,7 +84,12 @@ export const HomepageConfig: GlobalConfig = {
                     { word: "stories." },
                   ],
                   fields: [
-                    { name: "word", type: "text", required: true, maxLength: 24 },
+                    {
+                      name: "word",
+                      type: "text",
+                      required: true,
+                      maxLength: 24,
+                    },
                   ],
                 },
                 {
@@ -96,15 +105,39 @@ export const HomepageConfig: GlobalConfig = {
                   type: "array",
                   minRows: 1,
                   maxRows: 4,
-                  admin: { description: "Call-to-action buttons under the hero copy." },
+                  admin: {
+                    description: "Call-to-action buttons under the hero copy.",
+                  },
                   defaultValue: [
-                    { label: "Explore events", href: "/events", variant: "primary" },
-                    { label: "Raise a concern", href: "/support#grievance-form", variant: "outline" },
-                    { label: "Meet the team", href: "/council", variant: "ghost" },
+                    {
+                      label: "Explore events",
+                      href: "/events",
+                      variant: "primary",
+                    },
+                    {
+                      label: "Raise a concern",
+                      href: "/support#grievance-form",
+                      variant: "outline",
+                    },
+                    {
+                      label: "Meet the team",
+                      href: "/council",
+                      variant: "ghost",
+                    },
                   ],
                   fields: [
-                    { name: "label", type: "text", required: true, maxLength: 40 },
-                    { name: "href", type: "text", required: true, maxLength: 200 },
+                    {
+                      name: "label",
+                      type: "text",
+                      required: true,
+                      maxLength: 40,
+                    },
+                    {
+                      name: "href",
+                      type: "text",
+                      required: true,
+                      maxLength: 200,
+                    },
                     {
                       name: "variant",
                       type: "select",
@@ -121,7 +154,8 @@ export const HomepageConfig: GlobalConfig = {
                   name: "marqueeText",
                   type: "text",
                   maxLength: 200,
-                  defaultValue: "Of the students. For the students. By the students.",
+                  defaultValue:
+                    "Of the students. For the students. By the students.",
                   admin: {
                     description:
                       "Faint italic phrase that drifts behind the hero. Repeated infinitely.",
@@ -156,7 +190,12 @@ export const HomepageConfig: GlobalConfig = {
                 { value: 29, label: "Student-run clubs" },
                 { value: 8, label: "Schools represented" },
                 { value: 200, suffix: "+", label: "Events every year" },
-                { value: 5000, suffix: "+", label: "Active students", displayValue: "5K+" },
+                {
+                  value: 5000,
+                  suffix: "+",
+                  label: "Active students",
+                  displayValue: "5K+",
+                },
                 { value: 1, label: "Council, of you" },
               ],
               fields: [
@@ -167,7 +206,8 @@ export const HomepageConfig: GlobalConfig = {
                   type: "text",
                   maxLength: 12,
                   admin: {
-                    description: "Optional. Overrides the count-up (e.g. '5K+').",
+                    description:
+                      "Optional. Overrides the count-up (e.g. '5K+').",
                   },
                 },
                 { name: "label", type: "text", required: true, maxLength: 40 },
@@ -230,22 +270,19 @@ export const HomepageConfig: GlobalConfig = {
                 {
                   icon: "ShieldAlert",
                   title: "Submit a grievance",
-                  body:
-                    "Confidential channel for harassment, discrimination, or misconduct concerns.",
+                  body: "Confidential channel for harassment, discrimination, or misconduct concerns.",
                   href: "/support#grievance-form",
                 },
                 {
                   icon: "Users",
                   title: "Join a club",
-                  body:
-                    "Twelve+ active clubs across tech, design, arts, sports and entrepreneurship.",
+                  body: "Twelve+ active clubs across tech, design, arts, sports and entrepreneurship.",
                   href: "/clubs",
                 },
                 {
                   icon: "MessagesSquare",
                   title: "Talk to the Council",
-                  body:
-                    "Share an idea, request a meeting, or flag something the Council should know.",
+                  body: "Share an idea, request a meeting, or flag something the Council should know.",
                   href: "mailto:council@woxsen.edu.in",
                 },
               ],
@@ -269,7 +306,12 @@ export const HomepageConfig: GlobalConfig = {
                   ].map((i) => ({ label: i, value: i })),
                 },
                 { name: "title", type: "text", required: true, maxLength: 60 },
-                { name: "body", type: "textarea", required: true, maxLength: 220 },
+                {
+                  name: "body",
+                  type: "textarea",
+                  required: true,
+                  maxLength: 220,
+                },
                 { name: "href", type: "text", required: true, maxLength: 200 },
               ],
             },
@@ -302,7 +344,9 @@ export const HomepageConfig: GlobalConfig = {
                   type: "text",
                   maxLength: 60,
                   defaultValue: "Show up. Speak up.",
-                  admin: { description: "Italic muted continuation on the next line." },
+                  admin: {
+                    description: "Italic muted continuation on the next line.",
+                  },
                 },
                 {
                   name: "ctas",
@@ -310,12 +354,30 @@ export const HomepageConfig: GlobalConfig = {
                   minRows: 1,
                   maxRows: 3,
                   defaultValue: [
-                    { label: "Meet the Council", href: "/council", variant: "primary" },
-                    { label: "Browse clubs", href: "/clubs", variant: "outline" },
+                    {
+                      label: "Meet the Council",
+                      href: "/council",
+                      variant: "primary",
+                    },
+                    {
+                      label: "Browse clubs",
+                      href: "/clubs",
+                      variant: "outline",
+                    },
                   ],
                   fields: [
-                    { name: "label", type: "text", required: true, maxLength: 40 },
-                    { name: "href", type: "text", required: true, maxLength: 200 },
+                    {
+                      name: "label",
+                      type: "text",
+                      required: true,
+                      maxLength: 40,
+                    },
+                    {
+                      name: "href",
+                      type: "text",
+                      required: true,
+                      maxLength: 200,
+                    },
                     {
                       name: "variant",
                       type: "select",

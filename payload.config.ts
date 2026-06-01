@@ -59,11 +59,14 @@ export default buildConfig({
             data?: { errors?: Array<{ path?: string; message?: string }> };
           };
           const duplicateEmail = maybeErr.data?.errors?.some(
-            (e) => e.path === "email" && /already registered/i.test(e.message || ""),
+            (e) =>
+              e.path === "email" && /already registered/i.test(e.message || ""),
           );
 
           if (duplicateEmail) {
-            payload.logger.info(`Admin user already exists: ${normalizedEmail}`);
+            payload.logger.info(
+              `Admin user already exists: ${normalizedEmail}`,
+            );
             return;
           }
           throw err;
@@ -93,6 +96,28 @@ export default buildConfig({
         "The content management system for the Woxsen Student Council portal.",
     },
     theme: "dark",
+    components: {
+      // Task-card landing page rendered above the default dashboard.
+      // Hides the default collections grid via CSS.
+      beforeDashboard: ["@/admin/components/dashboard/BeforeDashboard#default"],
+      // Guided wizards as custom admin routes.
+      // Each one wraps a client component in Payload's DefaultTemplate.
+      views: {
+        newEventWizard: {
+          Component: "@/admin/components/wizards/views/NewEventView#default",
+          path: "/wizards/new-event",
+        },
+        newAnnouncementWizard: {
+          Component:
+            "@/admin/components/wizards/views/NewAnnouncementView#default",
+          path: "/wizards/new-announcement",
+        },
+        newRecapWizard: {
+          Component: "@/admin/components/wizards/views/NewRecapView#default",
+          path: "/wizards/new-recap",
+        },
+      },
+    },
   },
   cors: [SITE_URL].filter(Boolean),
   csrf: [SITE_URL].filter(Boolean),

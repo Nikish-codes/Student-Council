@@ -1,0 +1,111 @@
+Plan: Replace Payload CMS with a custom management portal
+
+ Context
+
+ The owner wants to own the entire backend and grow it well beyond a CMS: event
+ registration, payments (Razorpay), attendee lists & check-in, plus content types
+ (news, blogs, announcements). Payload's generic admin doesn't fit that vision, and a
+ custom /dashboard + guided wizards were already started alongside it — so this
+ formalizes a direction already in motion.
+
+ Two facts make this safe to do incrementally:
+
+ 1. The public site touches the backend through exactly one file — src/lib/content.ts
+ (~15 getters returning the plain shapes in src/lib/schemas.ts). Preserve those
+ signatures and return shapes and the entire src/app/(site)/** tree is untouched.
+ 2. The database is tiny (events 7, media 33, clubs 27, council 2, users 2 …), so a
+ one-time migration into fresh tables is trivial to verify by hand.
+
+ Greenfield stack: Drizzle ORM over the existing Turso/libSQL DB, Auth.js v5
+ (credentials + JWT, bcrypt), R2 kept for media, Razorpay for payments. The
+ hardcoded backdoor admin (src/lib/runtime-flags.ts + payload.config.ts onInit +
+ Users.ts hooks) is dropped entirely and replaced with an env-seeded first admin.
+
+ Guiding principles
+
+ - The seam is sacred — content.ts signatures + schemas.ts shapes are the contract.
+ - Dual-read, not dual-write — new Drizzle tables use new names; Payload's tables
+ are never mutated, so rollback is git revert. Payload and Drizzle read the same DB.
+ - Each phase is independently shippable and leaves the site green.
+ - Delete Payload LAST, only after the portal is proven in production.
+
+ Data-model facts (verified against the live DB)
+
+ - Relations are integer *_id FK columns; keep integer PKs so the copy preserves FKs.
+ - Richtext (events.description, faqs.answer) = Lexical JSON; site already flattens via
+ lexicalToText() → migrate to markdown text (Tiptap deferred; dashboard edits it as a textarea today).
+ - Array-of-scalar lives in *_texts child tables (clubs.tags, support_channels.bring).
+ - Array-of-object / nested globals live in child tables + *_rels joins.
+ - media.url already stores the full public R2 URL.
+ - Passwords are Payload PBKDF2, not bcrypt → cannot be migrated. Only 2 users (1 real:
+ nikish.bishnoi_2029@woxsen.edu.in); seed/reset via env instead.
+
+ ---
+ Phased roadmap
+
+ Phase 0 — Foundation (no behavior change)
+
+ - Add deps: drizzle-orm, drizzle-kit (dev), next-auth@5, @auth/core. Keep bcryptjs, zod, @libsql/client.
+ - New: src/db/client.ts (drizzle/libsql singleton, server-only), src/db/schema.ts (full schema, compiles, not applied), drizzle.config.ts (dialect turso), src/db/migrate.ts (manual applier — never on cold start).
+ - Schema decisions: integer autoincrement PKs (UUID text PKs for new registration tables); globals = single-row typed tables (id=1), not key-value; arrays/nested = JSON columns (text {mode:"json"}), not child tables; enums = text + reuse
+ Zod unions from schemas.ts.
+ - Define (but don't use yet) event_registrations and attendees tables.
+ - Deliverable: build passes, schema + client compile, generated SQL reviewed. DB untouched, site unchanged.
+
+ Phase 1 — Vertical slice: site runs WITHOUT Payload (keystone)
+
+ - 1a. Migrate data — apply new-table SQL; scripts/migrate-from-payload.ts (tsx, idempotent) reads old tables via raw libsql, writes new tables via Drizzle. Drop __system@local.invalid; don't copy hashes; Lexical→markdown; assemble
+ tags/bring/recap arrays/homepage config from child tables (reuse the assembly logic already in getHomepageConfig).
+ - 1b. Auth.js v5 — src/auth.ts Credentials provider over the Drizzle users table, bcryptjs.compare, JWT with {id, role, clubId} on session; src/types/next-auth.d.ts; src/app/api/auth/[...nextauth]/route.ts; src/middleware.ts guards
+ /portal/**. scripts/seed-admin.ts from SEED_SUPER_ADMIN_EMAIL/PASSWORD (already in .env.local). Add bcrypt password column to users.
+ - 1c. Rewrite content.ts behind unchanged signatures — every getter queries Drizzle; keep cache(), HOMEPAGE_DEFAULTS/SITE_SETTINGS_DEFAULTS, pinned-sort, upcoming/past date math, homepage default-merge verbatim. Identical shapes → zero
+ (site) changes.
+ - 1d. Events end-to-end — src/app/(portal)/portal/** (auth'd layout, login page, events list/form/approval queue reusing the wizard atoms). Port createEventAction/updateEventAction/approveEventAction from dashboard/actions.ts to Drizzle
+ + auth() guards, keeping the same RBAC predicates and slugify. New picker routes src/app/api/media/route.ts + src/app/api/portal/[collection]/route.ts replace Payload REST. Leave old /dashboard running in parallel.
+ - Deliverable: public site renders from Drizzle; login works; Events CRUD + approve/publish through the new portal; Payload off the read path.
+
+ Phase 2 — Media ownership
+
+ - src/lib/r2.ts (S3 client from existing R2_* env), src/app/api/media/upload/route.ts (presigned PUT, dims via sharp), inserts a media row. Upgrade MediaPickerField with a real upload button.
+
+ Phase 3 — Full content parity
+
+ - Port the rest to Drizzle: Recaps, Announcements, Council, Clubs, Highlights, FAQs, Support channels, Homepage composer, Site settings. Port the 3 wizards to the new actions. Decommission /dashboard (redirect to /portal).
+
+ Phase 4 — Hardening & RBAC
+
+ - Centralize src/lib/rbac.ts (requireRole/requireAdmin/assertOwnClubEvent) used by actions + middleware. Login rate-limit, audit fields. Snapshot tests for the 15 content.ts getter shapes. Optional Tiptap (same text column).
+
+ Phase 5 — Registration + Razorpay + attendees/check-in
+
+ - Public registration form on (site)/events/[slug]. api/payments/razorpay/order (server orders.create, paise/INR). Client Razorpay checkout. api/payments/razorpay/webhook — HMAC SHA256 verify before trusting, idempotent on
+ razorpayPaymentId, never store card data. Portal attendee lists + CSV + /portal/events/[id]/checkin (lookup ticketCode). Free events skip payment.
+
+ Phase 6 — Delete Payload (after prod-stable)
+
+ - Remove payload/@payloadcms/* deps + scripts. Delete payload.config.ts, src/payload/**, src/lib/runtime-flags.ts, src/app/(payload)/**, src/payload-types.ts, src/payload-schema.graphql, old src/app/dashboard/**,
+ src/admin/components/dashboard/**. Drop withPayload(...) + @payload-config alias + PAYLOAD_SECRET. Optionally drop Payload-only tables after a backup.
+
+ ---
+ Critical files
+
+ - src/lib/content.ts — the seam; rewrite bodies behind unchanged signatures (Phase 1c).
+ - src/lib/schemas.ts — the return-shape contract (unchanged).
+ - src/app/dashboard/actions.ts — RBAC + write logic to port to Drizzle.
+ - payload.config.ts + src/payload/collections/Events.ts — data-model source of truth (deleted Phase 6).
+ - New: src/db/schema.ts, src/db/client.ts, src/auth.ts, src/middleware.ts, src/app/(portal)/portal/**, scripts/migrate-from-payload.ts, scripts/seed-admin.ts.
+
+ Verification
+
+ - After Phase 1 migration: run migrate-from-payload.ts, then diff each (site) page's rendered data against the pre-migration Payload output (shapes match → no visual diff). Spot-check homepage config, clubs tags, events list/detail.
+ - Auth: seed-admin.ts, then sign in at /portal/login; confirm role gating (club_lead sees only own club; only admin can publish).
+ - Events slice: create → save draft → submit for review → approve/publish → confirm it appears on /events and the homepage.
+ - Build/lint: npm run build green at each phase boundary; npm run dev smoke test.
+ - Phase 5: Razorpay test-mode order → checkout → webhook signature verification → registration confirmed → attendee appears → check-in flips checkedInAt.
+
+ Notes / decisions still open
+
+ - DB stays on Turso/libSQL (reuses infra + enables in-place migration). Postgres is a later option if scale demands.
+ - Existing admin passwords reset on cutover (PBKDF2 can't convert to bcrypt) — only 1 real account affected.
+ - Rich text starts as markdown; Tiptap can slot into the same column later.
+

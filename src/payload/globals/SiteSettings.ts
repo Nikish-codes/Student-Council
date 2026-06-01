@@ -10,9 +10,9 @@ export const SiteSettings: GlobalConfig = {
   slug: "site-settings",
   label: "Site settings",
   admin: {
-    group: "⚙️ Configuration",
+    group: "⚙️ Settings",
     description:
-      "Site-wide settings: brand name, social links, campus location, support form categories.",
+      "💡 Site-wide settings that apply everywhere — not just the homepage. Brand name, social links, contact email, campus location (used by the live status badge in the hero), and the categories shown in the grievance form on /support.",
   },
   access: {
     read: () => true,
@@ -37,7 +37,9 @@ export const SiteSettings: GlobalConfig = {
             {
               name: "contactEmail",
               type: "email",
-              admin: { description: "Public contact email shown in the footer." },
+              admin: {
+                description: "Public contact email shown in the footer.",
+              },
             },
             {
               name: "instagramUrl",
@@ -48,7 +50,8 @@ export const SiteSettings: GlobalConfig = {
                 if (typeof val !== "string") return "Must be a URL.";
                 try {
                   const u = new URL(val);
-                  if (!/^https?:$/.test(u.protocol)) return "Must be http or https.";
+                  if (!/^https?:$/.test(u.protocol))
+                    return "Must be http or https.";
                   return true;
                 } catch {
                   return "Enter a full URL like https://instagram.com/...";
@@ -64,7 +67,8 @@ export const SiteSettings: GlobalConfig = {
                 if (typeof val !== "string") return "Must be a URL.";
                 try {
                   const u = new URL(val);
-                  if (!/^https?:$/.test(u.protocol)) return "Must be http or https.";
+                  if (!/^https?:$/.test(u.protocol))
+                    return "Must be http or https.";
                   return true;
                 } catch {
                   return "Enter a full URL like https://linkedin.com/...";
@@ -92,7 +96,9 @@ export const SiteSettings: GlobalConfig = {
                   type: "text",
                   maxLength: 40,
                   defaultValue: "17.5°N 78.4°E",
-                  admin: { description: "Display string only — e.g. '17.5°N 78.4°E'." },
+                  admin: {
+                    description: "Display string only — e.g. '17.5°N 78.4°E'.",
+                  },
                 },
                 {
                   name: "timezone",
@@ -103,8 +109,14 @@ export const SiteSettings: GlobalConfig = {
                     { label: "Asia/Dubai", value: "Asia/Dubai" },
                     { label: "Asia/Singapore", value: "Asia/Singapore" },
                     { label: "Europe/London (GMT)", value: "Europe/London" },
-                    { label: "America/New_York (EST)", value: "America/New_York" },
-                    { label: "America/Los_Angeles (PST)", value: "America/Los_Angeles" },
+                    {
+                      label: "America/New_York (EST)",
+                      value: "America/New_York",
+                    },
+                    {
+                      label: "America/Los_Angeles (PST)",
+                      value: "America/Los_Angeles",
+                    },
                   ],
                 },
                 {
@@ -120,7 +132,8 @@ export const SiteSettings: GlobalConfig = {
         },
         {
           label: "Grievance form",
-          description: "Categories shown in the dropdown on /support#grievance-form.",
+          description:
+            "Categories shown in the dropdown on /support#grievance-form.",
           fields: [
             {
               name: "grievanceCategories",
@@ -143,7 +156,9 @@ export const SiteSettings: GlobalConfig = {
                   type: "text",
                   required: true,
                   maxLength: 40,
-                  admin: { description: "Internal value (lowercase, no spaces)." },
+                  admin: {
+                    description: "Internal value (lowercase, no spaces).",
+                  },
                 },
                 { name: "label", type: "text", required: true, maxLength: 80 },
               ],
@@ -152,7 +167,10 @@ export const SiteSettings: GlobalConfig = {
               name: "grievanceMailTo",
               type: "email",
               defaultValue: "council@woxsen.edu.in",
-              admin: { description: "Email address that receives grievance submissions." },
+              admin: {
+                description:
+                  "Email address that receives grievance submissions.",
+              },
             },
           ],
         },

@@ -9,9 +9,9 @@ export const Highlights: CollectionConfig = {
   admin: {
     useAsTitle: "alt",
     defaultColumns: ["image", "alt", "span", "order", "caption"],
-    group: "📅 Editorial",
+    group: "🏠 Homepage extras",
     description:
-      "Photos shown in the campus mosaic. 'span' controls how big each tile is.",
+      "💡 The photo mosaic on the homepage. Mix different 'span' sizes (small, medium, large, extra-large) to get a varied, magazine-style layout. Lower 'order' numbers appear first. Tip: upload photos to the Media library first, then come here to add them as highlights.",
     pagination: { defaultLimit: 50 },
   },
   access: {
@@ -33,7 +33,9 @@ export const Highlights: CollectionConfig = {
       type: "text",
       required: true,
       maxLength: 140,
-      admin: { description: "Required for accessibility — describe the photo." },
+      admin: {
+        description: "Required for accessibility — describe the photo.",
+      },
     },
     {
       name: "caption",
@@ -46,8 +48,7 @@ export const Highlights: CollectionConfig = {
       type: "select",
       defaultValue: "md",
       admin: {
-        description:
-          "Tile size in the mosaic. Mix sizes for a varied layout.",
+        description: "Tile size in the mosaic. Mix sizes for a varied layout.",
       },
       options: [
         { label: "Small (1×1)", value: "sm" },

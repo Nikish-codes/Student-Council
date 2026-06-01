@@ -7,9 +7,9 @@ export const Media: CollectionConfig = {
   admin: {
     useAsTitle: "filename",
     defaultColumns: ["filename", "alt", "mimeType", "filesize", "updatedAt"],
-    group: "🗂️ Library",
+    group: "🗂️ Media library",
     description:
-      "Every uploaded image, video, and PDF. Stored on Cloudflare R2. Required: alt text on every image.",
+      "💡 Every uploaded image, video, and PDF. Stored on Cloudflare R2. Required: alt text on every image (for screen readers and SEO). Upload files here first — then attach them when editing events, recaps, clubs, etc.",
     pagination: { defaultLimit: 50 },
   },
   access: {
@@ -36,7 +36,9 @@ export const Media: CollectionConfig = {
       required: true,
       label: "Alt text",
       maxLength: 200,
-      admin: { description: "Required. Describe the image for screen readers." },
+      admin: {
+        description: "Required. Describe the image for screen readers.",
+      },
     },
     {
       name: "credit",

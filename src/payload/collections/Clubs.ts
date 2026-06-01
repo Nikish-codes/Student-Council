@@ -11,8 +11,9 @@ export const Clubs: CollectionConfig = {
   admin: {
     useAsTitle: "name",
     defaultColumns: ["name", "tags", "members", "lead"],
-    group: "👥 People",
-    description: "Every club, society, and student-run group.",
+    group: "👥 People & clubs",
+    description:
+      "💡 Every club, society, and student-run group on /clubs. Each one needs a logo (square, transparent background), a blurb, and tags for filtering. Optionally link a 'lead' user so they can be granted club_lead access in Payload.",
     pagination: { defaultLimit: 50 },
     livePreview: {
       url: () => `${SITE}/clubs`,
@@ -65,13 +66,16 @@ export const Clubs: CollectionConfig = {
     {
       name: "joinUrl",
       type: "text",
-      admin: { description: "Optional. Link to the join form / WhatsApp / Instagram." },
+      admin: {
+        description: "Optional. Link to the join form / WhatsApp / Instagram.",
+      },
       validate: (val: unknown) => {
         if (!val) return true;
         if (typeof val !== "string") return "Must be a URL.";
         try {
           const u = new URL(val);
-          if (!/^https?:|^mailto:/.test(u.protocol)) return "Must be http, https, or mailto.";
+          if (!/^https?:|^mailto:/.test(u.protocol))
+            return "Must be http, https, or mailto.";
           return true;
         } catch {
           return "Enter a full URL like https://...";

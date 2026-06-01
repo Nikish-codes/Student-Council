@@ -9,9 +9,9 @@ export const Announcements: CollectionConfig = {
   admin: {
     useAsTitle: "title",
     defaultColumns: ["title", "date", "pinned"],
-    group: "📅 Editorial",
+    group: "📢 Announcements",
     description:
-      "Short headlines that scroll in the announcements ticker. Pinned items always come first.",
+      "💡 Short, dated headlines that scroll in the ticker right under the homepage hero. Pinned items always appear first. Keep them under ~140 characters. For new announcements, the 'Post an announcement' wizard on the dashboard is fastest — come here to edit, pin, or remove existing ones.",
     pagination: { defaultLimit: 50 },
   },
   access: {

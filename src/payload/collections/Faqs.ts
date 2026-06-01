@@ -9,8 +9,9 @@ export const Faqs: CollectionConfig = {
   admin: {
     useAsTitle: "question",
     defaultColumns: ["question", "page", "order"],
-    group: "📅 Editorial",
-    description: "Frequently-asked questions shown on /council and /support.",
+    group: "❓ Help & FAQs",
+    description:
+      "💡 Question/answer pairs displayed in the accordion sections on /council, /support, /clubs, and /events. Use the 'page' field to choose where each FAQ shows up. Lower 'order' numbers appear first. Answers support rich text (links, bold, lists).",
     pagination: { defaultLimit: 50 },
   },
   access: {
@@ -56,7 +57,11 @@ export const Faqs: CollectionConfig = {
     },
   ],
   hooks: {
-    afterChange: [revalidateAfterChange(["/council", "/support", "/clubs", "/events"])],
-    afterDelete: [revalidateAfterChange(["/council", "/support", "/clubs", "/events"])],
+    afterChange: [
+      revalidateAfterChange(["/council", "/support", "/clubs", "/events"]),
+    ],
+    afterDelete: [
+      revalidateAfterChange(["/council", "/support", "/clubs", "/events"]),
+    ],
   },
 };

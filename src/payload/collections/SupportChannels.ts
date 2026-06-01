@@ -36,9 +36,9 @@ export const SupportChannels: CollectionConfig = {
   admin: {
     useAsTitle: "name",
     defaultColumns: ["name", "purpose", "ownedBy", "icon"],
-    group: "⚙️ Configuration",
+    group: "❓ Help & FAQs",
     description:
-      "The support channels shown on /support. Each card uses one icon and a short description.",
+      "💡 The support channels shown on /support. Each one renders as a card with an icon, owner, and short description. Use these to help students find the right person for things like grievances, mental health support, academic queries, etc.",
   },
   access: {
     read: () => true,
@@ -81,7 +81,10 @@ export const SupportChannels: CollectionConfig = {
       name: "bring",
       type: "text",
       hasMany: true,
-      admin: { description: "Bullet list of what to bring / prepare before reaching out." },
+      admin: {
+        description:
+          "Bullet list of what to bring / prepare before reaching out.",
+      },
     },
     {
       name: "councilRole",

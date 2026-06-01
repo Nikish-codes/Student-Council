@@ -10,10 +10,17 @@ export const CouncilMembers: CollectionConfig = {
   defaultSort: "order",
   admin: {
     useAsTitle: "name",
-    defaultColumns: ["name", "role", "program", "order", "isPresident", "featured"],
-    group: "👥 People",
+    defaultColumns: [
+      "name",
+      "role",
+      "program",
+      "order",
+      "isPresident",
+      "featured",
+    ],
+    group: "👥 People & clubs",
     description:
-      "The Council members shown on /council. Lower 'order' values appear first.",
+      "💡 The Council members shown on /council. Use 'order' to control the layout — lower numbers appear first, so set the President to 1, VPs to 2/3, and so on. Tick exactly one member as 'isPresident'; that's the person whose long-form message appears on the President hero.",
     pagination: { defaultLimit: 50 },
     livePreview: {
       url: () => `${SITE}/council`,
@@ -43,7 +50,8 @@ export const CouncilMembers: CollectionConfig = {
       required: true,
       maxLength: 60,
       admin: {
-        description: "e.g. 'President', 'Vice President — Cultural', 'Secretary'.",
+        description:
+          "e.g. 'President', 'Vice President — Cultural', 'Secretary'.",
       },
     },
     {
@@ -87,13 +95,17 @@ export const CouncilMembers: CollectionConfig = {
       name: "message",
       type: "textarea",
       maxLength: 1200,
-      admin: { description: "Long-form message — used on the President hero only." },
+      admin: {
+        description: "Long-form message — used on the President hero only.",
+      },
     },
     {
       name: "quote",
       type: "textarea",
       maxLength: 240,
-      admin: { description: "Short one-line statement for the editorial slab." },
+      admin: {
+        description: "Short one-line statement for the editorial slab.",
+      },
     },
     {
       name: "isPresident",

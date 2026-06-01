@@ -11,9 +11,10 @@ export const Events: CollectionConfig = {
   admin: {
     useAsTitle: "title",
     defaultColumns: ["title", "category", "date", "status", "featured"],
-    group: "📅 Editorial",
+    group: "📅 Events",
     description:
-      "Every event the Council runs or supports. Drafts are private until an admin marks them Published.",
+      "💡 Every event the Council runs or supports — past, present, and future. New events start as drafts and stay private until an admin marks them Published. Prefer the 'Add an event' wizard on the dashboard for new events; come here to edit existing ones or do bulk changes.",
+    listSearchableFields: ["title", "venue", "category"],
     pagination: { defaultLimit: 25 },
     livePreview: {
       url: ({ data }) =>
@@ -136,7 +137,8 @@ export const Events: CollectionConfig = {
         },
         {
           label: "Story",
-          description: "The pitch that goes on cards, plus the full description.",
+          description:
+            "The pitch that goes on cards, plus the full description.",
           fields: [
             {
               name: "excerpt",
@@ -151,7 +153,9 @@ export const Events: CollectionConfig = {
             {
               name: "description",
               type: "richText",
-              admin: { description: "Full event description shown on the detail page." },
+              admin: {
+                description: "Full event description shown on the detail page.",
+              },
             },
           ],
         },
@@ -164,7 +168,10 @@ export const Events: CollectionConfig = {
               type: "upload",
               relationTo: "media",
               required: true,
-              admin: { description: "Hero/banner image. 16:9 preferred, at least 1600×900." },
+              admin: {
+                description:
+                  "Hero/banner image. 16:9 preferred, at least 1600×900.",
+              },
             },
             {
               name: "videoUrl",
@@ -178,7 +185,8 @@ export const Events: CollectionConfig = {
                 if (typeof val !== "string") return "Must be a URL.";
                 try {
                   const u = new URL(val);
-                  if (!/^https?:$/.test(u.protocol)) return "Must be http or https.";
+                  if (!/^https?:$/.test(u.protocol))
+                    return "Must be http or https.";
                   return true;
                 } catch {
                   return "Enter a full URL like https://youtube.com/...";
@@ -206,7 +214,8 @@ export const Events: CollectionConfig = {
                     if (typeof val !== "string") return "Must be a URL.";
                     try {
                       const u = new URL(val);
-                      if (!/^https?:$/.test(u.protocol)) return "Must be http or https.";
+                      if (!/^https?:$/.test(u.protocol))
+                        return "Must be http or https.";
                       return true;
                     } catch {
                       return "Enter a full URL like https://...";
@@ -238,7 +247,9 @@ export const Events: CollectionConfig = {
               name: "organizer",
               type: "relationship",
               relationTo: "users",
-              admin: { description: "Person responsible (auto-set on create)." },
+              admin: {
+                description: "Person responsible (auto-set on create).",
+              },
             },
             {
               name: "club",
