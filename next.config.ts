@@ -1,4 +1,3 @@
-import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -8,7 +7,6 @@ const nextConfig: NextConfig = {
     "@libsql/hrana-client",
     "@libsql/isomorphic-fetch",
     "@libsql/isomorphic-ws",
-    "@payloadcms/db-sqlite",
     "libsql",
     "sharp",
     "drizzle-orm",
@@ -75,4 +73,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withPayload(nextConfig);
+export default nextConfig;
