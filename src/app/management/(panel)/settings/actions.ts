@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { siteSettings as t } from "@/db/schema";
 import { requireRole } from "@/lib/rbac";

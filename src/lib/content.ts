@@ -10,9 +10,7 @@ import {
   events as eventsT,
   faqs as faqsT,
   highlights as highlightsT,
-  homepageConfig as homepageT,
   recaps as recapsT,
-  siteSettings as siteSettingsT,
   supportChannels as supportT,
 } from "@/db/schema";
 
