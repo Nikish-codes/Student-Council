@@ -3,30 +3,32 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
-import { Marquee } from "@/components/motion/marquee";
-import { Picture } from "@/components/ui/picture";
-import { cn } from "@/lib/utils";
+import { localClubLogo } from "@/lib/club-logos";
 import type { Club } from "@/lib/schemas";
 
+/** Prefer the edge-served /public logo; fall back to the R2 URL. */
+function logoSrc(club: Club): string {
+  return localClubLogo(club.slug) ?? club.logo;
+}
+
 /**
- * Featured club spotlight + logo rail.
+ * Clubs "spotlight cloud".
  *
- * The old wall rendered every logo as a large tile, then stagger-animated all
- * tiles on scroll. This version keeps the "many communities" feeling but does
- * it with a lightweight logo rail and one contextual spotlight card.
+ * A calm hairline grid of every club logo rendered as a dim, ink-tinted
+ * silhouette via CSS `mask-image` (the logo's alpha → the shape). A soft glow
+ * trails the cursor; the full-colour logos are revealed only inside a radial
+ * mask centred on that glow — the "flashlight" effect. On idle / touch devices
+ * the glow gently auto-roams so the section always feels alive.
+ *
+ * Performance: the silhouettes are pure CSS masks (no next/image optimizer),
+ * and each unique logo URL is fetched once and reused, so the whole cloud costs
+ * a handful of cached requests instead of ~100 optimizer round-trips.
  */
 export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
   const root = React.useRef<HTMLElement>(null);
-  const prefersReducedMotion = usePrefersReducedMotion();
-  const [activeIndex, setActiveIndex] = React.useState(0);
-  const [paused, setPaused] = React.useState(false);
 
-  const activeClub = clubs[activeIndex] ?? clubs[0];
-  const railClubs = clubs.length > 0 ? clubs : [];
-
-  // Headline entrance animation only. The rail itself uses one CSS transform.
   useGSAP(
     () => {
       const reduced = window.matchMedia(
@@ -55,12 +57,7 @@ export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
         type: "chars,words",
         charsClass: "char",
       });
-      gsap.set(split.chars, {
-        opacity: 0,
-        y: 100,
-        rotateX: -70,
-        filter: "blur(10px)",
-      });
+      gsap.set(split.chars, { opacity: 0, y: 100, rotateX: -70, filter: "blur(10px)" });
       gsap.to(split.chars, {
         opacity: 1,
         y: 0,
@@ -75,48 +72,22 @@ export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
     { scope: root },
   );
 
-  // Auto-rotate the spotlight so the rail isn't just decorative. It pauses
-  // when the user hovers/focuses the section and respects reduced motion.
-  React.useEffect(() => {
-    if (prefersReducedMotion || paused || clubs.length <= 1) return;
-    const id = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % clubs.length);
-    }, 4200);
-    return () => window.clearInterval(id);
-  }, [clubs.length, paused, prefersReducedMotion]);
-
-  const goToPrevious = () => {
-    if (clubs.length <= 1) return;
-    setActiveIndex((current) => (current - 1 + clubs.length) % clubs.length);
-  };
-
-  const goToNext = () => {
-    if (clubs.length <= 1) return;
-    setActiveIndex((current) => (current + 1) % clubs.length);
-  };
-
-  if (!activeClub) return null;
+  if (clubs.length === 0) return null;
 
   return (
     <section
       ref={root}
-      aria-label="Student clubs spotlight"
+      aria-label="Student clubs"
       className="relative overflow-hidden border-t border-line/10 bg-bg py-28 sm:py-40"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.08),transparent_28%),radial-gradient(circle_at_80%_75%,rgba(255,255,255,0.05),transparent_30%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(255,255,255,0.05),transparent_45%)]" />
 
       <div className="container relative z-10">
         <div className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-3xl">
             <div className="mb-6 flex items-center gap-3">
               <span className="h-px w-14 bg-line/30" aria-hidden />
-              <span className="kicker">
-                {clubs.length} communities · one council
-              </span>
+              <span className="kicker">{clubs.length} communities · one council</span>
             </div>
             <h2
               data-clubs-headline
@@ -136,258 +107,169 @@ export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
           </Link>
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)] lg:items-stretch">
-          <SpotlightCard
-            club={activeClub}
-            index={activeIndex}
-            total={clubs.length}
-            onPrevious={goToPrevious}
-            onNext={goToNext}
+        <SpotlightCloud clubs={clubs} />
+
+        <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-subtle">
+          Move your cursor through the cloud · tap a logo to explore
+        </p>
+
+        <div className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-3 border-t border-line/10 pt-6 text-center">
+          <MiniStat value={clubs.length} label="Clubs" />
+          <MiniStat value={uniqueTagCount(clubs)} label="Tags" />
+          <MiniStat
+            value={clubs.reduce((sum, c) => sum + (c.members ?? 0), 0) || "—"}
+            label="Members"
           />
-
-          <div className="relative overflow-hidden border border-line/10 bg-surface/20 p-5 sm:p-6 lg:min-h-[25rem]">
-            <div className="mb-8 flex items-start justify-between gap-4">
-              <div>
-                <p className="kicker mb-3 text-subtle">Live club rail</p>
-                <p className="max-w-md text-sm leading-relaxed text-muted">
-                  Hover or tap a logo to spotlight it. The rail keeps campus
-                  moving without loading the homepage like a giant logo wall.
-                </p>
-              </div>
-              <span className="hidden rounded-full border border-line/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-subtle sm:inline-flex">
-                {paused ? "Paused" : "Rolling"}
-              </span>
-            </div>
-
-            <div className="relative -mx-5 flex flex-col gap-4 sm:-mx-6">
-              <Marquee speed={Math.max(36, clubs.length * 2.4)} pauseOnHover>
-                {railClubs.map((club, index) => (
-                  <RailLogo
-                    key={club.slug}
-                    club={club}
-                    active={index === activeIndex}
-                    onSelect={() => setActiveIndex(index)}
-                  />
-                ))}
-              </Marquee>
-              <Marquee
-                speed={Math.max(42, clubs.length * 2.8)}
-                pauseOnHover
-                reverse
-              >
-                {[...railClubs].reverse().map((club) => {
-                  const originalIndex = clubs.findIndex(
-                    (item) => item.slug === club.slug,
-                  );
-                  return (
-                    <RailLogo
-                      key={club.slug}
-                      club={club}
-                      active={originalIndex === activeIndex}
-                      compact
-                      onSelect={() => setActiveIndex(originalIndex)}
-                    />
-                  );
-                })}
-              </Marquee>
-            </div>
-
-            <div className="mt-8 grid grid-cols-3 gap-3 border-t border-line/10 pt-5 text-center">
-              <MiniStat value={clubs.length} label="Clubs" />
-              <MiniStat value={uniqueTagCount(clubs)} label="Tags" />
-              <MiniStat
-                value={
-                  clubs.reduce((sum, club) => sum + (club.members ?? 0), 0) ||
-                  "—"
-                }
-                label="Members"
-              />
-            </div>
-          </div>
         </div>
       </div>
     </section>
   );
 }
 
-function SpotlightCard({
-  club,
-  index,
-  total,
-  onPrevious,
-  onNext,
-}: {
-  club: Club;
-  index: number;
-  total: number;
-  onPrevious: () => void;
-  onNext: () => void;
-}) {
+const GRID_CLS =
+  "grid grid-cols-3 gap-px sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8";
+
+function SpotlightCloud({ clubs }: { clubs: Club[] }) {
+  const wrap = React.useRef<HTMLDivElement>(null);
+  const target = React.useRef({ x: 0, y: 0, active: false });
+  const pos = React.useRef({ x: 0, y: 0 });
+
+  React.useEffect(() => {
+    const el = wrap.current;
+    if (!el) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const onMove = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect();
+      target.current = { x: e.clientX - r.left, y: e.clientY - r.top, active: true };
+    };
+    const onLeave = () => {
+      target.current.active = false;
+    };
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerleave", onLeave);
+
+    let raf = 0;
+    const loop = (t: number) => {
+      raf = requestAnimationFrame(loop);
+      if (document.hidden) return;
+      const r = el.getBoundingClientRect();
+      let tx = target.current.x;
+      let ty = target.current.y;
+      if (!target.current.active) {
+        // Idle / touch: gently roam the glow on a slow Lissajous path.
+        const k = reduced ? 0 : 1;
+        tx = r.width / 2 + Math.cos(t / 2300) * r.width * 0.33 * k;
+        ty = r.height / 2 + Math.sin(t / 1700) * r.height * 0.36 * k;
+      }
+      pos.current.x += (tx - pos.current.x) * 0.1;
+      pos.current.y += (ty - pos.current.y) * 0.1;
+      el.style.setProperty("--mx", `${pos.current.x}px`);
+      el.style.setProperty("--my", `${pos.current.y}px`);
+    };
+    raf = requestAnimationFrame(loop);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerleave", onLeave);
+    };
+  }, []);
+
+  const reveal =
+    "radial-gradient(circle 150px at var(--mx, 50%) var(--my, 50%), #000 0%, #000 32%, transparent 72%)";
+
   return (
-    <article className="relative overflow-hidden border border-line/10 bg-surface/35 p-6 sm:p-8">
-      <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-ink/5 blur-3xl" />
-      <div className="relative z-10 flex h-full flex-col">
-        <div className="mb-8 flex items-center justify-between gap-4">
-          <span className="kicker text-subtle">Featured club</span>
-          <span className="font-mono text-xs text-muted">
-            {String(index + 1).padStart(2, "0")} /{" "}
-            {String(total).padStart(2, "0")}
-          </span>
-        </div>
+    <div
+      ref={wrap}
+      className="relative overflow-hidden border border-line/10 bg-line/[0.06]"
+      style={{ "--mx": "50%", "--my": "50%" } as React.CSSProperties}
+    >
+      {/* Base: dim monochrome silhouettes (interactive). */}
+      <div className={GRID_CLS}>
+        {clubs.map((club) => (
+          <MonoCell key={club.slug} club={club} />
+        ))}
+      </div>
 
-        <div className="mb-8 flex items-center gap-5">
-          <div className="relative flex h-28 w-28 shrink-0 items-center justify-center border border-line/12 bg-bg/60 p-5 sm:h-32 sm:w-32">
-            <Picture
-              src={club.logo}
-              alt={club.name}
-              fill
-              sizes="128px"
-              quality={70}
-              fallbackLabel={club.name.slice(0, 2).toUpperCase()}
-              className="object-contain p-5"
-            />
-          </div>
-          <div className="min-w-0">
-            <h3 className="display mb-3 text-balance text-3xl leading-none text-ink sm:text-4xl">
-              {club.name}
-            </h3>
-            {club.members ? (
-              <p className="font-mono text-xs uppercase tracking-[0.18em] text-subtle">
-                {club.members}+ active members
-              </p>
-            ) : null}
-          </div>
-        </div>
-
-        <p className="max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-          {club.blurb}
-        </p>
-
-        {club.tags.length > 0 ? (
-          <div className="mt-6 flex flex-wrap gap-2">
-            {club.tags.slice(0, 5).map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full border border-line/10 bg-bg/40 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-subtle"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        ) : null}
-
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-4 pt-10">
-          <Link
-            href="/clubs"
-            className="group/spot inline-flex items-center gap-3 text-sm text-ink"
-          >
-            <span className="kicker">View club directory</span>
-            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/spot:translate-x-1" />
-          </Link>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onPrevious}
-              className="grid h-10 w-10 place-items-center rounded-full border border-line/12 bg-bg/40 text-ink transition-colors hover:border-line/35 hover:bg-surface/60"
-              aria-label="Previous club"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={onNext}
-              className="grid h-10 w-10 place-items-center rounded-full border border-line/12 bg-bg/40 text-ink transition-colors hover:border-line/35 hover:bg-surface/60"
-              aria-label="Next club"
-            >
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
+      {/* Reveal: full-colour logos, shown only inside the cursor glow. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{ maskImage: reveal, WebkitMaskImage: reveal }}
+      >
+        <div className={GRID_CLS}>
+          {clubs.map((club) => (
+            <ColorCell key={club.slug} club={club} />
+          ))}
         </div>
       </div>
-    </article>
+
+      {/* Aura: soft glow halo trailing the cursor. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 mix-blend-screen"
+        style={{
+          background:
+            "radial-gradient(circle 230px at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.09), transparent 70%)",
+        }}
+      />
+    </div>
   );
 }
 
-/**
- * Monochrome logo tile.
- *
- * The default state is a flat ink-white silhouette rendered via a CSS
- * `mask-image` of the logo (the logo's alpha channel becomes the shape, filled
- * with the ink colour). This means NO next/image optimizer round-trips — the
- * browser fetches each unique logo URL once and reuses it across every tile.
- * On hover (or when the tile is the active spotlight) the real, full-colour
- * logo blooms in over the silhouette.
- */
-function RailLogo({
-  club,
-  active,
-  compact,
-  onSelect,
-}: {
-  club: Club;
-  active: boolean;
-  compact?: boolean;
-  onSelect: () => void;
-}) {
-  const hasLogo = Boolean(club.logo);
+function MonoCell({ club }: { club: Club }) {
+  const src = logoSrc(club);
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      aria-label={`Spotlight ${club.name}`}
-      className={cn(
-        "group/rail relative flex shrink-0 items-center justify-center overflow-hidden border bg-bg/45 transition-colors duration-200 hover:border-line/40 hover:bg-surface/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/50",
-        active ? "border-ink/50" : "border-line/12",
-        compact
-          ? "h-20 w-32 px-5 sm:h-24 sm:w-40"
-          : "h-24 w-40 px-6 sm:h-28 sm:w-48",
-      )}
+    <Link
+      href="/clubs"
+      aria-label={club.name}
+      className="group/cell relative flex aspect-[5/3] items-center justify-center bg-bg transition-colors duration-200 hover:bg-surface/40"
     >
-      <div className="relative h-14 w-full sm:h-16">
-        {hasLogo ? (
-          <>
-            {/* Monochrome silhouette (default) — CSS mask, no optimizer. */}
-            <span
-              aria-hidden
-              className={cn(
-                "absolute inset-0 bg-ink/70 transition-opacity duration-300 group-hover/rail:opacity-0",
-                active && "opacity-0",
-              )}
-              style={{
-                maskImage: `url("${club.logo}")`,
-                WebkitMaskImage: `url("${club.logo}")`,
-                maskRepeat: "no-repeat",
-                WebkitMaskRepeat: "no-repeat",
-                maskPosition: "center",
-                WebkitMaskPosition: "center",
-                maskSize: "contain",
-                WebkitMaskSize: "contain",
-              }}
-            />
-            {/* Full-colour logo — blooms in on hover / when active. */}
-            <Image
-              src={club.logo}
-              alt=""
-              fill
-              unoptimized
-              sizes={compact ? "160px" : "192px"}
-              className={cn(
-                "object-contain opacity-0 transition-opacity duration-300 group-hover/rail:opacity-100",
-                active && "opacity-100",
-              )}
-            />
-          </>
-        ) : (
-          <div className="grid h-full w-full place-items-center font-mono text-xs uppercase tracking-[0.2em] text-subtle">
-            {club.name.slice(0, 2).toUpperCase()}
-          </div>
-        )}
-      </div>
-      <span className="pointer-events-none absolute inset-x-2 bottom-2 truncate text-center font-mono text-[9px] uppercase tracking-[0.18em] text-muted opacity-0 transition-opacity duration-200 group-hover/rail:opacity-100 group-focus-visible/rail:opacity-100">
+      {src ? (
+        <span
+          aria-hidden
+          className="absolute inset-[18%] bg-ink/30 transition-colors duration-300 group-hover/cell:bg-ink/60"
+          style={{
+            maskImage: `url("${src}")`,
+            WebkitMaskImage: `url("${src}")`,
+            maskRepeat: "no-repeat",
+            WebkitMaskRepeat: "no-repeat",
+            maskPosition: "center",
+            WebkitMaskPosition: "center",
+            maskSize: "contain",
+            WebkitMaskSize: "contain",
+          }}
+        />
+      ) : (
+        <span className="font-mono text-xs uppercase tracking-[0.2em] text-subtle">
+          {club.name.slice(0, 2).toUpperCase()}
+        </span>
+      )}
+      <span className="pointer-events-none absolute inset-x-1 bottom-1.5 truncate text-center font-mono text-[8px] uppercase tracking-[0.16em] text-muted opacity-0 transition-opacity duration-200 group-hover/cell:opacity-100">
         {club.name}
       </span>
-    </button>
+    </Link>
+  );
+}
+
+function ColorCell({ club }: { club: Club }) {
+  const src = logoSrc(club);
+  return (
+    <div className="relative aspect-[5/3]">
+      {src ? (
+        <div className="absolute inset-[18%]">
+          <Image
+            src={src}
+            alt=""
+            fill
+            unoptimized
+            sizes="160px"
+            className="object-contain"
+          />
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -404,19 +286,4 @@ function MiniStat({ value, label }: { value: React.ReactNode; label: string }) {
 
 function uniqueTagCount(clubs: Club[]) {
   return new Set(clubs.flatMap((club) => club.tags)).size;
-}
-
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = React.useState(false);
-
-  React.useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(media.matches);
-
-    const listener = () => setReduced(media.matches);
-    media.addEventListener("change", listener);
-    return () => media.removeEventListener("change", listener);
-  }, []);
-
-  return reduced;
 }

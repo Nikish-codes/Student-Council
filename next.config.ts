@@ -59,7 +59,19 @@ const nextConfig: NextConfig = {
         value: "max-age=63072000; includeSubDomains; preload",
       });
     }
-    return [{ source: "/:path*", headers: security }];
+    return [
+      { source: "/:path*", headers: security },
+      {
+        // Edge-served club logos rarely change — cache them hard.
+        source: "/club-logos/:file*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+    ];
   },
   images: {
     formats: ["image/avif", "image/webp"],
