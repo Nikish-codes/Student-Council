@@ -1,7 +1,20 @@
 import "server-only";
 import { cache } from "react";
-import { getPayload } from "payload";
-import config from "@payload-config";
+import { and, asc, desc, eq, gte, ne, or, inArray } from "drizzle-orm";
+
+import { db } from "@/db/client";
+import {
+  announcements as announcementsT,
+  clubs as clubsT,
+  councilMembers as councilT,
+  events as eventsT,
+  faqs as faqsT,
+  highlights as highlightsT,
+  homepageConfig as homepageT,
+  recaps as recapsT,
+  siteSettings as siteSettingsT,
+  supportChannels as supportT,
+} from "@/db/schema";
 
 import type {
   Announcement,
@@ -17,76 +30,41 @@ import type {
 } from "./schemas";
 
 /**
- * Content getters — all read from Payload (Turso) via the local API.
- *
- * Each getter is wrapped in React's `cache()` so multiple server components
- * within the same request share a single query result. Payload itself
- * memoizes the underlying instance, so calling `getPayload({ config })`
- * is cheap on subsequent invocations.
- *
- * Return shapes match the original Zod-typed schema so call sites are
- * unchanged apart from being awaited.
+ * Content getters — all read from the custom Drizzle layer (mp_* tables in
+ * Turso). Each getter is wrapped in React's `cache()` so multiple server
+ * components in one request share a single query. Return shapes are identical
+ * to the previous Payload-backed implementation, so the public site is
+ * unchanged. This file is the only seam between the data layer and the UI.
  */
 
-const payloadPromise = getPayload({ config });
-
 // ─────────────── helpers ───────────────
-
-type AnyDoc = Record<string, unknown>;
 
 function asString(v: unknown): string {
   return v == null ? "" : String(v);
 }
 
+/** Keep session copy current (mirrors the previous behaviour). */
 function currentSessionCopy(v: unknown): string {
   return asString(v).replace(/2025\/26|2025-26|25\/26/g, "2026/27");
 }
 
-/** Pull a usable URL out of an upload field that may be id|object|null. */
-function mediaUrl(v: unknown): string {
-  if (!v) return "";
-  if (typeof v === "string" || typeof v === "number") return ""; // depth was 0
-  const o = v as { url?: string; filename?: string };
-  return o.url ?? (o.filename ? `/${o.filename}` : "");
-}
-
-/** Best-effort plain-text extraction from a Lexical editor state. */
-function lexicalToText(v: unknown): string {
-  if (!v) return "";
-  if (typeof v === "string") return v;
-  const root = (v as { root?: { children?: unknown[] } }).root;
-  if (!root?.children) return "";
-  const parts: string[] = [];
-  const walk = (node: unknown) => {
-    if (!node || typeof node !== "object") return;
-    const n = node as {
-      type?: string;
-      text?: string;
-      children?: unknown[];
-    };
-    if (typeof n.text === "string") parts.push(n.text);
-    if (Array.isArray(n.children)) n.children.forEach(walk);
-    if (n.type === "paragraph" || n.type === "heading") parts.push("\n");
-  };
-  root.children.forEach(walk);
-  return parts.join("").trim();
+/** A joined media row → public URL (or ""). */
+function mediaUrl(m: { url?: string | null } | null | undefined): string {
+  return m?.url ?? "";
 }
 
 // ─────────────── announcements ───────────────
 
 export const getAnnouncements = cache(async (): Promise<Announcement[]> => {
-  const payload = await payloadPromise;
-  const r = await payload.find({
-    collection: "announcements",
-    limit: 200,
-    sort: "-date",
-    overrideAccess: true,
-  });
-  return r.docs
-    .map((d: AnyDoc) => ({
+  const rows = await db
+    .select()
+    .from(announcementsT)
+    .orderBy(desc(announcementsT.date));
+  return rows
+    .map((d) => ({
       id: asString(d.id),
       title: asString(d.title),
-      href: (d.href as string | undefined) || undefined,
+      href: d.href || undefined,
       date: asString(d.date),
       pinned: Boolean(d.pinned),
     }))
@@ -102,27 +80,23 @@ export const getAnnouncements = cache(async (): Promise<Announcement[]> => {
 // ─────────────── council ───────────────
 
 export const getCouncil = cache(async (): Promise<CouncilMember[]> => {
-  const payload = await payloadPromise;
-  const r = await payload.find({
-    collection: "council-members",
-    limit: 200,
-    depth: 1,
-    sort: "order",
-    overrideAccess: true,
+  const rows = await db.query.councilMembers.findMany({
+    with: { photo: true },
+    orderBy: asc(councilT.sortOrder),
   });
-  return r.docs.map((d: AnyDoc) => ({
+  return rows.map((d) => ({
     id: asString(d.id),
     name: asString(d.name),
     role: asString(d.role),
     program: asString(d.program),
     photo: mediaUrl(d.photo),
-    email: (d.email as string | undefined) || undefined,
-    linkedin: (d.linkedin as string | undefined) || undefined,
-    message: (d.message as string | undefined) || undefined,
-    quote: (d.quote as string | undefined) || undefined,
+    email: d.email || undefined,
+    linkedin: d.linkedin || undefined,
+    message: d.message || undefined,
+    quote: d.quote || undefined,
     isPresident: Boolean(d.isPresident),
     featured: Boolean(d.featured),
-    order: typeof d.order === "number" ? d.order : 99,
+    order: typeof d.sortOrder === "number" ? d.sortOrder : 99,
   }));
 });
 
@@ -136,99 +110,80 @@ export async function getPresident(): Promise<CouncilMember | undefined> {
 
 // ─────────────── events ───────────────
 
-function mapEventDoc(d: AnyDoc): EventItem {
+type EventRow = typeof eventsT.$inferSelect & {
+  banner?: { url?: string | null } | null;
+};
+
+function mapEventRow(d: EventRow): EventItem {
   return {
+    id: typeof d.id === "number" ? d.id : undefined,
     slug: asString(d.slug),
     title: asString(d.title),
     category: asString(d.category) as EventItem["category"],
     date: asString(d.date),
-    endDate: (d.endDate as string | undefined) || undefined,
+    endDate: d.endDate || undefined,
     venue: asString(d.venue),
     banner: mediaUrl(d.banner),
     excerpt: asString(d.excerpt),
-    description: lexicalToText(d.description),
-    videoUrl: (d.videoUrl as string | undefined) || undefined,
-    registrationUrl: (d.registrationUrl as string | undefined) || undefined,
+    description: asString(d.description),
+    videoUrl: d.videoUrl || undefined,
+    registrationUrl: d.registrationUrl || undefined,
     attendees: typeof d.attendees === "number" ? d.attendees : undefined,
     featured: Boolean(d.featured),
+    registrationEnabled: Boolean(d.registrationEnabled),
+    priceInPaise: typeof d.priceInPaise === "number" ? d.priceInPaise : 0,
+    capacity: typeof d.capacity === "number" ? d.capacity : undefined,
   };
 }
 
 export const getEvents = cache(async (): Promise<EventItem[]> => {
-  const payload = await payloadPromise;
-  const r = await payload.find({
-    collection: "events",
-    where: { status: { equals: "published" } },
-    limit: 500,
-    depth: 1,
-    sort: "date",
-    overrideAccess: true,
+  const rows = await db.query.events.findMany({
+    where: eq(eventsT.status, "published"),
+    with: { banner: true },
+    orderBy: asc(eventsT.date),
   });
-  return r.docs.map((d: AnyDoc) => mapEventDoc(d));
+  return rows.map(mapEventRow);
 });
 
-export const getEvent = cache(async (slug: string): Promise<EventItem | undefined> => {
-  const payload = await payloadPromise;
-  const r = await payload.find({
-    collection: "events",
-    where: {
-      and: [
-        { status: { equals: "published" } },
-        { slug: { equals: slug } },
-      ],
-    },
-    limit: 1,
-    depth: 1,
-    overrideAccess: true,
-  });
-  const doc = r.docs[0] as AnyDoc | undefined;
-  return doc ? mapEventDoc(doc) : undefined;
-});
+export const getEvent = cache(
+  async (slug: string): Promise<EventItem | undefined> => {
+    const row = await db.query.events.findFirst({
+      where: and(eq(eventsT.status, "published"), eq(eventsT.slug, slug)),
+      with: { banner: true },
+    });
+    return row ? mapEventRow(row) : undefined;
+  },
+);
 
 export const getRelatedEvents = cache(
   async (event: EventItem, limit = 3): Promise<EventItem[]> => {
-    const payload = await payloadPromise;
-    const r = await payload.find({
-      collection: "events",
-      where: {
-        and: [
-          { status: { equals: "published" } },
-          { category: { equals: event.category } },
-          { slug: { not_equals: event.slug } },
-        ],
-      },
+    const rows = await db.query.events.findMany({
+      where: and(
+        eq(eventsT.status, "published"),
+        eq(eventsT.category, event.category),
+        ne(eventsT.slug, event.slug),
+      ),
+      with: { banner: true },
+      orderBy: asc(eventsT.date),
       limit,
-      depth: 1,
-      sort: "date",
-      overrideAccess: true,
     });
-    return r.docs.map((d: AnyDoc) => mapEventDoc(d));
+    return rows.map(mapEventRow);
   },
 );
 
 export async function getUpcomingEvents(limit = 3): Promise<EventItem[]> {
-  const payload = await payloadPromise;
   const now = new Date().toISOString();
   const yesterday = new Date(Date.now() - 86_400_000).toISOString();
-  const r = await payload.find({
-    collection: "events",
-    where: {
-      and: [
-        { status: { equals: "published" } },
-        {
-          or: [
-            { date: { greater_than_equal: yesterday } },
-            { endDate: { greater_than_equal: now } },
-          ],
-        },
-      ],
-    },
+  const rows = await db.query.events.findMany({
+    where: and(
+      eq(eventsT.status, "published"),
+      or(gte(eventsT.date, yesterday), gte(eventsT.endDate, now)),
+    ),
+    with: { banner: true },
+    orderBy: asc(eventsT.date),
     limit,
-    depth: 1,
-    sort: "date",
-    overrideAccess: true,
   });
-  return r.docs.map((d: AnyDoc) => mapEventDoc(d));
+  return rows.map(mapEventRow);
 }
 
 export async function getPastEvents(): Promise<EventItem[]> {
@@ -247,21 +202,17 @@ export async function getPastEvents(): Promise<EventItem[]> {
 // ─────────────── clubs ───────────────
 
 export const getClubs = cache(async (): Promise<Club[]> => {
-  const payload = await payloadPromise;
-  const r = await payload.find({
-    collection: "clubs",
-    limit: 200,
-    depth: 1,
-    sort: "name",
-    overrideAccess: true,
+  const rows = await db.query.clubs.findMany({
+    with: { logo: true },
+    orderBy: asc(clubsT.name),
   });
-  return r.docs.map((d: AnyDoc) => ({
+  return rows.map((d) => ({
     slug: asString(d.slug),
     name: asString(d.name),
     logo: mediaUrl(d.logo),
     blurb: asString(d.blurb),
-    joinUrl: (d.joinUrl as string | undefined) || undefined,
-    tags: Array.isArray(d.tags) ? (d.tags as string[]) : [],
+    joinUrl: d.joinUrl || undefined,
+    tags: Array.isArray(d.tags) ? d.tags : [],
     members: typeof d.members === "number" ? d.members : undefined,
   }));
 });
@@ -270,20 +221,15 @@ export const getClubs = cache(async (): Promise<Club[]> => {
 
 export const getSupportChannels = cache(
   async (): Promise<SupportChannel[]> => {
-    const payload = await payloadPromise;
-    const r = await payload.find({
-      collection: "support-channels",
-      limit: 200,
-      overrideAccess: true,
-    });
-    return r.docs.map((d: AnyDoc) => ({
+    const rows = await db.select().from(supportT);
+    return rows.map((d) => ({
       id: asString(d.id),
       name: asString(d.name),
       purpose: asString(d.purpose),
       description: asString(d.description),
       icon: asString(d.icon),
       ownedBy: asString(d.ownedBy),
-      bring: Array.isArray(d.bring) ? (d.bring as string[]) : [],
+      bring: Array.isArray(d.bring) ? d.bring : [],
       councilRole: asString(d.councilRole),
     }));
   },
@@ -292,18 +238,15 @@ export const getSupportChannels = cache(
 // ─────────────── highlights ───────────────
 
 export const getHighlights = cache(async (): Promise<Highlight[]> => {
-  const payload = await payloadPromise;
-  const r = await payload.find({
-    collection: "highlights",
-    limit: 200,
-    depth: 1,
-    overrideAccess: true,
+  const rows = await db.query.highlights.findMany({
+    with: { image: true },
+    orderBy: asc(highlightsT.sortOrder),
   });
-  return r.docs.map((d: AnyDoc) => ({
+  return rows.map((d) => ({
     id: asString(d.id),
     src: mediaUrl(d.image),
     alt: asString(d.alt),
-    caption: (d.caption as string | undefined) || undefined,
+    caption: d.caption || undefined,
     span: (asString(d.span) || "md") as Highlight["span"],
   }));
 });
@@ -397,225 +340,168 @@ const SITE_SETTINGS_DEFAULTS: SiteSettingsData = {
   grievanceMailTo: "council@woxsen.edu.in",
 };
 
-function recapDocToVault(d: AnyDoc): VaultStory {
-  const event = d.event as AnyDoc | null | undefined;
-  const slug =
-    asString((event as AnyDoc | undefined)?.slug) || asString(d.slug);
-  return {
-    id: asString(d.id),
-    title: asString(d.title),
-    kicker: asString(d.kicker),
-    blurb: asString(d.blurb),
-    posterImage: mediaUrl(d.heroMedia),
-    videoUrl: (d.heroVideoUrl as string | undefined) || undefined,
-    href: slug ? `/events/${slug}` : "/archive",
-    publishedAt: (d.publishedAt as string | undefined) || undefined,
-  };
-}
-
 export const getHomepageConfig = cache(
   async (): Promise<HomepageConfigData> => {
-    const payload = await payloadPromise;
-    let raw: AnyDoc;
-    try {
-      raw = (await payload.findGlobal({
-        slug: "homepage-config",
-        depth: 2,
-        overrideAccess: true,
-      })) as AnyDoc;
-    } catch {
-      return HOMEPAGE_DEFAULTS;
+    const raw = await db.query.homepageConfig.findFirst();
+    if (!raw) return HOMEPAGE_DEFAULTS;
+
+    const hero = raw.hero ?? ({} as NonNullable<typeof raw.hero>);
+    const closing = raw.closingCta ?? ({} as NonNullable<typeof raw.closingCta>);
+    const stats = raw.stats ?? [];
+    const manifestoLines = raw.manifestoLines ?? [];
+    const quickActions = raw.quickActions ?? [];
+
+    // Resolve flagship event id → slug.
+    let flagshipSlug: string | undefined;
+    if (raw.flagshipEventId) {
+      const ev = await db.query.events.findFirst({
+        where: eq(eventsT.id, raw.flagshipEventId),
+        columns: { slug: true },
+      });
+      flagshipSlug = ev?.slug || undefined;
     }
 
-    const heroRaw = (raw.hero as AnyDoc | undefined) ?? {};
-    const sublineWordsRaw = Array.isArray(heroRaw.sublineWords)
-      ? (heroRaw.sublineWords as AnyDoc[])
-          .map((w) => asString(w.word))
-          .filter(Boolean)
-      : [];
-    const heroCtasRaw = Array.isArray(heroRaw.ctas)
-      ? (heroRaw.ctas as AnyDoc[]).map((c) => ({
-          label: asString(c.label),
-          href: asString(c.href),
-          variant:
-            (asString(c.variant) as "primary" | "outline" | "ghost") ||
-            "primary",
-        }))
-      : [];
-
-    const statsRaw = Array.isArray(raw.stats)
-      ? (raw.stats as AnyDoc[]).map((s) => ({
-          value: typeof s.value === "number" ? s.value : 0,
-          suffix: (s.suffix as string | undefined) || undefined,
-          displayValue: (s.displayValue as string | undefined) || undefined,
-          label: asString(s.label),
-        }))
-      : [];
-
-    const manifestoLinesRaw = Array.isArray(raw.manifestoLines)
-      ? (raw.manifestoLines as AnyDoc[]).map((l) => ({
-          lead: asString(l.lead),
-          tail: asString(l.tail),
-        }))
-      : [];
-
-    const quickActionsRaw = Array.isArray(raw.quickActions)
-      ? (raw.quickActions as AnyDoc[]).map((q) => ({
-          icon: asString(q.icon) || "Sparkles",
-          title: asString(q.title),
-          body: asString(q.body),
-          href: asString(q.href),
-        }))
-      : [];
-
-    const closingRaw = (raw.closingCta as AnyDoc | undefined) ?? {};
-    const closingCtas = Array.isArray(closingRaw.ctas)
-      ? (closingRaw.ctas as AnyDoc[]).map((c) => ({
-          label: asString(c.label),
-          href: asString(c.href),
-          variant:
-            (asString(c.variant) as "primary" | "outline" | "ghost") ||
-            "primary",
-        }))
-      : [];
-
-    const flagship = raw.flagshipEvent as AnyDoc | string | null | undefined;
-    const flagshipSlug =
-      flagship && typeof flagship === "object"
-        ? asString((flagship as AnyDoc).slug) || undefined
-        : undefined;
-
-    const featuredClubsRaw = Array.isArray(raw.featuredClubs)
-      ? (raw.featuredClubs as Array<AnyDoc | string>)
-          .map((c) =>
-            typeof c === "object" && c
-              ? asString((c as AnyDoc).slug)
-              : "",
-          )
-          .filter(Boolean)
-      : [];
-
-    let vaultStoriesRaw: VaultStory[] = [];
-    if (Array.isArray(raw.vaultStories) && raw.vaultStories.length > 0) {
-      vaultStoriesRaw = (raw.vaultStories as Array<AnyDoc | string>)
-        .filter((v): v is AnyDoc => typeof v === "object" && v !== null)
-        .map(recapDocToVault);
-    } else {
-      // auto-fill with most recent published recaps
-      try {
-        const recaps = await payload.find({
-          collection: "recaps",
-          where: { _status: { equals: "published" } },
-          limit: 4,
-          depth: 2,
-          sort: "-publishedAt",
-          overrideAccess: true,
-        });
-        vaultStoriesRaw = recaps.docs.map((d: AnyDoc) => recapDocToVault(d));
-      } catch {
-        vaultStoriesRaw = [];
-      }
+    // Resolve featured club ids → slugs (preserve order).
+    let featuredClubSlugs: string[] = [];
+    const clubIds = raw.featuredClubIds ?? [];
+    if (clubIds.length > 0) {
+      const rows = await db
+        .select({ id: clubsT.id, slug: clubsT.slug })
+        .from(clubsT)
+        .where(inArray(clubsT.id, clubIds));
+      const bySlug = new Map(rows.map((r) => [r.id, r.slug]));
+      featuredClubSlugs = clubIds
+        .map((id) => bySlug.get(id))
+        .filter((s): s is string => Boolean(s));
     }
 
-    const out: HomepageConfigData = {
+    // Vault stories: explicit ids, else most-recent published recaps.
+    const vaultStories = await resolveVaultStories(raw.vaultStoryIds ?? []);
+
+    return {
       hero: {
-        kicker: currentSessionCopy(heroRaw.kicker) || HOMEPAGE_DEFAULTS.hero.kicker,
-        headline:
-          asString(heroRaw.headline) || HOMEPAGE_DEFAULTS.hero.headline,
-        sublineLead:
-          asString(heroRaw.sublineLead) || HOMEPAGE_DEFAULTS.hero.sublineLead,
+        kicker: currentSessionCopy(hero.kicker) || HOMEPAGE_DEFAULTS.hero.kicker,
+        headline: hero.headline || HOMEPAGE_DEFAULTS.hero.headline,
+        sublineLead: hero.sublineLead || HOMEPAGE_DEFAULTS.hero.sublineLead,
         sublineWords:
-          sublineWordsRaw.length > 0
-            ? sublineWordsRaw
+          hero.sublineWords && hero.sublineWords.length > 0
+            ? hero.sublineWords
             : HOMEPAGE_DEFAULTS.hero.sublineWords,
         subParagraph:
-          asString(heroRaw.subParagraph) ||
-          HOMEPAGE_DEFAULTS.hero.subParagraph,
-        ctas: heroCtasRaw.length > 0 ? heroCtasRaw : HOMEPAGE_DEFAULTS.hero.ctas,
-        marqueeText:
-          asString(heroRaw.marqueeText) ||
-          HOMEPAGE_DEFAULTS.hero.marqueeText,
+          hero.subParagraph || HOMEPAGE_DEFAULTS.hero.subParagraph,
+        ctas:
+          hero.ctas && hero.ctas.length > 0
+            ? hero.ctas
+            : HOMEPAGE_DEFAULTS.hero.ctas,
+        marqueeText: hero.marqueeText || HOMEPAGE_DEFAULTS.hero.marqueeText,
       },
       statsKicker:
         currentSessionCopy(raw.statsKicker) || HOMEPAGE_DEFAULTS.statsKicker,
-      stats: statsRaw.length > 0 ? statsRaw : HOMEPAGE_DEFAULTS.stats,
+      stats: stats.length > 0 ? stats : HOMEPAGE_DEFAULTS.stats,
       manifestoKicker:
-        currentSessionCopy(raw.manifestoKicker) || HOMEPAGE_DEFAULTS.manifestoKicker,
+        currentSessionCopy(raw.manifestoKicker) ||
+        HOMEPAGE_DEFAULTS.manifestoKicker,
       manifestoLines:
-        manifestoLinesRaw.length > 0
-          ? manifestoLinesRaw
+        manifestoLines.length > 0
+          ? manifestoLines
           : HOMEPAGE_DEFAULTS.manifestoLines,
       manifestoFooter:
-        asString(raw.manifestoFooter) || HOMEPAGE_DEFAULTS.manifestoFooter,
+        raw.manifestoFooter || HOMEPAGE_DEFAULTS.manifestoFooter,
       quickActions:
-        quickActionsRaw.length > 0
-          ? quickActionsRaw
+        quickActions.length > 0
+          ? quickActions
           : HOMEPAGE_DEFAULTS.quickActions,
       closingCta: {
-        kicker:
-          asString(closingRaw.kicker) || HOMEPAGE_DEFAULTS.closingCta.kicker,
+        kicker: closing.kicker || HOMEPAGE_DEFAULTS.closingCta.kicker,
         headlineLead:
-          asString(closingRaw.headlineLead) ||
-          HOMEPAGE_DEFAULTS.closingCta.headlineLead,
+          closing.headlineLead || HOMEPAGE_DEFAULTS.closingCta.headlineLead,
         headlineTail:
-          asString(closingRaw.headlineTail) ||
-          HOMEPAGE_DEFAULTS.closingCta.headlineTail,
+          closing.headlineTail || HOMEPAGE_DEFAULTS.closingCta.headlineTail,
         ctas:
-          closingCtas.length > 0
-            ? closingCtas
+          closing.ctas && closing.ctas.length > 0
+            ? closing.ctas
             : HOMEPAGE_DEFAULTS.closingCta.ctas,
       },
       flagshipEventSlug: flagshipSlug,
-      featuredClubSlugs: featuredClubsRaw,
-      vaultStories: vaultStoriesRaw,
-      tagline: asString(raw.tagline) || HOMEPAGE_DEFAULTS.tagline,
+      featuredClubSlugs,
+      vaultStories,
+      tagline: raw.tagline || HOMEPAGE_DEFAULTS.tagline,
     };
-    return out;
   },
 );
+
+async function resolveVaultStories(ids: number[]): Promise<VaultStory[]> {
+  const toVault = (d: {
+    id: number;
+    title: string | null;
+    kicker: string | null;
+    blurb: string | null;
+    slug: string | null;
+    heroMedia?: { url?: string | null } | null;
+    heroVideoUrl: string | null;
+    publishedAt: string | null;
+    event?: { slug: string | null } | null;
+  }): VaultStory => {
+    const slug = d.event?.slug || d.slug || "";
+    return {
+      id: asString(d.id),
+      title: asString(d.title),
+      kicker: asString(d.kicker),
+      blurb: asString(d.blurb),
+      posterImage: mediaUrl(d.heroMedia),
+      videoUrl: d.heroVideoUrl || undefined,
+      href: slug ? `/events/${slug}` : "/archive",
+      publishedAt: d.publishedAt || undefined,
+    };
+  };
+
+  if (ids.length > 0) {
+    const rows = await db.query.recaps.findMany({
+      where: inArray(recapsT.id, ids),
+      with: { heroMedia: true, event: { columns: { slug: true } } },
+    });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    return ids
+      .map((id) => byId.get(id))
+      .filter((r): r is NonNullable<typeof r> => Boolean(r))
+      .map(toVault);
+  }
+
+  // auto-fill with most recent published recaps
+  const rows = await db.query.recaps.findMany({
+    where: eq(recapsT.status, "published"),
+    with: { heroMedia: true, event: { columns: { slug: true } } },
+    orderBy: desc(recapsT.publishedAt),
+    limit: 4,
+  });
+  return rows.map(toVault);
+}
 
 // ─────────────── site settings ───────────────
 
 export const getSiteSettings = cache(async (): Promise<SiteSettingsData> => {
-  const payload = await payloadPromise;
-  let raw: AnyDoc;
-  try {
-    raw = (await payload.findGlobal({
-      slug: "site-settings",
-      overrideAccess: true,
-    })) as AnyDoc;
-  } catch {
-    return SITE_SETTINGS_DEFAULTS;
-  }
-  const campusRaw = (raw.campus as AnyDoc | undefined) ?? {};
-  const cats = Array.isArray(raw.grievanceCategories)
-    ? (raw.grievanceCategories as AnyDoc[]).map((c) => ({
-        value: asString(c.value),
-        label: asString(c.label),
-      }))
-    : [];
+  const raw = await db.query.siteSettings.findFirst();
+  if (!raw) return SITE_SETTINGS_DEFAULTS;
+  const campus = raw.campus ?? SITE_SETTINGS_DEFAULTS.campus;
+  const cats = raw.grievanceCategories ?? [];
   return {
-    siteName: asString(raw.siteName) || SITE_SETTINGS_DEFAULTS.siteName,
-    tagline: (raw.tagline as string | undefined) || undefined,
-    contactEmail: (raw.contactEmail as string | undefined) || undefined,
-    instagramUrl: (raw.instagramUrl as string | undefined) || undefined,
-    linkedinUrl: (raw.linkedinUrl as string | undefined) || undefined,
+    siteName: raw.siteName || SITE_SETTINGS_DEFAULTS.siteName,
+    tagline: raw.tagline || undefined,
+    contactEmail: raw.contactEmail || undefined,
+    instagramUrl: raw.instagramUrl || undefined,
+    linkedinUrl: raw.linkedinUrl || undefined,
     campus: {
-      name: asString(campusRaw.name) || SITE_SETTINGS_DEFAULTS.campus.name,
+      name: campus.name || SITE_SETTINGS_DEFAULTS.campus.name,
       coordinates:
-        asString(campusRaw.coordinates) ||
-        SITE_SETTINGS_DEFAULTS.campus.coordinates,
-      timezone:
-        asString(campusRaw.timezone) || SITE_SETTINGS_DEFAULTS.campus.timezone,
+        campus.coordinates || SITE_SETTINGS_DEFAULTS.campus.coordinates,
+      timezone: campus.timezone || SITE_SETTINGS_DEFAULTS.campus.timezone,
       timezoneAbbr:
-        asString(campusRaw.timezoneAbbr) ||
-        SITE_SETTINGS_DEFAULTS.campus.timezoneAbbr,
+        campus.timezoneAbbr || SITE_SETTINGS_DEFAULTS.campus.timezoneAbbr,
     },
     grievanceCategories:
       cats.length > 0 ? cats : SITE_SETTINGS_DEFAULTS.grievanceCategories,
     grievanceMailTo:
-      asString(raw.grievanceMailTo) ||
-      SITE_SETTINGS_DEFAULTS.grievanceMailTo,
+      raw.grievanceMailTo || SITE_SETTINGS_DEFAULTS.grievanceMailTo,
   };
 });
 
@@ -623,20 +509,16 @@ export const getSiteSettings = cache(async (): Promise<SiteSettingsData> => {
 
 export const getFaqs = cache(
   async (page?: FaqItem["page"]): Promise<FaqItem[]> => {
-    const payload = await payloadPromise;
-    const r = await payload.find({
-      collection: "faqs",
-      where: page ? { page: { equals: page } } : undefined,
-      limit: 200,
-      sort: "order",
-      overrideAccess: true,
+    const rows = await db.query.faqs.findMany({
+      where: page ? eq(faqsT.page, page) : undefined,
+      orderBy: asc(faqsT.sortOrder),
     });
-    return r.docs.map((d: AnyDoc) => ({
+    return rows.map((d) => ({
       id: asString(d.id),
       question: asString(d.question),
-      answer: lexicalToText(d.answer),
+      answer: asString(d.answer),
       page: asString(d.page) as FaqItem["page"],
-      order: typeof d.order === "number" ? d.order : 99,
+      order: typeof d.sortOrder === "number" ? d.sortOrder : 99,
     }));
   },
 );

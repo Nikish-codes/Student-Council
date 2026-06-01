@@ -37,6 +37,7 @@ export const eventCategorySchema = z.enum([
 export type EventCategory = z.infer<typeof eventCategorySchema>;
 
 export const eventSchema = z.object({
+  id: z.number().optional(),
   slug: z.string(),
   title: z.string(),
   category: eventCategorySchema,
@@ -50,6 +51,10 @@ export const eventSchema = z.object({
   registrationUrl: z.string().url().optional(),
   attendees: z.number().optional(),
   featured: z.boolean().default(false),
+  // Native registration / ticketing (managed in the portal).
+  registrationEnabled: z.boolean().default(false),
+  priceInPaise: z.number().default(0),
+  capacity: z.number().optional(),
 });
 export type EventItem = z.infer<typeof eventSchema>;
 

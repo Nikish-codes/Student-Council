@@ -15,6 +15,7 @@ import { EventVideo } from "@/components/ui/event-video";
 import { Magnetic } from "@/components/motion/magnetic";
 import { Reveal } from "@/components/motion/reveal";
 import { getEvent, getEvents } from "@/lib/content";
+import { EventRegistration } from "@/components/sections/event-registration";
 import { cn, formatDate } from "@/lib/utils";
 
 export async function generateStaticParams() {
@@ -265,7 +266,17 @@ export default async function EventDetailPage({
               </div>
             )}
             <div className="border-t border-line/10 pt-6">
-              {event.registrationUrl && !isPast ? (
+              {isPast ? (
+                <p className="text-xs text-subtle">
+                  This event has wrapped. Catch the next one.
+                </p>
+              ) : event.registrationEnabled && event.id ? (
+                <EventRegistration
+                  eventId={event.id}
+                  title={event.title}
+                  priceInPaise={event.priceInPaise ?? 0}
+                />
+              ) : event.registrationUrl ? (
                 <Magnetic className="block">
                   <Button asChild size="lg" className="w-full">
                     <a
@@ -278,10 +289,6 @@ export default async function EventDetailPage({
                     </a>
                   </Button>
                 </Magnetic>
-              ) : isPast ? (
-                <p className="text-xs text-subtle">
-                  This event has wrapped. Catch the next one.
-                </p>
               ) : (
                 <p className="text-xs text-subtle">
                   Registration opens closer to the event.
