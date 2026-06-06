@@ -44,6 +44,25 @@ const nextConfig: NextConfig = {
     return config;
   },
   async headers() {
+    // CSP scoped to allow Razorpay checkout (script + iframe + API + telemetry),
+    // self-hosted next/font, R2-hosted images, and inline scripts/styles that
+    // Next.js + GSAP inject. No nonce pipeline yet, so 'unsafe-inline' is
+    // required for scripts/styles; tighten with a nonce middleware later.
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data:",
+      "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com",
+      "frame-src https://api.razorpay.com https://checkout.razorpay.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'self'",
+      "upgrade-insecure-requests",
+    ].join("; ");
+
     const security = [
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "X-Frame-Options", value: "SAMEORIGIN" },
@@ -52,6 +71,7 @@ const nextConfig: NextConfig = {
         key: "Permissions-Policy",
         value: "camera=(), microphone=(), geolocation=()",
       },
+      { key: "Content-Security-Policy", value: csp },
     ];
     if (process.env.NODE_ENV === "production") {
       security.push({

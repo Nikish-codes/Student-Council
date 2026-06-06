@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     "Bootcamps, hackathons, cultural nights and sports cups — every event run by the Woxsen Student Council.",
 };
 
+// ISR: upcoming/past split depends on the current time.
+export const revalidate = 60;
+
 export default async function EventsPage() {
   const all = await getEvents();
   const now = Date.now();

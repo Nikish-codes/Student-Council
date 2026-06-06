@@ -12,6 +12,10 @@ export function paymentsConfigured(): boolean {
   return Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
 }
 
+export function webhookConfigured(): boolean {
+  return Boolean(process.env.RAZORPAY_WEBHOOK_SECRET);
+}
+
 export function publicKeyId(): string {
   return process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || "";
 }
@@ -35,6 +39,7 @@ export async function createRazorpayOrder(
       receipt,
       payment_capture: 1,
     }),
+    signal: AbortSignal.timeout(8000),
   });
   if (!res.ok) {
     throw new Error(`Razorpay order failed: ${res.status} ${await res.text()}`);
@@ -57,8 +62,10 @@ export function verifyPaymentSignature(
   paymentId: string,
   signature: string,
 ): boolean {
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!secret) return false; // fail closed if misconfigured
   const expected = crypto
-    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "")
+    .createHmac("sha256", secret)
     .update(`${orderId}|${paymentId}`)
     .digest("hex");
   return timingSafeEqualHex(expected, signature);
@@ -66,8 +73,10 @@ export function verifyPaymentSignature(
 
 /** Verify a webhook payload signature: HMAC(rawBody, webhookSecret). */
 export function verifyWebhookSignature(rawBody: string, signature: string): boolean {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  if (!secret) return false; // fail closed if misconfigured
   const expected = crypto
-    .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET || "")
+    .createHmac("sha256", secret)
     .update(rawBody)
     .digest("hex");
   return timingSafeEqualHex(expected, signature);

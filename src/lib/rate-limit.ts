@@ -25,11 +25,18 @@ export function rateLimit(
   return { ok: true, remaining: limit - b.count, retryAfter: 0 };
 }
 
-/** Best-effort client IP from forwarded headers. */
+/**
+ * Best-effort client IP. On Vercel, `x-real-ip` is set by the platform and is
+ * NOT user-controlled, so prefer it. `x-forwarded-for` can be spoofed by the
+ * caller, but the leftmost entry is overwritten by Vercel's edge — fine as a
+ * fallback. Behind a different reverse proxy, audit before relying on this.
+ */
 export function clientIp(req: Request): string {
+  const real = req.headers.get("x-real-ip");
+  if (real) return real.trim();
   const xff = req.headers.get("x-forwarded-for");
   if (xff) return xff.split(",")[0].trim();
-  return req.headers.get("x-real-ip") || "unknown";
+  return "unknown";
 }
 
 // Periodic cleanup so the map can't grow unbounded.

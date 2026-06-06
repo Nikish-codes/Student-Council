@@ -18,6 +18,9 @@ import { getEvent, getEvents } from "@/lib/content";
 import { EventRegistration } from "@/components/sections/event-registration";
 import { cn, formatDate } from "@/lib/utils";
 
+// ISR: "Live now" / "In N days" status is time-sensitive.
+export const revalidate = 60;
+
 export async function generateStaticParams() {
   const events = await getEvents();
   return events.map((e) => ({ slug: e.slug }));

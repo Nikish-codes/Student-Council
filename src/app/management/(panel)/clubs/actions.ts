@@ -30,11 +30,12 @@ export async function saveClub(id: number | null, fd: FormData) {
 
   if (id) {
     const existing = await db.query.clubs.findFirst({ where: eq(t.id, id) });
+    if (!existing) throw new Error("NOT_FOUND");
     const requested = s(fd, "slug");
     const slug =
-      requested && slugify(requested) !== existing?.slug
+      requested && slugify(requested) !== existing.slug
         ? await uniqueSlug("clubs", requested, id)
-        : existing!.slug;
+        : existing.slug;
     await db.update(t).set({ ...base, slug, updatedAt: new Date().toISOString() }).where(eq(t.id, id));
   } else {
     const slug = await uniqueSlug("clubs", s(fd, "slug") || base.name);

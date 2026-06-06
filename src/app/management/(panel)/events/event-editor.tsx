@@ -55,8 +55,16 @@ export function EventEditor({
   const [title, setTitle] = useState(event?.title ?? "");
   const [slug, setSlug] = useState(event?.slug ?? "");
 
-  const toLocal = (iso: string | null | undefined) =>
-    iso ? new Date(iso).toISOString().slice(0, 16) : "";
+  // Format an ISO timestamp for a `datetime-local` input using the BROWSER's
+  // local components — `toISOString().slice(0,16)` would silently shift by the
+  // admin's UTC offset on every round-trip.
+  const toLocal = (iso: string | null | undefined) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "";
+    const p = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+  };
 
   return (
     <form action={action} className="mx-auto max-w-3xl">

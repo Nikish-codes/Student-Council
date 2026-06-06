@@ -55,21 +55,28 @@ export async function POST(req: Request) {
   }
 
   const key = makeKey(file.name || "upload");
-  const url = await uploadToR2(key, buf, file.type || "application/octet-stream");
 
-  const [row] = await db
-    .insert(mediaT)
-    .values({
-      alt: alt || file.name || "Untitled",
-      url,
-      filename: key,
-      mimeType: file.type || null,
-      filesize: file.size,
-      width,
-      height,
-      tags: [],
-    })
-    .returning();
-
-  return NextResponse.json({ media: row });
+  try {
+    const url = await uploadToR2(key, buf, file.type || "application/octet-stream");
+    const [row] = await db
+      .insert(mediaT)
+      .values({
+        alt: alt || file.name || "Untitled",
+        url,
+        filename: key,
+        mimeType: file.type || null,
+        filesize: file.size,
+        width,
+        height,
+        tags: [],
+      })
+      .returning();
+    return NextResponse.json({ media: row });
+  } catch (err) {
+    console.error("[media/upload] failed:", err);
+    return NextResponse.json(
+      { error: "Upload failed. Please try again." },
+      { status: 502 },
+    );
+  }
 }

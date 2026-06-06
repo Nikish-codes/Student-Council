@@ -108,13 +108,15 @@ export async function onEventPublished(eventId: number): Promise<{
     const url = process.env.DISCORD_WEBHOOK_URL;
     if (!url) return "skipped";
     const site = process.env.NEXT_PUBLIC_SITE_URL || "";
-    await fetch(url, {
+    const res = await fetch(url, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        content: `📅 **New event published:** ${ev.title}\n${site}/events/${ev.slug}`,
+        content: `New event published: ${ev.title}\n${site}/events/${ev.slug}`,
       }),
+      signal: AbortSignal.timeout(5000),
     });
+    if (!res.ok) throw new Error(`discord ${res.status}`);
     return "ok";
   });
 

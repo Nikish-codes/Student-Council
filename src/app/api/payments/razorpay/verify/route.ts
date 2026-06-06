@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyPaymentSignature } from "@/lib/razorpay";
 import { confirmPaidRegistration } from "@/lib/registrations";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -13,6 +14,16 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  // Throttle abuse: 16 verify attempts per IP per minute. Legitimate users hit
+  // this once per registration; anything beyond is brute-force noise.
+  const limit = rateLimit(`verify:${clientIp(req)}`, 16, 60_000);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "Too many attempts. Please try again shortly." },
+      { status: 429, headers: { "retry-after": String(limit.retryAfter) } },
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();
@@ -36,9 +47,15 @@ export async function POST(req: Request) {
       registrationId,
       razorpay_payment_id,
       razorpay_signature,
+      razorpay_order_id, // bind: must match the stored razorpayOrderId
     );
     return NextResponse.json({ ok: true, ticketCode });
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 400 });
+    console.error("[verify] confirm failed:", err);
+    // Don't leak internal error details — generic message to client.
+    return NextResponse.json(
+      { error: "Could not confirm payment. Please contact us with your payment id." },
+      { status: 400 },
+    );
   }
 }

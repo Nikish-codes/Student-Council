@@ -109,6 +109,19 @@ export function SelectField(props: {
   );
 }
 
+/**
+ * Format an ISO timestamp as a `datetime-local` value in the BROWSER's local
+ * time. `toISOString()` returns UTC, which a `datetime-local` input renders as
+ * if it were local — silently shifting events by the admin's UTC offset on
+ * every round-trip. Build the string from local components instead.
+ */
+function toLocalInput(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
 export function DateTimeField(props: {
   name: string;
   label: string;
@@ -117,9 +130,7 @@ export function DateTimeField(props: {
   required?: boolean;
 }) {
   const { label, hint, defaultValue, ...rest } = props;
-  const local = defaultValue
-    ? new Date(defaultValue).toISOString().slice(0, 16)
-    : "";
+  const local = defaultValue ? toLocalInput(defaultValue) : "";
   return (
     <div>
       <Label label={label} hint={hint} />
