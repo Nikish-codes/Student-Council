@@ -76,6 +76,23 @@ export function EventRegistration({ eventId, title, priceInPaise }: Props) {
         order_id: data.orderId,
         prefill: { name: form.name, email: form.email, contact: form.phone },
         theme: { color: "#0a0a0a" },
+        // UPI is the dominant rail for students — surface it first, with app
+        // intent (GPay/PhonePe/Paytm deep-links on mobile), QR (desktop) and
+        // VPA collect. The remaining methods (cards/netbanking) show below.
+        config: {
+          display: {
+            blocks: {
+              upi: {
+                name: "Pay via UPI",
+                instruments: [
+                  { method: "upi", flows: ["intent", "qr", "collect"] },
+                ],
+              },
+            },
+            sequence: ["block.upi"],
+            preferences: { show_default_blocks: true },
+          },
+        },
         handler: async (resp: {
           razorpay_order_id: string;
           razorpay_payment_id: string;
