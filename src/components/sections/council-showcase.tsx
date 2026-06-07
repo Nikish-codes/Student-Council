@@ -151,7 +151,7 @@ export function CouncilShowcase({
           {/* Gigantic ghost word behind */}
           <span
             aria-hidden
-            className="pointer-events-none absolute -top-4 left-1/2 -translate-x-1/2 select-none whitespace-nowrap font-display text-[clamp(3rem,15.5vw,5.8rem)] italic leading-none text-ink/[0.045] sm:-top-10 sm:left-0 sm:translate-x-0 sm:text-[clamp(10rem,22vw,28rem)] sm:text-ink/[0.035]"
+            className="pointer-events-none absolute -top-4 left-1/2 -translate-x-1/2 select-none whitespace-nowrap font-display text-[clamp(2.5rem,14vw,5rem)] italic leading-none text-ink/[0.045] sm:-top-10 sm:left-0 sm:translate-x-0 sm:text-[clamp(10rem,22vw,28rem)] sm:text-ink/[0.035]"
           >
             President.
           </span>
@@ -259,7 +259,7 @@ export function CouncilShowcase({
                   aria-hidden
                   className={cn(
                     "pointer-events-none absolute top-8 select-none font-mono leading-none text-ink/[0.05]",
-                    "text-[10rem] sm:text-[16rem]",
+                    "text-[clamp(5rem,22vw,10rem)] sm:text-[16rem]",
                     isOdd ? "right-4 sm:right-10" : "left-4 sm:left-10",
                   )}
                 >

@@ -11,7 +11,9 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: #050505;
+  /* Themed via CSS vars so light/dark toggle doesn't flash. The fallback
+     (#050505) is used when CSS vars haven't loaded yet — matches dark mode. */
+  background: rgb(var(--bg, 5 5 5));
   display: grid;
   place-items: center;
   opacity: 1;
@@ -154,6 +156,22 @@
     --line: 255 255 255;
     --radius: 16px;
     color-scheme: dark;
+  }
+
+  /* Light theme — kicks in when html carries `.light` (set by ThemeToggle
+     and the pre-paint script). Tokens are tuned so the existing dark-mode
+     opacity-based borders/dividers still read on a white background.
+     `--line` flips from white to black so `rgb(var(--line) / 0.08)` becomes
+     a faint dark hairline instead of an invisible white one. */
+  html.light {
+    --bg: 250 250 250;
+    --surface: 255 255 255;
+    --surface-2: 244 244 245;
+    --ink: 17 17 17;
+    --muted: 82 82 91;
+    --subtle: 113 113 122;
+    --line: 24 24 27;
+    color-scheme: light;
   }
 
   * {

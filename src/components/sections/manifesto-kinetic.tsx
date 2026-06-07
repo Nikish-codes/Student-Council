@@ -92,7 +92,7 @@ export function ManifestoKinetic({
       <div
         data-drift
         aria-hidden
-        className="pointer-events-none absolute -top-20 left-0 select-none whitespace-nowrap font-display text-[12rem] italic leading-none text-ink/[0.025] sm:text-[18rem]"
+        className="pointer-events-none absolute -top-20 left-0 select-none whitespace-nowrap font-display text-[clamp(4rem,18vw,12rem)] italic leading-none text-ink/[0.025] sm:text-[18rem]"
       >
         Of the students. For the students. By the students. ·
       </div>

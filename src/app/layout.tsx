@@ -3,6 +3,7 @@ import { Inter, Fraunces, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import { BootOverlay } from "@/components/system/boot-overlay";
+import { ThemeToggle } from "@/components/system/theme-toggle";
 import "./globals.css";
 
 const sans = Inter({
@@ -55,18 +56,26 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Sync the html class with localStorage BEFORE first paint so the boot
+  // overlay + first render use the user's saved theme. Default is dark
+  // (matches the base :root tokens) so this only runs to *opt into light*.
+  const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.classList.add('light');}}catch(e){}})();`;
   return (
     <html
       lang="en"
       className={`${sans.variable} ${display.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="antialiased">
         <BootOverlay />
         {children}
+        <ThemeToggle />
         <Toaster
           theme="dark"
-          position="bottom-right"
+          position="bottom-left"
           toastOptions={{
             style: {
               background: "rgb(17 17 17)",

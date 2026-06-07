@@ -196,7 +196,7 @@ export function SupportGuide({ channels }: { channels: SupportChannel[] }) {
                   aria-hidden
                   className={cn(
                     "pointer-events-none absolute -top-16 select-none font-display italic leading-none text-ink/[0.03]",
-                    "text-[10rem] sm:text-[14rem]",
+                    "text-[clamp(5rem,22vw,10rem)] sm:text-[14rem]",
                     isOdd ? "right-0" : "-left-4",
                   )}
                 >
