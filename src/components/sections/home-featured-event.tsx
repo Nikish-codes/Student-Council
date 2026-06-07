@@ -22,7 +22,7 @@ export function HomeFeaturedEvent({ event }: { event?: EventItem }) {
             fallbackLabel={event.category}
             className="opacity-60 transition duration-700 group-hover:scale-[1.04] group-hover:opacity-75"
           />
-          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-bg/70 via-bg/15 to-transparent" />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-bg/30 via-bg/5 to-transparent" />
         </div>
 
         <div className="flex min-h-[22rem] flex-col justify-between p-7 sm:p-10 lg:p-12">

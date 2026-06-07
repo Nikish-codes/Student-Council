@@ -258,7 +258,7 @@ export function CouncilShowcase({
                   data-numeral
                   aria-hidden
                   className={cn(
-                    "pointer-events-none absolute top-8 select-none font-mono leading-none text-ink/[0.05]",
+                    "pointer-events-none absolute top-8 select-none font-mono leading-none text-accent/[0.08]",
                     "text-[clamp(5rem,22vw,10rem)] sm:text-[16rem]",
                     isOdd ? "right-4 sm:right-10" : "left-4 sm:left-10",
                   )}

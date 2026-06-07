@@ -37,7 +37,7 @@ export function SiteHeader() {
         "fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-out",
         scrolled
           ? "glass py-3"
-          : "bg-transparent py-5",
+          : "glass-soft py-5",
       )}
     >
       <div className="container flex items-center justify-between gap-6">
@@ -84,7 +84,7 @@ export function SiteHeader() {
                 )}
               >
                 {active && (
-                  <span className="absolute inset-0 -z-10 rounded-full bg-line/[0.06]" />
+                  <span className="absolute inset-x-4 -bottom-0.5 -z-10 h-0.5 rounded-full bg-accent" />
                 )}
                 {item.label}
               </Link>

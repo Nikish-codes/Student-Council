@@ -225,7 +225,7 @@ export function Hero({
         <div
           data-vignette
           aria-hidden
-          className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_55%,transparent_25%,rgb(10_10_10)_82%)]"
+          className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_55%,transparent_25%,rgb(var(--bg))_82%)]"
         />
       </div>
 
@@ -309,7 +309,7 @@ export function Hero({
 
           <div className="order-2 flex flex-col gap-9 lg:order-none lg:col-span-8">
             <div className="flex items-center gap-3">
-              <span data-kicker-line className="block h-px w-14 bg-line/50" aria-hidden />
+              <span data-kicker-line className="block h-px w-14 bg-accent" aria-hidden />
               <span data-kicker-text className="kicker">
                 {data?.kicker ?? "Woxsen Student Council · Session 2026/27"}
               </span>
@@ -360,7 +360,7 @@ export function Hero({
                 <div data-cta key={`${cta.href}-${i}`}>
                   {cta.variant === "primary" ? (
                     <Magnetic>
-                      <Button asChild size="lg">
+                      <Button asChild size="lg" variant="accent">
                         <Link href={cta.href}>
                           {cta.label}{" "}
                           <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" />

@@ -17,7 +17,7 @@
   display: grid;
   place-items: center;
   opacity: 1;
-  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1);
   pointer-events: auto;
 }
 .boot-overlay[data-hide="true"] {
@@ -147,13 +147,15 @@
 
 @layer base {
   :root {
-    --bg: 10 10 10;
-    --surface: 17 17 17;
-    --surface-2: 22 22 22;
+    --bg: 12 11 10;
+    --surface: 18 17 16;
+    --surface-2: 24 22 20;
     --ink: 245 245 244;
     --muted: 163 163 163;
     --subtle: 102 102 102;
     --line: 255 255 255;
+    --accent: 238 73 92;
+    --accent-ink: 255 255 255;
     --radius: 16px;
     color-scheme: dark;
   }
@@ -171,6 +173,8 @@
     --muted: 82 82 91;
     --subtle: 113 113 122;
     --line: 24 24 27;
+    --accent: 220 38 60;
+    --accent-ink: 255 255 255;
     color-scheme: light;
   }
 
@@ -198,6 +202,25 @@
 
   body {
     overflow-x: hidden;
+    /* Fine paper grain — barely there but stops the pure-flat-color feeling.
+       SVG turbulence at ~3% alpha. In light mode the grain is dark; in dark
+       mode it's white. Multiply blend keeps it from washing out content. */
+    position: relative;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.7 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+  }
+  html.light body::before {
+    /* Invert noise for light mode so grains read dark on white. */
+    opacity: 0.06;
+    mix-blend-mode: multiply;
   }
 
   ::selection {
@@ -260,6 +283,15 @@
     backdrop-filter: blur(20px) saturate(140%);
     -webkit-backdrop-filter: blur(20px) saturate(140%);
     border-bottom: 1px solid rgb(var(--line) / 0.08);
+  }
+
+  /* Softer version of .glass for the at-top state — just enough backdrop
+     to make navbar text legible against whatever hero is doing, without
+     the hard glass plate that kicks in once you scroll. */
+  .glass-soft {
+    background: rgb(var(--bg) / 0.25);
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
   }
 }
 

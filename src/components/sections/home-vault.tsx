@@ -494,7 +494,7 @@ export function HomeVault({ entries }: { entries?: VaultStory[] }) {
                     className={cn(
                       "absolute inset-0 transition-opacity",
                       isActive
-                        ? "bg-gradient-to-t from-bg/95 via-bg/30 to-transparent"
+                        ? "bg-gradient-to-t from-bg/55 via-bg/10 to-transparent"
                         : "bg-bg/40 group-hover:bg-bg/20",
                     )}
                   />

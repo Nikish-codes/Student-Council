@@ -180,7 +180,7 @@ export function EventsOverture({
             />
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-bg via-bg/50 to-transparent"
+              className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-bg/50 via-bg/15 to-transparent"
             />
             <div className="relative flex h-full flex-col justify-between p-8 sm:p-12 lg:p-16">
               <div data-feat-bit className="flex items-center gap-3">

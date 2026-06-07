@@ -195,7 +195,7 @@ export function EventsRail({ events }: { events: EventItem[] }) {
                   </div>
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg via-bg/30 to-transparent"
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/50 via-bg/10 to-transparent"
                   />
                   <div className="absolute left-6 top-6 flex items-center gap-2">
                     <Badge>{e.category}</Badge>

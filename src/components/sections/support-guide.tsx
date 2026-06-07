@@ -190,19 +190,6 @@ export function SupportGuide({ channels }: { channels: SupportChannel[] }) {
                 data-channel
                 className="relative grid gap-12 lg:grid-cols-12"
               >
-                {/* Giant ghost name */}
-                <span
-                  data-channel-watermark
-                  aria-hidden
-                  className={cn(
-                    "pointer-events-none absolute -top-16 select-none font-display italic leading-none text-ink/[0.03]",
-                    "text-[clamp(5rem,22vw,10rem)] sm:text-[14rem]",
-                    isOdd ? "right-0" : "-left-4",
-                  )}
-                >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-
                 {/* Left meta column */}
                 <div
                   data-channel-meta

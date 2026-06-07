@@ -118,7 +118,7 @@ export function EventBrowser({ events }: { events: EventItem[] }) {
                         />
                         <div
                           aria-hidden
-                          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/10 to-transparent"
+                          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/50 via-bg/5 to-transparent"
                         />
                         <div className="absolute left-4 top-4">
                           <Badge>{e.category}</Badge>

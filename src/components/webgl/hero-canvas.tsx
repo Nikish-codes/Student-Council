@@ -24,6 +24,20 @@ export function HeroCanvas() {
     let raf = 0;
     const t0 = performance.now();
     const mouse = { x: 0, y: 0, has: false };
+    let dotColor = "245,245,244"; // dark mode default — light dots
+    const updateDotColor = () => {
+      // In light mode, draw dark dots so the field is visible against the
+      // white bg. In dark mode, keep the warm-white dots.
+      dotColor = document.documentElement.classList.contains("light")
+        ? "17,17,17"
+        : "245,245,244";
+    };
+    updateDotColor();
+    const themeObserver = new MutationObserver(updateDotColor);
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
     const resize = () => {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -78,7 +92,7 @@ export function HeroCanvas() {
           }
 
           ctx.beginPath();
-          ctx.fillStyle = `rgba(245,245,244,${alpha})`;
+          ctx.fillStyle = `rgba(${dotColor},${alpha})`;
           ctx.arc(x, y, r, 0, Math.PI * 2);
           ctx.fill();
         }
@@ -97,6 +111,7 @@ export function HeroCanvas() {
       window.removeEventListener("resize", resize);
       canvas.removeEventListener("mousemove", onMove);
       canvas.removeEventListener("mouseleave", onLeave);
+      themeObserver.disconnect();
     };
   }, []);
 

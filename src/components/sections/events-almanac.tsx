@@ -284,7 +284,7 @@ function Slab({ event }: { event: EventItem }) {
             />
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/95 via-bg/30 to-bg/10"
+              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/55 via-bg/10 to-transparent"
             />
             {/* Date overlay */}
             <div className="absolute left-5 top-5 flex items-baseline gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ink/80">

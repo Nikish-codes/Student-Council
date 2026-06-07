@@ -35,7 +35,7 @@ export function CouncilGrid({ members }: { members: CouncilMember[] }) {
               />
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/85 via-transparent to-transparent"
+                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/45 via-transparent to-transparent"
               />
               <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-2">
                 <div>

@@ -24,12 +24,13 @@ export function BootOverlay() {
       // (so any [data-...] FOUC guards have applied opacity:0).
       raf1 = requestAnimationFrame(() => {
         raf2 = requestAnimationFrame(() => {
-          // Small grace period so GSAP's initial gsap.set() has run.
+          // Short grace period so GSAP's initial gsap.set() has run.
+          // Kept tight (~120ms) — the loader is a flourish, not a stage.
           timeout = window.setTimeout(() => {
             setHide(true);
             // Clean up after fade transition
-            window.setTimeout(() => setRemove(true), 900);
-          }, 250);
+            window.setTimeout(() => setRemove(true), 700);
+          }, 120);
         });
       });
     };
