@@ -7,10 +7,11 @@ import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import type { Club } from "@/lib/schemas";
 
 /**
- * Clubs section — a single composed SVG of every club, served as a static
- * asset from /public/club-wall.svg. One edge-cached fetch instead of dozens of
- * per-logo image requests; framed by the headline and the "Explore all clubs"
- * CTA.
+ * Clubs section — a single composed image of every club, served as a static
+ * asset from /public/club-wall.png (sharp-rendered from the source SVG at
+ * 2400px wide, palette PNG, ~150KB). One edge-cached fetch instead of dozens
+ * of per-logo image requests; framed by the headline and the "Explore all
+ * clubs" CTA.
  */
 export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
   const root = React.useRef<HTMLElement>(null);
@@ -100,8 +101,10 @@ export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/club-wall.svg"
+            src="/club-wall.png"
             alt="Every Woxsen student club"
+            width={2400}
+            height={1033}
             loading="lazy"
             decoding="async"
             className="block h-auto w-full"

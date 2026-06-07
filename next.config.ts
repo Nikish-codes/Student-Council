@@ -92,9 +92,9 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // The composed clubs SVG is large (~5MB) and immutable — cache for a
+        // The composed clubs image is large-ish and immutable — cache for a
         // year. Re-deploy with a different filename if it ever changes.
-        source: "/club-wall.svg",
+        source: "/club-wall.png",
         headers: [
           {
             key: "Cache-Control",
