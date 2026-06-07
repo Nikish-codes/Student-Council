@@ -93,7 +93,12 @@ export function BootOverlay() {
           <img
             src="/brand/sc-white.png"
             alt=""
-            className="boot-overlay__crest-logo"
+            className="boot-overlay__crest-logo theme-logo-on-dark"
+          />
+          <img
+            src="/brand/sc-black.png"
+            alt=""
+            className="boot-overlay__crest-logo theme-logo-on-light"
           />
         </div>
         <div className="boot-overlay__bar">

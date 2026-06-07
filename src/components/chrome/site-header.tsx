@@ -52,7 +52,14 @@ export function SiteHeader() {
               src="/brand/sc-white.png"
               alt=""
               aria-hidden
-              className="h-7 w-7 object-contain transition-transform duration-500 group-hover/brand:scale-110"
+              className="theme-logo-on-dark h-7 w-7 object-contain transition-transform duration-500 group-hover/brand:scale-110"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/sc-black.png"
+              alt=""
+              aria-hidden
+              className="theme-logo-on-light h-7 w-7 object-contain transition-transform duration-500 group-hover/brand:scale-110"
             />
           </span>
           <span className="hidden flex-col leading-none sm:flex">

@@ -294,7 +294,14 @@ export function Hero({
                 <img
                   src="/brand/sc-white.png"
                   alt="Woxsen Student Council emblem"
-                  className="h-full w-full object-contain drop-shadow-[0_0_60px_rgba(255,255,255,0.18)]"
+                  className="theme-logo-on-dark h-full w-full object-contain drop-shadow-[0_0_60px_rgba(255,255,255,0.18)]"
+                />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/brand/sc-black.png"
+                  alt=""
+                  aria-hidden
+                  className="theme-logo-on-light absolute inset-0 h-full w-full object-contain drop-shadow-[0_0_60px_rgba(0,0,0,0.18)]"
                 />
               </div>
             </div>

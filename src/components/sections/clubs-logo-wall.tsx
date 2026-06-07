@@ -100,24 +100,41 @@ export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
           aria-label="Browse all student clubs"
           className="block"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/club-wall-2800.png"
-            srcSet="
-              /club-wall-1200.png 1200w,
-              /club-wall-2000.png 2000w,
-              /club-wall-2800.png 2800w,
-              /club-wall-4000.png 4000w,
-              /club-wall-5400.png 5400w
-            "
-            sizes="(min-width: 1280px) 1200px, 100vw"
-            alt="Every Woxsen student club"
-            width={2800}
-            height={1205}
-            loading="lazy"
-            decoding="async"
-            className="block h-auto w-full"
-          />
+          {/* WebP first (95 quality, lanczos3 from 7850px native source) with PNG
+              fallback for any rare client that lacks WebP. Sizes hint slightly
+              overshoots actual CSS px on purpose so retina pulls a larger
+              variant — crispness > a few hundred KB. */}
+          <picture>
+            <source
+              type="image/webp"
+              srcSet="
+                /club-wall-1600.webp 1600w,
+                /club-wall-2400.webp 2400w,
+                /club-wall-3200.webp 3200w,
+                /club-wall-4800.webp 4800w,
+                /club-wall-7850.webp 7850w
+              "
+              sizes="(min-width: 1280px) 1400px, 100vw"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/club-wall-3200.png"
+              srcSet="
+                /club-wall-1600.png 1600w,
+                /club-wall-2400.png 2400w,
+                /club-wall-3200.png 3200w,
+                /club-wall-4800.png 4800w,
+                /club-wall-7850.png 7850w
+              "
+              sizes="(min-width: 1280px) 1400px, 100vw"
+              alt="Every Woxsen student club"
+              width={7850}
+              height={3378}
+              loading="lazy"
+              decoding="async"
+              className="block h-auto w-full"
+            />
+          </picture>
         </Link>
 
         <div className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-3 border-t border-line/10 pt-6 text-center">

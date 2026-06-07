@@ -13,7 +13,7 @@ export function HomeFeaturedEvent({ event }: { event?: EventItem }) {
         href={`/events/${event.slug}`}
         className="group relative grid overflow-hidden rounded-[2rem] border border-line/15 bg-surface/40 lg:grid-cols-[1.05fr_0.95fr]"
       >
-        <div className="relative min-h-[22rem] overflow-hidden bg-black sm:min-h-[28rem] lg:min-h-full">
+        <div className="relative min-h-[22rem] overflow-hidden bg-surface-2 sm:min-h-[28rem] lg:min-h-full">
           <Picture
             src={event.banner}
             alt={event.title}

@@ -136,7 +136,7 @@ export function HomeReel() {
   return (
     <section
       ref={root}
-      className="relative bg-black"
+      className="relative bg-bg"
       aria-label="Cinematic reel of past events"
     >
       {/* Intro band */}
@@ -161,7 +161,7 @@ export function HomeReel() {
       </div>
 
       {/* Pinned stage */}
-      <div data-reel-pin className="relative h-screen w-full overflow-hidden bg-black">
+      <div data-reel-pin className="relative h-screen w-full overflow-hidden bg-bg">
         {STAGES.map((stage, i) => (
           <div
             key={stage.id}
@@ -193,8 +193,8 @@ export function HomeReel() {
             )}
 
             {/* Letterbox — taller bottom bar = stage for text */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-12 bg-black" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-black" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-12 bg-bg" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-bg" />
             {/* Bottom-anchored scrim that guarantees caption legibility */}
             <div
               className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4"

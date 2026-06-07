@@ -93,8 +93,8 @@ const nextConfig: NextConfig = {
       },
       {
         // Pre-rendered srcset variants of the clubs composite — large + immutable.
-        // (club-wall-1200.png, club-wall-2000.png, …) Cache for a year.
-        source: "/club-wall-:size.png",
+        // (club-wall-{1600,2400,3200,4800,7850}.{webp,png}) Cache for a year.
+        source: "/club-wall-:size(\\d+).:ext(webp|png)",
         headers: [
           {
             key: "Cache-Control",
