@@ -97,7 +97,7 @@ export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
         <Link
           href="/clubs"
           aria-label="Browse all student clubs"
-          className="block overflow-hidden rounded-2xl border border-line/10 bg-line/[0.04] transition-colors hover:bg-line/[0.06]"
+          className="block"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
