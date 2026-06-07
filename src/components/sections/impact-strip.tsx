@@ -59,11 +59,8 @@ export function ImpactStrip({ numbers }: { numbers: ImpactNumber[] }) {
           <div
             key={n.label}
             data-impact-item
-            className="relative flex flex-col items-start gap-3 px-6 py-10 sm:px-10 sm:py-14"
+            className="relative flex flex-col items-start gap-3 px-6 py-14 sm:px-10 sm:py-20"
           >
-            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-subtle">
-              {String(i + 1).padStart(2, "0")}
-            </span>
             <span className="display italic leading-[0.85] text-accent text-[clamp(3.5rem,8vw,7rem)]">
               {n.displayValue ? (
                 n.displayValue

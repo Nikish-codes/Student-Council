@@ -8,16 +8,17 @@ export function HomeFeaturedEvent({ event }: { event?: EventItem }) {
   if (!event) return null;
 
   return (
-    <section className="container py-20 sm:py-28" aria-label="Featured event">
-      <Link
-        href={`/events/${event.slug}`}
-        className="group relative grid overflow-hidden rounded-[2rem] border border-line/15 bg-surface/40 lg:grid-cols-[1.05fr_0.95fr]"
-      >
-        <div className="relative min-h-[22rem] overflow-hidden bg-surface-2 sm:min-h-[28rem] lg:min-h-full">
-          <Picture
-            src={event.banner}
-            alt={event.title}
-            fill
+    <section className="bg-surface" aria-label="Featured event">
+      <div className="container py-32 sm:py-40">
+        <Link
+          href={`/events/${event.slug}`}
+          className="group relative grid overflow-hidden rounded-[2rem] border border-line/15 bg-surface/40 lg:grid-cols-[1.05fr_0.95fr]"
+        >
+          <div className="relative min-h-[22rem] overflow-hidden bg-surface-2 sm:min-h-[28rem] lg:min-h-full">
+            <Picture
+              src={event.banner}
+              alt={event.title}
+              fill
             sizes="(min-width: 1024px) 48vw, 100vw"
             fallbackLabel={event.category}
             className="opacity-60 transition duration-700 group-hover:scale-[1.04] group-hover:opacity-75"
@@ -45,6 +46,7 @@ export function HomeFeaturedEvent({ event }: { event?: EventItem }) {
           </div>
         </div>
       </Link>
+      </div>
     </section>
   );
 }

@@ -66,7 +66,7 @@ export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
     <section
       ref={root}
       aria-label="Student clubs"
-      className="relative overflow-hidden border-t border-line/10 bg-bg py-28 sm:py-40"
+      className="relative overflow-hidden border-t border-line/10 bg-bg py-40 sm:py-48"
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(255,255,255,0.05),transparent_45%)]" />
 

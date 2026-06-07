@@ -124,7 +124,7 @@ export function SupportGuide({ channels }: { channels: SupportChannel[] }) {
   return (
     <div ref={root}>
       {/* ── Truth panel: what we do / don't do ── */}
-      <section className="container mt-20">
+      <section className="container mt-32">
         <div className="grid gap-px overflow-hidden rounded-3xl border border-line/15 bg-line/10 sm:grid-cols-2">
           <div data-truth-row className="bg-bg p-8 sm:p-10">
             <span className="kicker text-ink">What the Council does</span>
@@ -165,7 +165,7 @@ export function SupportGuide({ channels }: { channels: SupportChannel[] }) {
       </section>
 
       {/* ── Channels — three editorial sections, no fake links ── */}
-      <section className="container mt-32 sm:mt-40">
+      <section className="container mt-40 sm:mt-40">
         <header className="mb-16 max-w-3xl">
           <span className="kicker">Three guided lanes</span>
           <h2 data-split className="display mt-6 text-balance text-5xl leading-[0.92] sm:text-7xl">
@@ -276,7 +276,7 @@ export function SupportGuide({ channels }: { channels: SupportChannel[] }) {
       {/* ── Grievance — the lane the Council DOES own ── */}
       <section
         id="grievance"
-        className="container mt-32 mb-24 sm:mt-44"
+        className="container mt-40 mb-24 sm:mt-44"
       >
         <div className="mb-12 flex items-center gap-4">
           <span className="font-mono text-xs text-subtle">

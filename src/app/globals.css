@@ -146,6 +146,14 @@
 }
 
 @layer base {
+  /* Base font size bumped from 16px → 17.5px (9% global scale). Every
+     rem-based Tailwind class (text-sm/base/lg/xl …) scales with it,
+     so body copy, kickers, badges, captions — everything — reads
+     ~10% bigger across the site. Cheaper than touching 200 classes. */
+  html {
+    font-size: 17.5px;
+  }
+
   :root {
     --bg: 12 11 10;
     --surface: 18 17 16;
@@ -245,7 +253,7 @@
 @layer components {
   .kicker {
     font-family: var(--font-mono), ui-monospace, monospace;
-    font-size: 0.6875rem;
+    font-size: 0.8125rem;
     line-height: 1;
     letter-spacing: 0.18em;
     text-transform: uppercase;

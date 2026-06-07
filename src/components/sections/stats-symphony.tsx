@@ -54,7 +54,7 @@ export function StatsSymphony({
     <section
       ref={root}
       aria-label="Council at a glance"
-      className="relative border-y border-line/10 bg-surface/30 py-20 sm:py-28"
+      className="relative border-y border-line/10 bg-surface/30 py-32 sm:py-40"
     >
       <div className="container">
         <div className="mb-10 flex items-center gap-3">

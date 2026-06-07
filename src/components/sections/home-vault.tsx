@@ -299,23 +299,6 @@ export function HomeVault({ entries }: { entries?: VaultStory[] }) {
       className="relative bg-bg overflow-hidden"
       aria-label="The Council Vault — past events"
     >
-      {/* Top kicker rail */}
-      <div className="relative z-20 border-y border-line/8 bg-bg/80 backdrop-blur">
-        <div className="mx-auto max-w-[1720px] px-6 py-4 flex items-center justify-between gap-6 text-[0.6875rem] font-mono uppercase tracking-[0.22em] text-subtle">
-          <span data-vault-bit className="text-ink">
-            ◉ The Vault · Past Events
-          </span>
-          <span data-vault-bit className="hidden sm:inline">
-            Auto-cycling · Hover to pause
-          </span>
-          <span data-vault-bit>
-            <Link href="/events" className="prose-link text-muted hover:text-ink transition-colors">
-              Full archive →
-            </Link>
-          </span>
-        </div>
-      </div>
-
       {/* Stage */}
       <div
         ref={stageRef}

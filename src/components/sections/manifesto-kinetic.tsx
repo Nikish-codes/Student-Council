@@ -20,6 +20,8 @@ export function ManifestoKinetic({
   lines?: ManifestoLine[];
   footer?: string;
 }) {
+  void kicker;
+  void footer;
   const LINES = lines && lines.length > 0 ? lines : FALLBACK_LINES;
   const root = React.useRef<HTMLElement>(null);
 
@@ -87,7 +89,7 @@ export function ManifestoKinetic({
     <section
       ref={root}
       aria-label="What we stand for"
-      className="relative overflow-hidden border-y border-line/10 bg-bg py-32 sm:py-44"
+      className="relative overflow-hidden border-y border-line/10 bg-surface py-32 sm:py-44"
     >
       <div
         data-drift
@@ -98,11 +100,6 @@ export function ManifestoKinetic({
       </div>
 
       <div className="container relative">
-        <div className="mb-16 flex items-center gap-3">
-          <span className="h-px w-14 bg-line/30" aria-hidden />
-          <span className="kicker">{kicker}</span>
-        </div>
-
         <div className="space-y-10 sm:space-y-14">
           {LINES.map((l, i) => (
             <div
@@ -114,11 +111,6 @@ export function ManifestoKinetic({
               <span className="italic text-accent">{l.tail}</span>
             </div>
           ))}
-        </div>
-
-        <div className="mt-24 flex items-center justify-between gap-6">
-          <span className="kicker">{footer}</span>
-          <span className="font-mono text-xs text-subtle">04 / 06 — Manifesto</span>
         </div>
       </div>
     </section>

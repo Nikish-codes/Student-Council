@@ -138,7 +138,7 @@ export function EventsRecap() {
   );
 
   return (
-    <section ref={root} className="container mt-32 sm:mt-40">
+    <section ref={root} className="container mt-40 sm:mt-40">
       <div className="mb-14 flex items-end justify-between gap-6 border-t border-line/10 pt-10">
         <div>
           <span className="kicker">Recap · this session</span>

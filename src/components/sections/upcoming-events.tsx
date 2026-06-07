@@ -14,7 +14,7 @@ import type { EventItem } from "@/lib/schemas";
 
 export function UpcomingEvents({ events }: { events: EventItem[] }) {
   return (
-    <section className="container py-32 sm:py-40">
+    <section className="container py-32 sm:py-48">
       <Reveal>
         <SectionHeading
           kicker="Upcoming"

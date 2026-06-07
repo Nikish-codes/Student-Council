@@ -6,7 +6,7 @@ import type { EventItem } from "@/lib/schemas";
 export function EventsGraveyard({ events }: { events: EventItem[] }) {
   if (events.length === 0) return null;
   return (
-    <section className="container mt-32 mb-24 sm:mt-40">
+    <section className="container mt-40 mb-24 sm:mt-40">
       <div className="mb-10 flex items-end justify-between gap-6 border-t border-line/10 pt-10">
         <div>
           <span className="kicker">The Archive</span>

@@ -56,7 +56,7 @@ const FALLBACK_ACTIONS: QuickAction[] = [
 export function QuickActions({ actions }: { actions?: QuickAction[] }) {
   const ACTIONS = actions && actions.length > 0 ? actions : FALLBACK_ACTIONS;
   return (
-    <section className="container py-28 sm:py-32">
+    <section className="container py-40 sm:py-44">
       <motion.div
         initial="hidden"
         whileInView="show"

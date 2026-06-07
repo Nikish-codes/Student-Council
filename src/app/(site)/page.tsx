@@ -1,5 +1,4 @@
 import { Hero } from "@/components/sections/hero";
-import { AnnouncementsTicker } from "@/components/sections/announcements-ticker";
 import { ImpactStrip } from "@/components/sections/impact-strip";
 import { HomeLazySections } from "@/components/sections/home-lazy-sections";
 import {
@@ -54,7 +53,6 @@ export default async function HomePage() {
   return (
     <>
       <Hero data={homepage.hero} campus={settings.campus} />
-      <AnnouncementsTicker />
       <ImpactStrip numbers={impactNumbers} />
       <HomeLazySections
         homepage={homepage}

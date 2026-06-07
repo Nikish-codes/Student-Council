@@ -2,11 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { HeroCanvas } from "@/components/webgl/hero-canvas";
 import { Button } from "@/components/ui/button";
 import { Magnetic } from "@/components/motion/magnetic";
-import { HeroLiveBadge } from "@/components/sections/hero-live-badge";
 import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import type { CampusSettings, HomepageHero } from "@/lib/schemas";
 
@@ -19,6 +18,7 @@ export function Hero({
   data?: HomepageHero;
   campus?: CampusSettings;
 }) {
+  void campus;
   const sublineWords =
     data?.sublineWords && data.sublineWords.length > 0
       ? data.sublineWords
@@ -229,28 +229,7 @@ export function Hero({
         />
       </div>
 
-      {/* Manifesto marquee — sits behind everything, drifts forever */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-[42%] -z-[5] overflow-hidden select-none"
-      >
-        <div
-          data-hero-marquee-track
-          className="flex whitespace-nowrap font-display italic text-[18vw] leading-none text-ink/[0.04] will-change-transform"
-        >
-          <span className="shrink-0 pr-12">
-            {data?.marqueeText ?? "Of the students. For the students. By the students."} ·{" "}
-          </span>
-          <span className="shrink-0 pr-12">
-            {data?.marqueeText ?? "Of the students. For the students. By the students."} ·{" "}
-          </span>
-          <span className="shrink-0 pr-12">
-            {data?.marqueeText ?? "Of the students. For the students. By the students."} ·{" "}
-          </span>
-        </div>
-      </div>
-
-      <div className="container relative pb-16 pt-32 sm:pb-24 sm:pt-40">
+      <div className="container relative pb-32 pt-32 sm:pb-44 sm:pt-40">
         <div
           data-hero-stage
           className="grid grid-cols-1 items-end gap-16 lg:grid-cols-12 lg:gap-12"
@@ -377,18 +356,6 @@ export function Hero({
           </div>
         </div>
 
-        <div className="mt-16 sm:mt-24">
-          <div data-meta-line className="hairline mb-6" aria-hidden />
-          <div data-meta className="flex items-center justify-between gap-6 text-xs text-muted">
-            <div className="flex items-center gap-3">
-              <ArrowDown className="h-3 w-3 animate-bounce" aria-hidden />
-              <span className="kicker">Scroll to explore</span>
-            </div>
-            <span className="hidden sm:block">
-              <HeroLiveBadge campus={campus} />
-            </span>
-          </div>
-        </div>
       </div>
     </section>
   );

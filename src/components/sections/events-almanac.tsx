@@ -133,7 +133,7 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
   );
 
   return (
-    <section ref={root} className="container mt-32 sm:mt-40">
+    <section ref={root} className="container mt-40 sm:mt-40">
       {/* Headline */}
       <div className="mb-10 flex items-end justify-between gap-6 border-b border-line/10 pb-10">
         <div>

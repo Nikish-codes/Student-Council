@@ -31,7 +31,7 @@ export default async function ClubsPage() {
         </Reveal>
       </section>
 
-      <section className="container mt-20 mb-32">
+      <section className="container mt-32 mb-32">
         <ClubsExplorer clubs={clubs} />
       </section>
     </div>

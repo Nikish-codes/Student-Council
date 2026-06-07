@@ -43,7 +43,7 @@ export default async function CouncilPage() {
         <CouncilShowcase president={president} members={others} />
       </div>
 
-      <section className="container mt-32 mb-24 sm:mt-40">
+      <section className="container mt-40 mb-24 sm:mt-40">
         <Reveal>
           <div className="mb-10">
             <span className="kicker">Constitution</span>

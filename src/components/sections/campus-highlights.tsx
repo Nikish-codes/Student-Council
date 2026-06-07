@@ -15,7 +15,7 @@ export async function CampusHighlights() {
   const items = await getHighlights();
 
   return (
-    <section className="container py-32 sm:py-40">
+    <section className="container py-32 sm:py-48">
       <Reveal>
         <SectionHeading
           kicker="Campus Life"

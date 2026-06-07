@@ -18,7 +18,7 @@ const FALLBACK: ClosingCtaData = {
 export function ClosingCTA({ data }: { data?: ClosingCtaData }) {
   const d = data ?? FALLBACK;
   return (
-    <section className="relative border-t border-line/10 py-32 sm:py-40">
+    <section className="relative border-t border-line/10 bg-surface py-32 sm:py-48">
       <div className="container">
         <Reveal className="flex flex-col items-start gap-10 text-balance">
           <span className="kicker">{d.kicker}</span>
