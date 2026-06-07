@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import {
   Calendar, Image as ImageIcon, LayoutDashboard, Megaphone, Film,
   Users, Building2, HelpCircle, LifeBuoy, Home, Settings, Sparkles,
+  UserCog,
 } from "lucide-react";
 import { requireOps, isAdmin, type SessionUser } from "@/lib/rbac";
 import { ROLE_LABELS } from "@/lib/roles";
@@ -22,6 +23,7 @@ const NAV = [
 ];
 
 const ADMIN_NAV = [
+  { href: "/management/users", label: "Users", icon: UserCog },
   { href: "/management/homepage", label: "Homepage", icon: Home },
   { href: "/management/settings", label: "Settings", icon: Settings },
 ];

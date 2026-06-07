@@ -8,9 +8,9 @@ import type { Club } from "@/lib/schemas";
 
 /**
  * Clubs section — a single composed image of every club, served as a static
- * asset from /public/club-wall.png (sharp-rendered at 3200px wide, full-color
- * lossless PNG, ~200KB). One edge-cached fetch instead of dozens of per-logo
- * image requests; framed by the headline and the "Explore all clubs" CTA.
+ * asset from /public/club-wall.png (re-encoded at the source's native 7850px
+ * resolution, lossless PNG ~800KB, year-cached). One edge-cached fetch
+ * instead of dozens of per-logo image requests.
  */
 export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
   const root = React.useRef<HTMLElement>(null);
@@ -102,8 +102,8 @@ export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
           <img
             src="/club-wall.png"
             alt="Every Woxsen student club"
-            width={3200}
-            height={1377}
+            width={7850}
+            height={3378}
             loading="lazy"
             decoding="async"
             className="block h-auto w-full"

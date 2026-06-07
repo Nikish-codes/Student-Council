@@ -19,6 +19,16 @@ export const OPS_ROLES: UserRole[] = [
   "editor",
 ];
 
+/** Every role known to the system — used for role-select dropdowns. */
+export const ROLES_ALL: UserRole[] = [
+  "super_admin",
+  "admin",
+  "council_member",
+  "club_lead",
+  "editor",
+  "viewer",
+];
+
 /** Roles that may publish (move content to `published`). */
 export const PUBLISHER_ROLES: UserRole[] = [
   "super_admin",
