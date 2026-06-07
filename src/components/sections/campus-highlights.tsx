@@ -22,7 +22,7 @@ export async function CampusHighlights() {
           title={
             <>
               A year, a campus, a thousand{" "}
-              <span className="italic text-muted">moments.</span>
+              <span className="italic text-accent">moments.</span>
             </>
           }
           description="Glimpses from the events, evenings, hackathons and quiet afternoons that make Woxsen feel like Woxsen."

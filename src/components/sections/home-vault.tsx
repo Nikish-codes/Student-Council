@@ -309,7 +309,7 @@ export function HomeVault({ entries }: { entries?: VaultStory[] }) {
             Auto-cycling · Hover to pause
           </span>
           <span data-vault-bit>
-            <Link href="/events" className="text-muted hover:text-ink transition-colors">
+            <Link href="/events" className="prose-link text-muted hover:text-ink transition-colors">
               Full archive →
             </Link>
           </span>

@@ -83,7 +83,7 @@ export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
               style={{ perspective: "800px" }}
             >
               <span className="block">Find your</span>
-              <span className="block italic text-muted">people.</span>
+              <span className="block italic text-accent">people.</span>
             </h2>
           </div>
           <Link

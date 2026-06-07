@@ -29,7 +29,7 @@ export default async function CouncilPage() {
           </div>
           <h1 className="display text-balance text-6xl leading-[0.92] sm:text-8xl lg:text-[10rem]">
             <span className="block">The faces</span>
-            <span className="block italic text-muted">behind the work.</span>
+            <span className="block italic text-accent">behind the work.</span>
           </h1>
           <p className="mt-10 max-w-2xl text-balance text-lg text-muted">
             Eight students. One council. One job — to make sure every voice on

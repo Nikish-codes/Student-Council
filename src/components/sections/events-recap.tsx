@@ -146,7 +146,7 @@ export function EventsRecap() {
             data-recap-headline
             className="display mt-6 text-5xl leading-[0.95] sm:text-7xl"
           >
-            What we&apos;ve already <span className="italic text-muted">shipped.</span>
+            What we&apos;ve already <span className="italic text-accent">shipped.</span>
           </h2>
           <p className="mt-6 max-w-2xl text-pretty text-muted">
             Receipts. Photos, aftermovies, and the moments that made it. Mute on

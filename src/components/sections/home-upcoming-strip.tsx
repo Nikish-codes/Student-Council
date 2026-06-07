@@ -22,11 +22,11 @@ function fmtDate(iso: string) {
 function relativeDays(iso: string) {
   const diff = +new Date(iso) - Date.now();
   const days = Math.round(diff / 86_400_000);
-  if (days <= 0) return "TODAY";
-  if (days === 1) return "TOMORROW";
-  if (days < 7) return `IN ${days} DAYS`;
-  if (days < 30) return `IN ${Math.round(days / 7)} WEEKS`;
-  return `IN ${Math.round(days / 30)} MONTHS`;
+  if (days <= 0) return { label: "TODAY", urgent: true };
+  if (days === 1) return { label: "TOMORROW", urgent: true };
+  if (days < 7) return { label: `IN ${days} DAYS`, urgent: true };
+  if (days < 30) return { label: `IN ${Math.round(days / 7)} WEEKS`, urgent: false };
+  return { label: `IN ${Math.round(days / 30)} MONTHS`, urgent: false };
 }
 
 export function HomeUpcomingStrip({ events, totalCount }: HomeUpcomingStripProps) {
@@ -81,7 +81,7 @@ export function HomeUpcomingStrip({ events, totalCount }: HomeUpcomingStripProps
               data-strip-head
               className="kicker text-ink flex items-center gap-2"
             >
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-ink animate-pulse" />
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
               Next up · Upcoming
             </span>
             <span data-strip-head className="kicker text-subtle">
@@ -91,7 +91,7 @@ export function HomeUpcomingStrip({ events, totalCount }: HomeUpcomingStripProps
           <Link
             data-strip-head
             href="/events"
-            className="text-sm font-mono uppercase tracking-[0.2em] text-muted hover:text-ink transition-colors"
+            className="prose-link text-sm font-mono uppercase tracking-[0.2em] text-muted hover:text-ink transition-colors"
           >
             All events →
           </Link>
@@ -101,6 +101,7 @@ export function HomeUpcomingStrip({ events, totalCount }: HomeUpcomingStripProps
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-line/8 border-y border-line/8">
           {visible.map((e) => {
             const { day, mon, weekday } = fmtDate(e.date);
+            const rel = relativeDays(e.date);
             return (
               <Link
                 key={e.slug}
@@ -123,7 +124,10 @@ export function HomeUpcomingStrip({ events, totalCount }: HomeUpcomingStripProps
                 {/* Body */}
                 <div className="flex-1 min-w-0 flex flex-col">
                   <div className="kicker text-subtle mb-1.5">
-                    {e.category} · {relativeDays(e.date)}
+                    {e.category} ·{" "}
+                    <span className={rel.urgent ? "text-accent font-semibold" : ""}>
+                      {rel.label}
+                    </span>
                   </div>
                   <div
                     className="text-ink font-medium leading-tight line-clamp-2 group-hover:underline decoration-ink/40 underline-offset-4"

@@ -21,7 +21,7 @@ export default async function ClubsPage() {
           </div>
           <h1 className="display text-balance text-6xl leading-[0.92] sm:text-8xl lg:text-[10rem]">
             <span className="block">Run by</span>
-            <span className="block italic text-muted">students.</span>
+            <span className="block italic text-accent">students.</span>
           </h1>
           <p className="mt-10 max-w-2xl text-balance text-lg text-muted">
             Every club below was started, is led by, and is run for students.

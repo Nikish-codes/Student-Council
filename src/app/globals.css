@@ -252,6 +252,32 @@
     color: rgb(var(--muted));
   }
 
+  /* Inline text link — Woxsen red underline wipes in from left on hover.
+     Apply with className="prose-link" to any inline anchor inside body
+     copy. Skipping button-style links, nav links, and icon-only anchors.
+
+     Two background-image stacks:
+       1) a transparent baseline at 100% width / 1px height (right-anchored)
+       2) the red underline at 0% width (left-anchored), grows to 100% on hover
+
+     The two stacks slide past each other so the underline appears to wipe
+     in from the LEFT on hover and wipe out to the LEFT on un-hover.
+  */
+  .prose-link {
+    background-image:
+      linear-gradient(rgb(var(--accent)), rgb(var(--accent))),
+      linear-gradient(rgb(var(--ink) / 0.25), rgb(var(--ink) / 0.25));
+    background-size: 0 1px, 100% 1px;
+    background-position: 0 100%, 100% 100%;
+    background-repeat: no-repeat;
+    color: rgb(var(--ink));
+    transition: background-size 380ms cubic-bezier(0.22, 1, 0.36, 1);
+    padding-bottom: 1px;
+  }
+  .prose-link:hover {
+    background-size: 100% 1px, 0 1px;
+  }
+
   .display {
     font-family: var(--font-display), Georgia, serif;
     font-weight: 400;

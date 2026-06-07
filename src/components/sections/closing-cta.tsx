@@ -25,7 +25,7 @@ export function ClosingCTA({ data }: { data?: ClosingCtaData }) {
           <h2 className="display max-w-4xl text-5xl leading-[0.95] sm:text-7xl lg:text-8xl">
             {d.headlineLead}
             <br />
-            <span className="italic text-muted">{d.headlineTail}</span>
+            <span className="italic text-accent">{d.headlineTail}</span>
           </h2>
           <div className="flex flex-wrap gap-4 pt-4">
             {d.ctas.map((cta, i) =>

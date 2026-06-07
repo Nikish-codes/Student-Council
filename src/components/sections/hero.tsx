@@ -354,7 +354,6 @@ export function Hero({
                 : [
                     { label: "Explore events", href: "/events", variant: "primary" as const },
                     { label: "Raise a concern", href: "/support#grievance-form", variant: "outline" as const },
-                    { label: "Meet the team", href: "/council", variant: "ghost" as const },
                   ]
               ).map((cta, i) => (
                 <div data-cta key={`${cta.href}-${i}`}>

@@ -150,7 +150,7 @@ export function EventsRail({ events }: { events: EventItem[] }) {
               className="display text-balance text-4xl leading-[0.92] sm:text-6xl lg:text-7xl"
             >
               <span className="block">What&apos;s next</span>
-              <span className="block italic text-muted">on campus.</span>
+              <span className="block italic text-accent">on campus.</span>
             </h2>
           </div>
           <div className="hidden shrink-0 flex-col items-end gap-2 sm:flex">
@@ -243,7 +243,7 @@ export function EventsRail({ events }: { events: EventItem[] }) {
             <span className="kicker text-subtle">End of the rail</span>
             <h3 className="display text-balance text-5xl leading-[0.95] sm:text-7xl">
               <span className="block">See the</span>
-              <span className="block italic text-muted">whole calendar.</span>
+              <span className="block italic text-accent">whole calendar.</span>
             </h3>
             <span className="inline-flex items-center gap-3 text-ink">
               All events

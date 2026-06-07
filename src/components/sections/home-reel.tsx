@@ -149,7 +149,7 @@ export function HomeReel() {
               style={{ fontSize: "clamp(2.5rem, 6vw, 5.5rem)" }}
             >
               Scroll the year.<br />
-              <span className="italic text-muted">Watch what we built.</span>
+              <span className="italic text-accent">Watch what we built.</span>
             </h2>
           </div>
           <div className="lg:col-span-5 lg:text-right">

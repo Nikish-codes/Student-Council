@@ -111,7 +111,7 @@ export function ManifestoKinetic({
               className="display text-balance text-5xl leading-[0.95] sm:text-7xl lg:text-[8rem]"
             >
               <span className="text-ink">{l.lead}</span>{" "}
-              <span className="italic text-muted">{l.tail}</span>
+              <span className="italic text-accent">{l.tail}</span>
             </div>
           ))}
         </div>

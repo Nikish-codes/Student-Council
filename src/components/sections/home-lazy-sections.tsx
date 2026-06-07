@@ -19,11 +19,6 @@ const HomeUpcomingStrip = dynamic(
   { ssr: false },
 );
 
-const StatsSymphony = dynamic(
-  () => import("@/components/sections/stats-symphony").then((mod) => mod.StatsSymphony),
-  { ssr: false },
-);
-
 const ManifestoKinetic = dynamic(
   () => import("@/components/sections/manifesto-kinetic").then((mod) => mod.ManifestoKinetic),
   { ssr: false },
@@ -81,7 +76,6 @@ export function HomeLazySections({
           <HomeVault entries={homepage.vaultStories} />
           <HomeFeaturedEvent event={featuredEvent} />
           <HomeUpcomingStrip events={upcoming} totalCount={upcoming.length} />
-          <StatsSymphony kicker={homepage.statsKicker} stats={homepage.stats} />
           <ManifestoKinetic
             kicker={homepage.manifestoKicker}
             lines={homepage.manifestoLines}

@@ -230,7 +230,7 @@ export function CouncilShowcase({
                 className="display mt-6 text-5xl leading-[0.92] sm:text-7xl"
                 style={{ perspective: "800px" }}
               >
-                Eight people. <span className="italic text-muted">One council.</span>
+                Eight people. <span className="italic text-accent">One council.</span>
               </h2>
             </div>
             <span className="hidden font-mono text-xs text-subtle sm:block">

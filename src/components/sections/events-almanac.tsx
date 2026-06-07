@@ -142,7 +142,7 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
             data-almanac-headline
             className="display mt-6 text-balance text-5xl leading-[0.95] sm:text-7xl"
           >
-            Every event. <span className="italic text-muted">In order.</span>
+            Every event. <span className="italic text-accent">In order.</span>
           </h2>
         </div>
         <span className="hidden font-mono text-xs text-subtle sm:block">
@@ -180,7 +180,7 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
             <p className="display text-3xl">Nothing here yet.</p>
             <p className="text-sm text-muted">
               Got an idea?{" "}
-              <Link href="/support" className="text-ink underline-offset-4 hover:underline">
+              <Link href="/support" className="prose-link text-ink underline-offset-4 hover:underline">
                 Pitch one →
               </Link>
             </p>
@@ -365,8 +365,8 @@ function StatusPill({ status, compact = false }: { status: StatusKind; compact?:
   const map: Record<StatusKind, { label: string; cls: string; dot: string }> = {
     live: {
       label: "Live now",
-      cls: "border-rose-300/40 text-rose-200 bg-bg/70 backdrop-blur",
-      dot: "bg-rose-300",
+      cls: "border-accent/40 text-accent bg-bg/70 backdrop-blur",
+      dot: "bg-accent",
     },
     soon: {
       label: "This week",

@@ -22,7 +22,7 @@ export default async function SupportPage() {
           </div>
           <h1 className="display text-balance text-6xl leading-[0.92] sm:text-8xl lg:text-[10rem]">
             <span className="block">Help, the</span>
-            <span className="block italic text-muted">honest way.</span>
+            <span className="block italic text-accent">honest way.</span>
           </h1>
           <p className="mt-10 max-w-2xl text-balance text-lg text-muted">
             The Council isn&apos;t a portal. We&apos;re a guide. Below is a clear
