@@ -92,9 +92,9 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // The composed clubs image is large-ish and immutable — cache for a
-        // year. Re-deploy with a different filename if it ever changes.
-        source: "/club-wall.png",
+        // Pre-rendered srcset variants of the clubs composite — large + immutable.
+        // (club-wall-1200.png, club-wall-2000.png, …) Cache for a year.
+        source: "/club-wall-:size.png",
         headers: [
           {
             key: "Cache-Control",

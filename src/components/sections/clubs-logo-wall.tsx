@@ -8,9 +8,11 @@ import type { Club } from "@/lib/schemas";
 
 /**
  * Clubs section — a single composed image of every club, served as a static
- * asset from /public/club-wall.png (re-encoded at the source's native 7850px
- * resolution, lossless PNG ~800KB, year-cached). One edge-cached fetch
- * instead of dozens of per-logo image requests.
+ * asset under /public/club-wall-{w}.png. We ship 5 pre-rendered widths and
+ * let the browser pick via `srcset` + `sizes` — same trick next/image uses,
+ * without burning Vercel's optimizer quota. Each variant is sharp-resampled
+ * (lanczos3 + light sharpening), so the picked image is pixel-crisp at the
+ * actual display size; the browser does at most a tiny scale.
  */
 export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
   const root = React.useRef<HTMLElement>(null);
@@ -100,10 +102,18 @@ export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/club-wall.png"
+            src="/club-wall-2800.png"
+            srcSet="
+              /club-wall-1200.png 1200w,
+              /club-wall-2000.png 2000w,
+              /club-wall-2800.png 2800w,
+              /club-wall-4000.png 4000w,
+              /club-wall-5400.png 5400w
+            "
+            sizes="(min-width: 1280px) 1200px, 100vw"
             alt="Every Woxsen student club"
-            width={7850}
-            height={3378}
+            width={2800}
+            height={1205}
             loading="lazy"
             decoding="async"
             className="block h-auto w-full"
