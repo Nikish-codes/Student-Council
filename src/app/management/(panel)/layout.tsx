@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import {
   Calendar, Image as ImageIcon, LayoutDashboard, Megaphone, Film,
   Users, Building2, HelpCircle, LifeBuoy, Home, Settings, Sparkles,
-  UserCog,
+  UserCog, ScanLine,
 } from "lucide-react";
 import { requireOps, isAdmin, type SessionUser } from "@/lib/rbac";
 import { ROLE_LABELS } from "@/lib/roles";
@@ -11,6 +11,7 @@ import { SignOutButton } from "./sign-out-button";
 
 const NAV = [
   { href: "/management", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/eventmanagement", label: "Event Ops", icon: ScanLine },
   { href: "/management/events", label: "Events", icon: Calendar },
   { href: "/management/recaps", label: "Recaps", icon: Film },
   { href: "/management/announcements", label: "Announcements", icon: Megaphone },

@@ -18,8 +18,11 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       const path = request.nextUrl.pathname;
       const isLogin = path.startsWith("/management/login");
-      const isManagement = path.startsWith("/management");
-      if (isManagement && !isLogin) return isLoggedIn;
+      // Both the CMS panel and the event-ops cockpit are session-gated; the
+      // login page (excluded here) lives under /management.
+      const isProtected =
+        path.startsWith("/management") || path.startsWith("/eventmanagement");
+      if (isProtected && !isLogin) return isLoggedIn;
       return true;
     },
     jwt({ token, user }) {

@@ -358,10 +358,57 @@ export const attendees = sqliteTable("mp_attendees", {
   ticketCode: text("ticket_code").notNull(),
   checkedInAt: text("checked_in_at"),
   checkedInByUserId: integer("checked_in_by_user_id").references(() => users.id),
+  // Which check-in station/gate stamped this attendee (multi-gate attribution).
+  checkedInGate: text("checked_in_gate"),
   createdAt,
+  // Nullable (no CURRENT_TIMESTAMP default): SQLite forbids a non-constant
+  // default on ADD COLUMN, and pre-existing attendee rows have no update time.
+  // Writers stamp this explicitly on check-in.
+  updatedAt: text("updated_at"),
 }, (t) => ({
   ticketIdx: uniqueIndex("mp_attendees_ticket_idx").on(t.ticketCode),
   eventIdx: index("mp_attendees_event_idx").on(t.eventId),
+}));
+
+// ─────────────── notifications (delivery outbox) ───────────────
+// Persisted so a ticket send is never silently lost: best-effort on the request
+// path, retried by a flush job. Phase 1 records "ticket issued"; Phase 2 adds
+// email delivery on top of the same rows.
+
+export type NotificationChannel = "email" | "system";
+export type NotificationStatus = "pending" | "sent" | "failed" | "skipped";
+
+export const notifications = sqliteTable("mp_notifications", {
+  id: text("id").primaryKey(), // UUID
+  registrationId: text("registration_id").references(() => eventRegistrations.id),
+  channel: text("channel").$type<NotificationChannel>().notNull().default("system"),
+  template: text("template").notNull(),
+  status: text("status").$type<NotificationStatus>().notNull().default("pending"),
+  attempts: integer("attempts").notNull().default(0),
+  lastError: text("last_error"),
+  payload: text("payload", { mode: "json" }).$type<Record<string, unknown>>(),
+  createdAt,
+  updatedAt,
+}, (t) => ({
+  statusIdx: index("mp_notifications_status_idx").on(t.status),
+  regIdx: index("mp_notifications_reg_idx").on(t.registrationId),
+}));
+
+// ─────────────── audit log (ops accountability) ───────────────
+// Every consequential cockpit action (check-in, manual add, cancel, refund,
+// resend) writes one row → powers the per-event activity feed.
+
+export const auditLog = sqliteTable("mp_audit_log", {
+  id: text("id").primaryKey(), // UUID
+  actorUserId: integer("actor_user_id").references(() => users.id),
+  eventId: integer("event_id").references(() => events.id),
+  action: text("action").notNull(),
+  targetId: text("target_id"),
+  meta: text("meta", { mode: "json" }).$type<Record<string, unknown>>(),
+  createdAt,
+}, (t) => ({
+  eventIdx: index("mp_audit_event_idx").on(t.eventId),
+  createdIdx: index("mp_audit_created_idx").on(t.createdAt),
 }));
 
 // ──────────────────────────────── relations ──────────────────────────────────
@@ -415,6 +462,22 @@ export const attendeesRelations = relations(attendees, ({ one }) => ({
     references: [eventRegistrations.id],
   }),
   event: one(events, { fields: [attendees.eventId], references: [events.id] }),
+  checkedInBy: one(users, {
+    fields: [attendees.checkedInByUserId],
+    references: [users.id],
+  }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  registration: one(eventRegistrations, {
+    fields: [notifications.registrationId],
+    references: [eventRegistrations.id],
+  }),
+}));
+
+export const auditLogRelations = relations(auditLog, ({ one }) => ({
+  actor: one(users, { fields: [auditLog.actorUserId], references: [users.id] }),
+  event: one(events, { fields: [auditLog.eventId], references: [events.id] }),
 }));
 
 // ─────────────────────────────── inferred types ──────────────────────────────
@@ -431,6 +494,8 @@ export type DbCouncilMember = typeof councilMembers.$inferSelect;
 export type DbSupportChannel = typeof supportChannels.$inferSelect;
 export type DbEventRegistration = typeof eventRegistrations.$inferSelect;
 export type DbAttendee = typeof attendees.$inferSelect;
+export type DbNotification = typeof notifications.$inferSelect;
+export type DbAuditLog = typeof auditLog.$inferSelect;
 
 // Marker referenced where self/cyclic FK typing is needed.
 export type _CyclicColumn = AnySQLiteColumn;

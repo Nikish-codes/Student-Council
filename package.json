@@ -33,6 +33,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@vercel/analytics": "^2.0.1",
+    "@zxing/browser": "^0.2.0",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -45,6 +46,7 @@
     "next": "15.4.11",
     "next-auth": "^5.0.0-beta.31",
     "ogl": "^1.0.11",
+    "qrcode": "^1.5.4",
     "react": "19.2.5",
     "react-dom": "19.2.5",
     "react-hook-form": "^7.73.1",
@@ -56,6 +58,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "cross-env": "^10.1.0",

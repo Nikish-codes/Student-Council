@@ -1,17 +1,20 @@
 import "server-only";
 import { cache } from "react";
-import { and, asc, desc, eq, gte, ne, or, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, gte, ne, or, inArray, sql } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import {
   announcements as announcementsT,
+  attendees as attendeesT,
   clubs as clubsT,
   councilMembers as councilT,
   events as eventsT,
+  eventRegistrations as regT,
   faqs as faqsT,
   highlights as highlightsT,
   recaps as recapsT,
   supportChannels as supportT,
+  type RegistrationStatus,
 } from "@/db/schema";
 
 import type {
@@ -520,3 +523,130 @@ export const getFaqs = cache(
     }));
   },
 );
+
+// ─────────────── tickets (attendee-facing) ───────────────
+
+export type TicketView = {
+  ticketCode: string;
+  attendeeId: string;
+  registrationId: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  status: RegistrationStatus;
+  amountInPaise: number;
+  checkedInAt: string | null;
+  createdAt: string;
+  event: {
+    id: number;
+    slug: string;
+    title: string;
+    date: string;
+    endDate: string | null;
+    venue: string;
+    category: string;
+    banner: string;
+  };
+};
+
+export type AttendeeWithRefs = {
+  id: string;
+  registrationId: string;
+  ticketCode: string;
+  checkedInAt: string | null;
+  createdAt: string;
+  registration?: {
+    name: string | null;
+    email: string | null;
+    phone: string | null;
+    status: RegistrationStatus | null;
+    amountInPaise: number | null;
+  } | null;
+  event?: {
+    id: number;
+    slug: string | null;
+    title: string | null;
+    date: string | null;
+    endDate: string | null;
+    venue: string | null;
+    category: string | null;
+    banner?: { url?: string | null } | null;
+  } | null;
+};
+
+export function toTicket(a: AttendeeWithRefs): TicketView | undefined {
+  if (!a.event) return undefined;
+  return {
+    ticketCode: a.ticketCode,
+    attendeeId: a.id,
+    registrationId: a.registrationId,
+    name: asString(a.registration?.name),
+    email: asString(a.registration?.email),
+    phone: a.registration?.phone ?? null,
+    status: (a.registration?.status ?? "confirmed") as RegistrationStatus,
+    amountInPaise: a.registration?.amountInPaise ?? 0,
+    checkedInAt: a.checkedInAt ?? null,
+    createdAt: asString(a.createdAt),
+    event: {
+      id: a.event.id,
+      slug: asString(a.event.slug),
+      title: asString(a.event.title),
+      date: asString(a.event.date),
+      endDate: a.event.endDate ?? null,
+      venue: asString(a.event.venue),
+      category: asString(a.event.category),
+      banner: mediaUrl(a.event.banner),
+    },
+  };
+}
+
+/** One ticket by its code (the /t/[code] page). */
+export const getTicketByCode = cache(
+  async (code: string): Promise<TicketView | undefined> => {
+    const normalized = code.trim().toUpperCase();
+    if (!normalized) return undefined;
+    const a = await db.query.attendees.findFirst({
+      where: eq(attendeesT.ticketCode, normalized),
+      with: {
+        registration: true,
+        event: { with: { banner: true } },
+      },
+    });
+    return a ? toTicket(a as AttendeeWithRefs) : undefined;
+  },
+);
+
+/** All tickets for a contact (email or phone) — the /t/lookup recovery page. */
+export async function getTicketsByContact(
+  contact: string,
+): Promise<TicketView[]> {
+  const raw = contact.trim();
+  if (!raw) return [];
+  const lower = raw.toLowerCase();
+  const regs = await db.query.eventRegistrations.findMany({
+    where: or(sql`lower(${regT.email}) = ${lower}`, eq(regT.phone, raw)),
+    with: {
+      attendees: {
+        with: { event: { with: { banner: true } } },
+      },
+    },
+  });
+  const tickets: TicketView[] = [];
+  for (const reg of regs) {
+    for (const a of reg.attendees) {
+      const t = toTicket({
+        ...(a as AttendeeWithRefs),
+        registration: {
+          name: reg.name,
+          email: reg.email,
+          phone: reg.phone,
+          status: reg.status,
+          amountInPaise: reg.amountInPaise,
+        },
+      });
+      if (t) tickets.push(t);
+    }
+  }
+  // Most recent event first.
+  return tickets.sort((x, y) => +new Date(y.event.date) - +new Date(x.event.date));
+}
