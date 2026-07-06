@@ -384,15 +384,15 @@ export function HomeVault({ entries }: { entries?: VaultStory[] }) {
               <div data-vault-swap key={current.id} className="max-w-2xl">
                 <div
                   data-vault-bit
-                  className="kicker mb-5 flex items-center gap-3 text-ink"
+                  className="kicker mb-5 flex items-center gap-3 text-white"
                   style={{ textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}
                 >
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-ink animate-pulse" />
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                   {current.kicker}
                 </div>
                 <h2
                   data-vault-title
-                  className="display text-ink leading-[0.85] mb-6"
+                  className="display text-white leading-[0.85] mb-6"
                   style={{
                     fontSize: "clamp(3.5rem, 10vw, 9.5rem)",
                     textShadow:
@@ -400,13 +400,13 @@ export function HomeVault({ entries }: { entries?: VaultStory[] }) {
                   }}
                 >
                   {current.title}
-                  <span className="italic text-muted ml-3 text-[0.6em] align-baseline">
+                  <span className="italic text-white/65 ml-3 text-[0.6em] align-baseline">
                     {current.year}
                   </span>
                 </h2>
                 <p
                   data-vault-bit
-                  className="text-lg sm:text-xl text-ink max-w-xl leading-snug mb-8"
+                  className="text-lg sm:text-xl text-white/90 max-w-xl leading-snug mb-8"
                   style={{ textShadow: "0 1px 2px rgba(0,0,0,0.7), 0 4px 16px rgba(0,0,0,0.4)" }}
                 >
                   {current.line}
@@ -414,7 +414,7 @@ export function HomeVault({ entries }: { entries?: VaultStory[] }) {
                 <Link
                   href={current.href}
                   data-vault-bit
-                  className="inline-flex items-center gap-3 text-sm font-mono uppercase tracking-[0.2em] text-ink border-b border-ink/40 pb-1 hover:border-ink transition-colors"
+                  className="inline-flex items-center gap-3 text-sm font-mono uppercase tracking-[0.2em] text-white border-b border-white/40 pb-1 hover:border-white transition-colors"
                 >
                   Open the recap
                   <span aria-hidden>→</span>
@@ -430,17 +430,17 @@ export function HomeVault({ entries }: { entries?: VaultStory[] }) {
             data-vault-fade
             type="button"
             onClick={toggleMute}
-            className="absolute right-6 top-20 z-40 inline-flex items-center gap-2 rounded-full border border-ink/30 bg-bg/40 px-4 py-2 text-[0.6875rem] font-mono uppercase tracking-[0.22em] text-ink backdrop-blur hover:bg-bg/70 transition-colors"
+            className="absolute right-6 top-20 z-40 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/40 px-4 py-2 text-[0.6875rem] font-mono uppercase tracking-[0.22em] text-white backdrop-blur hover:bg-black/70 transition-colors"
           >
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-ink" />
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-white" />
             {muted ? "Unmute" : "Mute"}
           </button>
         )}
 
         {/* Index counter */}
-        <div data-vault-fade className="absolute left-6 top-20 z-40 font-mono text-[0.6875rem] uppercase tracking-[0.22em] text-ink/70">
-          <div className="text-ink">
-            {current.index} <span className="text-subtle">/ 0{ENTRIES.length}</span>
+        <div data-vault-fade className="absolute left-6 top-20 z-40 font-mono text-[0.6875rem] uppercase tracking-[0.22em] text-white/70">
+          <div className="text-white">
+            {current.index} <span className="text-white/50">/ 0{ENTRIES.length}</span>
           </div>
         </div>
       </div>

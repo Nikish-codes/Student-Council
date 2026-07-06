@@ -37,12 +37,9 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   icons: {
-    icon: [
-      { url: "/icon.png", type: "image/png" },
-      { url: "/brand/sc-black.png", type: "image/png" },
-    ],
+    icon: [{ url: "/icon.png", type: "image/png" }],
     shortcut: "/icon.png",
-    apple: "/brand/sc-black.png",
+    apple: "/icon.png",
   },
   openGraph: {
     title: "Woxsen Student Council",

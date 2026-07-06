@@ -3,9 +3,10 @@ import { desc, eq } from "drizzle-orm";
 import { Plus } from "lucide-react";
 import { db } from "@/db/client";
 import { events as eventsT } from "@/db/schema";
-import { requireOps, canPublish } from "@/lib/rbac";
+import { requireOps, canPublish, isAdmin } from "@/lib/rbac";
 import { Button } from "@/components/ui/button";
 import { ApprovalButton } from "./approval-button";
+import { DeleteEventButton } from "./delete-button";
 
 const STATUS_STYLES: Record<string, string> = {
   published: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
@@ -27,6 +28,7 @@ export default async function EventsListPage() {
   });
 
   const publisher = canPublish(user.role);
+  const admin = isAdmin(user.role);
 
   return (
     <div className="flex flex-col gap-6">
@@ -90,10 +92,15 @@ export default async function EventsListPage() {
                     {e.status.replace("_", " ")}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right">
-                  {publisher && e.status === "pending_review" ? (
-                    <ApprovalButton id={e.id} />
-                  ) : null}
+                <td className="px-4 py-3">
+                  <div className="flex items-center justify-end gap-2">
+                    {publisher && e.status === "pending_review" ? (
+                      <ApprovalButton id={e.id} />
+                    ) : null}
+                    {admin ? (
+                      <DeleteEventButton id={e.id} title={e.title} />
+                    ) : null}
+                  </div>
                 </td>
               </tr>
             ))}
