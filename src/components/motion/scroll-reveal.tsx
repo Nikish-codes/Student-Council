@@ -60,8 +60,11 @@ export function ScrollReveal({
 
         if (effect === "rise") {
           targets = el.children.length ? el.children : el;
-          fromVars = { opacity: 0, y: yFrom, filter: "blur(6px)" };
-          toVars = { opacity: 1, y: 0, filter: "blur(0px)", duration, stagger, ease: "power3.out" };
+          // Transform + opacity only. Animating filter:blur re-rasterizes each
+          // target through a GPU shader every frame — cheap per element, but
+          // this reveal is used site-wide, so it's removed everywhere.
+          fromVars = { opacity: 0, y: yFrom };
+          toVars = { opacity: 1, y: 0, duration, stagger, ease: "power3.out" };
         } else if (effect === "fade") {
           fromVars = { opacity: 0 };
           toVars = { opacity: 1, duration };
@@ -82,12 +85,11 @@ export function ScrollReveal({
           targets = items;
           fromVars = simpleText
             ? { opacity: 0, y: 24 }
-            : { opacity: 0, y: type === "chars" ? 60 : 80, filter: "blur(8px)", rotateX: type === "chars" ? -45 : 0 };
+            : { opacity: 0, y: type === "chars" ? 60 : 80, rotateX: type === "chars" ? -45 : 0 };
           toVars = {
             opacity: 1,
             y: 0,
             rotateX: 0,
-            filter: simpleText ? undefined : "blur(0px)",
             duration: simpleText ? 0.65 : type === "chars" ? 0.7 : 0.9,
             stagger: simpleText ? 0.04 : type === "chars" ? 0.025 : type === "words" ? 0.06 : 0.12,
             ease: "power4.out",

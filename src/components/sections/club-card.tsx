@@ -104,14 +104,15 @@ export function ClubCard({ club, size = "std", index, total }: Props) {
       )}
       style={{ perspective: "1000px" }}
     >
-      {/* Cursor halo */}
+      {/* Cursor halo (plain alpha blend — no mix-blend-screen, which forces an
+          expensive backdrop recomposite per card during scroll) */}
       <div
         ref={haloRef}
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[160%] w-[160%] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-0 mix-blend-screen"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[160%] w-[160%] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-0"
         style={{
           background:
-            "radial-gradient(circle at center, rgba(255,255,255,0.10), transparent 55%)",
+            "radial-gradient(circle at center, rgba(255,255,255,0.08), transparent 55%)",
         }}
       />
 
@@ -153,7 +154,7 @@ export function ClubCard({ club, size = "std", index, total }: Props) {
           ref={logoRef}
           data-club-logo
           className={cn(
-            "relative aspect-square will-change-transform",
+            "relative aspect-square",
             isHero ? "w-[58%] max-w-[280px]" : "w-[55%] max-w-[140px]",
           )}
           style={{ transformStyle: "preserve-3d" }}
@@ -188,9 +189,9 @@ export function ClubCard({ club, size = "std", index, total }: Props) {
         </h3>
         <p
           className={cn(
-            "text-pretty text-muted transition-[filter] duration-500 group-hover/c:[filter:blur(0px)]",
+            "text-pretty text-muted",
             isHero ? "text-base leading-relaxed" : "text-sm leading-relaxed",
-            "[filter:blur(0.4px)] line-clamp-2",
+            "line-clamp-2",
             isHero && "line-clamp-3",
           )}
         >

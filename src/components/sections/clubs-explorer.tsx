@@ -67,12 +67,11 @@ export function ClubsExplorer({ clubs }: { clubs: Club[] }) {
             return;
           }
           const split = new SplitText(el, { type: "chars,words", charsClass: "char" });
-          gsap.set(split.chars, { opacity: 0, y: 80, rotateX: -70, filter: "blur(10px)" });
+          gsap.set(split.chars, { opacity: 0, y: 80, rotateX: -70 });
           gsap.to(split.chars, {
             opacity: 1,
             y: 0,
             rotateX: 0,
-            filter: "blur(0px)",
             duration: 1,
             ease: "expo.out",
             stagger: { each: 0.022, from: "start" },
@@ -101,13 +100,16 @@ export function ClubsExplorer({ clubs }: { clubs: Club[] }) {
             gsap.set(cards, { opacity: 1 });
             return;
           }
+          // Transform + opacity only (no animated filter:blur — blur re-rasters
+          // every card through a GPU shader each frame and, with a dozen cards
+          // animating at once on fast scroll, exhausts the raster budget).
+          // Offsets kept modest so simultaneous entrances stay cheap.
           gsap.set(cards, {
             opacity: 0,
-            scale: 0.7,
-            rotateZ: () => gsap.utils.random(-12, 12),
-            x: () => gsap.utils.random(-180, 180),
-            y: () => gsap.utils.random(-120, 160),
-            filter: "blur(14px)",
+            scale: 0.85,
+            rotateZ: () => gsap.utils.random(-7, 7),
+            x: () => gsap.utils.random(-70, 70),
+            y: () => gsap.utils.random(-50, 70),
           });
           gsap.to(cards, {
             opacity: 1,
@@ -115,8 +117,7 @@ export function ClubsExplorer({ clubs }: { clubs: Club[] }) {
             rotateZ: 0,
             x: 0,
             y: 0,
-            filter: "blur(0px)",
-            duration: 1.4,
+            duration: 1.1,
             ease: "expo.out",
             stagger: { each: 0.06, from: "random" },
             scrollTrigger: { trigger: grid, start: "top 85%", once: true },
