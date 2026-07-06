@@ -1,0 +1,8 @@
+# .githooks — checked-in Git hooks, activated via `core.hooksPath`.
+#
+# Enable once per clone:
+#   git config core.hooksPath .githooks
+#
+# Then every `git commit` runs .githooks/pre-commit, which scans staged content
+# for hardcoded secrets with gitleaks (auto-downloaded on first run if missing).
+.githooks/.bin/

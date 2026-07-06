@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Scans staged content for hardcoded secrets before each commit.
+# Installed once via:  git config core.hooksPath .githooks
+# If gitleaks is missing, it is fetched into .githooks/.bin on first run.
+
+set -eu
+
+GL_VERSION="8.30.1"
+GL_DIR=".githooks/.bin"
+GL_BIN="${GL_DIR}/gitleaks"
+
+autofetch_gitleaks() {
+  case "$(uname -s)-$(uname -m)" in
+    Linux-x86_64)  asset="gitleaks_${GL_VERSION}_linux_x64.tar.gz" ;;
+    Linux-aarch64) asset="gitleaks_${GL_VERSION}_linux_arm64.tar.gz" ;;
+    Darwin-x86_64) asset="gitleaks_${GL_VERSION}_darwin_x64.tar.gz" ;;
+    Darwin-arm64)  asset="gitleaks_${GL_VERSION}_darwin_arm64.tar.gz" ;;
+    *) echo "[pre-commit] gitleaks: unsupported platform, skipping scan." >&2; exit 0 ;;
+  esac
+  url="https://github.com/gitleaks/gitleaks/releases/download/v${GL_VERSION}/${asset}"
+  echo "[pre-commit] gitleaks not installed; fetching v${GL_VERSION} into ${GL_DIR}/" >&2
+  mkdir -p "$GL_DIR"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$url" | tar -xz -C "$GL_DIR"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -qO- "$url" | tar -xz -C "$GL_DIR"
+  else
+    echo "[pre-commit] need curl or wget; skipping scan" >&2; exit 0
+  fi
+  [ -x "$GL_BIN" ] || { echo "[pre-commit] extraction failed; skipping scan" >&2; exit 0; }
+}
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  if [ ! -x "$GL_BIN" ]; then
+    autofetch_gitleaks
+  fi
+  PATH="$(pwd)/$GL_DIR:$PATH"
+fi
+
+# Build a temp tree of staged NEW/MODIFIED/RENAMED/COPIED files, preserving paths,
+# because `gitleaks dir` operates on a directory, not a file list.
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+while IFS= read -r f; do
+  [ -n "$f" ] || continue
+  mkdir -p "$tmp/$(dirname "$f")"
+  git show ":$f" >"$tmp/$f" 2>/dev/null || true
+done < <(git diff --cached --name-only --diff-filter=ACMRTUXB -- ':!package-lock.json' ':!*.lock')
+
+if [ -z "$(find "$tmp" -type f 2>/dev/null | head -1)" ]; then
+  exit 0
+fi
+
+echo "[pre-commit] scanning staged files for secrets…" >&2
+if gitleaks dir "$tmp" --no-banner --redact --config .gitleaks.toml; then
+  exit 0
+else
+  rc=$?
+  echo "[pre-commit] gitleaks reported possible secrets — commit blocked." >&2
+  echo "[pre-commit] if this is a true false positive, stage with --no-verify and add an" >&2
+  echo "[pre-commit] allowlist entry in .gitleaks.toml." >&2
+  exit "$rc"
+fi

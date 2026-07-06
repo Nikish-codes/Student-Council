@@ -1,0 +1,39 @@
+# Local gitleaks config — extends the built-in default rule set.
+# https://github.com/gitleaks/gitleaks#configuration
+
+title = "portal"
+
+[extend]
+useDefault = true
+
+# Catch the obfuscation trick that bit us: a literal byte array XOR'd
+# against base64 blobs in source. If anyone reintroduces "_M = " alongside
+# "base64" + "fromCharCode" + "^", block the commit.
+[[rules]]
+id = "xor-base64-decoder"
+description = "Obfuscated secret via XOR+base64 decoder"
+regex = '''(?i)(?:\b_?M\b[\s\S]{0,80}?=\s*\[?\s*0x[0-9a-f]{2})|(?:\bbase64\b[\s\S]{0,120}?\bfromCharCode\b[\s\S]{0,40}?\^)'''
+keywords = ["fromCharCode", "0x42", "_M ="]
+tags = ["backdoor"]
+
+# GitHub personal access / fine-grained / OAuth / app tokens — dropped by
+# gitleaks v8 default ruleset, restored here.
+[[rules]]
+id = "github-pat"
+description = "GitHub personal access / app token"
+regex = '''\b(ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9]{22}_[A-Za-z0-9]{59}|gho_[A-Za-z0-9]{36}|ghu_[A-Za-z0-9]{36}|ghs_[A-Za-z0-9]{36}|ghr_[A-Za-z0-9]{36})\b'''
+keywords = ["ghp_", "github_pat_", "gho_", "ghu_", "ghs_", "ghr_"]
+
+[allowlist]
+description = "Skip paths and patterns that legitimately contain secret-like tokens."
+paths = [
+  '''package-lock\.json''',
+  '''.*/pnpm-lock\.yaml''',
+  '''.env\.example''',
+  '''.env\.local\.example''',
+  '''.next/''',
+]
+# Encourage environment indirection; explicit env reads are not secrets.
+regexes = [
+  '''process\.env\.[A-Z_]+''',
+]
