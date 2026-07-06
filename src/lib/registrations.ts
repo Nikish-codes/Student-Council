@@ -1,9 +1,12 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { attendees, eventRegistrations, events } from "@/db/schema";
 import { createRazorpayOrder, paymentsConfigured } from "@/lib/razorpay";
 import { generateTicketCode, newId } from "@/lib/tickets";
+import { verifyScan } from "@/lib/ticket-sign";
+import { toTicket, type AttendeeWithRefs, type TicketView } from "@/lib/content";
+import { logAudit } from "@/lib/audit";
 
 export type RegisterInput = {
   eventId: number;
@@ -13,7 +16,12 @@ export type RegisterInput = {
 };
 
 export type RegisterResult =
-  | { kind: "free"; ticketCode: string; registrationId: string }
+  | {
+      kind: "free";
+      ticketCode: string;
+      registrationId: string;
+      alreadyRegistered?: boolean;
+    }
   | {
       kind: "paid";
       registrationId: string;
@@ -68,6 +76,27 @@ export async function registerForEvent(input: RegisterInput): Promise<RegisterRe
   if (!event) throw new Error("Event not found");
   if (!event.registrationEnabled) throw new Error("Registration is not open for this event");
   if (event.status !== "published") throw new Error("Registration is not open");
+
+  // De-dupe: one confirmed ticket per (event, email). If they already have one,
+  // hand back the same ticket instead of issuing a duplicate — this also makes
+  // a double-submit of the free form idempotent.
+  const emailLower = input.email.trim().toLowerCase();
+  const existing = await db.query.eventRegistrations.findFirst({
+    where: and(
+      eq(eventRegistrations.eventId, event.id),
+      eq(eventRegistrations.status, "confirmed"),
+      sql`lower(${eventRegistrations.email}) = ${emailLower}`,
+    ),
+    with: { attendees: true },
+  });
+  if (existing?.attendees[0]) {
+    return {
+      kind: "free",
+      ticketCode: existing.attendees[0].ticketCode,
+      registrationId: existing.id,
+      alreadyRegistered: true,
+    };
+  }
 
   const amountPaise = event.priceInPaise ?? 0;
   const registrationId = newId();
@@ -220,4 +249,130 @@ export async function confirmByOrderId(orderId: string, paymentId: string): Prom
   // Webhook is authenticated by HMAC over the raw body, so the order id is
   // trusted — pass it through as the expectedOrderId guard.
   await confirmPaidRegistration(reg.id, paymentId, null, orderId);
+}
+
+/**
+ * Staff-added attendee (walk-in / desk registration). Issues a confirmed, free
+ * ticket immediately and is de-duped by (event, email) like the public path.
+ */
+export async function manualRegister(input: {
+  eventId: number;
+  name: string;
+  email: string;
+  phone?: string;
+  byUserId?: number | null;
+}): Promise<{ ticketCode: string; registrationId: string; alreadyRegistered: boolean }> {
+  const event = await db.query.events.findFirst({
+    where: eq(events.id, input.eventId),
+  });
+  if (!event) throw new Error("Event not found");
+
+  const emailLower = input.email.trim().toLowerCase();
+  const existing = await db.query.eventRegistrations.findFirst({
+    where: and(
+      eq(eventRegistrations.eventId, event.id),
+      eq(eventRegistrations.status, "confirmed"),
+      sql`lower(${eventRegistrations.email}) = ${emailLower}`,
+    ),
+    with: { attendees: true },
+  });
+  if (existing?.attendees[0]) {
+    return {
+      ticketCode: existing.attendees[0].ticketCode,
+      registrationId: existing.id,
+      alreadyRegistered: true,
+    };
+  }
+
+  const registrationId = newId();
+  await db.insert(eventRegistrations).values({
+    id: registrationId,
+    eventId: event.id,
+    name: input.name,
+    email: input.email,
+    phone: input.phone ?? null,
+    status: "confirmed",
+    amountInPaise: 0,
+    paymentStatus: "none",
+    meta: { manual: true, byUserId: input.byUserId ?? null },
+  });
+  const ticketCode = await ensureAttendee(registrationId, event.id);
+  return { ticketCode, registrationId, alreadyRegistered: false };
+}
+
+// ─────────────── check-in (event-day, single-use) ───────────────
+
+export type CheckInResult =
+  | { status: "ok"; ticket: TicketView }
+  | { status: "already"; ticket: TicketView }
+  | { status: "wrong_event"; ticket: TicketView }
+  | { status: "invalid"; message: string };
+
+/**
+ * Check in an attendee from a scanned QR (or a typed code). Anti-fraud:
+ *  - `verifyScan` rejects a forged/altered signed token before any DB hit.
+ *  - The stamp is an ATOMIC conditional update (`WHERE checkedInAt IS NULL`), so
+ *    the first scan wins and a shared screenshot loses on the second scan — even
+ *    across multiple gates hitting the DB simultaneously.
+ * `eventId` (when the station is bound to an event) rejects tickets for a
+ * different event. Every successful check-in is audit-logged.
+ */
+export async function checkInAttendee(input: {
+  scan: string;
+  eventId?: number;
+  gate?: string | null;
+  userId?: number | null;
+}): Promise<CheckInResult> {
+  const code = verifyScan(input.scan);
+  if (!code) {
+    return { status: "invalid", message: "Invalid or unrecognised ticket QR." };
+  }
+
+  const attendee = await db.query.attendees.findFirst({
+    where: eq(attendees.ticketCode, code),
+    with: { registration: true, event: { with: { banner: true } } },
+  });
+  if (!attendee) {
+    return { status: "invalid", message: `No ticket "${code}" found.` };
+  }
+
+  const ticket = toTicket(attendee as AttendeeWithRefs);
+  if (!ticket) {
+    return { status: "invalid", message: `Ticket "${code}" has no event.` };
+  }
+
+  if (attendee.registration?.status === "cancelled") {
+    return { status: "invalid", message: `Ticket ${code} was cancelled.` };
+  }
+
+  if (input.eventId != null && attendee.eventId !== input.eventId) {
+    return { status: "wrong_event", ticket };
+  }
+
+  const now = new Date().toISOString();
+  const res = await db
+    .update(attendees)
+    .set({
+      checkedInAt: now,
+      checkedInByUserId: input.userId ?? null,
+      checkedInGate: input.gate ?? null,
+      updatedAt: now,
+    })
+    .where(and(eq(attendees.id, attendee.id), isNull(attendees.checkedInAt)));
+
+  const affected = (res as { rowsAffected?: number }).rowsAffected ?? 0;
+  if (affected === 0) {
+    // Lost the race / already scanned → return the existing check-in state.
+    return { status: "already", ticket };
+  }
+
+  await logAudit({
+    actorUserId: input.userId ?? null,
+    eventId: attendee.eventId,
+    action: "checkin",
+    targetId: attendee.id,
+    meta: { ticketCode: code, gate: input.gate ?? null, name: ticket.name },
+  });
+
+  return { status: "ok", ticket: { ...ticket, checkedInAt: now } };
 }

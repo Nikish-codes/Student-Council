@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 import type { DbEvent } from "@/db/schema";
 import { Button } from "@/components/ui/button";
 import { MediaField, type MediaOption } from "@/components/management/fields";
+import { DeleteEventButton } from "./delete-button";
 
 type Option = { id: number; name?: string | null; filename?: string | null; url?: string };
 
@@ -23,10 +24,26 @@ function field(label: string, hint?: string) {
 const inputCls =
   "w-full rounded-xl border border-line/15 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none transition-colors focus:border-line/40";
 
-function SaveBar({ canPublish }: { canPublish: boolean }) {
+function SaveBar({
+  canPublish,
+  deleteFor,
+}: {
+  canPublish: boolean;
+  deleteFor?: { id: number; title: string };
+}) {
   const { pending } = useFormStatus();
   return (
     <div className="sticky bottom-0 flex items-center justify-end gap-3 border-t border-line/10 bg-bg/80 py-4 backdrop-blur-xl">
+      {deleteFor ? (
+        <div className="mr-auto">
+          <DeleteEventButton
+            id={deleteFor.id}
+            title={deleteFor.title}
+            redirectTo="/management/events"
+            variant="full"
+          />
+        </div>
+      ) : null}
       <Button asChild variant="ghost" size="sm" type="button">
         <Link href="/management/events">Cancel</Link>
       </Button>
@@ -44,6 +61,7 @@ export function EventEditor({
   media,
   canPublish,
   isClubLead,
+  canDelete = false,
 }: {
   action: (fd: FormData) => Promise<void>;
   event: DbEvent | null;
@@ -51,6 +69,7 @@ export function EventEditor({
   media: Option[];
   canPublish: boolean;
   isClubLead: boolean;
+  canDelete?: boolean;
 }) {
   const [title, setTitle] = useState(event?.title ?? "");
   const [slug, setSlug] = useState(event?.slug ?? "");
@@ -283,7 +302,12 @@ export function EventEditor({
         </div>
       </div>
 
-      <SaveBar canPublish={canPublish} />
+      <SaveBar
+        canPublish={canPublish}
+        deleteFor={
+          canDelete && event ? { id: event.id, title: event.title } : undefined
+        }
+      />
     </form>
   );
 }

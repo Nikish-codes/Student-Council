@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { clubs as clubsT, events as eventsT, media as mediaT } from "@/db/schema";
-import { canPublish, requireOps, assertCanEditEvent } from "@/lib/rbac";
+import { canPublish, requireOps, assertCanEditEvent, isAdmin } from "@/lib/rbac";
 import { createEvent, updateEvent } from "../actions";
 import { EventEditor } from "../event-editor";
 
@@ -46,6 +46,7 @@ export default async function EventEditPage({
       media={mediaList}
       canPublish={canPublish(user.role)}
       isClubLead={user.role === "club_lead"}
+      canDelete={!isNew && isAdmin(user.role)}
     />
   );
 }

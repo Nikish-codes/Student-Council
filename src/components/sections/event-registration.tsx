@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ArrowUpRight, CheckCircle2, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -36,10 +38,18 @@ const inputCls =
   "w-full rounded-xl border border-line/15 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none transition-colors focus:border-line/40";
 
 export function EventRegistration({ eventId, title, priceInPaise }: Props) {
+  const router = useRouter();
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ticket, setTicket] = useState<string | null>(null);
+
+  // Persist the ticket by sending the user to its permanent page. Keep the code
+  // in local state too so a slow navigation still shows a working link.
+  function goToTicket(code: string) {
+    setTicket(code);
+    router.push(`/t/${encodeURIComponent(code)}`);
+  }
 
   const priceLabel =
     priceInPaise > 0
@@ -61,7 +71,7 @@ export function EventRegistration({ eventId, title, priceInPaise }: Props) {
         throw new Error("error" in data ? data.error : "Registration failed");
       }
       if (data.kind === "free") {
-        setTicket(data.ticketCode);
+        goToTicket(data.ticketCode);
         return;
       }
       // Paid → open Razorpay checkout.
@@ -104,7 +114,7 @@ export function EventRegistration({ eventId, title, priceInPaise }: Props) {
             body: JSON.stringify({ registrationId: data.registrationId, ...resp }),
           });
           const vd = await v.json();
-          if (v.ok && vd.ticketCode) setTicket(vd.ticketCode);
+          if (v.ok && vd.ticketCode) goToTicket(vd.ticketCode);
           else setError(vd.error || "Payment verification failed");
         },
       });
@@ -127,7 +137,15 @@ export function EventRegistration({ eventId, title, priceInPaise }: Props) {
             <Ticket className="h-4 w-4" /> {ticket}
           </p>
         </div>
-        <p className="text-xs text-subtle">Save this code — you&apos;ll need it at check-in.</p>
+        <Link
+          href={`/t/${encodeURIComponent(ticket)}`}
+          className="inline-flex items-center justify-center gap-1.5 text-sm font-medium text-accent hover:underline"
+        >
+          Open your ticket <ArrowUpRight className="h-3.5 w-3.5" />
+        </Link>
+        <p className="text-xs text-subtle">
+          Your ticket lives at this link — bookmark it or send it to yourself.
+        </p>
       </div>
     );
   }
