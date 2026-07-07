@@ -7,29 +7,19 @@ import { gsap, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
 import type { Club } from "@/lib/schemas";
 
-type Size = "hero" | "wide" | "tall" | "std";
-
 interface Props {
   club: Club;
-  size?: Size;
   index: number;
   total: number;
 }
 
-const SIZE_CLASSES: Record<Size, string> = {
-  hero: "md:col-span-2 md:row-span-2 min-h-[460px]",
-  wide: "md:col-span-2 min-h-[260px]",
-  tall: "md:row-span-2 min-h-[460px]",
-  std: "min-h-[260px]",
-};
-
-export function ClubCard({ club, size = "std", index, total }: Props) {
+export function ClubCard({ club, index, total }: Props) {
   const ref = React.useRef<HTMLAnchorElement>(null);
   const logoRef = React.useRef<HTMLDivElement>(null);
   const haloRef = React.useRef<HTMLDivElement>(null);
   const borderRef = React.useRef<SVGRectElement>(null);
 
-  // Cursor tilt + halo follow
+  // Cursor tilt + halo follow — hover-only cost, skipped entirely on touch.
   useGSAP(
     () => {
       const el = ref.current;
@@ -39,7 +29,8 @@ export function ClubCard({ club, size = "std", index, total }: Props) {
       if (!el || !logo || !halo || !border) return;
 
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduced) return;
+      const coarse = window.matchMedia("(pointer: coarse)").matches;
+      if (reduced || coarse) return;
 
       const xTo = gsap.quickTo(logo, "rotationY", { duration: 0.6, ease: "power3.out" });
       const yTo = gsap.quickTo(logo, "rotationX", { duration: 0.6, ease: "power3.out" });
@@ -84,7 +75,6 @@ export function ClubCard({ club, size = "std", index, total }: Props) {
     { scope: ref },
   );
 
-  const isHero = size === "hero";
   const fallbackLabel = club.name
     .split(" ")
     .map((s) => s[0])
@@ -98,10 +88,7 @@ export function ClubCard({ club, size = "std", index, total }: Props) {
       target={club.joinUrl ? "_blank" : undefined}
       rel={club.joinUrl ? "noreferrer" : undefined}
       data-club-card
-      className={cn(
-        "group/c relative flex flex-col overflow-hidden rounded-2xl border border-line/10 bg-surface/50 p-7 transition-colors duration-500 hover:border-line/30",
-        SIZE_CLASSES[size],
-      )}
+      className="group/c relative flex min-h-[300px] flex-col overflow-hidden rounded-2xl border border-line/10 bg-surface/50 p-7 transition-colors duration-500 hover:border-line/30"
       style={{ perspective: "1000px" }}
     >
       {/* Cursor halo (plain alpha blend — no mix-blend-screen, which forces an
@@ -144,30 +131,12 @@ export function ClubCard({ club, size = "std", index, total }: Props) {
       <ArrowUpRight className="absolute right-6 top-6 z-10 h-5 w-5 text-muted transition-all duration-500 group-hover/c:-translate-y-0.5 group-hover/c:translate-x-0.5 group-hover/c:text-ink" />
 
       {/* Logo - dominant element */}
-      <div
-        className={cn(
-          "relative z-0 flex flex-1 items-center justify-center",
-          isHero ? "min-h-[260px]" : "min-h-[140px]",
-        )}
-      >
+      <div className="relative z-0 flex min-h-[140px] flex-1 items-center justify-center">
         <div
           ref={logoRef}
-          data-club-logo
-          className={cn(
-            "relative aspect-square",
-            isHero ? "w-[58%] max-w-[280px]" : "w-[55%] max-w-[140px]",
-          )}
+          className="relative aspect-square w-[55%] max-w-[140px]"
           style={{ transformStyle: "preserve-3d" }}
         >
-          {/* Glow under logo */}
-          <div
-            aria-hidden
-            className="absolute inset-[-30%] rounded-full opacity-0 blur-3xl transition-opacity duration-500 group-hover/c:opacity-100"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(255,255,255,0.18), transparent 60%)",
-            }}
-          />
           <Picture
             src={club.logo}
             alt={`${club.name} logo`}
@@ -179,28 +148,14 @@ export function ClubCard({ club, size = "std", index, total }: Props) {
 
       {/* Body */}
       <div className="relative z-10 mt-6 space-y-4">
-        <h3
-          className={cn(
-            "display text-ink",
-            isHero ? "text-4xl sm:text-5xl" : "text-2xl",
-          )}
-        >
-          {club.name}
-        </h3>
-        <p
-          className={cn(
-            "text-pretty text-muted",
-            isHero ? "text-base leading-relaxed" : "text-sm leading-relaxed",
-            "line-clamp-2",
-            isHero && "line-clamp-3",
-          )}
-        >
+        <h3 className="display text-2xl text-ink">{club.name}</h3>
+        <p className="line-clamp-2 text-pretty text-sm leading-relaxed text-muted">
           {club.blurb}
         </p>
 
         <div className="flex items-center justify-between gap-3 border-t border-line/10 pt-4">
           <div className="flex flex-wrap gap-1.5">
-            {club.tags.slice(0, isHero ? 3 : 2).map((tag) => (
+            {club.tags.slice(0, 2).map((tag) => (
               <span
                 key={tag}
                 className="rounded-full border border-line/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted transition-colors group-hover/c:border-line/25 group-hover/c:text-ink"

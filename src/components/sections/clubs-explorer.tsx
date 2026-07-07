@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
+import { gsap, useGSAP } from "@/lib/gsap";
 import { ClubCard } from "@/components/sections/club-card";
 import { CountUp } from "@/components/motion/count-up";
 import { cn } from "@/lib/utils";
@@ -24,15 +24,6 @@ function bucketOf(club: Club) {
   return "other";
 }
 
-// Bento sizing pattern per group — index inside the group decides the tile size.
-function tileSize(i: number, total: number): "hero" | "wide" | "tall" | "std" {
-  if (total <= 3) return "std";
-  if (i === 0) return "hero";
-  if (i === 4) return "wide";
-  if (total > 7 && i === 7) return "tall";
-  return "std";
-}
-
 export function ClubsExplorer({ clubs }: { clubs: Club[] }) {
   const root = React.useRef<HTMLDivElement>(null);
 
@@ -45,36 +36,24 @@ export function ClubsExplorer({ clubs }: { clubs: Club[] }) {
 
   const totalMembers = clubs.reduce((acc, c) => acc + (c.members ?? 0), 0);
 
-  // Wall-of-logos cinematic intro per section as it scrolls in,
-  // plus split-char headers.
+  // Deliberately light entrances: this page animates WHILE the user scrolls,
+  // so everything here is a single short fade-up per element group — no
+  // split-char headers, no random fly-ins, no secondary logo tweens. Each of
+  // those multiplied "layers animating at once" by 10-20× and made fast
+  // scrolling stutter on laptops.
   useGSAP(
     () => {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const simpleText = prefersSimpleTextMotion();
       const ctx = gsap.context(() => {
-        // ── Section headers: split chars, rise + blur out ──
+        // ── Section headers: one fade-rise per title ──
         root.current?.querySelectorAll<HTMLElement>("[data-group-title]").forEach((el) => {
           gsap.set(el, { opacity: 1 });
           if (reduced) return;
-          if (simpleText) {
-            gsap.from(el, {
-              opacity: 0,
-              y: 24,
-              duration: 0.7,
-              ease: "power2.out",
-              scrollTrigger: { trigger: el, start: "top 85%", once: true },
-            });
-            return;
-          }
-          const split = new SplitText(el, { type: "chars,words", charsClass: "char" });
-          gsap.set(split.chars, { opacity: 0, y: 80, rotateX: -70 });
-          gsap.to(split.chars, {
-            opacity: 1,
-            y: 0,
-            rotateX: 0,
-            duration: 1,
-            ease: "expo.out",
-            stagger: { each: 0.022, from: "start" },
+          gsap.from(el, {
+            opacity: 0,
+            y: 32,
+            duration: 0.8,
+            ease: "power3.out",
             scrollTrigger: { trigger: el, start: "top 85%", once: true },
           });
         });
@@ -92,7 +71,7 @@ export function ClubsExplorer({ clubs }: { clubs: Club[] }) {
           });
         });
 
-        // ── Wall-of-logos: per group, fly cards in from random offsets ──
+        // ── Cards: single staggered fade-up per grid ──
         root.current?.querySelectorAll<HTMLElement>("[data-group-grid]").forEach((grid) => {
           const cards = grid.querySelectorAll("[data-club-card]");
           if (!cards.length) return;
@@ -100,39 +79,14 @@ export function ClubsExplorer({ clubs }: { clubs: Club[] }) {
             gsap.set(cards, { opacity: 1 });
             return;
           }
-          // Transform + opacity only (no animated filter:blur — blur re-rasters
-          // every card through a GPU shader each frame and, with a dozen cards
-          // animating at once on fast scroll, exhausts the raster budget).
-          // Offsets kept modest so simultaneous entrances stay cheap.
-          gsap.set(cards, {
-            opacity: 0,
-            scale: 0.85,
-            rotateZ: () => gsap.utils.random(-7, 7),
-            x: () => gsap.utils.random(-70, 70),
-            y: () => gsap.utils.random(-50, 70),
-          });
+          gsap.set(cards, { opacity: 0, y: 28 });
           gsap.to(cards, {
             opacity: 1,
-            scale: 1,
-            rotateZ: 0,
-            x: 0,
             y: 0,
-            duration: 1.1,
-            ease: "expo.out",
-            stagger: { each: 0.06, from: "random" },
-            scrollTrigger: { trigger: grid, start: "top 85%", once: true },
-          });
-
-          // After cards land, animate the inner logos with a subtle pop
-          const logos = grid.querySelectorAll("[data-club-logo]");
-          gsap.from(logos, {
-            scale: 0.6,
-            opacity: 0,
-            duration: 1,
-            ease: "back.out(1.6)",
-            stagger: { each: 0.04, from: "random" },
-            scrollTrigger: { trigger: grid, start: "top 85%", once: true },
-            delay: 0.3,
+            duration: 0.7,
+            ease: "power3.out",
+            stagger: 0.05,
+            scrollTrigger: { trigger: grid, start: "top 88%", once: true },
           });
         });
 
@@ -248,7 +202,6 @@ export function ClubsExplorer({ clubs }: { clubs: Club[] }) {
               <h2
                 data-group-title
                 className="display text-balance text-5xl leading-[0.9] sm:text-7xl lg:text-8xl"
-                style={{ perspective: "800px" }}
               >
                 {g.label}.
               </h2>
@@ -256,10 +209,7 @@ export function ClubsExplorer({ clubs }: { clubs: Club[] }) {
 
             <div
               data-group-grid
-              className={cn(
-                "grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
-                "[grid-auto-flow:dense]",
-              )}
+              className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
             >
               {g.items.map((club, i) => (
                 <ClubCard
@@ -267,7 +217,6 @@ export function ClubsExplorer({ clubs }: { clubs: Club[] }) {
                   club={club}
                   index={i}
                   total={g.items.length}
-                  size={tileSize(i, g.items.length)}
                 />
               ))}
             </div>
