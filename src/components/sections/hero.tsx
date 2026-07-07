@@ -50,36 +50,37 @@ export function Hero({
 
       if (reduced) {
         gsap.set("[data-anim]", { opacity: 1, y: 0, scale: 1 });
-        gsap.set([headline, subline], { opacity: 1, y: 0, rotateX: 0, filter: "none" });
+        gsap.set([headline, subline], { opacity: 1, y: 0, rotateX: 0 });
         if (splitH && splitS) {
-          gsap.set([splitH.chars, splitS.chars], { opacity: 1, y: 0, rotateX: 0, filter: "none" });
+          gsap.set([splitH.chars, splitS.chars], { opacity: 1, y: 0, rotateX: 0 });
         }
         return;
       }
 
       // ── Initial states ──
+      // Transform + opacity ONLY — no animated filter:blur anywhere in the
+      // hero. Blur re-rasterizes the element every frame; staggered across
+      // dozens of split chars (each its own layer) it blows the frame budget
+      // on slow devices. The y/rotateX/stagger carries the cinematic feel.
       gsap.set([headline, subline], { opacity: 1 });
       gsap.set("[data-cycle-word]", { opacity: 1 });
       gsap.set("[data-vignette]", { opacity: 0 });
       gsap.set("[data-kicker-line]", { scaleX: 0, transformOrigin: "left center" });
-      gsap.set("[data-kicker-text]", { opacity: 0, x: -16, filter: "blur(6px)" });
+      gsap.set("[data-kicker-text]", { opacity: 0, x: -16 });
       gsap.set("[data-logo]", {
         opacity: 0,
         scale: 0.55,
         rotate: -8,
-        filter: "blur(20px)",
       });
       gsap.set("[data-logo-ring]", { scale: 0.6, opacity: 0 });
       if (simpleText) {
-        gsap.set([headline, subline], { opacity: 0, y: 28, filter: "none" });
+        gsap.set([headline, subline], { opacity: 0, y: 28 });
       } else if (splitH && splitS) {
-        gsap.set(splitH.chars, { opacity: 0, y: 140, rotateX: -85, filter: "blur(12px)" });
-        gsap.set(splitS.chars, { opacity: 0, y: 80, filter: "blur(10px)" });
+        gsap.set(splitH.chars, { opacity: 0, y: 140, rotateX: -85 });
+        gsap.set(splitS.chars, { opacity: 0, y: 80 });
       }
       gsap.set("[data-sub]", { opacity: 0, y: 20 });
       gsap.set("[data-cta]", { opacity: 0, y: 24, scale: 0.96 });
-      gsap.set("[data-meta]", { opacity: 0 });
-      gsap.set("[data-meta-line]", { scaleX: 0, transformOrigin: "left center" });
 
       // ── Cinematic intro ──
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -88,10 +89,10 @@ export function Hero({
 
       tl.to("[data-vignette]", { opacity: 1, duration: 1.2, ease: "power2.inOut" })
         .to("[data-kicker-line]", { scaleX: 1, duration: 0.7, ease: "expo.out" }, "-=0.9")
-        .to("[data-kicker-text]", { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.7 }, "-=0.5")
+        .to("[data-kicker-text]", { opacity: 1, x: 0, duration: 0.7 }, "-=0.5")
         .to(
           "[data-logo]",
-          { opacity: 1, scale: 1, rotate: 0, filter: "blur(0px)", duration: 1.4, ease: "expo.out" },
+          { opacity: 1, scale: 1, rotate: 0, duration: 1.4, ease: "expo.out" },
           "-=0.3",
         )
         .to("[data-logo-ring]", { scale: 1, opacity: 1, duration: 1.6, ease: "expo.out" }, "<")
@@ -103,7 +104,6 @@ export function Hero({
                 opacity: 1,
                 y: 0,
                 rotateX: 0,
-                filter: "blur(0px)",
                 duration: 1.1,
                 ease: "expo.out",
                 stagger: { each: 0.035, from: "start" },
@@ -117,7 +117,6 @@ export function Hero({
             : {
                 opacity: 1,
                 y: 0,
-                filter: "blur(0px)",
                 duration: 0.9,
                 ease: "power4.out",
                 stagger: { each: 0.025, from: "start" },
@@ -130,8 +129,6 @@ export function Hero({
           { opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.08, ease: "back.out(1.6)" },
           "-=0.4",
         )
-        .to("[data-meta-line]", { scaleX: 1, duration: 0.9, ease: "expo.out" }, "-=0.3")
-        .to("[data-meta]", { opacity: 1, duration: 0.6 }, "-=0.6")
         .add(() => {
           gsap.to("[data-logo]", {
             y: "+=10",
@@ -150,11 +147,14 @@ export function Hero({
         });
 
       // ── Scroll-driven exit ──
+      // Compositor-only properties (transform/opacity). The old scrubbed
+      // filter:blur(4px) re-rasterized the ENTIRE hero stage — headline chars,
+      // logo, CTAs — on every scroll frame, which is what made scrolling past
+      // the hero janky on laptops. Opacity fade sells the exit on its own.
       gsap.to("[data-hero-stage]", {
         y: -140,
         scale: 0.94,
         opacity: 0.35,
-        filter: "blur(4px)",
         ease: "none",
         scrollTrigger: {
           trigger: root.current,
@@ -175,14 +175,6 @@ export function Hero({
         },
       });
 
-      // ── Manifesto marquee drift ──
-      gsap.to("[data-hero-marquee-track]", {
-        xPercent: -50,
-        duration: 60,
-        ease: "none",
-        repeat: -1,
-      });
-
       // ── Word-cycle on subline ──
       const cycleEl = root.current?.querySelector<HTMLElement>("[data-cycle-word]");
       if (cycleEl) {
@@ -192,7 +184,6 @@ export function Hero({
           tl.to(cycleEl, {
             yPercent: -100,
             opacity: 0,
-            filter: "blur(8px)",
             duration: 0.55,
             ease: "power3.in",
           })
@@ -204,7 +195,6 @@ export function Hero({
             .to(cycleEl, {
               yPercent: 0,
               opacity: 1,
-              filter: "blur(0px)",
               duration: 0.7,
               ease: "expo.out",
             })

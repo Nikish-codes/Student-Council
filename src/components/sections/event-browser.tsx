@@ -39,7 +39,7 @@ export function EventBrowser({ events }: { events: EventItem[] }) {
 
   return (
     <>
-      <div className="sticky top-20 z-30 -mx-5 mb-10 border-b border-line/10 bg-bg/70 px-5 py-4 backdrop-blur-xl sm:mx-0 sm:rounded-2xl sm:border sm:px-5">
+      <div className="sticky top-20 z-30 -mx-5 mb-10 border-b border-line/10 bg-bg/85 px-5 py-4 backdrop-blur-md sm:mx-0 sm:rounded-2xl sm:border sm:px-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />

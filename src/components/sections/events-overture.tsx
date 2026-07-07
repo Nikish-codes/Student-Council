@@ -42,12 +42,11 @@ export function EventsOverture({
             return;
           }
           const split = new SplitText(el, { type: "chars,words", charsClass: "char" });
-          gsap.set(split.chars, { opacity: 0, y: 80, rotateX: -70, filter: "blur(10px)" });
+          gsap.set(split.chars, { opacity: 0, y: 80, rotateX: -70 });
           gsap.to(split.chars, {
             opacity: 1,
             y: 0,
             rotateX: 0,
-            filter: "blur(0px)",
             duration: 1,
             ease: "expo.out",
             stagger: { each: 0.022 },

@@ -34,7 +34,6 @@ export function StatsSymphony({
         gsap.from(items, {
           y: 80,
           opacity: 0,
-          filter: "blur(12px)",
           duration: 1.2,
           ease: "expo.out",
           stagger: 0.08,

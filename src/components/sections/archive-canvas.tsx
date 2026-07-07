@@ -104,7 +104,6 @@ export function ArchiveCanvas({ events }: ArchiveCanvasProps) {
               opacity: 0,
               y: 80,
               rotateX: -50,
-              filter: "blur(8px)",
               duration: 1.1,
               stagger: 0.025,
               ease: "power3.out",

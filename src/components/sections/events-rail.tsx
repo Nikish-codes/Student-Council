@@ -41,13 +41,11 @@ export function EventsRail({ events }: { events: EventItem[] }) {
             opacity: 0,
             y: 60,
             rotateX: -60,
-            filter: "blur(8px)",
           });
           gsap.to(split.chars, {
             opacity: 1,
             y: 0,
             rotateX: 0,
-            filter: "blur(0px)",
             duration: 0.9,
             ease: "expo.out",
             stagger: { each: 0.025 },

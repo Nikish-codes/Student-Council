@@ -198,7 +198,10 @@ export function ClubsExplorer({ clubs }: { clubs: Club[] }) {
       </div>
 
       {/* ── Sticky category nav ── */}
-      <nav className="sticky top-20 z-30 -mx-5 my-12 border-b border-line/10 bg-bg/70 px-5 py-4 backdrop-blur-xl sm:mx-0 sm:rounded-2xl sm:border">
+      {/* backdrop-blur-md, not -xl: the sticky bar re-blurs its backdrop every
+          scroll frame; blur cost scales with radius. md is visually identical
+          over bg/85. */}
+      <nav className="sticky top-20 z-30 -mx-5 my-12 border-b border-line/10 bg-bg/85 px-5 py-4 backdrop-blur-md sm:mx-0 sm:rounded-2xl sm:border">
         <div className="flex items-center gap-6 overflow-x-auto no-scrollbar">
           <span className="kicker shrink-0 text-subtle">Jump to</span>
           {grouped.map((g) => (

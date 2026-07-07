@@ -92,11 +92,10 @@ export function EventsRecap() {
           gsap.set(headline, { opacity: 1 });
           if (!reduced) {
             const split = new SplitText(headline, { type: "words" });
-            gsap.set(split.words, { opacity: 0, y: 40, filter: "blur(8px)" });
+            gsap.set(split.words, { opacity: 0, y: 40 });
             gsap.to(split.words, {
               opacity: 1,
               y: 0,
-              filter: "blur(0px)",
               duration: 0.9,
               ease: "expo.out",
               stagger: 0.06,

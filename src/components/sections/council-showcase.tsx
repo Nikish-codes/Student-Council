@@ -46,13 +46,11 @@ export function CouncilShowcase({
             opacity: 0,
             y: 80,
             rotateX: -70,
-            filter: "blur(10px)",
           });
           gsap.to(split.chars, {
             opacity: 1,
             y: 0,
             rotateX: 0,
-            filter: "blur(0px)",
             duration: 1,
             ease: "expo.out",
             stagger: { each: 0.022 },
@@ -74,7 +72,6 @@ export function CouncilShowcase({
                 scale: 0.85,
                 rotateZ: () => gsap.utils.random(-6, 6),
                 opacity: 0,
-                filter: "blur(20px)",
                 duration: 1.6,
                 ease: "expo.out",
                 scrollTrigger: { trigger: slab, start: "top 80%", once: true },

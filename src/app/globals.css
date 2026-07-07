@@ -366,7 +366,9 @@
   .word,
   .line {
     display: inline-block;
-    will-change: transform, opacity, filter;
+    /* transform + opacity only — nothing animates filter on split text
+       anymore (animated blur re-rasterizes every char layer per frame). */
+    will-change: transform, opacity;
   }
 
   /* ─────────────────────────────────────────────────────────────────

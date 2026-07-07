@@ -80,12 +80,11 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
             });
           } else if (!reduced) {
             const split = new SplitText(headline, { type: "chars,words", charsClass: "char" });
-            gsap.set(split.chars, { opacity: 0, y: 50, rotateX: -50, filter: "blur(8px)" });
+            gsap.set(split.chars, { opacity: 0, y: 50, rotateX: -50 });
             gsap.to(split.chars, {
               opacity: 1,
               y: 0,
               rotateX: 0,
-              filter: "blur(0px)",
               duration: 0.9,
               ease: "expo.out",
               stagger: { each: 0.022 },
@@ -103,7 +102,6 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
               gsap.from(date, {
                 x: -40,
                 opacity: 0,
-                filter: "blur(10px)",
                 duration: 1,
                 ease: "expo.out",
                 scrollTrigger: { trigger: slab, start: "top 85%", once: true },

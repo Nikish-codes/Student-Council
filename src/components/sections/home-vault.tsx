@@ -275,8 +275,8 @@ export function HomeVault({ entries }: { entries?: VaultStory[] }) {
     if (titleSwap) {
       gsap.fromTo(
         titleSwap,
-        { opacity: 0, y: 20, filter: "blur(8px)" },
-        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.7, ease: "power2.out" },
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" },
       );
     }
   }, [active]);
