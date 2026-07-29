@@ -6,7 +6,9 @@ import { db } from "@/db/client";
 import {
   announcements as announcementsT,
   attendees as attendeesT,
+  clubCategories as clubCategoriesT,
   clubs as clubsT,
+  councilGroups as councilGroupsT,
   councilMembers as councilT,
   events as eventsT,
   eventRegistrations as regT,
@@ -20,6 +22,10 @@ import {
 import type {
   Announcement,
   Club,
+  ClubCategory,
+  CouncilCardSize,
+  CouncilGroup,
+  CouncilGroupLayout,
   CouncilMember,
   EventItem,
   FaqItem,
@@ -95,15 +101,113 @@ export const getCouncil = cache(async (): Promise<CouncilMember[]> => {
     linkedin: d.linkedin || undefined,
     message: d.message || undefined,
     quote: d.quote || undefined,
+    memberType: d.memberType === "president" ? "president" : "member",
+    groupId: d.groupId != null ? String(d.groupId) : undefined,
     isPresident: Boolean(d.isPresident),
     featured: Boolean(d.featured),
     order: typeof d.sortOrder === "number" ? d.sortOrder : 99,
   }));
 });
 
+/** A group plus the members in it and any sub-groups beneath it. */
+export type CouncilSection = CouncilGroup & {
+  members: CouncilMember[];
+  children: CouncilSection[];
+};
+
+const CARD_SIZES: CouncilCardSize[] = ["sm", "md", "lg"];
+const LAYOUTS: CouncilGroupLayout[] = ["grid", "hscroll"];
+
+/**
+ * The /council page structure: top-level sections in order, each with its own
+ * members and sub-sections (the Board's VP / officer tiers). The president is
+ * excluded — they get the takeover, not a card.
+ *
+ * Members whose group was deleted or never set are collected into a synthetic
+ * trailing section so nobody silently disappears from the page.
+ */
+export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
+  const [groupRows, members] = await Promise.all([
+    db.query.councilGroups.findMany({ orderBy: asc(councilGroupsT.sortOrder) }),
+    getCouncil(),
+  ]);
+
+  const toGroup = (g: typeof groupRows[number]): CouncilGroup => ({
+    id: String(g.id),
+    title: asString(g.title),
+    blurb: g.blurb || undefined,
+    parentId: g.parentId != null ? String(g.parentId) : undefined,
+    perRow: Math.min(6, Math.max(1, Number(g.perRow) || 4)),
+    cardSize: CARD_SIZES.includes(g.cardSize as CouncilCardSize)
+      ? (g.cardSize as CouncilCardSize)
+      : "md",
+    layout: LAYOUTS.includes(g.layout as CouncilGroupLayout)
+      ? (g.layout as CouncilGroupLayout)
+      : "grid",
+    order: typeof g.sortOrder === "number" ? g.sortOrder : 99,
+  });
+
+  const byGroup = new Map<string, CouncilMember[]>();
+  const ungrouped: CouncilMember[] = [];
+  for (const m of members) {
+    if (m.memberType === "president") continue;
+    if (!m.groupId) {
+      ungrouped.push(m);
+      continue;
+    }
+    const list = byGroup.get(m.groupId);
+    if (list) list.push(m);
+    else byGroup.set(m.groupId, [m]);
+  }
+
+  const groups = groupRows.map(toGroup);
+  const known = new Set(groups.map((g) => g.id));
+  const build = (g: CouncilGroup): CouncilSection => ({
+    ...g,
+    members: byGroup.get(g.id) ?? [],
+    children: groups
+      .filter((c) => c.parentId === g.id)
+      .map(build),
+  });
+
+  const sections = groups.filter((g) => !g.parentId).map(build);
+
+  // Anything pointing at a missing parent would otherwise never render.
+  const orphaned = groups.filter((g) => g.parentId && !known.has(g.parentId));
+  sections.push(...orphaned.map(build));
+
+  const strays = [
+    ...ungrouped,
+    ...members.filter(
+      (m) => m.memberType !== "president" && m.groupId && !known.has(m.groupId),
+    ),
+  ];
+  if (strays.length > 0) {
+    sections.push({
+      id: "ungrouped",
+      title: "The team",
+      perRow: 4,
+      cardSize: "md",
+      layout: "grid",
+      order: 999,
+      members: strays,
+      children: [],
+    });
+  }
+
+  return sections;
+});
+
+/**
+ * The single member who gets the full-width takeover on /council. Prefers the
+ * explicit `memberType`, then falls back to the older `isPresident` flag and
+ * finally a role-name check, so a row that predates the `member_type` backfill
+ * still resolves.
+ */
 export async function getPresident(): Promise<CouncilMember | undefined> {
   const all = await getCouncil();
   return (
+    all.find((m) => m.memberType === "president") ??
     all.find((m) => m.isPresident) ??
     all.find((m) => /president/i.test(m.role) && !/vice/i.test(m.role))
   );
@@ -215,6 +319,25 @@ export const getClubs = cache(async (): Promise<Club[]> => {
     joinUrl: d.joinUrl || undefined,
     tags: Array.isArray(d.tags) ? d.tags : [],
     members: typeof d.members === "number" ? d.members : undefined,
+    categoryId: d.categoryId != null ? String(d.categoryId) : undefined,
+  }));
+});
+
+/**
+ * The /clubs headings, in page order. Categories with no clubs in them are kept
+ * here — the explorer drops the empty ones, but the panel needs the full list.
+ */
+export const getClubCategories = cache(async (): Promise<ClubCategory[]> => {
+  const rows = await db
+    .select()
+    .from(clubCategoriesT)
+    .orderBy(asc(clubCategoriesT.sortOrder), asc(clubCategoriesT.id));
+  return rows.map((d) => ({
+    id: String(d.id),
+    slug: asString(d.slug),
+    label: asString(d.label),
+    blurb: d.blurb || undefined,
+    order: d.sortOrder,
   }));
 });
 

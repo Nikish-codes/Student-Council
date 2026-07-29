@@ -3,12 +3,13 @@ import * as Accordion from "@radix-ui/react-accordion";
 import { ChevronDown } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 import { CouncilShowcase } from "@/components/sections/council-showcase";
-import { getCouncil, getFaqs, getPresident } from "@/lib/content";
+import { getCouncil, getCouncilSections, getFaqs, getPresident } from "@/lib/content";
+import { numberWord } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Council Team",
   description:
-    "The 2026/27 Woxsen Student Council — eight people, one council, one job: every voice gets heard.",
+    "The 2026/27 Woxsen Student Council — one council, one job: every voice gets heard.",
 };
 
 export const revalidate = 60;
@@ -16,8 +17,8 @@ export const revalidate = 60;
 export default async function CouncilPage() {
   const members = await getCouncil();
   const president = await getPresident();
+  const sections = await getCouncilSections();
   const faqs = await getFaqs("council");
-  const others = members.filter((m) => m.id !== president?.id);
 
   return (
     <div className="pt-32 sm:pt-40">
@@ -32,15 +33,15 @@ export default async function CouncilPage() {
             <span className="block italic text-accent">behind the work.</span>
           </h1>
           <p className="mt-10 max-w-2xl text-balance text-lg text-muted">
-            Eight students. One council. One job — to make sure every voice on
-            this campus is heard, every event runs well, and every concern
-            reaches the right desk.
+            {numberWord(members.length)} students. One council. One job — to
+            make sure every voice on this campus is heard, every event runs
+            well, and every concern reaches the right desk.
           </p>
         </Reveal>
       </section>
 
       <div className="mt-24 sm:mt-32">
-        <CouncilShowcase president={president} members={others} />
+        <CouncilShowcase president={president} sections={sections} />
       </div>
 
       <section className="container mt-40 mb-24 sm:mt-40">

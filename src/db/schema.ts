@@ -32,6 +32,9 @@ import { relations } from "drizzle-orm";
 import type {
   CampusSettings,
   ClosingCta,
+  CouncilCardSize,
+  CouncilGroupLayout,
+  CouncilMemberType,
   EventCategory,
   GrievanceCategory,
   HomepageHero,
@@ -117,6 +120,24 @@ export const media = sqliteTable("mp_media", {
 
 // ─────────────────────────────────── clubs ───────────────────────────────────
 
+/**
+ * The headings on /clubs. Previously a hardcoded array in the explorer that
+ * bucketed clubs by their first matching tag; now a table so categories can be
+ * renamed, reordered and reassigned from the panel. `tags` stays as free-form
+ * keywords — the category is the one authoritative grouping.
+ */
+export const clubCategories = sqliteTable("mp_club_categories", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  slug: text("slug").notNull(),
+  label: text("label").notNull(),
+  blurb: text("blurb"),
+  sortOrder: integer("sort_order").notNull().default(99),
+  createdAt,
+  updatedAt,
+}, (t) => ({
+  slugIdx: uniqueIndex("mp_club_categories_slug_idx").on(t.slug),
+}));
+
 export const clubs = sqliteTable("mp_clubs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
@@ -126,6 +147,7 @@ export const clubs = sqliteTable("mp_clubs", {
   joinUrl: text("join_url"),
   tags: text("tags", { mode: "json" }).$type<string[]>().default([]),
   members: integer("members"),
+  categoryId: integer("category_id").references(() => clubCategories.id),
   leadId: integer("lead_id"), // -> users.id (circular; via relations)
   createdAt,
   updatedAt,
@@ -238,6 +260,29 @@ export const faqs = sqliteTable("mp_faqs", {
   updatedAt,
 });
 
+// ──────────────────────────────── council groups ─────────────────────────────
+// Sections of the /council page ("The Board", "Core Team", "SCFC", …). A row
+// with a `parentId` is a SUB-group rendered under its parent's heading — that's
+// how the Board shows 3 large VP cards and then 4 smaller officer cards while
+// staying one section. Self-referencing FK, so the column needs the explicit
+// AnySQLiteColumn return type.
+
+export const councilGroups = sqliteTable("mp_council_groups", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  blurb: text("blurb"),
+  parentId: integer("parent_id").references(
+    (): AnySQLiteColumn => councilGroups.id,
+  ),
+  // How many cards per row on desktop (1-6); narrower breakpoints step down.
+  perRow: integer("per_row").notNull().default(4),
+  cardSize: text("card_size").$type<CouncilCardSize>().notNull().default("md"),
+  layout: text("layout").$type<CouncilGroupLayout>().notNull().default("grid"),
+  sortOrder: integer("sort_order").notNull().default(99),
+  createdAt,
+  updatedAt,
+});
+
 // ──────────────────────────────── council members ────────────────────────────
 
 export const councilMembers = sqliteTable("mp_council_members", {
@@ -250,6 +295,17 @@ export const councilMembers = sqliteTable("mp_council_members", {
   linkedin: text("linkedin"),
   message: text("message"),
   quote: text("quote"),
+  // Layout tier: "president" gets the full-width takeover, "member" gets a card
+  // in the grid. `isPresident` predates this column and is written in sync by
+  // the panel (see council/actions.ts) so a rollback stays a `git revert`.
+  memberType: text("member_type")
+    .$type<CouncilMemberType>()
+    .notNull()
+    .default("member"),
+  // Which section of /council this member appears in. Null → ungrouped, which
+  // the page collects into a trailing "The team" section so a member is never
+  // silently dropped just because nobody picked a group for them.
+  groupId: integer("group_id").references(() => councilGroups.id),
   isPresident: integer("is_president", { mode: "boolean" })
     .notNull()
     .default(false),
@@ -418,9 +474,17 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   ledClubs: many(clubs),
 }));
 
+export const clubCategoriesRelations = relations(clubCategories, ({ many }) => ({
+  clubs: many(clubs),
+}));
+
 export const clubsRelations = relations(clubs, ({ one, many }) => ({
   logo: one(media, { fields: [clubs.logoId], references: [media.id] }),
   lead: one(users, { fields: [clubs.leadId], references: [users.id] }),
+  category: one(clubCategories, {
+    fields: [clubs.categoryId],
+    references: [clubCategories.id],
+  }),
   events: many(events),
 }));
 
@@ -437,8 +501,22 @@ export const recapsRelations = relations(recaps, ({ one }) => ({
   heroMedia: one(media, { fields: [recaps.heroMediaId], references: [media.id] }),
 }));
 
+export const councilGroupsRelations = relations(councilGroups, ({ one, many }) => ({
+  parent: one(councilGroups, {
+    relationName: "groupParent",
+    fields: [councilGroups.parentId],
+    references: [councilGroups.id],
+  }),
+  children: many(councilGroups, { relationName: "groupParent" }),
+  members: many(councilMembers),
+}));
+
 export const councilMembersRelations = relations(councilMembers, ({ one }) => ({
   photo: one(media, { fields: [councilMembers.photoId], references: [media.id] }),
+  group: one(councilGroups, {
+    fields: [councilMembers.groupId],
+    references: [councilGroups.id],
+  }),
 }));
 
 export const highlightsRelations = relations(highlights, ({ one }) => ({

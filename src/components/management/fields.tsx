@@ -71,6 +71,7 @@ export function NumberField(props: {
   hint?: string;
   defaultValue?: number | null;
   min?: number;
+  max?: number;
   required?: boolean;
 }) {
   const { label, hint, defaultValue, ...rest } = props;

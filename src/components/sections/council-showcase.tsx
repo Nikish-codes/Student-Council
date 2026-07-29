@@ -1,23 +1,54 @@
 "use client";
 
 import * as React from "react";
-import { Mail, ExternalLink } from "lucide-react";
 import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
+import { CouncilCard } from "@/components/sections/council-card";
 import { CutoutPortrait } from "@/components/ui/cutout-portrait";
+import { MemberLinks } from "@/components/sections/member-links";
 import { cn } from "@/lib/utils";
+import type { CouncilSection } from "@/lib/content";
 import type { CouncilMember } from "@/lib/schemas";
 
 /**
- * Cinematic council showcase — president takeover + alternating
- * editorial slabs where members "pop out" as cutout PNGs over the
- * typography. No square photos, no card frames.
+ * The /council page body: the president's full-width takeover, then one section
+ * per council group in order — The Board (with its VP / officer sub-tiers), Core
+ * Team, School Representatives, SCFC, and the club presidents as a single
+ * horizontally-scrolling row.
+ *
+ * Sections, their nesting, their cards-per-row and card size all come from
+ * mp_council_groups, so the shape of this page is editable in the panel rather
+ * than hard-coded here.
+ *
+ * Motion budget: one staggered fade-up per grid and nothing that keeps running
+ * afterwards (an earlier version floated every portrait forever).
  */
+
+/**
+ * Tailwind needs literal class names, so per-row counts map to fixed column
+ * ladders rather than an interpolated `grid-cols-${n}`.
+ */
+const COLS: Record<number, string> = {
+  1: "grid-cols-1",
+  2: "grid-cols-1 sm:grid-cols-2",
+  3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+  4: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
+  5: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5",
+  6: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6",
+};
+
+/** Fixed track widths for a horizontally-scrolling row. */
+const HSCROLL_W: Record<string, string> = {
+  sm: "w-[190px] sm:w-[210px]",
+  md: "w-[240px] sm:w-[260px]",
+  lg: "w-[280px] sm:w-[320px]",
+};
+
 export function CouncilShowcase({
   president,
-  members,
+  sections,
 }: {
   president?: CouncilMember;
-  members: CouncilMember[];
+  sections: CouncilSection[];
 }) {
   const root = React.useRef<HTMLDivElement>(null);
 
@@ -42,11 +73,7 @@ export function CouncilShowcase({
             return;
           }
           const split = new SplitText(el, { type: "chars,words", charsClass: "char" });
-          gsap.set(split.chars, {
-            opacity: 0,
-            y: 80,
-            rotateX: -70,
-          });
+          gsap.set(split.chars, { opacity: 0, y: 80, rotateX: -70 });
           gsap.to(split.chars, {
             opacity: 1,
             y: 0,
@@ -58,60 +85,33 @@ export function CouncilShowcase({
           });
         });
 
-        // ── Member slab entries ──
-        root.current?.querySelectorAll<HTMLElement>("[data-member]").forEach((slab) => {
-          const portrait = slab.querySelector<HTMLElement>("[data-portrait]");
-          const meta = slab.querySelectorAll<HTMLElement>("[data-meta-row] > *");
-          const numeral = slab.querySelector<HTMLElement>("[data-numeral]");
+        // ── Section headings: one fade-rise each ──
+        root.current?.querySelectorAll<HTMLElement>("[data-section-title]").forEach((el) => {
+          gsap.set(el, { opacity: 1 });
+          if (reduced) return;
+          gsap.from(el, {
+            opacity: 0,
+            y: 28,
+            duration: 0.8,
+            ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 88%", once: true },
+          });
+        });
 
-          if (portrait) {
-            gsap.set(portrait, { opacity: 1 });
-            if (!reduced) {
-              gsap.from(portrait, {
-                y: 80,
-                scale: 0.85,
-                rotateZ: () => gsap.utils.random(-6, 6),
-                opacity: 0,
-                duration: 1.6,
-                ease: "expo.out",
-                scrollTrigger: { trigger: slab, start: "top 80%", once: true },
-              });
-
-              // Floaty idle once it lands
-              gsap.to(portrait, {
-                y: "+=14",
-                duration: 4 + Math.random(),
-                ease: "sine.inOut",
-                yoyo: true,
-                repeat: -1,
-                delay: 1.6,
-              });
-            }
-          }
-
-          if (meta.length) {
-            gsap.set(meta, { opacity: 1 });
-            if (!reduced) {
-              gsap.from(meta, {
-                y: 30,
-                opacity: 0,
-                duration: 0.9,
-                ease: "expo.out",
-                stagger: 0.08,
-                scrollTrigger: { trigger: slab, start: "top 80%", once: true },
-              });
-            }
-          }
-
-          if (numeral && !reduced) {
-            gsap.from(numeral, {
-              x: -40,
-              opacity: 0,
-              duration: 1.2,
-              ease: "expo.out",
-              scrollTrigger: { trigger: slab, start: "top 85%", once: true },
-            });
-          }
+        // ── Each card track: ONE staggered fade-up, nothing per-card ──
+        root.current?.querySelectorAll<HTMLElement>("[data-card-track]").forEach((track) => {
+          const cards = track.querySelectorAll("[data-council-card]");
+          if (!cards.length) return;
+          gsap.set(cards, { opacity: 1 });
+          if (reduced) return;
+          gsap.from(cards, {
+            opacity: 0,
+            y: 28,
+            duration: 0.7,
+            ease: "power3.out",
+            stagger: 0.05,
+            scrollTrigger: { trigger: track, start: "top 88%", once: true },
+          });
         });
 
         // ── Cursor parallax on the president cutout ──
@@ -145,7 +145,6 @@ export function CouncilShowcase({
           data-president-stage
           className="relative overflow-hidden border-b border-line/10"
         >
-          {/* Gigantic ghost word behind */}
           <span
             aria-hidden
             className="pointer-events-none absolute -top-4 left-1/2 -translate-x-1/2 select-none whitespace-nowrap font-display text-[clamp(2.5rem,14vw,5rem)] italic leading-none text-ink/[0.045] sm:-top-10 sm:left-0 sm:translate-x-0 sm:text-[clamp(10rem,22vw,28rem)] sm:text-ink/[0.035]"
@@ -154,10 +153,8 @@ export function CouncilShowcase({
           </span>
 
           <div className="container relative grid grid-cols-1 items-end gap-10 pb-0 pt-24 sm:pt-32 lg:grid-cols-12 lg:gap-8">
-            {/* Quote column */}
             <div className="relative z-10 lg:col-span-7">
               <div className="mb-8 flex items-center gap-3">
-                <span className="font-mono text-xs text-subtle">01 / 08</span>
                 <span className="h-px w-14 bg-line/30" aria-hidden />
                 <span className="kicker">Message from the President</span>
               </div>
@@ -172,32 +169,10 @@ export function CouncilShowcase({
                   <p className="display text-3xl">{president.name}</p>
                   <p className="mt-2 kicker">{president.role} · {president.program}</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  {president.email && (
-                    <a
-                      href={`mailto:${president.email}`}
-                      aria-label={`Email ${president.name}`}
-                      className="grid h-10 w-10 place-items-center rounded-full border border-line/15 transition-colors hover:border-line/40 hover:text-ink"
-                    >
-                      <Mail className="h-4 w-4" />
-                    </a>
-                  )}
-                  {president.linkedin && (
-                    <a
-                      href={president.linkedin}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={`${president.name} on LinkedIn`}
-                      className="grid h-10 w-10 place-items-center rounded-full border border-line/15 transition-colors hover:border-line/40 hover:text-ink"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  )}
-                </div>
+                <MemberLinks member={president} size="lg" className="gap-3" />
               </div>
             </div>
 
-            {/* Cutout column — portrait pops out, no box */}
             <div className="relative lg:col-span-5">
               <div
                 data-president-portrait
@@ -216,134 +191,89 @@ export function CouncilShowcase({
         </section>
       )}
 
-      {/* ───────────── Member roll — alternating cutout slabs ───────────── */}
-      <section className="relative">
-        <div className="container py-24">
-          <div className="mb-16 flex items-end justify-between gap-6">
-            <div>
-              <span className="kicker">The team</span>
-              <h2
-                data-split
-                className="display mt-6 text-5xl leading-[0.92] sm:text-7xl"
-                style={{ perspective: "800px" }}
-              >
-                Eight people. <span className="italic text-accent">One council.</span>
-              </h2>
+      {/* ───────────── Grouped sections ───────────── */}
+      {sections.map((section) => (
+        <Section key={section.id} section={section} />
+      ))}
+    </div>
+  );
+}
+
+/** One top-level section: heading, its own members, then any sub-sections. */
+function Section({ section }: { section: CouncilSection }) {
+  // A section with nobody in it renders nothing at all — including its heading.
+  // Same for an empty sub-group, so seeded-but-unfilled sections ("Core Team",
+  // "SCFC") stay invisible until someone is actually assigned to them.
+  const hasOwn = section.members.length > 0;
+  const kids = section.children.filter((c) => c.members.length > 0);
+  if (!hasOwn && kids.length === 0) return null;
+
+  return (
+    <section className="border-t border-line/10 py-20 sm:py-24">
+      <div className="container">
+        <div data-section-title className="mb-12">
+          <span className="h-px w-14 bg-line/30 block" aria-hidden />
+          <h2 className="display mt-6 text-4xl leading-[0.95] sm:text-6xl">
+            {section.title}
+          </h2>
+          {section.blurb && (
+            <p className="mt-4 max-w-2xl text-pretty text-muted">
+              {section.blurb}
+            </p>
+          )}
+        </div>
+
+        {hasOwn && <Track section={section} />}
+
+        {kids.map((child) => (
+          <div key={child.id} className={cn(hasOwn && "mt-14")}>
+            <div data-section-title className="mb-6 flex items-center gap-3">
+              <span className="h-px w-10 bg-line/25" aria-hidden />
+              <h3 className="kicker text-ink">{child.title}</h3>
             </div>
-            <span className="hidden font-mono text-xs text-subtle sm:block">
-              {members.length.toString().padStart(2, "0")} / 08
-            </span>
+            {child.blurb && (
+              <p className="mb-6 max-w-2xl text-pretty text-sm text-muted">
+                {child.blurb}
+              </p>
+            )}
+            <Track section={child} />
           </div>
-        </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
-        <div className="group/wall">
-          {members.map((m, i) => {
-            const isOdd = i % 2 === 1;
-            return (
-              <article
-                key={m.id}
-                data-member
-                className={cn(
-                  "relative overflow-hidden border-t border-line/10 py-20 sm:py-28",
-                  // Hover-dim siblings
-                  "transition-opacity duration-500",
-                  "hover:!opacity-100 group-hover/wall:opacity-40",
-                )}
-              >
-                {/* Giant numeral watermark */}
-                <span
-                  data-numeral
-                  aria-hidden
-                  className={cn(
-                    "pointer-events-none absolute top-8 select-none font-mono leading-none text-accent/[0.08]",
-                    "text-[clamp(5rem,22vw,10rem)] sm:text-[16rem]",
-                    isOdd ? "right-4 sm:right-10" : "left-4 sm:left-10",
-                  )}
-                >
-                  {String(i + 2).padStart(2, "0")}
-                </span>
+/** A group's members, as either a wrapping grid or one scrolling row. */
+function Track({ section }: { section: CouncilSection }) {
+  if (section.members.length === 0) return null;
 
-                <div
-                  className={cn(
-                    "container relative grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-8",
-                  )}
-                >
-                  {/* Cutout */}
-                  <div
-                    className={cn(
-                      "relative lg:col-span-5",
-                      isOdd && "lg:order-2",
-                    )}
-                  >
-                    <div
-                      data-portrait
-                      className="relative mx-auto h-[55vh] w-full max-w-[440px] sm:h-[60vh]"
-                      style={{ willChange: "transform" }}
-                    >
-                      <CutoutPortrait
-                        src={m.photo}
-                        alt={m.name}
-                        initials={initialsOf(m.name)}
-                        shadow="soft"
-                      />
-                    </div>
-                  </div>
+  if (section.layout === "hscroll") {
+    return (
+      <div
+        data-card-track
+        className="no-scrollbar mask-fade-x -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 sm:-mx-0 sm:px-0"
+      >
+        {section.members.map((m, i) => (
+          <div
+            key={m.id}
+            className={cn("shrink-0 snap-start", HSCROLL_W[section.cardSize])}
+          >
+            <CouncilCard member={m} index={i} size={section.cardSize} />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
-                  {/* Quote + meta */}
-                  <div
-                    data-meta-row
-                    className={cn(
-                      "relative z-10 flex flex-col gap-8 lg:col-span-7",
-                      isOdd && "lg:order-1",
-                    )}
-                  >
-                    <div className="flex items-center gap-4">
-                      <span className="font-mono text-xs text-subtle">
-                        0{i + 2} / 08
-                      </span>
-                      <span className="h-px w-14 bg-line/20" aria-hidden />
-                      <span className="kicker">{m.role}</span>
-                    </div>
-
-                    <blockquote className="display text-balance text-3xl leading-[1.15] text-ink sm:text-4xl lg:text-5xl">
-                      &ldquo;{m.quote ?? "Working for the campus, every day."}&rdquo;
-                    </blockquote>
-
-                    <div className="flex flex-wrap items-end justify-between gap-6 border-t border-line/10 pt-8">
-                      <div>
-                        <p className="display text-2xl text-ink sm:text-3xl">{m.name}</p>
-                        <p className="mt-2 kicker">{m.program}</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        {m.email && (
-                          <a
-                            href={`mailto:${m.email}`}
-                            aria-label={`Email ${m.name}`}
-                            className="grid h-10 w-10 place-items-center rounded-full border border-line/15 transition-colors hover:border-line/40 hover:text-ink"
-                          >
-                            <Mail className="h-4 w-4" />
-                          </a>
-                        )}
-                        {m.linkedin && (
-                          <a
-                            href={m.linkedin}
-                            target="_blank"
-                            rel="noreferrer"
-                            aria-label={`${m.name} on LinkedIn`}
-                            className="grid h-10 w-10 place-items-center rounded-full border border-line/15 transition-colors hover:border-line/40 hover:text-ink"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      </section>
+  return (
+    <div
+      data-card-track
+      className={cn("grid gap-4", COLS[section.perRow] ?? COLS[4])}
+    >
+      {section.members.map((m, i) => (
+        <CouncilCard key={m.id} member={m} index={i} size={section.cardSize} />
+      ))}
     </div>
   );
 }

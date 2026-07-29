@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { clubs as t, users as usersT } from "@/db/schema";
+import { clubCategories as catT, clubs as t, users as usersT } from "@/db/schema";
 import { requireOps } from "@/lib/rbac";
 import { mediaOptions } from "@/lib/media-options";
 import { EditorShell } from "@/components/management/page-header";
@@ -12,10 +12,14 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
   await requireOps();
   const { id } = await params;
   const isNew = id === "new";
-  const [row, media, leads] = await Promise.all([
+  const [row, media, leads, cats] = await Promise.all([
     isNew ? null : db.query.clubs.findFirst({ where: eq(t.id, Number(id)) }),
     mediaOptions(),
     db.select({ id: usersT.id, name: usersT.name }).from(usersT).orderBy(asc(usersT.name)),
+    db
+      .select({ id: catT.id, label: catT.label })
+      .from(catT)
+      .orderBy(asc(catT.sortOrder), asc(catT.id)),
   ]);
   if (!isNew && !row) notFound();
   const action = saveClub.bind(null, isNew ? null : Number(id));
@@ -32,7 +36,17 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
         <TextField name="joinUrl" label="Join URL" hint="optional" defaultValue={row?.joinUrl} />
         <NumberField name="members" label="Members" hint="optional" min={0} defaultValue={row?.members ?? null} />
       </div>
-      <TagsField name="tags" label="Tags" defaultValue={row?.tags} />
+      <SelectField
+        name="categoryId"
+        label="Category"
+        hint="the heading this club sits under on /clubs"
+        defaultValue={row?.categoryId ? String(row.categoryId) : ""}
+        options={[
+          { value: "", label: "— uncategorised —" },
+          ...cats.map((c) => ({ value: String(c.id), label: c.label })),
+        ]}
+      />
+      <TagsField name="tags" label="Tags" hint="keywords · not the category" defaultValue={row?.tags} />
       <SelectField
         name="leadId"
         label="Club lead"

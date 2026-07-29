@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/motion/reveal";
 import { ClubsExplorer } from "@/components/sections/clubs-explorer";
-import { getClubs } from "@/lib/content";
+import { getClubCategories, getClubs } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Student Clubs",
@@ -10,7 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default async function ClubsPage() {
-  const clubs = await getClubs();
+  const [clubs, categories] = await Promise.all([
+    getClubs(),
+    getClubCategories(),
+  ]);
   return (
     <div className="pt-32 sm:pt-40">
       <section className="container">
@@ -32,7 +35,7 @@ export default async function ClubsPage() {
       </section>
 
       <section className="container mt-32 mb-32">
-        <ClubsExplorer clubs={clubs} />
+        <ClubsExplorer clubs={clubs} categories={categories} />
       </section>
     </div>
   );

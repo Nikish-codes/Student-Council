@@ -5,34 +5,39 @@ import { gsap, useGSAP } from "@/lib/gsap";
 import { ClubCard } from "@/components/sections/club-card";
 import { CountUp } from "@/components/motion/count-up";
 import { cn } from "@/lib/utils";
-import type { Club } from "@/lib/schemas";
+import type { Club, ClubCategory } from "@/lib/schemas";
 
-// Primary category derived from the first tag bucket.
-const CATEGORY_BUCKETS: { key: string; label: string; matchTags: string[] }[] = [
-  { key: "tech", label: "Tech & Engineering", matchTags: ["Tech"] },
-  { key: "business", label: "Business & Strategy", matchTags: ["Business"] },
-  { key: "creative", label: "Creative & Design", matchTags: ["Creative"] },
-  { key: "cultural", label: "Cultural & Performing", matchTags: ["Cultural"] },
-  { key: "impact", label: "Impact & Service", matchTags: ["Impact"] },
-  { key: "academic", label: "Academic & Research", matchTags: ["Academic"] },
-];
+/** Trailing bucket for clubs that haven't been filed under a category yet. */
+const UNCATEGORISED = {
+  key: "other",
+  label: "More Clubs",
+  blurb: undefined as string | undefined,
+};
 
-function bucketOf(club: Club) {
-  for (const b of CATEGORY_BUCKETS) {
-    if (club.tags.some((t) => b.matchTags.includes(t))) return b.key;
-  }
-  return "other";
-}
-
-export function ClubsExplorer({ clubs }: { clubs: Club[] }) {
+export function ClubsExplorer({
+  clubs,
+  categories,
+}: {
+  clubs: Club[];
+  categories: ClubCategory[];
+}) {
   const root = React.useRef<HTMLDivElement>(null);
 
+  // Categories come from mp_club_categories in panel-defined order; anything
+  // unassigned falls into one trailing group rather than disappearing.
   const grouped = React.useMemo(() => {
-    return CATEGORY_BUCKETS.map((b) => ({
-      ...b,
-      items: clubs.filter((c) => bucketOf(c) === b.key),
-    })).filter((g) => g.items.length > 0);
-  }, [clubs]);
+    const sections = categories.map((c) => ({
+      key: c.slug,
+      label: c.label,
+      blurb: c.blurb,
+      items: clubs.filter((club) => club.categoryId === c.id),
+    }));
+    const orphans = clubs.filter(
+      (club) => !club.categoryId || !categories.some((c) => c.id === club.categoryId),
+    );
+    if (orphans.length) sections.push({ ...UNCATEGORISED, items: orphans });
+    return sections.filter((g) => g.items.length > 0);
+  }, [clubs, categories]);
 
   const totalMembers = clubs.reduce((acc, c) => acc + (c.members ?? 0), 0);
 
@@ -205,6 +210,11 @@ export function ClubsExplorer({ clubs }: { clubs: Club[] }) {
               >
                 {g.label}.
               </h2>
+              {g.blurb && (
+                <p className="mt-6 max-w-2xl text-pretty text-muted">
+                  {g.blurb}
+                </p>
+              )}
             </header>
 
             <div

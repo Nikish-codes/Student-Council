@@ -1,16 +1,26 @@
 import { and, eq, ne } from "drizzle-orm";
 import { db } from "@/db/client";
-import { clubs as clubsT, events as eventsT, recaps as recapsT } from "@/db/schema";
+import {
+  clubCategories as clubCategoriesT,
+  clubs as clubsT,
+  events as eventsT,
+  recaps as recapsT,
+} from "@/db/schema";
 import { slugify } from "@/lib/slugify";
 
 export { slugify };
 
-type SlugTable = "events" | "recaps" | "clubs";
+type SlugTable = "events" | "recaps" | "clubs" | "clubCategories";
 
 const SLUG_TABLES = {
   events: { t: eventsT, slug: eventsT.slug, id: eventsT.id },
   recaps: { t: recapsT, slug: recapsT.slug, id: recapsT.id },
   clubs: { t: clubsT, slug: clubsT.slug, id: clubsT.id },
+  clubCategories: {
+    t: clubCategoriesT,
+    slug: clubCategoriesT.slug,
+    id: clubCategoriesT.id,
+  },
 } as const;
 
 /**

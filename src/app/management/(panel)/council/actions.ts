@@ -10,12 +10,17 @@ import { requireOps, requireRole } from "@/lib/rbac";
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 
 function bust() {
-  ["/", "/council", "/management/council"].forEach((p) => revalidatePath(p));
+  ["/", "/council", "/management/council", "/management/council/groups"].forEach(
+    (p) => revalidatePath(p),
+  );
 }
 
 export async function saveCouncil(id: number | null, fd: FormData) {
   await requireOps();
-  const isPresident = fd.get("isPresident") === "on";
+  // `memberType` is the source of truth; `isPresident` is written in sync so the
+  // older flag never drifts and a rollback stays a plain `git revert`.
+  const memberType = s(fd, "memberType") === "president" ? "president" : "member";
+  const isPresident = memberType === "president";
   const values = {
     name: s(fd, "name"),
     role: s(fd, "role"),
@@ -25,6 +30,8 @@ export async function saveCouncil(id: number | null, fd: FormData) {
     linkedin: s(fd, "linkedin") || null,
     message: s(fd, "message") || null,
     quote: s(fd, "quote") || null,
+    memberType: memberType as "president" | "member",
+    groupId: s(fd, "groupId") ? Number(s(fd, "groupId")) : null,
     isPresident,
     featured: fd.get("featured") === "on",
     sortOrder: Number(s(fd, "sortOrder") || 99),
@@ -38,9 +45,12 @@ export async function saveCouncil(id: number | null, fd: FormData) {
     savedId = row.id;
   }
 
-  // Enforce a single president: clear the flag on everyone else.
+  // Enforce a single president: demote everyone else to a plain member.
   if (isPresident && savedId) {
-    await db.update(t).set({ isPresident: false }).where(ne(t.id, savedId));
+    await db
+      .update(t)
+      .set({ memberType: "member", isPresident: false })
+      .where(ne(t.id, savedId));
   }
 
   bust();

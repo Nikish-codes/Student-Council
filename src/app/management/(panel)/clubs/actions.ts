@@ -13,7 +13,9 @@ const list = (fd: FormData, k: string) =>
   s(fd, k).split(",").map((x) => x.trim()).filter(Boolean);
 
 function bust() {
-  ["/", "/clubs", "/management/clubs"].forEach((p) => revalidatePath(p));
+  ["/", "/clubs", "/management/clubs", "/management/clubs/categories"].forEach(
+    (p) => revalidatePath(p),
+  );
 }
 
 export async function saveClub(id: number | null, fd: FormData) {
@@ -25,6 +27,7 @@ export async function saveClub(id: number | null, fd: FormData) {
     joinUrl: s(fd, "joinUrl") || null,
     tags: list(fd, "tags"),
     members: s(fd, "members") ? Number(s(fd, "members")) : null,
+    categoryId: s(fd, "categoryId") ? Number(s(fd, "categoryId")) : null,
     leadId: s(fd, "leadId") ? Number(s(fd, "leadId")) : null,
   };
 
