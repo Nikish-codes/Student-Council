@@ -17,6 +17,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { getEvent, getEvents } from "@/lib/content";
 import { EventRegistration } from "@/components/sections/event-registration";
 import { cn, formatDate } from "@/lib/utils";
+import { getEventTiming } from "@/lib/event-status";
 
 // ISR: "Live now" / "In N days" status is time-sensitive.
 export const revalidate = 60;
@@ -65,11 +66,7 @@ export default async function EventDetailPage({
   const startDate = new Date(event.date);
   const endDate = event.endDate ? new Date(event.endDate) : null;
   const now = Date.now();
-  const startMs = +startDate;
-  const endMs = endDate ? +endDate : startMs + 86_400_000;
-  const isLive = now >= startMs && now <= endMs;
-  const isPast = now > endMs;
-  const daysAway = Math.round((startMs - now) / 86_400_000);
+  const { isLive, isPast, daysAway } = getEventTiming(event, now);
 
   const dayNum = String(startDate.getDate()).padStart(2, "0");
   const monthShort = startDate
@@ -120,9 +117,7 @@ export default async function EventDetailPage({
                           : "bg-muted",
                   )}
                   style={
-                    isLive
-                      ? { boxShadow: "0 0 12px currentColor" }
-                      : undefined
+                    isLive ? { boxShadow: "0 0 12px currentColor" } : undefined
                   }
                   aria-hidden
                 />
@@ -204,7 +199,11 @@ export default async function EventDetailPage({
           {/* Quick-fact strip */}
           <Reveal delay={0.05}>
             <div className="mt-16 grid gap-px overflow-hidden rounded-2xl border border-line/10 bg-line/[0.04] sm:grid-cols-3">
-              <Fact icon={Calendar} label="Date" value={formatDate(event.date)} />
+              <Fact
+                icon={Calendar}
+                label="Date"
+                value={formatDate(event.date)}
+              />
               <Fact icon={MapPin} label="Venue" value={event.venue} />
               <Fact
                 icon={Users}
@@ -219,7 +218,14 @@ export default async function EventDetailPage({
               <div className="mt-16">
                 <span className="kicker">Event video</span>
                 <div className="mt-6 overflow-hidden rounded-3xl border border-line/15 bg-black/80 p-0 sm:p-3">
-                  <EventVideo src={event.videoUrl} title={event.title} poster={event.banner} autoPlay controls={false} fit="contain" />
+                  <EventVideo
+                    src={event.videoUrl}
+                    title={event.title}
+                    poster={event.banner}
+                    autoPlay
+                    controls={false}
+                    fit="contain"
+                  />
                 </div>
               </div>
             </Reveal>
@@ -234,7 +240,11 @@ export default async function EventDetailPage({
               <p className="mt-3 flex items-center gap-2 text-sm text-ink">
                 <Calendar className="h-3.5 w-3.5 text-muted" />
                 {formatDate(event.date)}
-                {event.endDate && ` — ${formatDate(event.endDate)}`}
+                {event.endDate
+                  ? ` — ${formatDate(event.endDate)}`
+                  : isLive
+                    ? " · Ongoing"
+                    : " · No end date"}
               </p>
             </div>
             <div>
@@ -301,7 +311,6 @@ export default async function EventDetailPage({
           </div>
         </aside>
       </div>
-
     </article>
   );
 }

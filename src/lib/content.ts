@@ -1,9 +1,21 @@
 import "server-only";
 import { cache } from "react";
-import { and, asc, desc, eq, gte, ne, or, inArray, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  inArray,
+  isNull,
+  ne,
+  or,
+  sql,
+} from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { attachCoLeads } from "@/lib/council";
+import { isEventPast } from "@/lib/event-status";
 import {
   announcements as announcementsT,
   attendees as attendeesT,
@@ -147,7 +159,7 @@ export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
     getCouncil(),
   ]);
 
-  const toGroup = (g: typeof groupRows[number]): CouncilGroup => ({
+  const toGroup = (g: (typeof groupRows)[number]): CouncilGroup => ({
     id: String(g.id),
     title: asString(g.title),
     blurb: g.blurb || undefined,
@@ -193,9 +205,7 @@ export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
   const build = (g: CouncilGroup): CouncilSection => ({
     ...g,
     members: byGroup.get(g.id) ?? [],
-    children: groups
-      .filter((c) => c.parentId === g.id)
-      .map(build),
+    children: groups.filter((c) => c.parentId === g.id).map(build),
   });
 
   const sections = groups.filter((g) => !g.parentId).map(build);
@@ -246,6 +256,22 @@ export async function getPresident(): Promise<CouncilMember | undefined> {
     all.find((m) => /president/i.test(m.role) && !/vice/i.test(m.role))
   );
 }
+
+/** The wide portrait selected for the council page in the management panel. */
+export const getCouncilGroupPhoto = cache(
+  async (): Promise<string | undefined> => {
+    const settings = await db.query.siteSettings.findFirst({
+      columns: { id: true },
+      with: {
+        councilGroupPhoto: {
+          columns: { url: true },
+        },
+      },
+    });
+
+    return settings?.councilGroupPhoto?.url || undefined;
+  },
+);
 
 // ─────────────── events ───────────────
 
@@ -316,7 +342,11 @@ export async function getUpcomingEvents(limit = 3): Promise<EventItem[]> {
   const rows = await db.query.events.findMany({
     where: and(
       eq(eventsT.status, "published"),
-      or(gte(eventsT.date, yesterday), gte(eventsT.endDate, now)),
+      or(
+        isNull(eventsT.endDate),
+        gte(eventsT.date, yesterday),
+        gte(eventsT.endDate, now),
+      ),
     ),
     with: { banner: true },
     orderBy: asc(eventsT.date),
@@ -328,14 +358,7 @@ export async function getUpcomingEvents(limit = 3): Promise<EventItem[]> {
 export async function getPastEvents(): Promise<EventItem[]> {
   const now = Date.now();
   const all = await getEvents();
-  return all
-    .filter((e) => {
-      const end = e.endDate
-        ? +new Date(e.endDate)
-        : +new Date(e.date) + 86_400_000;
-      return end < now;
-    })
-    .reverse();
+  return all.filter((e) => isEventPast(e, now)).reverse();
 }
 
 // ─────────────── clubs ───────────────
@@ -377,21 +400,19 @@ export const getClubCategories = cache(async (): Promise<ClubCategory[]> => {
 
 // ─────────────── support ───────────────
 
-export const getSupportChannels = cache(
-  async (): Promise<SupportChannel[]> => {
-    const rows = await db.select().from(supportT);
-    return rows.map((d) => ({
-      id: asString(d.id),
-      name: asString(d.name),
-      purpose: asString(d.purpose),
-      description: asString(d.description),
-      icon: asString(d.icon),
-      ownedBy: asString(d.ownedBy),
-      bring: Array.isArray(d.bring) ? d.bring : [],
-      councilRole: asString(d.councilRole),
-    }));
-  },
-);
+export const getSupportChannels = cache(async (): Promise<SupportChannel[]> => {
+  const rows = await db.select().from(supportT);
+  return rows.map((d) => ({
+    id: asString(d.id),
+    name: asString(d.name),
+    purpose: asString(d.purpose),
+    description: asString(d.description),
+    icon: asString(d.icon),
+    ownedBy: asString(d.ownedBy),
+    bring: Array.isArray(d.bring) ? d.bring : [],
+    councilRole: asString(d.councilRole),
+  }));
+});
 
 // ─────────────── highlights ───────────────
 
@@ -421,7 +442,11 @@ const HOMEPAGE_DEFAULTS: HomepageConfigData = {
       "The official portal of the Woxsen Student Council — events, clubs, leadership, and the support channels that keep campus moving.",
     ctas: [
       { label: "Explore events", href: "/events", variant: "primary" },
-      { label: "Raise a concern", href: "/support#grievance-form", variant: "outline" },
+      {
+        label: "Raise a concern",
+        href: "/support#grievance-form",
+        variant: "outline",
+      },
       { label: "Meet the team", href: "/council", variant: "ghost" },
     ],
     marqueeText: "Of the students. For the students. By the students.",
@@ -504,7 +529,8 @@ export const getHomepageConfig = cache(
     if (!raw) return HOMEPAGE_DEFAULTS;
 
     const hero = raw.hero ?? ({} as NonNullable<typeof raw.hero>);
-    const closing = raw.closingCta ?? ({} as NonNullable<typeof raw.closingCta>);
+    const closing =
+      raw.closingCta ?? ({} as NonNullable<typeof raw.closingCta>);
     const stats = raw.stats ?? [];
     const manifestoLines = raw.manifestoLines ?? [];
     const quickActions = raw.quickActions ?? [];
@@ -538,15 +564,15 @@ export const getHomepageConfig = cache(
 
     return {
       hero: {
-        kicker: currentSessionCopy(hero.kicker) || HOMEPAGE_DEFAULTS.hero.kicker,
+        kicker:
+          currentSessionCopy(hero.kicker) || HOMEPAGE_DEFAULTS.hero.kicker,
         headline: hero.headline || HOMEPAGE_DEFAULTS.hero.headline,
         sublineLead: hero.sublineLead || HOMEPAGE_DEFAULTS.hero.sublineLead,
         sublineWords:
           hero.sublineWords && hero.sublineWords.length > 0
             ? hero.sublineWords
             : HOMEPAGE_DEFAULTS.hero.sublineWords,
-        subParagraph:
-          hero.subParagraph || HOMEPAGE_DEFAULTS.hero.subParagraph,
+        subParagraph: hero.subParagraph || HOMEPAGE_DEFAULTS.hero.subParagraph,
         ctas:
           hero.ctas && hero.ctas.length > 0
             ? hero.ctas
@@ -563,12 +589,9 @@ export const getHomepageConfig = cache(
         manifestoLines.length > 0
           ? manifestoLines
           : HOMEPAGE_DEFAULTS.manifestoLines,
-      manifestoFooter:
-        raw.manifestoFooter || HOMEPAGE_DEFAULTS.manifestoFooter,
+      manifestoFooter: raw.manifestoFooter || HOMEPAGE_DEFAULTS.manifestoFooter,
       quickActions:
-        quickActions.length > 0
-          ? quickActions
-          : HOMEPAGE_DEFAULTS.quickActions,
+        quickActions.length > 0 ? quickActions : HOMEPAGE_DEFAULTS.quickActions,
       closingCta: {
         kicker: closing.kicker || HOMEPAGE_DEFAULTS.closingCta.kicker,
         headlineLead:
@@ -805,5 +828,7 @@ export async function getTicketsByContact(
     }
   }
   // Most recent event first.
-  return tickets.sort((x, y) => +new Date(y.event.date) - +new Date(x.event.date));
+  return tickets.sort(
+    (x, y) => +new Date(y.event.date) - +new Date(x.event.date),
+  );
 }

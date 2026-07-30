@@ -10,6 +10,7 @@ export type EventOpsCard = {
   slug: string;
   title: string;
   date: string;
+  endDate: string | null;
   status: string;
   category: string;
   capacity: number | null;
@@ -22,7 +23,11 @@ export type EventOpsCard = {
 
 /** Per-event registration aggregates keyed by eventId. */
 async function regAggregates(eventIds: number[]) {
-  if (eventIds.length === 0) return new Map<number, { registered: number; confirmed: number; revenue: number }>();
+  if (eventIds.length === 0)
+    return new Map<
+      number,
+      { registered: number; confirmed: number; revenue: number }
+    >();
   const rows = await db
     .select({
       eventId: eventRegistrations.eventId,
@@ -36,7 +41,11 @@ async function regAggregates(eventIds: number[]) {
   return new Map(
     rows.map((r) => [
       r.eventId,
-      { registered: Number(r.registered), confirmed: Number(r.confirmed), revenue: Number(r.revenue) },
+      {
+        registered: Number(r.registered),
+        confirmed: Number(r.confirmed),
+        revenue: Number(r.revenue),
+      },
     ]),
   );
 }
@@ -56,7 +65,9 @@ async function checkinAggregates(eventIds: number[]) {
 }
 
 /** Overview cards for every event the user may see (club leads → own club). */
-export async function getEventsForOps(user: SessionUser): Promise<EventOpsCard[]> {
+export async function getEventsForOps(
+  user: SessionUser,
+): Promise<EventOpsCard[]> {
   const scoped =
     user.role === "club_lead" && user.clubId
       ? await db.query.events.findMany({
@@ -78,6 +89,7 @@ export async function getEventsForOps(user: SessionUser): Promise<EventOpsCard[]
       slug: e.slug,
       title: e.title,
       date: e.date,
+      endDate: e.endDate,
       status: e.status,
       category: e.category,
       capacity: e.capacity ?? null,
@@ -119,7 +131,9 @@ export type EventOpsDetail = {
 export async function getEventOpsDetail(
   eventId: number,
 ): Promise<EventOpsDetail | null> {
-  const event = await db.query.events.findFirst({ where: eq(events.id, eventId) });
+  const event = await db.query.events.findFirst({
+    where: eq(events.id, eventId),
+  });
   if (!event) return null;
 
   const regs = await db.query.eventRegistrations.findMany({
@@ -159,10 +173,24 @@ export async function getEventOpsDetail(
 }
 
 /** Convenience count for the live check-in counter (cheap, single query). */
-export async function getCheckedInCount(eventId: number): Promise<{ checkedIn: number; confirmed: number }> {
+export async function getCheckedInCount(
+  eventId: number,
+): Promise<{ checkedIn: number; confirmed: number }> {
   const [checkedIn, confirmed] = await Promise.all([
-    db.$count(attendees, and(eq(attendees.eventId, eventId), sql`${attendees.checkedInAt} is not null`)),
-    db.$count(eventRegistrations, and(eq(eventRegistrations.eventId, eventId), eq(eventRegistrations.status, "confirmed"))),
+    db.$count(
+      attendees,
+      and(
+        eq(attendees.eventId, eventId),
+        sql`${attendees.checkedInAt} is not null`,
+      ),
+    ),
+    db.$count(
+      eventRegistrations,
+      and(
+        eq(eventRegistrations.eventId, eventId),
+        eq(eventRegistrations.status, "confirmed"),
+      ),
+    ),
   ]);
   return { checkedIn, confirmed };
 }

@@ -3,6 +3,7 @@ import { ArrowUpRight, CalendarDays } from "lucide-react";
 
 import { requireOps } from "@/lib/rbac";
 import { getEventsForOps, type EventOpsCard } from "@/lib/event-ops";
+import { getEventTiming } from "@/lib/event-status";
 
 export const dynamic = "force-dynamic";
 
@@ -19,16 +20,18 @@ function fmtDate(iso: string): string {
   const d = new Date(iso);
   return Number.isNaN(+d)
     ? iso
-    : d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+    : d.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
 }
 
 type Bucket = "live" | "upcoming" | "past";
 function bucketOf(e: EventOpsCard): Bucket {
-  const start = +new Date(e.date);
-  const now = Date.now();
-  const dayMs = 86_400_000;
-  if (now >= start - dayMs && now <= start + dayMs) return "live";
-  return start > now ? "upcoming" : "past";
+  const timing = getEventTiming(e);
+  if (timing.isLive) return "live";
+  return timing.isPast ? "past" : "upcoming";
 }
 
 /** Compact SVG progress ring — the card's hero metric (check-in rate). */
@@ -47,7 +50,14 @@ function ProgressRing({
   return (
     <div className="relative h-16 w-16 shrink-0">
       <svg viewBox="0 0 64 64" className="h-full w-full -rotate-90">
-        <circle cx="32" cy="32" r={r} fill="none" strokeWidth="5" className="stroke-line/10" />
+        <circle
+          cx="32"
+          cy="32"
+          r={r}
+          fill="none"
+          strokeWidth="5"
+          className="stroke-line/10"
+        />
         <circle
           cx="32"
           cy="32"
@@ -106,7 +116,9 @@ function EventCard({ e }: { e: EventOpsCard }) {
             {isLive ? (
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent/70" />
             ) : null}
-            <span className={`relative inline-flex h-2 w-2 rounded-full ${BUCKET_DOT[bucket]}`} />
+            <span
+              className={`relative inline-flex h-2 w-2 rounded-full ${BUCKET_DOT[bucket]}`}
+            />
           </span>
           <span className="kicker text-[11px] text-subtle">{e.category}</span>
           {e.status !== "published" ? (
@@ -133,11 +145,17 @@ function EventCard({ e }: { e: EventOpsCard }) {
           <span className="text-sm font-semibold leading-none tabular-nums text-ink">
             {checkinPct}%
           </span>
-          <span className="mt-0.5 text-[8px] uppercase tracking-wider text-subtle">in</span>
+          <span className="mt-0.5 text-[8px] uppercase tracking-wider text-subtle">
+            in
+          </span>
         </ProgressRing>
 
         <div className="grid flex-1 grid-cols-2 gap-x-3 gap-y-2">
-          <Figure value={e.checkedIn} sub={`/ ${e.confirmed}`} label="Checked in" />
+          <Figure
+            value={e.checkedIn}
+            sub={`/ ${e.confirmed}`}
+            label="Checked in"
+          />
           <Figure value={e.registered} label="Registered" />
           <Figure value={compactRupees(e.revenuePaise)} label="Revenue" />
           <Figure
@@ -172,10 +190,16 @@ function Figure({
   return (
     <div className="min-w-0">
       <p className="flex items-baseline gap-1 leading-none">
-        <span className="text-base font-semibold tabular-nums text-ink">{value}</span>
-        {sub ? <span className="text-[11px] tabular-nums text-subtle">{sub}</span> : null}
+        <span className="text-base font-semibold tabular-nums text-ink">
+          {value}
+        </span>
+        {sub ? (
+          <span className="text-[11px] tabular-nums text-subtle">{sub}</span>
+        ) : null}
       </p>
-      <p className="mt-1 truncate text-[10px] uppercase tracking-wide text-subtle">{label}</p>
+      <p className="mt-1 truncate text-[10px] uppercase tracking-wide text-subtle">
+        {label}
+      </p>
     </div>
   );
 }
@@ -217,15 +241,21 @@ export default async function EventOpsOverview() {
 
       <div className="grid grid-cols-3 gap-3">
         <div className="surface-card rounded-2xl p-5">
-          <p className="text-3xl font-semibold tabular-nums">{totals.confirmed}</p>
+          <p className="text-3xl font-semibold tabular-nums">
+            {totals.confirmed}
+          </p>
           <p className="mt-1 text-sm text-muted">Confirmed tickets</p>
         </div>
         <div className="surface-card rounded-2xl p-5">
-          <p className="text-3xl font-semibold tabular-nums">{totals.checkedIn}</p>
+          <p className="text-3xl font-semibold tabular-nums">
+            {totals.checkedIn}
+          </p>
           <p className="mt-1 text-sm text-muted">Checked in</p>
         </div>
         <div className="surface-card rounded-2xl p-5">
-          <p className="text-3xl font-semibold tabular-nums">{rupees(totals.revenue)}</p>
+          <p className="text-3xl font-semibold tabular-nums">
+            {rupees(totals.revenue)}
+          </p>
           <p className="mt-1 text-sm text-muted">Revenue</p>
         </div>
       </div>

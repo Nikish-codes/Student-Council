@@ -6,6 +6,7 @@ import { ArrowUpRight, MapPin } from "lucide-react";
 import { Picture } from "@/components/ui/picture";
 import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
+import { getEventTiming } from "@/lib/event-status";
 import type { EventItem } from "@/lib/schemas";
 
 const KICKERS = ["What's on", "What's next", "What's live", "What's new"];
@@ -31,29 +32,43 @@ export function EventsOverture({
 
   useGSAP(
     () => {
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
       const simpleText = prefersSimpleTextMotion();
       const ctx = gsap.context(() => {
-        root.current?.querySelectorAll<HTMLElement>("[data-split]").forEach((el) => {
-          gsap.set(el, { opacity: 1 });
-          if (reduced) return;
-          if (simpleText) {
-            gsap.from(el, { opacity: 0, y: 24, duration: 0.7, ease: "power2.out" });
-            return;
-          }
-          const split = new SplitText(el, { type: "chars,words", charsClass: "char" });
-          gsap.set(split.chars, { opacity: 0, y: 80, rotateX: -70 });
-          gsap.to(split.chars, {
-            opacity: 1,
-            y: 0,
-            rotateX: 0,
-            duration: 1,
-            ease: "expo.out",
-            stagger: { each: 0.022 },
+        root.current
+          ?.querySelectorAll<HTMLElement>("[data-split]")
+          .forEach((el) => {
+            gsap.set(el, { opacity: 1 });
+            if (reduced) return;
+            if (simpleText) {
+              gsap.from(el, {
+                opacity: 0,
+                y: 24,
+                duration: 0.7,
+                ease: "power2.out",
+              });
+              return;
+            }
+            const split = new SplitText(el, {
+              type: "chars,words",
+              charsClass: "char",
+            });
+            gsap.set(split.chars, { opacity: 0, y: 80, rotateX: -70 });
+            gsap.to(split.chars, {
+              opacity: 1,
+              y: 0,
+              rotateX: 0,
+              duration: 1,
+              ease: "expo.out",
+              stagger: { each: 0.022 },
+            });
           });
-        });
 
-        const meta = root.current?.querySelectorAll<HTMLElement>("[data-meta-row] > *");
+        const meta = root.current?.querySelectorAll<HTMLElement>(
+          "[data-meta-row] > *",
+        );
         if (meta?.length) {
           gsap.set(meta, { opacity: 1 });
           if (!reduced) {
@@ -69,15 +84,21 @@ export function EventsOverture({
         }
 
         // Featured banner reveal
-        const featBanner = root.current?.querySelector<HTMLElement>("[data-feat-banner]");
-        const featBits = root.current?.querySelectorAll<HTMLElement>("[data-feat-bit]");
+        const featBanner =
+          root.current?.querySelector<HTMLElement>("[data-feat-banner]");
+        const featBits =
+          root.current?.querySelectorAll<HTMLElement>("[data-feat-bit]");
         if (featBanner && !reduced) {
           gsap.from(featBanner, {
             opacity: 0,
             scale: 1.05,
             duration: 1.4,
             ease: "expo.out",
-            scrollTrigger: { trigger: featBanner, start: "top 80%", once: true },
+            scrollTrigger: {
+              trigger: featBanner,
+              start: "top 80%",
+              once: true,
+            },
           });
         }
         if (featBits?.length) {
@@ -89,7 +110,11 @@ export function EventsOverture({
               duration: 0.9,
               ease: "expo.out",
               stagger: 0.08,
-              scrollTrigger: { trigger: featBits[0], start: "top 80%", once: true },
+              scrollTrigger: {
+                trigger: featBits[0],
+                start: "top 80%",
+                once: true,
+              },
             });
           }
         }
@@ -100,6 +125,16 @@ export function EventsOverture({
   );
 
   const daysAway = next ? Math.max(0, daysFromNow(next.date)) : null;
+  const nextIsLive = next ? getEventTiming(next).isLive : false;
+  const nextValue = !next
+    ? "—"
+    : nextIsLive
+      ? "Ongoing"
+      : daysAway === 0
+        ? "Today"
+        : daysAway === 1
+          ? "Tomorrow"
+          : `${pad(daysAway ?? 0)}d`;
 
   return (
     <div ref={root}>
@@ -143,18 +178,14 @@ export function EventsOverture({
             className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-line/10 bg-line/[0.03] sm:grid-cols-3"
           >
             <Stat label="Upcoming" value={pad(total)} suffix="events" />
-            <Stat label="This week" value={pad(thisWeekCount)} suffix={thisWeekCount === 1 ? "event" : "events"} />
+            <Stat
+              label="This week"
+              value={pad(thisWeekCount)}
+              suffix={thisWeekCount === 1 ? "event" : "events"}
+            />
             <Stat
               label="Next up"
-              value={
-                next
-                  ? daysAway === 0
-                    ? "Today"
-                    : daysAway === 1
-                      ? "Tomorrow"
-                      : `${pad(daysAway ?? 0)}d`
-                  : "—"
-              }
+              value={nextValue}
               suffix={next?.title ?? "Nothing scheduled"}
               truncate
             />
@@ -217,7 +248,8 @@ export function EventsOverture({
                     {longDate(featured.date)}
                   </span>
                   <span className="flex items-center gap-2">
-                    <MapPin className="h-3.5 w-3.5" aria-hidden /> {featured.venue}
+                    <MapPin className="h-3.5 w-3.5" aria-hidden />{" "}
+                    {featured.venue}
                   </span>
                   <span className="ml-auto inline-flex items-center gap-2 text-ink transition-transform duration-500 group-hover/feat:translate-x-1">
                     Read brief <ArrowUpRight className="h-4 w-4" />
@@ -247,7 +279,9 @@ function Stat({
     <div className="flex flex-col gap-2 bg-bg p-6 sm:p-7">
       <span className="kicker">{label}</span>
       <div className="flex items-baseline gap-3">
-        <span className="display text-4xl tabular-nums text-ink sm:text-5xl">{value}</span>
+        <span className="display text-4xl tabular-nums text-ink sm:text-5xl">
+          {value}
+        </span>
         <span
           className={cn(
             "text-xs uppercase tracking-[0.18em] text-muted",

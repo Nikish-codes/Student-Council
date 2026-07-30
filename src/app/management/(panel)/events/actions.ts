@@ -81,10 +81,13 @@ function parse(fd: FormData): ParsedEvent {
 }
 
 /** Resolve the requested status against the user's publishing rights. */
-function resolveStatus(requested: string, role: Parameters<typeof canPublish>[0]) {
-  const status = (STATUSES.includes(requested as EventStatus)
-    ? requested
-    : "draft") as EventStatus;
+function resolveStatus(
+  requested: string,
+  role: Parameters<typeof canPublish>[0],
+) {
+  const status = (
+    STATUSES.includes(requested as EventStatus) ? requested : "draft"
+  ) as EventStatus;
   // Non-publishers cannot publish directly — their "publish" becomes a review request.
   if (status === "published" && !canPublish(role)) return "pending_review";
   return status;
@@ -159,6 +162,9 @@ export async function updateEvent(id: number, fd: FormData) {
   if (justPublished) await onEventPublished(id);
 
   revalidatePath("/management/events");
+  revalidatePath("/");
+  revalidatePath("/events");
+  revalidatePath("/archive");
   revalidatePath(`/events/${slug}`);
   redirect("/management/events");
 }

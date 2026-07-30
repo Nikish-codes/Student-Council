@@ -4,6 +4,7 @@ import { EventsOverture } from "@/components/sections/events-overture";
 import { EventsAlmanac } from "@/components/sections/events-almanac";
 import { EventsRecap } from "@/components/sections/events-recap";
 import { getEvents } from "@/lib/content";
+import { getEventTiming } from "@/lib/event-status";
 
 export const metadata: Metadata = {
   title: "Events Calendar",
@@ -19,14 +20,8 @@ export default async function EventsPage() {
   const now = Date.now();
   const sevenDays = 7 * 86_400_000;
 
-  const upcoming = all.filter((e) => {
-    const end = e.endDate ? +new Date(e.endDate) : +new Date(e.date) + 86_400_000;
-    return end >= now;
-  });
-  const past = all.filter((e) => {
-    const end = e.endDate ? +new Date(e.endDate) : +new Date(e.date) + 86_400_000;
-    return end < now;
-  });
+  const upcoming = all.filter((e) => !getEventTiming(e, now).isPast);
+  const past = all.filter((e) => getEventTiming(e, now).isPast);
 
   const next = upcoming[0];
   const featured = upcoming.find((e) => e.featured) ?? next;
@@ -50,7 +45,9 @@ export default async function EventsPage() {
             <div>
               <div className="kicker mb-4 text-muted">Looking back?</div>
               <p className="text-ink text-xl sm:text-2xl max-w-2xl leading-snug">
-                <span className="display italic text-ink">{String(past.length).padStart(2, "0")}</span>{" "}
+                <span className="display italic text-ink">
+                  {String(past.length).padStart(2, "0")}
+                </span>{" "}
                 events already shipped. Browse the full archive.
               </p>
             </div>

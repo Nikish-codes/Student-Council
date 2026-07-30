@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { eq, ne } from "drizzle-orm";
 import { db } from "@/db/client";
-import { councilMembers as t } from "@/db/schema";
+import { councilMembers as t, siteSettings } from "@/db/schema";
 import { requireOps, requireRole } from "@/lib/rbac";
 import type { CouncilMemberType } from "@/lib/schemas";
 
@@ -13,9 +13,12 @@ const MEMBER_TYPES: CouncilMemberType[] = ["president", "member", "co_lead"];
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 
 function bust() {
-  ["/", "/council", "/management/council", "/management/council/groups"].forEach(
-    (p) => revalidatePath(p),
-  );
+  [
+    "/",
+    "/council",
+    "/management/council",
+    "/management/council/groups",
+  ].forEach((p) => revalidatePath(p));
 }
 
 export async function saveCouncil(id: number | null, fd: FormData) {
@@ -48,7 +51,10 @@ export async function saveCouncil(id: number | null, fd: FormData) {
 
   let savedId = id;
   if (id) {
-    await db.update(t).set({ ...values, updatedAt: new Date().toISOString() }).where(eq(t.id, id));
+    await db
+      .update(t)
+      .set({ ...values, updatedAt: new Date().toISOString() })
+      .where(eq(t.id, id));
   } else {
     const [row] = await db.insert(t).values(values).returning({ id: t.id });
     savedId = row.id;
@@ -70,4 +76,21 @@ export async function deleteCouncil(id: number) {
   await requireRole("super_admin", "admin");
   await db.delete(t).where(eq(t.id, id));
   bust();
+}
+
+export async function saveCouncilGroupPhoto(fd: FormData) {
+  await requireOps();
+  const selectedId = s(fd, "groupPhotoId");
+  const values = {
+    councilGroupPhotoId: selectedId ? Number(selectedId) : null,
+    updatedAt: new Date().toISOString(),
+  };
+
+  await db
+    .insert(siteSettings)
+    .values({ id: 1, ...values })
+    .onConflictDoUpdate({ target: siteSettings.id, set: values });
+
+  revalidatePath("/council");
+  revalidatePath("/management/council");
 }

@@ -4,8 +4,15 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowUpRight, MapPin, Users } from "lucide-react";
 import { Picture } from "@/components/ui/picture";
-import { gsap, prefersSimpleTextMotion, ScrollTrigger, SplitText, useGSAP } from "@/lib/gsap";
+import {
+  gsap,
+  prefersSimpleTextMotion,
+  ScrollTrigger,
+  SplitText,
+  useGSAP,
+} from "@/lib/gsap";
 import { cn } from "@/lib/utils";
+import { getEventTiming } from "@/lib/event-status";
 import type { EventCategory, EventItem } from "@/lib/schemas";
 
 const CATEGORIES: { value: EventCategory | "all"; label: string }[] = [
@@ -39,18 +46,25 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
     [events, cat],
   );
 
-  const groups = React.useMemo<Group[]>(() => groupByMonth(filtered), [filtered]);
+  const groups = React.useMemo<Group[]>(
+    () => groupByMonth(filtered),
+    [filtered],
+  );
 
   // Scroll-spy on month groups
   React.useEffect(() => {
-    const els = Array.from(root.current?.querySelectorAll<HTMLElement>("[data-month]") ?? []);
+    const els = Array.from(
+      root.current?.querySelectorAll<HTMLElement>("[data-month]") ?? [],
+    );
     if (!els.length) return;
     const io = new IntersectionObserver(
       (entries) => {
         const visible = entries.filter((e) => e.isIntersecting);
         if (visible.length) {
           const top = visible.sort(
-            (a, b) => a.target.getBoundingClientRect().top - b.target.getBoundingClientRect().top,
+            (a, b) =>
+              a.target.getBoundingClientRect().top -
+              b.target.getBoundingClientRect().top,
           )[0];
           setActiveKey((top.target as HTMLElement).dataset.month ?? null);
         }
@@ -64,10 +78,14 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
   // Reveal animations on slabs
   useGSAP(
     () => {
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
       const simpleText = prefersSimpleTextMotion();
       const ctx = gsap.context(() => {
-        const headline = root.current?.querySelector<HTMLElement>("[data-almanac-headline]");
+        const headline = root.current?.querySelector<HTMLElement>(
+          "[data-almanac-headline]",
+        );
         if (headline) {
           gsap.set(headline, { opacity: 1 });
           if (!reduced && simpleText) {
@@ -76,10 +94,17 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
               y: 24,
               duration: 0.7,
               ease: "power2.out",
-              scrollTrigger: { trigger: headline, start: "top 85%", once: true },
+              scrollTrigger: {
+                trigger: headline,
+                start: "top 85%",
+                once: true,
+              },
             });
           } else if (!reduced) {
-            const split = new SplitText(headline, { type: "chars,words", charsClass: "char" });
+            const split = new SplitText(headline, {
+              type: "chars,words",
+              charsClass: "char",
+            });
             gsap.set(split.chars, { opacity: 0, y: 50, rotateX: -50 });
             gsap.to(split.chars, {
               opacity: 1,
@@ -88,40 +113,54 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
               duration: 0.9,
               ease: "expo.out",
               stagger: { each: 0.022 },
-              scrollTrigger: { trigger: headline, start: "top 85%", once: true },
+              scrollTrigger: {
+                trigger: headline,
+                start: "top 85%",
+                once: true,
+              },
             });
           }
         }
 
-        root.current?.querySelectorAll<HTMLElement>("[data-slab]").forEach((slab) => {
-          const date = slab.querySelector<HTMLElement>("[data-slab-date]");
-          const meta = slab.querySelectorAll<HTMLElement>("[data-slab-bit]");
-          if (date) {
-            gsap.set(date, { opacity: 1 });
-            if (!reduced) {
-              gsap.from(date, {
-                x: -40,
-                opacity: 0,
-                duration: 1,
-                ease: "expo.out",
-                scrollTrigger: { trigger: slab, start: "top 85%", once: true },
-              });
+        root.current
+          ?.querySelectorAll<HTMLElement>("[data-slab]")
+          .forEach((slab) => {
+            const date = slab.querySelector<HTMLElement>("[data-slab-date]");
+            const meta = slab.querySelectorAll<HTMLElement>("[data-slab-bit]");
+            if (date) {
+              gsap.set(date, { opacity: 1 });
+              if (!reduced) {
+                gsap.from(date, {
+                  x: -40,
+                  opacity: 0,
+                  duration: 1,
+                  ease: "expo.out",
+                  scrollTrigger: {
+                    trigger: slab,
+                    start: "top 85%",
+                    once: true,
+                  },
+                });
+              }
             }
-          }
-          if (meta.length) {
-            gsap.set(meta, { opacity: 1 });
-            if (!reduced) {
-              gsap.from(meta, {
-                y: 24,
-                opacity: 0,
-                duration: 0.8,
-                ease: "expo.out",
-                stagger: 0.06,
-                scrollTrigger: { trigger: slab, start: "top 85%", once: true },
-              });
+            if (meta.length) {
+              gsap.set(meta, { opacity: 1 });
+              if (!reduced) {
+                gsap.from(meta, {
+                  y: 24,
+                  opacity: 0,
+                  duration: 0.8,
+                  ease: "expo.out",
+                  stagger: 0.06,
+                  scrollTrigger: {
+                    trigger: slab,
+                    start: "top 85%",
+                    once: true,
+                  },
+                });
+              }
             }
-          }
-        });
+          });
 
         ScrollTrigger.refresh();
       }, root);
@@ -178,7 +217,10 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
             <p className="display text-3xl">Nothing here yet.</p>
             <p className="text-sm text-muted">
               Got an idea?{" "}
-              <Link href="/support" className="prose-link text-ink underline-offset-4 hover:underline">
+              <Link
+                href="/support"
+                className="prose-link text-ink underline-offset-4 hover:underline"
+              >
                 Pitch one →
               </Link>
             </p>
@@ -200,7 +242,10 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
                       e.preventDefault();
                       document
                         .getElementById(`month-${g.key}`)
-                        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        ?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
                     }}
                     className={cn(
                       "group/m relative flex items-center gap-3 py-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors",
@@ -214,7 +259,12 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
                       )}
                     />
                     <span className="flex-1">{g.label}</span>
-                    <span className={cn("tabular-nums", isActive ? "text-ink" : "text-subtle")}>
+                    <span
+                      className={cn(
+                        "tabular-nums",
+                        isActive ? "text-ink" : "text-subtle",
+                      )}
+                    >
                       {String(g.events.length).padStart(2, "0")}
                     </span>
                   </a>
@@ -232,7 +282,8 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
                     {g.label.split(" ")[0]}
                   </span>
                   <span className="font-mono text-xs uppercase tracking-[0.18em] text-subtle">
-                    {g.label.split(" ")[1]} · {String(g.events.length).padStart(2, "0")} events
+                    {g.label.split(" ")[1]} ·{" "}
+                    {String(g.events.length).padStart(2, "0")} events
                   </span>
                 </div>
                 <div className="group/list">
@@ -254,8 +305,12 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
 function Slab({ event }: { event: EventItem }) {
   const status = computeStatus(event);
   const dayNum = String(new Date(event.date).getDate()).padStart(2, "0");
-  const dayName = new Date(event.date).toLocaleDateString("en-IN", { weekday: "short" });
-  const monthShort = new Date(event.date).toLocaleDateString("en-IN", { month: "short" }).toUpperCase();
+  const dayName = new Date(event.date).toLocaleDateString("en-IN", {
+    weekday: "short",
+  });
+  const monthShort = new Date(event.date)
+    .toLocaleDateString("en-IN", { month: "short" })
+    .toUpperCase();
   const accent = CAT_ACCENT[event.category];
 
   return (
@@ -337,7 +392,8 @@ function Slab({ event }: { event: EventItem }) {
             </span>
             {event.attendees && (
               <span className="flex items-center gap-2">
-                <Users className="h-3 w-3" aria-hidden /> Cap · {event.attendees}
+                <Users className="h-3 w-3" aria-hidden /> Cap ·{" "}
+                {event.attendees}
               </span>
             )}
             {event.endDate && <span>Multi-day</span>}
@@ -359,7 +415,13 @@ function Slab({ event }: { event: EventItem }) {
 
 /* ─────────────── Status pill ─────────────── */
 
-function StatusPill({ status, compact = false }: { status: StatusKind; compact?: boolean }) {
+function StatusPill({
+  status,
+  compact = false,
+}: {
+  status: StatusKind;
+  compact?: boolean;
+}) {
   const map: Record<StatusKind, { label: string; cls: string; dot: string }> = {
     live: {
       label: "Live now",
@@ -397,8 +459,14 @@ function StatusPill({ status, compact = false }: { status: StatusKind; compact?:
       )}
     >
       <span
-        className={cn("h-1.5 w-1.5 rounded-full", s.dot, status === "live" && "animate-pulse")}
-        style={status === "live" ? { boxShadow: "0 0 12px currentColor" } : undefined}
+        className={cn(
+          "h-1.5 w-1.5 rounded-full",
+          s.dot,
+          status === "live" && "animate-pulse",
+        )}
+        style={
+          status === "live" ? { boxShadow: "0 0 12px currentColor" } : undefined
+        }
         aria-hidden
       />
       {s.label}
@@ -410,11 +478,9 @@ function StatusPill({ status, compact = false }: { status: StatusKind; compact?:
 
 function computeStatus(e: EventItem): StatusKind {
   const now = Date.now();
-  const start = +new Date(e.date);
-  const end = e.endDate ? +new Date(e.endDate) : start + 86_400_000;
-  if (now >= start && now <= end) return "live";
-  if (now > end) return "past";
-  const days = Math.round((start - now) / 86_400_000);
+  const { isLive, isPast, daysAway: days } = getEventTiming(e, now);
+  if (isLive) return "live";
+  if (isPast) return "past";
   if (days <= 7) return "soon";
   if (e.registrationUrl) return "open";
   return "scheduled";
@@ -425,7 +491,10 @@ function groupByMonth(events: EventItem[]): Group[] {
   for (const e of events) {
     const d = new Date(e.date);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    const label = d.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+    const label = d.toLocaleDateString("en-IN", {
+      month: "long",
+      year: "numeric",
+    });
     if (!buckets.has(key)) buckets.set(key, { key, label, events: [] });
     buckets.get(key)!.events.push(e);
   }

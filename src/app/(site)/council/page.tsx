@@ -2,8 +2,15 @@ import type { Metadata } from "next";
 import * as Accordion from "@radix-ui/react-accordion";
 import { ChevronDown } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
+import { CouncilGroupPhoto } from "@/components/sections/council-group-photo";
 import { CouncilShowcase } from "@/components/sections/council-showcase";
-import { getCouncil, getCouncilSections, getFaqs, getPresident } from "@/lib/content";
+import {
+  getCouncil,
+  getCouncilGroupPhoto,
+  getCouncilSections,
+  getFaqs,
+  getPresident,
+} from "@/lib/content";
 import { numberWord } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -15,10 +22,13 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 export default async function CouncilPage() {
-  const members = await getCouncil();
-  const president = await getPresident();
-  const sections = await getCouncilSections();
-  const faqs = await getFaqs("council");
+  const [members, president, sections, faqs, groupPhoto] = await Promise.all([
+    getCouncil(),
+    getPresident(),
+    getCouncilSections(),
+    getFaqs("council"),
+    getCouncilGroupPhoto(),
+  ]);
 
   return (
     <div className="pt-32 sm:pt-40">
@@ -26,7 +36,9 @@ export default async function CouncilPage() {
         <Reveal className="max-w-5xl">
           <div className="mb-8 flex items-center gap-3">
             <span className="h-px w-14 bg-line/30" aria-hidden />
-            <span className="kicker">Session 2026/27 · {members.length} members</span>
+            <span className="kicker">
+              Session 2026/27 · {members.length} members
+            </span>
           </div>
           <h1 className="display text-balance text-6xl leading-[0.92] sm:text-8xl lg:text-[10rem]">
             <span className="block">The faces</span>
@@ -41,6 +53,8 @@ export default async function CouncilPage() {
           </p>
         </Reveal>
       </section>
+
+      <CouncilGroupPhoto photoSrc={groupPhoto} memberCount={members.length} />
 
       <div className="mt-24 sm:mt-32">
         <CouncilShowcase president={president} sections={sections} />
@@ -63,11 +77,7 @@ export default async function CouncilPage() {
           className="divide-y divide-line/10 border-y border-line/10"
         >
           {faqs.map((item) => (
-            <Accordion.Item
-              key={item.id}
-              value={item.id}
-              className="group/acc"
-            >
+            <Accordion.Item key={item.id} value={item.id} className="group/acc">
               <Accordion.Header>
                 <Accordion.Trigger className="flex w-full items-center justify-between gap-6 py-6 text-left transition-colors hover:text-ink">
                   <span className="display text-xl text-ink sm:text-2xl">

@@ -1,0 +1,1 @@
+ALTER TABLE `mp_site_settings` ADD `council_group_photo_id` integer REFERENCES mp_media(id);

@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { gsap, useGSAP } from "@/lib/gsap";
+import { getEventTiming } from "@/lib/event-status";
 import type { EventItem } from "@/lib/schemas";
 
 interface HomeUpcomingStripProps {
@@ -19,27 +20,39 @@ function fmtDate(iso: string) {
   };
 }
 
-function relativeDays(iso: string) {
-  const diff = +new Date(iso) - Date.now();
+function relativeDays(event: EventItem) {
+  const now = Date.now();
+  if (getEventTiming(event, now).isLive) {
+    return { label: "ONGOING", urgent: true };
+  }
+  const diff = +new Date(event.date) - now;
   const days = Math.round(diff / 86_400_000);
   if (days <= 0) return { label: "TODAY", urgent: true };
   if (days === 1) return { label: "TOMORROW", urgent: true };
   if (days < 7) return { label: `IN ${days} DAYS`, urgent: true };
-  if (days < 30) return { label: `IN ${Math.round(days / 7)} WEEKS`, urgent: false };
+  if (days < 30)
+    return { label: `IN ${Math.round(days / 7)} WEEKS`, urgent: false };
   return { label: `IN ${Math.round(days / 30)} MONTHS`, urgent: false };
 }
 
-export function HomeUpcomingStrip({ events, totalCount }: HomeUpcomingStripProps) {
+export function HomeUpcomingStrip({
+  events,
+  totalCount,
+}: HomeUpcomingStripProps) {
   const root = React.useRef<HTMLElement>(null);
   const visible = events.slice(0, 3);
 
   useGSAP(
     () => {
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
       if (reduced) return;
       const ctx = gsap.context(() => {
-        const items = root.current?.querySelectorAll<HTMLElement>("[data-strip-item]");
-        const head = root.current?.querySelectorAll<HTMLElement>("[data-strip-head]");
+        const items =
+          root.current?.querySelectorAll<HTMLElement>("[data-strip-item]");
+        const head =
+          root.current?.querySelectorAll<HTMLElement>("[data-strip-head]");
         if (head) {
           gsap.set(head, { opacity: 1 });
           gsap.from(head, {
@@ -101,7 +114,7 @@ export function HomeUpcomingStrip({ events, totalCount }: HomeUpcomingStripProps
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-line/8 border-y border-line/8">
           {visible.map((e) => {
             const { day, mon, weekday } = fmtDate(e.date);
-            const rel = relativeDays(e.date);
+            const rel = relativeDays(e);
             return (
               <Link
                 key={e.slug}
@@ -111,21 +124,27 @@ export function HomeUpcomingStrip({ events, totalCount }: HomeUpcomingStripProps
               >
                 {/* Date block */}
                 <div className="shrink-0 flex flex-col items-start font-mono leading-none">
-                  <span className="text-[0.6875rem] text-subtle tracking-[0.22em]">{weekday}</span>
+                  <span className="text-[0.6875rem] text-subtle tracking-[0.22em]">
+                    {weekday}
+                  </span>
                   <span
                     className="display italic text-ink mt-1"
                     style={{ fontSize: "clamp(2.2rem, 4vw, 3rem)" }}
                   >
                     {day}
                   </span>
-                  <span className="text-[0.6875rem] text-muted tracking-[0.22em] mt-1">{mon}</span>
+                  <span className="text-[0.6875rem] text-muted tracking-[0.22em] mt-1">
+                    {mon}
+                  </span>
                 </div>
 
                 {/* Body */}
                 <div className="flex-1 min-w-0 flex flex-col">
                   <div className="kicker text-subtle mb-1.5">
                     {e.category} ·{" "}
-                    <span className={rel.urgent ? "text-accent font-semibold" : ""}>
+                    <span
+                      className={rel.urgent ? "text-accent font-semibold" : ""}
+                    >
                       {rel.label}
                     </span>
                   </div>

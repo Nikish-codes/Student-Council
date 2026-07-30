@@ -1,6 +1,6 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
-import { and, eq, lt } from "drizzle-orm";
+import { and, eq, isNotNull, lt } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import {
@@ -91,7 +91,13 @@ export async function onEventPublished(eventId: number): Promise<{
     await db
       .update(eventsT)
       .set({ featured: false })
-      .where(and(eq(eventsT.featured, true), lt(eventsT.date, nowIso)));
+      .where(
+        and(
+          eq(eventsT.featured, true),
+          isNotNull(eventsT.endDate),
+          lt(eventsT.endDate, nowIso),
+        ),
+      );
     return "ok";
   });
 

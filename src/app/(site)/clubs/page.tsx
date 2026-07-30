@@ -6,7 +6,7 @@ import { getClubCategories, getClubs } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Student Clubs",
   description:
-    "29 student-run clubs across tech, design, performing arts, sports and entrepreneurship at Woxsen.",
+    "28 student-run clubs across design, performing arts, professional development, social impact and academics at Woxsen.",
 };
 
 export default async function ClubsPage() {
@@ -28,8 +28,8 @@ export default async function ClubsPage() {
           </h1>
           <p className="mt-10 max-w-2xl text-balance text-lg text-muted">
             Every club below was started, is led by, and is run for students.
-            Browse by category, or just scroll — they reveal themselves as
-            you go.
+            Browse by category, or just scroll — they reveal themselves as you
+            go.
           </p>
         </Reveal>
       </section>

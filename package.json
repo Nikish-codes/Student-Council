@@ -15,6 +15,7 @@
     "db:migrate-from-payload": "tsx scripts/migrate-from-payload.ts",
     "test": "vitest run",
     "test:watch": "vitest",
+    "clubs:sync-taxonomy": "tsx scripts/sync-club-taxonomy.ts",
     "sync:club-logos": "tsx scripts/sync-club-logos.ts"
   },
   "dependencies": {
