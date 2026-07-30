@@ -61,14 +61,30 @@ export function CouncilCard({
   member,
   index,
   size = "md",
+  compactOnMobile = false,
   onOpen,
 }: {
   member: CouncilMember;
   index: number;
   size?: CouncilCardSize;
+  compactOnMobile?: boolean;
   onOpen?: () => void;
 }) {
   const s = SIZES[size];
+  const compactPad =
+    size === "sm" ? undefined : size === "md" ? "p-3.5 sm:p-5" : "p-3.5 sm:p-6";
+  const compactName =
+    size === "sm"
+      ? undefined
+      : size === "md"
+        ? "text-xl/[1.1] sm:text-2xl/[1.1]"
+        : "text-xl/[1.1] sm:text-3xl/[1.1]";
+  const compactQuote =
+    size === "sm"
+      ? undefined
+      : size === "md"
+        ? "text-sm sm:text-base"
+        : "text-sm sm:text-lg";
 
   return (
     <SpotlightCard
@@ -112,6 +128,7 @@ export function CouncilCard({
           "pointer-events-none relative flex flex-1 flex-col",
           s.pad,
           s.gap,
+          compactOnMobile && compactPad,
         )}
       >
         <span className="person-role">{member.role}</span>
@@ -120,7 +137,13 @@ export function CouncilCard({
             rather than getting cut off mid-sentence; the grid rows stretch to
             match, so a row stays even. */}
         {member.quote && (
-          <blockquote className={cn("person-voice text-ink", s.quote)}>
+          <blockquote
+            className={cn(
+              "person-voice text-ink",
+              s.quote,
+              compactOnMobile && compactQuote,
+            )}
+          >
             &ldquo;{member.quote}&rdquo;
           </blockquote>
         )}
@@ -131,7 +154,13 @@ export function CouncilCard({
               basis also moves the link buttons onto their own line before
               they can squeeze a name into a one-character-wide column. */}
           <div className="min-w-[min(100%,10rem)] flex-1">
-            <p className={cn("person-name break-normal text-ink", s.name)}>
+            <p
+              className={cn(
+                "person-name break-normal text-ink",
+                s.name,
+                compactOnMobile && compactName,
+              )}
+            >
               {member.name}
             </p>
             {member.program && (
