@@ -92,7 +92,7 @@ export function CouncilMemberDialog({
                       <span className="person-role text-base">{m.role}</span>
                     </div>
 
-                    <h2 className="person-name mt-5 text-4xl text-ink sm:text-5xl lg:text-6xl">
+                    <h2 className="person-name mt-5 break-normal text-4xl text-ink sm:text-5xl lg:text-6xl">
                       {m.name}
                     </h2>
 

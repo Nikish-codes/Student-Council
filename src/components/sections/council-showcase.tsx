@@ -40,16 +40,20 @@ const COLS: Record<number, string> = {
   1: "grid-cols-1",
   2: "grid-cols-1 sm:grid-cols-2",
   3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-  4: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
-  5: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5",
-  6: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6",
+  4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
+  5: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5",
+  6: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6",
 };
 
-/** Fixed track widths for a horizontally-scrolling row. */
+/**
+ * Mobile cards need enough inline space for real names, not just a scaled-down
+ * desktop tile. The viewport-relative widths show a useful peek of the next
+ * card while keeping the current member readable at 320px.
+ */
 const HSCROLL_W: Record<string, string> = {
-  sm: "w-[190px] sm:w-[210px]",
-  md: "w-[240px] sm:w-[260px]",
-  lg: "w-[280px] sm:w-[320px]",
+  sm: "w-[78vw] min-w-[240px] max-w-[270px] sm:w-[240px]",
+  md: "w-[82vw] min-w-[260px] max-w-[310px] sm:w-[280px]",
+  lg: "w-[86vw] min-w-[280px] max-w-[340px] sm:w-[320px]",
 };
 
 export function CouncilShowcase({
@@ -179,7 +183,9 @@ export function CouncilShowcase({
                 {/* Same person-roles as every card, so the president's
                     attribution and a member's card read as one system. */}
                 <div>
-                  <p className="person-name text-3xl/[1.1] text-ink">{president.name}</p>
+                  <p className="person-name break-normal text-3xl/[1.1] text-ink">
+                    {president.name}
+                  </p>
                   <p className="person-role mt-2 text-base">{president.role}</p>
                   <p className="person-meta mt-1">{president.program}</p>
                 </div>

@@ -125,11 +125,15 @@ export function CouncilCard({
           </blockquote>
         )}
 
-        <div className="mt-auto flex items-end gap-3 border-t border-line/10 pt-3">
+        <div className="mt-auto flex flex-wrap items-end gap-3 border-t border-line/10 pt-3">
           {/* Neither the name nor the programme truncates any more. Both used
-              to, and both lost real information on every phone. */}
-          <div className="min-w-0 flex-1">
-            <p className={cn("person-name text-ink", s.name)}>{member.name}</p>
+              to, and both lost real information on every phone. The minimum
+              basis also moves the link buttons onto their own line before
+              they can squeeze a name into a one-character-wide column. */}
+          <div className="min-w-[min(100%,10rem)] flex-1">
+            <p className={cn("person-name break-normal text-ink", s.name)}>
+              {member.name}
+            </p>
             {member.program && (
               <p className="person-meta mt-1.5">{member.program}</p>
             )}
