@@ -137,9 +137,6 @@ const LAYOUTS: CouncilGroupLayout[] = ["grid", "hscroll"];
  *
  * Members whose group was deleted or never set are collected into a synthetic
  * trailing section so nobody silently disappears from the page.
- *
- * Co-leads are deliberately NOT placed in any section — they hang off their
- * lead (see src/lib/council.ts) and surface only in that lead's expanded card.
  */
 export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
   const [groupRows, members] = await Promise.all([
@@ -172,7 +169,7 @@ export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
   const byGroup = new Map<string, CouncilMemberWithCoLeads[]>();
   const ungrouped: CouncilMemberWithCoLeads[] = [];
   for (const m of members) {
-    if (m.memberType === "president" || m.memberType === "co_lead") continue;
+    if (m.memberType === "president") continue;
     const entry = withCoLeads(m);
     if (!m.groupId) {
       ungrouped.push(entry);
@@ -205,7 +202,6 @@ export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
       .filter(
         (m) =>
           m.memberType !== "president" &&
-          m.memberType !== "co_lead" &&
           m.groupId &&
           !known.has(m.groupId),
       )
