@@ -137,6 +137,9 @@ const LAYOUTS: CouncilGroupLayout[] = ["grid", "hscroll"];
  *
  * Members whose group was deleted or never set are collected into a synthetic
  * trailing section so nobody silently disappears from the page.
+ *
+ * Co-leads are deliberately NOT placed in any section — they hang off their
+ * lead (see src/lib/council.ts) and surface only in that lead's expanded card.
  */
 export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
   const [groupRows, members] = await Promise.all([
@@ -169,7 +172,12 @@ export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
   const byGroup = new Map<string, CouncilMemberWithCoLeads[]>();
   const ungrouped: CouncilMemberWithCoLeads[] = [];
   for (const m of members) {
+    // The president gets the full-width takeover — never a card.
     if (m.memberType === "president") continue;
+    // Co-leads WITHOUT a group stay dialog-only (they hang off their lead's
+    // expanded card). Co-leads WITH a groupId are placed into that group's
+    // section so they render as normal cards on the page too.
+    if (m.memberType === "co_lead" && !m.groupId) continue;
     const entry = withCoLeads(m);
     if (!m.groupId) {
       ungrouped.push(entry);
@@ -202,6 +210,7 @@ export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
       .filter(
         (m) =>
           m.memberType !== "president" &&
+          !(m.memberType === "co_lead" && !m.groupId) &&
           m.groupId &&
           !known.has(m.groupId),
       )

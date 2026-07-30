@@ -20,16 +20,19 @@
   transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1);
   pointer-events: auto;
 }
+
 .boot-overlay[data-hide="true"] {
   opacity: 0;
   pointer-events: none;
 }
+
 .boot-overlay__inner {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2.5rem;
 }
+
 .boot-overlay__crest {
   position: relative;
   width: clamp(180px, 32vw, 320px);
@@ -37,6 +40,7 @@
   color: rgb(var(--ink, 245 245 244));
   filter: drop-shadow(0 0 40px rgb(var(--ink, 255 255 255) / 0.08));
 }
+
 .boot-overlay__ring {
   position: absolute;
   inset: 0;
@@ -46,6 +50,7 @@
   text-transform: uppercase;
   font-family: var(--font-mono), ui-monospace, monospace;
 }
+
 .boot-overlay__crest-logo {
   position: absolute;
   inset: 18%;
@@ -57,30 +62,37 @@
     boot-crest-pulse 3.6s 1s ease-in-out infinite;
   filter: drop-shadow(0 0 30px rgb(var(--ink, 255 255 255) / 0.18));
 }
+
 @keyframes boot-ring-spin {
   to {
     transform: rotate(360deg);
   }
 }
+
 @keyframes boot-crest-in {
   from {
     opacity: 0;
     transform: scale(0.92);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
   }
 }
+
 @keyframes boot-crest-pulse {
+
   0%,
   100% {
     filter: drop-shadow(0 0 30px rgb(var(--ink, 255 255 255) / 0.18));
   }
+
   50% {
     filter: drop-shadow(0 0 50px rgb(var(--ink, 255 255 255) / 0.32));
   }
 }
+
 .boot-overlay__bar {
   position: relative;
   width: clamp(180px, 28vw, 320px);
@@ -88,6 +100,7 @@
   background: rgb(var(--line, 255 255 255) / 0.18);
   overflow: hidden;
 }
+
 .boot-overlay__bar-fill {
   position: absolute;
   inset: 0;
@@ -95,6 +108,7 @@
   background: rgb(var(--ink, 245 245 244));
   animation: boot-bar 1400ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
+
 .boot-overlay__caption {
   display: flex;
   flex-direction: column;
@@ -108,26 +122,32 @@
   opacity: 0;
   animation: boot-fade 700ms 400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
+
 .boot-overlay__caption span:first-child {
   color: rgb(163 163 163);
 }
+
 @keyframes boot-bar {
   0% {
     transform: translateX(-100%);
   }
+
   100% {
     transform: translateX(400%);
   }
 }
+
 @keyframes boot-fade {
   to {
     opacity: 1;
   }
 }
+
 @media (prefers-reduced-motion: reduce) {
   .boot-overlay {
     transition: opacity 200ms linear;
   }
+
   .boot-overlay__crest-logo,
   .boot-overlay__caption {
     animation-duration: 1ms;
@@ -136,9 +156,11 @@
     transform: none;
     filter: none;
   }
+
   .boot-overlay__ring {
     animation: none;
   }
+
   .boot-overlay__bar-fill {
     animation: none;
     width: 100%;
@@ -146,6 +168,7 @@
 }
 
 @layer base {
+
   /* Base font size bumped from 16px → 17.5px (9% global scale). Every
      rem-based Tailwind class (text-sm/base/lg/xl …) scales with it,
      so body copy, kickers, badges, captions — everything — reads
@@ -190,10 +213,21 @@
      the on-light (black) logo in the markup; CSS hides whichever doesn't
      match the active theme. Pre-paint script means the right one is up
      before first paint. */
-  .theme-logo-on-dark { display: block; }
-  .theme-logo-on-light { display: none; }
-  html.light .theme-logo-on-dark { display: none; }
-  html.light .theme-logo-on-light { display: block; }
+  .theme-logo-on-dark {
+    display: block;
+  }
+
+  .theme-logo-on-light {
+    display: none;
+  }
+
+  html.light .theme-logo-on-dark {
+    display: none;
+  }
+
+  html.light .theme-logo-on-light {
+    display: block;
+  }
 
   * {
     border-color: rgb(var(--line) / 0.08);
@@ -215,6 +249,7 @@
        mode it's white. Multiply blend keeps it from washing out content. */
     position: relative;
   }
+
   body::before {
     content: "";
     position: fixed;
@@ -225,6 +260,7 @@
     opacity: 0.035;
     mix-blend-mode: overlay;
   }
+
   html.light body::before {
     /* Invert noise for light mode so grains read dark on white. */
     opacity: 0.06;
@@ -282,6 +318,7 @@
     transition: background-size 380ms cubic-bezier(0.22, 1, 0.36, 1);
     padding-bottom: 1px;
   }
+
   .prose-link:hover {
     background-size: 100% 1px, 0 1px;
   }
@@ -371,6 +408,7 @@
       transform 400ms cubic-bezier(0.22, 1, 0.36, 1),
       background-color 400ms cubic-bezier(0.22, 1, 0.36, 1);
   }
+
   .surface-card:hover {
     border-color: rgb(var(--line) / 0.18);
     background: rgb(var(--surface) / 0.9);
@@ -397,21 +435,23 @@
   .text-balance {
     text-wrap: balance;
   }
+
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   .no-scrollbar {
     scrollbar-width: none;
   }
+
   .mask-fade-x {
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      black 8%,
-      black 92%,
-      transparent
-    );
+    mask-image: linear-gradient(to right,
+        transparent,
+        black 8%,
+        black 92%,
+        transparent);
   }
+
   /* GSAP initial states - hidden until JS hydrates and animates in.
      Falls back to visible if JS is disabled via :where + no-js class. */
   .gsap-fade,
@@ -420,12 +460,15 @@
     opacity: 0;
     will-change: transform, opacity;
   }
+
   .gsap-rise {
     transform: translate3d(0, 40px, 0);
   }
+
   .gsap-mask {
     clip-path: inset(0 0 100% 0);
   }
+
   .char,
   .word,
   .line {
@@ -454,7 +497,7 @@
   [data-line],
   [data-tile],
   [data-channel-watermark],
-  [data-channel-meta] > *,
+  [data-channel-meta]>*,
   [data-bring-item],
   [data-truth-row],
   [data-group-title],
@@ -463,7 +506,7 @@
   [data-rail-headline],
   [data-wall-headline],
   [data-cycle-word],
-  [data-meta-row] > *,
+  [data-meta-row]>*,
   [data-feat-bit],
   [data-almanac-headline],
   [data-slab-date],
@@ -472,6 +515,7 @@
   [data-recap-bit] {
     opacity: 0;
   }
+
   [data-kicker-line],
   [data-meta-line] {
     transform: scaleX(0);
@@ -480,6 +524,7 @@
 
   /* If reduced-motion is on, JS skips animation; reveal everything */
   @media (prefers-reduced-motion: reduce) {
+
     [data-headline],
     [data-subline],
     [data-sub],
@@ -494,7 +539,7 @@
     [data-line],
     [data-tile],
     [data-channel-watermark],
-    [data-channel-meta] > *,
+    [data-channel-meta]>*,
     [data-bring-item],
     [data-truth-row],
     [data-group-title],
@@ -503,7 +548,7 @@
     [data-rail-headline],
     [data-wall-headline],
     [data-cycle-word],
-    [data-meta-row] > *,
+    [data-meta-row]>*,
     [data-feat-bit],
     [data-almanac-headline],
     [data-slab-date],
@@ -512,6 +557,7 @@
     [data-recap-bit] {
       opacity: 1;
     }
+
     [data-kicker-line],
     [data-meta-line] {
       transform: none;
@@ -520,6 +566,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
