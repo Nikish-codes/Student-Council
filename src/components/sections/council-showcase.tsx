@@ -3,11 +3,20 @@
 import * as React from "react";
 import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { CouncilCard } from "@/components/sections/council-card";
+import { CouncilMemberDialog } from "@/components/sections/council-member-dialog";
 import { CutoutPortrait } from "@/components/ui/cutout-portrait";
 import { MemberLinks } from "@/components/sections/member-links";
 import { cn } from "@/lib/utils";
-import type { CouncilSection } from "@/lib/content";
+import type { CouncilMemberWithCoLeads, CouncilSection } from "@/lib/content";
 import type { CouncilMember } from "@/lib/schemas";
+
+/**
+ * Lets a card deep in the section tree open the one shared dialog without
+ * threading a callback through Section → Track → CouncilCard.
+ */
+const OpenMemberContext = React.createContext<
+  ((m: CouncilMemberWithCoLeads) => void) | null
+>(null);
 
 /**
  * The /council page body: the president's full-width takeover, then one section
@@ -51,6 +60,8 @@ export function CouncilShowcase({
   sections: CouncilSection[];
 }) {
   const root = React.useRef<HTMLDivElement>(null);
+  const [selected, setSelected] =
+    React.useState<CouncilMemberWithCoLeads | null>(null);
 
   useGSAP(
     () => {
@@ -153,7 +164,7 @@ export function CouncilShowcase({
           </span>
 
           <div className="container relative grid grid-cols-1 items-end gap-10 pb-0 pt-24 sm:pt-32 lg:grid-cols-12 lg:gap-8">
-            <div className="relative z-10 lg:col-span-7">
+            <div className="relative z-10 lg:col-span-7 pb-12 lg:pb-24">
               <div className="mb-8 flex items-center gap-3">
                 <span className="h-px w-14 bg-line/30" aria-hidden />
                 <span className="kicker">Message from the President</span>
@@ -165,9 +176,12 @@ export function CouncilShowcase({
                 &ldquo;{president.message}&rdquo;
               </blockquote>
               <div className="mt-12 flex flex-wrap items-end justify-between gap-6 border-t border-line/10 pt-8">
+                {/* Same person-roles as every card, so the president's
+                    attribution and a member's card read as one system. */}
                 <div>
-                  <p className="display text-3xl">{president.name}</p>
-                  <p className="mt-2 kicker">{president.role} · {president.program}</p>
+                  <p className="person-name text-3xl/[1.1] text-ink">{president.name}</p>
+                  <p className="person-role mt-2 text-base">{president.role}</p>
+                  <p className="person-meta mt-1">{president.program}</p>
                 </div>
                 <MemberLinks member={president} size="lg" className="gap-3" />
               </div>
@@ -192,9 +206,18 @@ export function CouncilShowcase({
       )}
 
       {/* ───────────── Grouped sections ───────────── */}
-      {sections.map((section) => (
-        <Section key={section.id} section={section} />
-      ))}
+      <OpenMemberContext.Provider value={setSelected}>
+        {sections.map((section) => (
+          <Section key={section.id} section={section} />
+        ))}
+      </OpenMemberContext.Provider>
+
+      <CouncilMemberDialog
+        member={selected}
+        onOpenChange={(open) => {
+          if (!open) setSelected(null);
+        }}
+      />
     </div>
   );
 }
@@ -216,8 +239,10 @@ function Section({ section }: { section: CouncilSection }) {
           <h2 className="display mt-6 text-4xl leading-[0.95] sm:text-6xl">
             {section.title}
           </h2>
+          {/* max-w-xl, not 2xl: at the 17.5px root, 42rem resolves to 735px and
+              ran this blurb to ~80 characters a line. */}
           {section.blurb && (
-            <p className="mt-4 max-w-2xl text-pretty text-muted">
+            <p className="mt-4 max-w-xl text-pretty text-muted">
               {section.blurb}
             </p>
           )}
@@ -225,14 +250,16 @@ function Section({ section }: { section: CouncilSection }) {
 
         {hasOwn && <Track section={section} />}
 
-        {kids.map((child) => (
-          <div key={child.id} className={cn(hasOwn && "mt-14")}>
+        {kids.map((child, i) => (
+          <div key={child.id} className={cn((hasOwn || i > 0) && "mt-24")}>
             <div data-section-title className="mb-6 flex items-center gap-3">
               <span className="h-px w-10 bg-line/25" aria-hidden />
               <h3 className="kicker text-ink">{child.title}</h3>
             </div>
+            {/* Smaller type needs a proportionally narrower box, not the same
+                one — at text-sm this was running past 90 characters. */}
             {child.blurb && (
-              <p className="mb-6 max-w-2xl text-pretty text-sm text-muted">
+              <p className="mb-6 max-w-lg text-pretty text-sm text-muted">
                 {child.blurb}
               </p>
             )}
@@ -246,6 +273,7 @@ function Section({ section }: { section: CouncilSection }) {
 
 /** A group's members, as either a wrapping grid or one scrolling row. */
 function Track({ section }: { section: CouncilSection }) {
+  const open = React.useContext(OpenMemberContext);
   if (section.members.length === 0) return null;
 
   if (section.layout === "hscroll") {
@@ -259,7 +287,12 @@ function Track({ section }: { section: CouncilSection }) {
             key={m.id}
             className={cn("shrink-0 snap-start", HSCROLL_W[section.cardSize])}
           >
-            <CouncilCard member={m} index={i} size={section.cardSize} />
+            <CouncilCard
+              member={m}
+              index={i}
+              size={section.cardSize}
+              onOpen={open ? () => open(m) : undefined}
+            />
           </div>
         ))}
       </div>
@@ -272,7 +305,13 @@ function Track({ section }: { section: CouncilSection }) {
       className={cn("grid gap-4", COLS[section.perRow] ?? COLS[4])}
     >
       {section.members.map((m, i) => (
-        <CouncilCard key={m.id} member={m} index={i} size={section.cardSize} />
+        <CouncilCard
+          key={m.id}
+          member={m}
+          index={i}
+          size={section.cardSize}
+          onOpen={open ? () => open(m) : undefined}
+        />
       ))}
     </div>
   );

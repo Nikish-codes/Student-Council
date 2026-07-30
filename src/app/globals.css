@@ -293,6 +293,70 @@
     line-height: 0.95;
   }
 
+  /* ── Person roles ─────────────────────────────────────────────────────
+     /council is a directory: the reader is looking for a PERSON. These four
+     roles are named for the job they do rather than for their values, so a
+     grid card and the expanded panel cannot drift apart.
+
+     They also split a collision. `.kicker` was doing four different jobs on
+     that page — section heading, content label, the session strapline, and
+     every person's job title — so nothing had a distinct voice. `.kicker` is
+     now reserved for structural labels; a person's own attributes live here,
+     in the sans face, because a job title is biography, not a system label. */
+
+  /* The signature. Wraps rather than truncates: 46 of 55 names were being cut
+     off on a phone, on a page whose entire purpose is naming people.
+
+     Deliberately sets NO line-height. Tailwind's `text-*` utilities each ship a
+     paired line-height, and the utilities layer beats this one — so a value
+     here would be silently dead (as `.display`'s `line-height: 0.95` in fact
+     is). Callers set it with the `text-2xl/[1.1]` size/leading shorthand, which
+     matters now that a name can run to two or three lines. */
+  .person-name {
+    font-family: var(--font-display), Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    overflow-wrap: break-word;
+  }
+
+  /* What they actually do. At 10px tracked mono this was the least legible
+     thing on the card despite being the reason the person is on the page. */
+  .person-role {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.005em;
+    color: rgb(var(--ink));
+    overflow-wrap: break-word;
+  }
+
+  /* Programme and batch — the quietest fact, and the only one that may wrap.
+     Breaks words because the real data contains unspaced runs like
+     "BBA(DSAI)" and "BBA Hons. AI & DS - 1st year" that overflow a narrow
+     card otherwise. */
+  .person-meta {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.4;
+    color: rgb(var(--muted));
+    overflow-wrap: break-word;
+  }
+
+  /* Their line. Fraunces italic keeps the editorial voice, but `.display`'s
+     -0.035em is a headline tracking that reads as cramped once the same face
+     is set at text size, so the voice gets its own. */
+  .person-voice {
+    font-family: var(--font-display), Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+
   .hairline {
     height: 1px;
     background: rgb(var(--line) / 0.08);

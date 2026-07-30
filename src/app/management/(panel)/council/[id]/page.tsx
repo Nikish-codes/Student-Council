@@ -43,16 +43,18 @@ export default async function CouncilEditor({ params }: { params: Promise<{ id: 
         <TextField name="linkedin" label="LinkedIn URL" hint="optional" defaultValue={row?.linkedin} />
       </div>
       <TextAreaField name="quote" label="Their line" hint="optional · shown under their photo on the card · no length cap" maxLength={1200} rows={3} defaultValue={row?.quote} />
+      <TextAreaField name="bio" label="About / what they do" hint="optional · shown when someone expands their card" maxLength={1200} rows={5} defaultValue={row?.bio} />
       <TextAreaField name="message" label="Long message" hint="optional · President hero only" maxLength={1200} rows={4} defaultValue={row?.message} />
       <div className="grid gap-5 sm:grid-cols-3">
         <SelectField
           name="memberType"
           label="Type"
-          hint="President gets the full-width takeover"
+          hint="Co-leads show inside their lead's expanded card"
           defaultValue={row?.memberType ?? "member"}
           options={[
             { value: "member", label: "Member — card in the grid" },
             { value: "president", label: "President — full takeover" },
+            { value: "co_lead", label: "Co-lead — under their lead" },
           ]}
         />
         <NumberField name="sortOrder" label="Order" hint="1 = first" min={0} defaultValue={row?.sortOrder ?? 99} />
@@ -61,7 +63,7 @@ export default async function CouncilEditor({ params }: { params: Promise<{ id: 
       <SelectField
         name="groupId"
         label="Section"
-        hint="Which part of /council they appear in · the President ignores this"
+        hint="Which part of /council they appear in · the President and co-leads ignore this"
         defaultValue={row?.groupId != null ? String(row.groupId) : ""}
         options={[
           { value: "", label: "— Ungrouped —" },

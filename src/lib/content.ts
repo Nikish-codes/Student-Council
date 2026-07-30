@@ -3,6 +3,7 @@ import { cache } from "react";
 import { and, asc, desc, eq, gte, ne, or, inArray, sql } from "drizzle-orm";
 
 import { db } from "@/db/client";
+import { attachCoLeads } from "@/lib/council";
 import {
   announcements as announcementsT,
   attendees as attendeesT,
@@ -27,6 +28,7 @@ import type {
   CouncilGroup,
   CouncilGroupLayout,
   CouncilMember,
+  CouncilMemberType,
   EventItem,
   FaqItem,
   Highlight,
@@ -86,6 +88,8 @@ export const getAnnouncements = cache(async (): Promise<Announcement[]> => {
 
 // ─────────────── council ───────────────
 
+const MEMBER_TYPES: CouncilMemberType[] = ["president", "member", "co_lead"];
+
 export const getCouncil = cache(async (): Promise<CouncilMember[]> => {
   const rows = await db.query.councilMembers.findMany({
     with: { photo: true },
@@ -101,7 +105,10 @@ export const getCouncil = cache(async (): Promise<CouncilMember[]> => {
     linkedin: d.linkedin || undefined,
     message: d.message || undefined,
     quote: d.quote || undefined,
-    memberType: d.memberType === "president" ? "president" : "member",
+    bio: d.bio || undefined,
+    memberType: MEMBER_TYPES.includes(d.memberType as CouncilMemberType)
+      ? (d.memberType as CouncilMemberType)
+      : "member",
     groupId: d.groupId != null ? String(d.groupId) : undefined,
     isPresident: Boolean(d.isPresident),
     featured: Boolean(d.featured),
@@ -109,9 +116,14 @@ export const getCouncil = cache(async (): Promise<CouncilMember[]> => {
   }));
 });
 
+/** A member as the page renders them: with the co-leads working under them. */
+export type CouncilMemberWithCoLeads = CouncilMember & {
+  coLeads: CouncilMember[];
+};
+
 /** A group plus the members in it and any sub-groups beneath it. */
 export type CouncilSection = CouncilGroup & {
-  members: CouncilMember[];
+  members: CouncilMemberWithCoLeads[];
   children: CouncilSection[];
 };
 
@@ -125,6 +137,9 @@ const LAYOUTS: CouncilGroupLayout[] = ["grid", "hscroll"];
  *
  * Members whose group was deleted or never set are collected into a synthetic
  * trailing section so nobody silently disappears from the page.
+ *
+ * Co-leads are deliberately NOT placed in any section — they hang off their
+ * lead (see src/lib/council.ts) and surface only in that lead's expanded card.
  */
 export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
   const [groupRows, members] = await Promise.all([
@@ -147,17 +162,25 @@ export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
     order: typeof g.sortOrder === "number" ? g.sortOrder : 99,
   });
 
-  const byGroup = new Map<string, CouncilMember[]>();
-  const ungrouped: CouncilMember[] = [];
+  // Built from ALL members, co-leads included, before anyone is filtered out.
+  const coLeadsByLeadId = attachCoLeads(members);
+  const withCoLeads = (m: CouncilMember): CouncilMemberWithCoLeads => ({
+    ...m,
+    coLeads: coLeadsByLeadId.get(m.id) ?? [],
+  });
+
+  const byGroup = new Map<string, CouncilMemberWithCoLeads[]>();
+  const ungrouped: CouncilMemberWithCoLeads[] = [];
   for (const m of members) {
-    if (m.memberType === "president") continue;
+    if (m.memberType === "president" || m.memberType === "co_lead") continue;
+    const entry = withCoLeads(m);
     if (!m.groupId) {
-      ungrouped.push(m);
+      ungrouped.push(entry);
       continue;
     }
     const list = byGroup.get(m.groupId);
-    if (list) list.push(m);
-    else byGroup.set(m.groupId, [m]);
+    if (list) list.push(entry);
+    else byGroup.set(m.groupId, [entry]);
   }
 
   const groups = groupRows.map(toGroup);
@@ -178,9 +201,15 @@ export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
 
   const strays = [
     ...ungrouped,
-    ...members.filter(
-      (m) => m.memberType !== "president" && m.groupId && !known.has(m.groupId),
-    ),
+    ...members
+      .filter(
+        (m) =>
+          m.memberType !== "president" &&
+          m.memberType !== "co_lead" &&
+          m.groupId &&
+          !known.has(m.groupId),
+      )
+      .map(withCoLeads),
   ];
   if (strays.length > 0) {
     sections.push({

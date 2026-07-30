@@ -295,9 +295,12 @@ export const councilMembers = sqliteTable("mp_council_members", {
   linkedin: text("linkedin"),
   message: text("message"),
   quote: text("quote"),
+  // Long-form "what this role is and what they do", shown in the expanded card.
+  bio: text("bio"),
   // Layout tier: "president" gets the full-width takeover, "member" gets a card
-  // in the grid. `isPresident` predates this column and is written in sync by
-  // the panel (see council/actions.ts) so a rollback stays a `git revert`.
+  // in the grid, "co_lead" gets no grid card and appears only inside their
+  // lead's expanded card. `isPresident` predates this column and is written in
+  // sync by the panel (see council/actions.ts) so a rollback stays a `git revert`.
   memberType: text("member_type")
     .$type<CouncilMemberType>()
     .notNull()

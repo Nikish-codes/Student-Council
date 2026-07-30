@@ -25,9 +25,9 @@ export function MemberLinks({
   const btn = cn(
     "grid place-items-center rounded-full border border-line/15 text-muted",
     "transition-colors hover:border-line/40 hover:text-ink",
-    size === "lg" ? "h-10 w-10" : "h-8 w-8",
+    size === "lg" ? "h-12 w-12" : "h-10 w-10",
   );
-  const glyph = size === "lg" ? "h-4 w-4" : "h-3.5 w-3.5";
+  const glyph = size === "lg" ? "h-6 w-6" : "h-5 w-5";
 
   return (
     <div className={cn("flex items-center gap-2", className)}>

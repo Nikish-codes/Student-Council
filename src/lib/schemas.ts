@@ -10,12 +10,20 @@ export const announcementSchema = z.object({
 export type Announcement = z.infer<typeof announcementSchema>;
 
 /**
- * Two kinds of council member, which drive two different layouts on /council:
- * the president gets a full-width takeover to themselves, everyone else gets a
- * card in the member grid. `isPresident` predates this and is kept in sync by
- * the panel so a rollback stays a plain `git revert`.
+ * Three kinds of council member, which drive three different placements on
+ * /council: the president gets a full-width takeover to themselves, a `member`
+ * gets a card in their section's grid, and a `co_lead` gets no grid card at all
+ * — they surface only inside their lead's expanded card (see src/lib/council.ts
+ * for how a co-lead is paired to its lead).
+ *
+ * `isPresident` predates this and is kept in sync by the panel so a rollback
+ * stays a plain `git revert`.
  */
-export const councilMemberTypeSchema = z.enum(["president", "member"]);
+export const councilMemberTypeSchema = z.enum([
+  "president",
+  "member",
+  "co_lead",
+]);
 export type CouncilMemberType = z.infer<typeof councilMemberTypeSchema>;
 
 /** Card footprint for a group's members. Drives padding + type scale. */
@@ -59,6 +67,8 @@ export const councilMemberSchema = z.object({
   message: z.string().optional(),
   // Short one-line statement, shown under the member's photo on their card
   quote: z.string().optional(),
+  // What the role is and what they actually do — shown in the expanded card
+  bio: z.string().optional(),
   memberType: councilMemberTypeSchema.default("member"),
   groupId: z.string().optional(),
   isPresident: z.boolean().default(false),

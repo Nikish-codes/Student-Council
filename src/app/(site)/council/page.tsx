@@ -32,7 +32,9 @@ export default async function CouncilPage() {
             <span className="block">The faces</span>
             <span className="block italic text-accent">behind the work.</span>
           </h1>
-          <p className="mt-10 max-w-2xl text-balance text-lg text-muted">
+          {/* text-pretty, not text-balance: balancing is for headings, and this
+              is a three-line paragraph where it just shortens every line. */}
+          <p className="mt-10 max-w-2xl text-pretty text-lg text-muted">
             {numberWord(members.length)} students. One council. One job — to
             make sure every voice on this campus is heard, every event runs
             well, and every concern reaches the right desk.
@@ -48,7 +50,9 @@ export default async function CouncilPage() {
         <Reveal>
           <div className="mb-10">
             <span className="kicker">Constitution</span>
-            <h2 className="display mt-4 text-4xl sm:text-5xl">
+            {/* Matches the section headings in the showcase — same level in the
+                page's outline, so the same size. */}
+            <h2 className="display mt-4 text-4xl leading-[0.95] sm:text-6xl">
               How the Council works.
             </h2>
           </div>
@@ -73,7 +77,7 @@ export default async function CouncilPage() {
                 </Accordion.Trigger>
               </Accordion.Header>
               <Accordion.Content className="overflow-hidden text-muted data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                <p className="max-w-3xl pb-6 pr-12 text-base leading-relaxed whitespace-pre-line">
+                <p className="max-w-xl pb-6 pr-12 text-base leading-relaxed whitespace-pre-line">
                   {item.answer}
                 </p>
               </Accordion.Content>

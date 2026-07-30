@@ -1,0 +1,1 @@
+ALTER TABLE `mp_council_members` ADD `bio` text;

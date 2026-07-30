@@ -12,8 +12,14 @@ const sans = Inter({
   display: "swap",
 });
 
+// `style` defaults to ["normal"], so every italic on the site — the hero accent
+// line, the president's message, every council member's quote — was a browser
+// slant of the roman rather than Fraunces' own italic, which has genuinely
+// different letterforms. Requesting it costs one more file on a site whose
+// identity is this serif.
 const display = Fraunces({
   subsets: ["latin"],
+  style: ["normal", "italic"],
   variable: "--font-display",
   display: "swap",
 });

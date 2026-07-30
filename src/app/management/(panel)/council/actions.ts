@@ -6,6 +6,9 @@ import { eq, ne } from "drizzle-orm";
 import { db } from "@/db/client";
 import { councilMembers as t } from "@/db/schema";
 import { requireOps, requireRole } from "@/lib/rbac";
+import type { CouncilMemberType } from "@/lib/schemas";
+
+const MEMBER_TYPES: CouncilMemberType[] = ["president", "member", "co_lead"];
 
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 
@@ -19,7 +22,12 @@ export async function saveCouncil(id: number | null, fd: FormData) {
   await requireOps();
   // `memberType` is the source of truth; `isPresident` is written in sync so the
   // older flag never drifts and a rollback stays a plain `git revert`.
-  const memberType = s(fd, "memberType") === "president" ? "president" : "member";
+  const raw = s(fd, "memberType");
+  const memberType: CouncilMemberType = MEMBER_TYPES.includes(
+    raw as CouncilMemberType,
+  )
+    ? (raw as CouncilMemberType)
+    : "member";
   const isPresident = memberType === "president";
   const values = {
     name: s(fd, "name"),
@@ -30,7 +38,8 @@ export async function saveCouncil(id: number | null, fd: FormData) {
     linkedin: s(fd, "linkedin") || null,
     message: s(fd, "message") || null,
     quote: s(fd, "quote") || null,
-    memberType: memberType as "president" | "member",
+    bio: s(fd, "bio") || null,
+    memberType,
     groupId: s(fd, "groupId") ? Number(s(fd, "groupId")) : null,
     isPresident,
     featured: fd.get("featured") === "on",

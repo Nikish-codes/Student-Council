@@ -12,7 +12,9 @@
  * Deliberately NOT imported: roll numbers and personal phone numbers. They are
  * personal data with no column to live in and no business being on a public page.
  *
- * Co-leads are skipped (they get their own treatment later).
+ * Co-leads import as `memberType: "co_lead"` with no section: they render only
+ * inside the expanded card of the lead whose role shares their prefix
+ * ("Sports Co Lead" → "Sports Lead"), paired by src/lib/council.ts.
  */
 import { config } from "dotenv";
 config({ path: ".env.local" });
@@ -24,6 +26,7 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 
 import * as schema from "../src/db/schema";
 import { councilGroups, councilMembers } from "../src/db/schema";
+import { coLeadBase, leadBase } from "../src/lib/council";
 
 // Build the client AFTER dotenv: ESM hoists every `import` above the config()
 // call, so importing @/db/client here would capture an unset LIBSQL_URL and
@@ -132,6 +135,7 @@ const normName = (s: string) => s.toLowerCase().replace(/[^a-z]/g, "");
 
 type Bucket =
   | "president"
+  | "co_lead"
   | "Vice Presidents"
   | "Secretaries & Treasurers"
   | "Core Team"
@@ -146,7 +150,10 @@ function bucketOf(position: string): Bucket {
   if (p.includes("general secretary") || p.includes("treasurer"))
     return "Secretaries & Treasurers";
   if (p.startsWith("sr ")) return "School Representatives";
-  if (p.includes("co lead") || p.includes("co-lead")) return "skip";
+  // Co-leads get no section of their own: they hang off the lead whose role
+  // shares their prefix ("Sports Co Lead" → "Sports Lead") and surface only
+  // inside that lead's expanded card. See src/lib/council.ts.
+  if (p.includes("co lead") || p.includes("co-lead")) return "co_lead";
   if (p.endsWith("lead")) return "Core Team";
   if (p.includes("club")) return "Club Presidents";
   return "skip";
@@ -225,11 +232,181 @@ const LINES_BY_POSITION: Record<string, string | string[]> = {
   "crowdcore club": "Nothing on this campus happens without a crowd. We're the ones who gather it.",
   "humanique club": "People first — the club for anyone interested in what makes us tick.",
   "nexus club": "The connective tissue between disciplines that don't usually talk to each other.",
+
+  // Co-leads
+  "operations co lead": "Half of operations is the second pair of hands nobody sees.",
+  "sports co lead": [
+    "Fixtures, kit and courts — someone has to chase all three at once.",
+    "Turnout is the whole game. My job is making sure people actually show up.",
+  ],
+  "student welfare co lead": [
+    "The second name on the list, so there's always somebody free to answer.",
+    "Welfare work is mostly listening. Two of us means twice the listening.",
+  ],
+  "tech co lead": "Two people on tech means nothing sits in a queue waiting for one of us.",
+  "facilities co lead": "Walking the buildings and writing down what's broken before someone complains.",
+  "entrepreneurship co lead": "Founders need a sounding board more than they need a stage.",
+  "production co lead": "Backstage runs on redundancy. I'm the redundancy.",
 };
 
-function lineFor(position: string, seen: Map<string, number>): string | null {
+/**
+ * "What they do" — the long-form text on the expanded card. Written per
+ * position because the sheet has no bio column; the panel can override any of
+ * them per person. Roles held by more than one student rotate through variants
+ * so three VPs don't read as three copies of the same paragraph.
+ */
+const BIO_BY_POSITION: Record<string, string | string[]> = {
+  president:
+    "The President chairs the Student Council and is the student body's formal representative to the administration. That means running Council meetings, setting the year's priorities, signing off on major events and budgets, and being the person the university comes to when it needs a student position on something. Most of the work is unglamorous: following up, mediating between clubs, and making sure decisions taken in a meeting actually happen.",
+
+  "vice president": [
+    "Vice Presidents share the Council's executive load with the President and step in when they can't be there. This portfolio focuses on the flow of information both ways — carrying student concerns up to the administration and bringing decisions back down in a form people can actually act on. Day to day it means sitting in on committee meetings, chasing departments for answers, and keeping the leads unblocked.",
+    "Vice Presidents share the Council's executive load with the President. This portfolio leans on coordination between the clubs and the Council: making sure club calendars don't collide, that budget requests are made properly, and that a club with a genuine problem gets it in front of someone who can fix it rather than losing it in a group chat.",
+    "Vice Presidents share the Council's executive load with the President. This portfolio covers the Council's own internal running — that the committees meet, that the leads have what they need, that decisions get minuted and revisited, and that a promise made in September is still being tracked in February.",
+  ],
+
+  "general secretary": [
+    "The General Secretary keeps the Council's official record. Every meeting is minuted, every motion and decision is written down with who is responsible for it, and every follow-up is chased until it's closed. The role also handles the Council's formal correspondence with the university, so requests and complaints go through a documented channel rather than a personal DM.",
+    "The General Secretary keeps the Council's official record — agendas out before meetings, minutes out after, and a running list of what was promised and by whom. The role also maintains the Council's documents and constitution, which means being the person who can answer 'are we actually allowed to do that?' with a reference rather than a guess.",
+  ],
+
+  treasurer: [
+    "The Treasurer manages the Council's funds: reviewing budget requests from clubs and committees, tracking what has actually been spent against what was approved, and reconciling receipts. The principle behind the role is that every rupee should be traceable to a student who benefited from it, and that the accounts should be legible to anyone who asks.",
+    "The Treasurer manages the Council's funds alongside their counterpart, covering event budgets and club disbursements. The job is mostly discipline: getting quotes before committing, keeping paperwork so reimbursements aren't stuck for weeks, and flagging early when a plan costs more than the money available.",
+  ],
+
+  // ── Core Team leads ──
+  "alumni relations lead":
+    "Alumni Relations keeps the line open between students here now and the ones who've left. That means maintaining contact with graduating batches, arranging talks and mentoring sessions, and connecting students to alumni working in fields they're trying to break into. The value of the network is entirely in whether someone actually picks up the phone, so most of the work is relationship maintenance.",
+  "operations lead":
+    "Operations makes events physically happen: venues booked, permissions cleared, vendors briefed, equipment moved, volunteers rostered and schedules that survive contact with reality. Anything that looks effortless on the day took weeks of unglamorous planning, and this is the desk where that planning lives.",
+  "cultural lead":
+    "Cultural programming covers the festivals, performances and traditions that give the campus a character beyond its timetable. The Lead plans the cultural calendar, works with the performing clubs on what they need, and tries to make sure the programme represents more than one part of the student body.",
+  "pr & media lead":
+    "PR & Media handles how the Council communicates — announcements, social channels, event coverage, photography and the Council's public voice. If the Council does good work and nobody hears about it, half the job is undone; equally, the role means being straight with students when something goes wrong rather than going quiet.",
+  "sports lead":
+    "Sports covers inter-house and inter-college fixtures, ground and equipment access, and the general question of who gets to play. The Lead schedules tournaments, works with the sports facilities on availability, and pushes for the casual player to have as much access as the people already on a team.",
+  "student welfare lead":
+    "Student Welfare is the first point of contact when something is wrong — hostel and mess issues, academic grievances, mental health signposting, and disputes that need someone neutral. Much of the role is confidential and unglamorous: listening properly, then making sure the concern reaches the person with the authority to act on it.",
+  "tech lead":
+    "Tech builds and maintains what the Council runs on: the portal, registration and ticketing, internal tooling and the data behind it. The Lead sets the technical direction, reviews what ships, and keeps the systems fast and open enough that the next student to take over can actually work on them.",
+  "outreach lead":
+    "Outreach is about the students the Council doesn't already hear from. The Lead runs the channels for feedback, takes the Council to parts of campus that don't come to it, and works with external partners and other institutions. A council that only talks to people who already talk to it isn't representing much.",
+  "facilities lead":
+    "Facilities covers the physical campus as students experience it — hostels, classrooms, mess halls, labs, transport and the things you only notice once they're broken. The Lead collects and triages complaints, escalates them to the right department, and follows up until they're actually closed rather than acknowledged.",
+  "design lead":
+    "Design owns how the Council looks and reads: identity, posters, decks, signage and the visual standard for events. The Lead sets that standard and produces or reviews the work against it, on the view that how an organisation presents itself changes how seriously people take what it has to say.",
+  "entrepreneurship lead":
+    "Entrepreneurship supports students trying to build something — connecting them to mentors, incubation support and funding routes, and running the sessions and competitions where early ideas get pressure-tested. The point of the role is that a good idea on this campus shouldn't die waiting for permission.",
+  "production lead":
+    "Production runs the technical side of events: sound, lighting, staging, AV and the crew who operate it. The Lead specs what an event needs, books and tests it, and runs the show on the day — the difference between an event and an experience is almost entirely here.",
+
+  // ── Co-leads ──
+  "operations co lead":
+    "Works alongside the Operations Lead on the logistics behind every event — venue bookings, vendor coordination, equipment and volunteer rosters. Operations is the one portfolio where a single point of failure shows up immediately on event day, so the co-lead carries a real share of the load rather than shadowing.",
+  "sports co lead": [
+    "Works alongside the Sports Lead on fixtures, ground and equipment access, and running tournaments. Splits the calendar so that two events on the same weekend both have someone accountable for them.",
+    "Works alongside the Sports Lead, focusing on participation — getting teams registered, chasing turnout, and making sure casual players and first-years know how to get onto a pitch in the first place.",
+  ],
+  "student welfare co lead": [
+    "Works alongside the Student Welfare Lead as a second point of contact for students raising a problem. Having two people on the portfolio means someone is reachable, and that a student can choose who they'd rather talk to.",
+    "Works alongside the Student Welfare Lead on hostel, mess and academic grievances, and on the follow-up that turns a complaint into a resolution. Most of the role is listening carefully and then being persistent on someone else's behalf.",
+  ],
+  "tech co lead":
+    "Works alongside the Tech Lead on the Council's portal, tooling and event systems — building features, reviewing changes and keeping things running during events, so no single request sits waiting on one person's availability.",
+  "facilities co lead":
+    "Works alongside the Facilities Lead on hostel, classroom and campus infrastructure issues — collecting complaints, walking the buildings, and escalating problems to the right department before they become everybody's problem.",
+  "entrepreneurship co lead":
+    "Works alongside the Entrepreneurship Lead supporting student founders — running sessions and competitions, and connecting early-stage teams to mentors and incubation support. A lot of it is simply being a sounding board for ideas that aren't ready for a stage yet.",
+  "production co lead":
+    "Works alongside the Production Lead on sound, lighting, staging and AV. Backstage work runs on redundancy: the co-lead makes sure there is always a second person who knows the cue sheet and can run the desk.",
+
+  // ── School representatives ──
+  // Roles came through as codes; these read against Woxsen's school names.
+  "sr soap":
+    "Represents students of the School of Architecture & Planning on the Council. Studio-based programmes have their own problems — long studio hours, materials and workspace access, and juries that don't fit a normal timetable — and this seat exists so those get raised rather than averaged away.",
+  "sr soad":
+    "Represents students of the School of Art & Design on the Council. The role covers what design students actually need to work — studio space, materials, equipment access and time — and carries school-specific academic concerns to the Council and the administration.",
+  "sr sob ug":
+    "Represents undergraduate students of the School of Business on the Council. It's the largest cohort on campus, which makes it easy for individual concerns to get lost in the average; this seat exists to bring specific ones forward, from scheduling to placements and academic policy.",
+  "sr sob pg":
+    "Represents postgraduate students of the School of Business on the Council. Postgraduate life runs on a different clock — shorter programmes, heavier coursework, different placement timelines — and this seat makes sure Council decisions account for that rather than assuming an undergraduate calendar.",
+  "sr sol":
+    "Represents students of the School of Law on the Council. The role covers moot and competition support, library and research access, and school-specific academic concerns — and law students tend to hold the Council to its own rules, which is no bad thing.",
+  "sr solh":
+    "Represents students of the School of Liberal Arts & Humanities on the Council. It's a smaller cohort with a distinct academic rhythm, and the seat makes sure their teaching, space and event needs aren't overlooked in favour of the larger schools.",
+  "sr sos":
+    "Represents students of the School of Sciences on the Council. Lab access, equipment, safety and scheduling around practical hours are the recurring issues, and this seat brings them to the Council with the specifics attached.",
+  "sr sot":
+    "Represents students of the School of Technology on the Council. The role covers lab and hardware access, project support, and the academic concerns of a cohort that builds a large share of what the campus runs on.",
+
+  // ── Club presidents ──
+  "aesthetrix club president":
+    "Leads Aesthetrix, the club for students interested in visual aesthetics and the craft behind them. The President plans the club's calendar, runs sessions and workshops, and manages its members and budget — and is accountable to the Council for both.",
+  "animal welfare club president":
+    "Leads the Animal Welfare Club, which looks after the animals living on and around campus — feeding, vaccination and rescue drives, and the awareness work that stops these becoming one person's private responsibility.",
+  "communication design club president":
+    "Leads the Communication Design Club. The club produces a large share of the campus's visual output — posters, titles, identities — and runs the workshops where students learn to make it. The President sets the calendar and manages members and budget.",
+  "distortion club president":
+    "Leads Distortion, the club for music and sound on the louder end of the spectrum. The President programmes the club's gigs and sessions, coordinates with Production on technical needs, and manages members and budget.",
+  "drishyakala - the film club president":
+    "Leads DrishyaKala, the campus film club — screenings, film-making workshops, and the short-film projects that give students a camera and a deadline. The President runs the programme and manages the club's members and budget.",
+  "finwiz club president":
+    "Leads FinWiz, the finance club. Markets, valuation, personal finance and the competitions that go with them, pitched at anyone willing to sit down and learn rather than only at finance majors. The President runs the sessions and manages members and budget.",
+  "fashion design club president":
+    "Leads the Fashion Design Club — showcases, styling and construction workshops, and the collaborative work behind a campus show. The President plans the calendar and manages the club's members and budget.",
+  "genesis club president":
+    "Leads Genesis, the club for students with an idea and no obvious place to take it. The President runs the sessions where those ideas get built out and tested, and manages the club's members and budget.",
+  "global sustainability club president":
+    "Leads the Global Sustainability Club, which runs the campus's environmental initiatives — waste, energy and consumption habits, plus the awareness work behind them. The President sets the agenda and manages members and budget.",
+  "ideate club president":
+    "Leads Ideate, a club built around structured idea generation and problem-solving — design sprints, hackathon-style sessions and workshops. The President runs the programme and manages the club's members and budget.",
+  "janspandan club president":
+    "Leads JanSpandan, the club's community service arm. Outreach and volunteering programmes with communities around the campus, run on the basis that service is about turning up when it's inconvenient. The President coordinates the drives and manages members and budget.",
+  "jashn club president":
+    "Leads Jashn, the club behind the campus's celebrations and festival programming. Far more planning goes into these than anyone watching realises, and the President owns that planning along with the club's members and budget.",
+  "just naach club president":
+    "Leads Just Naach, the dance club — practices, choreography and performances across the year, open to trained dancers and complete beginners alike. The President runs the calendar and manages members and budget.",
+  "law club president":
+    "Leads the Law Club — moots, debates, legal awareness sessions and competition preparation. The President runs the programme, coordinates with the School of Law, and manages the club's members and budget.",
+  "literature club president":
+    "Leads the Literature Club: reading circles, writing workshops, open mics and the campus's publishing efforts. The President runs the calendar and manages the club's members and budget.",
+  "marketing director's club president":
+    "Leads the Marketing Director's Club — case competitions, campaign work and sessions on how products actually get sold. The President runs the programme and manages the club's members and budget.",
+  "rotaract club president":
+    "Leads the Rotaract Club, the campus chapter of the international service organisation. Community projects, professional development and joint work with other chapters. The President runs the programme and manages members and budget.",
+  "spectrum club president":
+    "Leads Spectrum, the club that exists so students have a place to be themselves on a campus still learning what that takes. The President runs its sessions and awareness work and manages the club's members and budget.",
+  "tantra club president":
+    "Leads Tantra, the club for traditional performance and craft — carrying those forms forward through performances and workshops. The President plans the calendar and manages the club's members and budget.",
+  "tech club president":
+    "Leads the Tech Club — build sessions, hackathons and workshops, plus the projects that get shipped and shown to the rest of campus. The President runs the programme and manages members and budget.",
+  "utopia esports club president":
+    "Leads Utopia Esports, which runs the campus's competitive gaming scene — tournaments, team selection and inter-college fixtures, treated with the same seriousness as any other sport. The President runs it and manages members and budget.",
+  "interior design club president":
+    "Leads the Interior Design Club — workshops and projects on how space changes the way people behave in it. The President plans the calendar and manages the club's members and budget.",
+  "paparazzi club president":
+    "Leads Paparazzi, the campus photography club. It covers events, runs technique workshops, and maintains the visual record of the year. The President coordinates coverage and manages members and budget.",
+  "debate club president":
+    "Leads the Debate Club — parliamentary debate, public speaking training and inter-college competition. The President runs the practice schedule, selects teams, and manages the club's members and budget.",
+  "skribble club":
+    "Leads Skribble, the campus sketching club — open drawing sessions with no talent threshold and no grading. The President runs the sessions and manages the club's members and budget.",
+  "crowdcore club":
+    "Leads Crowdcore, the club responsible for turnout and crowd energy at campus events. Nothing on this campus happens without a crowd, and this is the club that gathers one. The President runs it and manages members and budget.",
+  "humanique club":
+    "Leads Humanique, a club built around people — psychology, behaviour and the conversations in between. The President runs the sessions and manages the club's members and budget.",
+  "nexus club":
+    "Leads Nexus, the club that works across disciplines that don't usually talk to each other, running collaborative projects and cross-school events. The President runs the programme and manages members and budget.",
+};
+
+/** Pick the entry for a position, rotating through variants for shared roles. */
+function pick(
+  table: Record<string, string | string[]>,
+  position: string,
+  seen: Map<string, number>,
+): string | null {
   const key = position.toLowerCase().trim();
-  const entry = LINES_BY_POSITION[key];
+  const entry = table[key];
   if (!entry) return null;
   if (typeof entry === "string") return entry;
   const n = seen.get(key) ?? 0;
@@ -246,6 +423,7 @@ type Incoming = {
   role: string;
   bucket: Bucket;
   quote: string | null;
+  bio: string | null;
 };
 
 async function main() {
@@ -259,7 +437,9 @@ async function main() {
   const rows = readSheet(file).filter((r) => r.some((c) => c.trim()));
   const body = rows.slice(1).filter((r) => r[0]?.trim());
 
-  const seenPositions = new Map<string, number>();
+  // Separate counters: quotes and bios rotate through their variants independently.
+  const seenForLines = new Map<string, number>();
+  const seenForBios = new Map<string, number>();
   const incoming: Incoming[] = [];
   let skipped = 0;
 
@@ -277,7 +457,8 @@ async function main() {
       program: tidyProgram(program),
       role: tidyRole(position),
       bucket,
-      quote: lineFor(position, seenPositions),
+      quote: pick(LINES_BY_POSITION, position, seenForLines),
+      bio: pick(BIO_BY_POSITION, position, seenForBios),
     });
   }
 
@@ -285,7 +466,7 @@ async function main() {
   const groups = await db.select().from(councilGroups);
   const groupId = new Map(groups.map((g) => [g.title, g.id]));
   const missing = [...new Set(incoming.map((i) => i.bucket))].filter(
-    (b) => b !== "president" && !groupId.has(b),
+    (b) => b !== "president" && b !== "co_lead" && !groupId.has(b),
   );
   if (missing.length) {
     console.error("Missing council sections:", missing.join(", "));
@@ -338,21 +519,29 @@ async function main() {
 
   for (const m of incoming) {
     const isPresident = m.bucket === "president";
+    const isCoLead = m.bucket === "co_lead";
     const match = findExisting(m, isPresident);
     if (match) claimed.add(match.id);
-    const gid = isPresident ? null : groupId.get(m.bucket)!;
+    // Neither the president nor a co-lead belongs to a section: the president
+    // gets the takeover, and a co-lead renders inside their lead's card.
+    const gid = isPresident || isCoLead ? null : groupId.get(m.bucket)!;
+    const memberType = isPresident
+      ? "president"
+      : isCoLead
+        ? "co_lead"
+        : "member";
     const orderKey = m.bucket;
     const order = (perGroupOrder.get(orderKey) ?? 0) + 1;
     perGroupOrder.set(orderKey, order);
 
     if (match) {
-      // Never clobber a portrait, a president's message, or an address that was
-      // deliberately set to a role inbox rather than a personal one.
+      // Never clobber a portrait, a president's message, a hand-written bio, or
+      // an address deliberately set to a role inbox rather than a personal one.
       const patch: Record<string, unknown> = {
         name: m.name,
         role: m.role,
         program: m.program,
-        memberType: isPresident ? "president" : "member",
+        memberType,
         isPresident,
         groupId: gid,
         sortOrder: order,
@@ -360,6 +549,7 @@ async function main() {
       };
       if (!match.email && m.email) patch.email = m.email;
       if (!match.quote && m.quote) patch.quote = m.quote;
+      if (!match.bio && m.bio) patch.bio = m.bio;
 
       if (!dry) {
         await db
@@ -377,7 +567,8 @@ async function main() {
           program: m.program,
           email: m.email || null,
           quote: m.quote,
-          memberType: isPresident ? "president" : "member",
+          bio: m.bio,
+          memberType,
           isPresident,
           groupId: gid,
           sortOrder: order,
@@ -412,9 +603,27 @@ async function main() {
     }
   }
 
+  const coLeads = incoming.filter((m) => m.bucket === "co_lead").length;
   console.log(
-    `\n${dry ? "[dry run] " : ""}created ${created}, updated ${updated}, skipped ${skipped} co-leads.`,
+    `\n${dry ? "[dry run] " : ""}created ${created}, updated ${updated}` +
+      ` (${coLeads} co-leads), skipped ${skipped} unrecognised.`,
   );
+
+  // A co-lead whose lead is missing renders nowhere, so say so rather than
+  // letting them vanish silently.
+  const orphaned = incoming.filter(
+    (m) =>
+      m.bucket === "co_lead" &&
+      !incoming.some(
+        (l) => l.bucket !== "co_lead" && leadBase(l.role) === coLeadBase(m.role),
+      ),
+  );
+  if (orphaned.length) {
+    console.log(
+      `\n⚠ ${orphaned.length} co-lead(s) have no matching Lead and will not appear on /council:`,
+    );
+    for (const o of orphaned) console.log(`    ${o.name} — ${o.role}`);
+  }
 }
 
 main()
