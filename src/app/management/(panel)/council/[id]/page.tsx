@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { councilGroups as g, councilMembers as t } from "@/db/schema";
+import { clubs as clubsT, councilGroups as g, councilMembers as t } from "@/db/schema";
 import { requireOps } from "@/lib/rbac";
 import { mediaOptions } from "@/lib/media-options";
 import { EditorShell } from "@/components/management/page-header";
@@ -12,10 +12,11 @@ export default async function CouncilEditor({ params }: { params: Promise<{ id: 
   await requireOps();
   const { id } = await params;
   const isNew = id === "new";
-  const [row, media, groups] = await Promise.all([
+  const [row, media, groups, clubs] = await Promise.all([
     isNew ? null : db.query.councilMembers.findFirst({ where: eq(t.id, Number(id)) }),
     mediaOptions(),
     db.select({ id: g.id, title: g.title, parentId: g.parentId }).from(g).orderBy(asc(g.sortOrder), asc(g.id)),
+    db.select({ id: clubsT.id, name: clubsT.name }).from(clubsT).orderBy(asc(clubsT.name)),
   ]);
   if (!isNew && !row) notFound();
   const action = saveCouncil.bind(null, isNew ? null : Number(id));
@@ -68,6 +69,16 @@ export default async function CouncilEditor({ params }: { params: Promise<{ id: 
         options={[
           { value: "", label: "— Ungrouped —" },
           ...groupOptions,
+        ]}
+      />
+      <SelectField
+        name="clubId"
+        label="Runs which club"
+        hint="optional · surfaces them in “Who runs it” on that club's page"
+        defaultValue={row?.clubId != null ? String(row.clubId) : ""}
+        options={[
+          { value: "", label: "— None —" },
+          ...clubs.map((c) => ({ value: String(c.id), label: c.name })),
         ]}
       />
       <SaveBar />

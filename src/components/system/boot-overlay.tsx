@@ -35,11 +35,19 @@ export function BootOverlay() {
       });
     };
 
-    if (document.readyState === "complete") {
-      begin();
-    } else {
-      window.addEventListener("load", begin, { once: true });
-    }
+    /**
+     * Start dismissing as soon as this component has mounted — i.e. as soon as
+     * React has hydrated, which is the only thing the overlay actually exists
+     * to cover.
+     *
+     * It used to wait for `window.load`, which fires only after every image,
+     * font and iframe on the page has finished. That made the overlay — and
+     * therefore the page's Largest Contentful Paint — hostage to the heaviest
+     * asset anywhere below the fold: on a throttled phone the crest was still
+     * the largest painted element five seconds in. The two RAFs below already
+     * guarantee a paint after hydration, which is the real requirement.
+     */
+    begin();
 
     return () => {
       cancelAnimationFrame(raf1);
@@ -91,16 +99,10 @@ export function BootOverlay() {
               </textPath>
             </text>
           </svg>
-          <img
-            src="/brand/sc-white.png"
-            alt=""
-            className="boot-overlay__crest-logo theme-logo-on-dark"
-          />
-          <img
-            src="/brand/sc-black.png"
-            alt=""
-            className="boot-overlay__crest-logo theme-logo-on-light"
-          />
+          {/* One masked element, both themes — see .brand-crest in globals.css.
+              The parent .boot-overlay__crest already sets `color` to --ink, so
+              the crest follows the theme with nothing to swap. */}
+          <span aria-hidden className="boot-overlay__crest-logo brand-crest" />
         </div>
         <div className="boot-overlay__bar">
           <div className="boot-overlay__bar-fill" />

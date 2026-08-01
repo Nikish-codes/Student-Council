@@ -1,4 +1,5 @@
 import { Mail } from "lucide-react";
+import { LinkedInMark } from "@/components/ui/brand-marks";
 import { cn, outlookCompose } from "@/lib/utils";
 import type { CouncilMember } from "@/lib/schemas";
 
@@ -55,23 +56,5 @@ export function MemberLinks({
         </a>
       )}
     </div>
-  );
-}
-
-/**
- * Inline LinkedIn mark — lucide v1 dropped brand icons, and the generic
- * external-link arrow this replaces gave no hint where the link actually went.
- */
-function LinkedInMark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden
-      focusable="false"
-      className={className}
-    >
-      <path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3V9Zm7 0h3.8v1.65h.05A4.17 4.17 0 0 1 17.6 8.7c3.7 0 4.4 2.4 4.4 5.55V21h-4v-5.6c0-1.34-.03-3.06-1.9-3.06-1.9 0-2.2 1.46-2.2 2.96V21h-4V9Z" />
-    </svg>
   );
 }

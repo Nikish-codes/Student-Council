@@ -30,6 +30,13 @@ import type { CouncilCardSize, CouncilMember } from "@/lib/schemas";
  * sat 2px apart in the same face, so a four-line quote read as the primary
  * element and the person's name read as its caption.
  */
+/**
+ * Portrait frames are 4:5 at EVERY size. `sm` used to be `aspect-square`, which
+ * silently cropped 20% off the top and bottom of every photo in the Club
+ * Presidents and Secretaries groups — the uploads are 4080×5100 portraits, so a
+ * 1:1 frame cut people's foreheads and chins off. The larger tiers were already
+ * 4:5 and looked correct, which is exactly why only the small cards looked wrong.
+ */
 const SIZES: Record<
   CouncilCardSize,
   { pad: string; name: string; quote: string; aspect: string; gap: string }
@@ -38,7 +45,7 @@ const SIZES: Record<
     pad: "p-4",
     name: "text-xl/[1.1]", // 21.9px vs 15.3px voice — 1.43×
     quote: "text-sm",
-    aspect: "aspect-square",
+    aspect: "aspect-[4/5]",
     gap: "gap-2.5",
   },
   md: {
@@ -113,12 +120,18 @@ export function CouncilCard({
           s.aspect,
         )}
       >
+        {/* `contain`, not `cover`: the frame matches today's 4:5 uploads exactly
+            (so this costs nothing now), but it also guarantees that a photo of
+            some other shape uploaded later is letterboxed against the card
+            rather than silently cropped. The hover zoom went with it — scaling
+            a contained image pushes its edges under the overflow clip, which
+            is the same "cut off" problem by another route. */}
         <MemberPortrait
           name={member.name}
           photo={member.photo}
           index={index}
           sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-          className="grayscale transition-all duration-700 ease-out group-hover/m:scale-[1.04] group-hover/m:grayscale-0"
+          className="object-contain grayscale transition-[filter] duration-700 ease-out group-hover/m:grayscale-0"
         />
       </div>
 

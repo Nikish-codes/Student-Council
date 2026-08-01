@@ -158,6 +158,63 @@ export function CheckboxField(props: {
   );
 }
 
+/**
+ * Hex colour with a native swatch picker beside a text input, kept in sync.
+ * The text input is the one that submits, so an author can paste a brand hex
+ * straight from a style guide, and "clear" is reachable (the native colour
+ * input has no empty state — it always reports a value).
+ */
+export function ColorField({
+  name,
+  label,
+  hint,
+  defaultValue,
+}: {
+  name: string;
+  label: string;
+  hint?: string;
+  defaultValue?: string | null;
+}) {
+  const [value, setValue] = useState(defaultValue ?? "");
+  const valid = /^#[0-9a-f]{6}$/i.test(value);
+  return (
+    <div>
+      <Label label={label} hint={hint} />
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          aria-label={`${label} swatch`}
+          value={valid ? value : "#888888"}
+          onChange={(e) => setValue(e.target.value)}
+          className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-line/15 bg-surface-2 p-1"
+        />
+        <input
+          name={name}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="#rrggbb"
+          className={inputCls}
+        />
+        {value ? (
+          <button
+            type="button"
+            onClick={() => setValue("")}
+            className="shrink-0 rounded-lg p-2 text-subtle hover:text-ink"
+            aria-label={`Clear ${label}`}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        ) : null}
+      </div>
+      {value && !valid ? (
+        <p className="mt-1 text-[11px] text-amber-300/80">
+          Needs to be a 6-digit hex like #ee495c — anything else is ignored.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 /** Comma-separated tags → submitted as a single string; parse server-side. */
 export function TagsField(props: {
   name: string;
@@ -289,7 +346,9 @@ export function MediaField({
 type RepeaterCol = {
   name: string;
   label: string;
-  type?: "text" | "number";
+  type?: "text" | "number" | "textarea";
+  /** Flex weight within the row; defaults to 1. Use to widen a description. */
+  grow?: number;
 };
 
 /**
@@ -331,21 +390,34 @@ export function RepeaterField<T extends Record<string, string | number>>({
       <input type="hidden" name={name} value={JSON.stringify(rows)} readOnly />
       <div className="flex flex-col gap-2">
         {rows.map((row, i) => (
-          <div key={i} className="flex items-center gap-2">
-            {columns.map((c) => (
-              <input
-                key={c.name}
-                placeholder={c.label}
-                type={c.type === "number" ? "number" : "text"}
-                value={String(row[c.name] ?? "")}
-                onChange={(e) => update(i, c.name, e.target.value)}
-                className={cn(inputCls, "py-2")}
-              />
-            ))}
+          <div key={i} className="flex items-start gap-2">
+            {columns.map((c) =>
+              c.type === "textarea" ? (
+                <textarea
+                  key={c.name}
+                  placeholder={c.label}
+                  rows={2}
+                  value={String(row[c.name] ?? "")}
+                  onChange={(e) => update(i, c.name, e.target.value)}
+                  style={{ flex: c.grow ?? 1 }}
+                  className={cn(inputCls, "py-2")}
+                />
+              ) : (
+                <input
+                  key={c.name}
+                  placeholder={c.label}
+                  type={c.type === "number" ? "number" : "text"}
+                  value={String(row[c.name] ?? "")}
+                  onChange={(e) => update(i, c.name, e.target.value)}
+                  style={{ flex: c.grow ?? 1 }}
+                  className={cn(inputCls, "py-2")}
+                />
+              ),
+            )}
             <button
               type="button"
               onClick={() => setRows((r) => r.filter((_, idx) => idx !== i))}
-              className="shrink-0 rounded-lg p-2 text-subtle hover:text-red-400"
+              className="mt-1 shrink-0 rounded-lg p-2 text-subtle hover:text-red-400"
             >
               <Trash2 className="h-4 w-4" />
             </button>

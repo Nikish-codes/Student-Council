@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { ArrowUpRight, Users } from "lucide-react";
 import { Picture } from "@/components/ui/picture";
 import { gsap, useGSAP } from "@/lib/gsap";
-import { cn } from "@/lib/utils";
 import type { Club } from "@/lib/schemas";
 
 interface Props {
@@ -82,11 +82,12 @@ export function ClubCard({ club, index, total }: Props) {
     .slice(0, 3);
 
   return (
-    <a
+    // Cards open the club's own page. The external `joinUrl` used to live here,
+    // which made every card a one-way exit off the site; it is now the CTA in
+    // the detail page's sticky aside instead.
+    <Link
       ref={ref}
-      href={club.joinUrl ?? "#"}
-      target={club.joinUrl ? "_blank" : undefined}
-      rel={club.joinUrl ? "noreferrer" : undefined}
+      href={`/clubs/${club.slug}`}
       data-club-card
       className="group/c relative flex min-h-[300px] flex-col overflow-hidden rounded-2xl border border-line/10 bg-surface/50 p-7 transition-colors duration-500 hover:border-line/30"
       style={{ perspective: "1000px" }}
@@ -172,6 +173,6 @@ export function ClubCard({ club, index, total }: Props) {
           )}
         </div>
       </div>
-    </a>
+    </Link>
   );
 }

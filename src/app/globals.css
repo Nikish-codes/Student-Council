@@ -56,11 +56,35 @@
   inset: 18%;
   width: 64%;
   height: 64%;
-  object-fit: contain;
   opacity: 0;
   animation: boot-crest-in 900ms 120ms cubic-bezier(0.22, 1, 0.36, 1) forwards,
     boot-crest-pulse 3.6s 1s ease-in-out infinite;
   filter: drop-shadow(0 0 30px rgb(var(--ink, 255 255 255) / 0.18));
+}
+
+/**
+ * The council crest, painted instead of downloaded.
+ *
+ * There used to be two <img> tags here — a white crest and a black one — with
+ * CSS hiding whichever the current theme didn't need. `display: none` does not
+ * stop a browser fetching an <img>, so every visitor downloaded BOTH masters
+ * (134KB + 126KB) to look at one of them, and the boot overlay sat in front of
+ * the page until they finished.
+ *
+ * The two files were pixel-identical artwork differing only in colour, so the
+ * shape is now an alpha mask filled with `currentColor`: one 22KB request, and
+ * the theme toggle recolours it instantly with no second asset and no swap.
+ */
+.brand-crest {
+  background-color: currentColor;
+  -webkit-mask-image: url("/brand/sc-crest.webp");
+  mask-image: url("/brand/sc-crest.webp");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 @keyframes boot-ring-spin {

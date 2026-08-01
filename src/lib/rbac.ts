@@ -80,3 +80,16 @@ export function assertCanEditEvent(
     }
   }
 }
+
+/**
+ * Club leads may only edit their own club's page. Admins/editors/council
+ * members may edit any. `clubId` null means "creating a new club", which a club
+ * lead may never do — they are attached to exactly one existing club.
+ */
+export function assertCanEditClub(user: SessionUser, clubId: number | null) {
+  if (user.role === "club_lead") {
+    if (!user.clubId || clubId !== user.clubId) {
+      throw new Error("FORBIDDEN");
+    }
+  }
+}

@@ -14,6 +14,7 @@ import {
 } from "drizzle-orm";
 
 import { db } from "@/db/client";
+import { normalizeAccent } from "@/lib/club-accent";
 import { attachCoLeads } from "@/lib/council";
 import { isEventPast } from "@/lib/event-status";
 import {
@@ -36,6 +37,7 @@ import type {
   Announcement,
   Club,
   ClubCategory,
+  ClubDetail,
   CouncilCardSize,
   CouncilGroup,
   CouncilGroupLayout,
@@ -122,6 +124,7 @@ export const getCouncil = cache(async (): Promise<CouncilMember[]> => {
       ? (d.memberType as CouncilMemberType)
       : "member",
     groupId: d.groupId != null ? String(d.groupId) : undefined,
+    clubId: d.clubId != null ? String(d.clubId) : undefined,
     isPresident: Boolean(d.isPresident),
     featured: Boolean(d.featured),
     order: typeof d.sortOrder === "number" ? d.sortOrder : 99,
@@ -257,19 +260,38 @@ export async function getPresident(): Promise<CouncilMember | undefined> {
   );
 }
 
-/** The wide portrait selected for the council page in the management panel. */
+/**
+ * The group portrait selected for the council page in the management panel.
+ *
+ * Returns the stored pixel dimensions alongside the URL so the page can size
+ * its frame to the actual image. Without them the frame had to guess an aspect
+ * ratio, and the guess (21/9) cropped roughly a third off a 3:2 photograph —
+ * people at the top and bottom of the group simply disappeared.
+ */
+export type CouncilGroupPhoto = {
+  url: string;
+  width?: number;
+  height?: number;
+};
+
 export const getCouncilGroupPhoto = cache(
-  async (): Promise<string | undefined> => {
+  async (): Promise<CouncilGroupPhoto | undefined> => {
     const settings = await db.query.siteSettings.findFirst({
       columns: { id: true },
       with: {
         councilGroupPhoto: {
-          columns: { url: true },
+          columns: { url: true, width: true, height: true },
         },
       },
     });
 
-    return settings?.councilGroupPhoto?.url || undefined;
+    const photo = settings?.councilGroupPhoto;
+    if (!photo?.url) return undefined;
+    return {
+      url: photo.url,
+      width: typeof photo.width === "number" ? photo.width : undefined,
+      height: typeof photo.height === "number" ? photo.height : undefined,
+    };
   },
 );
 
@@ -369,6 +391,7 @@ export const getClubs = cache(async (): Promise<Club[]> => {
     orderBy: asc(clubsT.name),
   });
   return rows.map((d) => ({
+    id: d.id,
     slug: asString(d.slug),
     name: asString(d.name),
     logo: mediaUrl(d.logo),
@@ -377,8 +400,87 @@ export const getClubs = cache(async (): Promise<Club[]> => {
     tags: Array.isArray(d.tags) ? d.tags : [],
     members: typeof d.members === "number" ? d.members : undefined,
     categoryId: d.categoryId != null ? String(d.categoryId) : undefined,
+    tagline: d.tagline || undefined,
+    accentColor: normalizeAccent(d.accentColor),
   }));
 });
+
+/**
+ * One club with everything /clubs/[slug] renders. Every content block is
+ * optional — the page derives its section numbering from what is actually
+ * present, so a club that has only filled in its card still gets a clean page.
+ */
+export const getClub = cache(
+  async (slug: string): Promise<ClubDetail | undefined> => {
+    const d = await db.query.clubs.findFirst({
+      where: eq(clubsT.slug, slug),
+      with: { logo: true, cover: true, category: true },
+    });
+    if (!d) return undefined;
+    return {
+      id: d.id,
+      slug: asString(d.slug),
+      name: asString(d.name),
+      logo: mediaUrl(d.logo),
+      blurb: asString(d.blurb),
+      joinUrl: d.joinUrl || undefined,
+      tags: Array.isArray(d.tags) ? d.tags : [],
+      members: typeof d.members === "number" ? d.members : undefined,
+      categoryId: d.categoryId != null ? String(d.categoryId) : undefined,
+      categoryLabel: d.category?.label || undefined,
+      categorySlug: d.category?.slug || undefined,
+      tagline: d.tagline || undefined,
+      // Re-validated on read, not just on write: rows may predate the panel's
+      // validation, and this string goes straight into a style attribute.
+      accentColor: normalizeAccent(d.accentColor),
+      about: d.about || undefined,
+      cover: mediaUrl(d.cover) || undefined,
+      foundedYear: typeof d.foundedYear === "number" ? d.foundedYear : undefined,
+      activities: (d.activities ?? []).filter((a) => a?.title?.trim()),
+      flagshipEvent: d.flagshipEvent || undefined,
+      videos: (d.videos ?? []).filter((v) => v?.url?.trim()),
+      gallery: (d.gallery ?? []).filter((g) => g?.url?.trim()),
+      instagramUrl: d.instagramUrl || undefined,
+      linkedinUrl: d.linkedinUrl || undefined,
+      websiteUrl: d.websiteUrl || undefined,
+      contactEmail: d.contactEmail || undefined,
+    };
+  },
+);
+
+/**
+ * A club's own events, split by timing. Published only, and ordered so the
+ * soonest upcoming event is first while past events read most-recent-first.
+ */
+export const getClubEvents = cache(
+  async (
+    clubId: number,
+  ): Promise<{ upcoming: EventItem[]; past: EventItem[] }> => {
+    const rows = await db.query.events.findMany({
+      where: and(eq(eventsT.status, "published"), eq(eventsT.clubId, clubId)),
+      with: { banner: true },
+      orderBy: asc(eventsT.date),
+    });
+    const all = rows.map(mapEventRow);
+    const now = Date.now();
+    return {
+      upcoming: all.filter((e) => !isEventPast(e, now)),
+      past: all.filter((e) => isEventPast(e, now)).reverse(),
+    };
+  },
+);
+
+/**
+ * The council members who run this club. Filters the already-cached
+ * `getCouncil()` result rather than issuing a second query — on the club page
+ * this is usually a cache hit and costs nothing.
+ */
+export const getClubLeads = cache(
+  async (clubId: number): Promise<CouncilMember[]> => {
+    const all = await getCouncil();
+    return all.filter((m) => m.clubId === String(clubId));
+  },
+);
 
 /**
  * The /clubs headings, in page order. Categories with no clubs in them are kept

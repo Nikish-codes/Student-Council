@@ -258,19 +258,14 @@ export function Hero({
                   </textPath>
                 </text>
               </svg>
+              {/* Masked crest — one asset for both themes. See .brand-crest.
+                  role/aria-label keep the emblem named for screen readers now
+                  that it is no longer an <img> with alt text. */}
               <div data-logo className="absolute inset-[14%]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/brand/sc-white.png"
-                  alt="Woxsen Student Council emblem"
-                  className="theme-logo-on-dark h-full w-full object-contain drop-shadow-[0_0_60px_rgba(255,255,255,0.18)]"
-                />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/brand/sc-black.png"
-                  alt=""
-                  aria-hidden
-                  className="theme-logo-on-light absolute inset-0 h-full w-full object-contain drop-shadow-[0_0_60px_rgba(0,0,0,0.18)]"
+                <div
+                  role="img"
+                  aria-label="Woxsen Student Council emblem"
+                  className="brand-crest h-full w-full text-ink drop-shadow-[0_0_60px_rgb(var(--ink)/0.18)]"
                 />
               </div>
             </div>

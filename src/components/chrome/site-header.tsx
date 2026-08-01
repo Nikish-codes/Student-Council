@@ -35,45 +35,29 @@ export function SiteHeader() {
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-out",
-        scrolled
-          ? "glass py-3"
-          : "glass-soft py-5",
+        scrolled ? "glass py-3" : "glass-soft py-5",
       )}
     >
       <div className="container flex items-center justify-between gap-6">
         <Link
           href="/"
-          className="group/brand flex items-center gap-3 text-sm font-medium tracking-tight"
+          className="group/brand relative grid h-12 w-12 shrink-0 place-items-center sm:h-14 sm:w-14"
           aria-label="Woxsen Student Council home"
         >
-          <span className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-line/20 bg-bg/40 transition-colors group-hover/brand:border-line/40">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/brand/sc-white.png"
-              alt=""
-              aria-hidden
-              className="theme-logo-on-dark h-7 w-7 object-contain transition-transform duration-500 group-hover/brand:scale-110"
-            />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/brand/sc-black.png"
-              alt=""
-              aria-hidden
-              className="theme-logo-on-light h-7 w-7 object-contain transition-transform duration-500 group-hover/brand:scale-110"
-            />
-          </span>
-          <span className="hidden flex-col leading-none sm:flex">
-            <span className="text-[10px] uppercase tracking-[0.24em] text-muted">
-              Woxsen University
-            </span>
-            <span className="display text-base text-ink">Student Council</span>
-          </span>
+          {/* Masked crest — see .brand-crest. This mark sits in the header of
+              every page at 40–48px; it was previously two 1563px PNGs. */}
+          <span
+            aria-hidden
+            className="brand-crest h-10 w-10 text-ink transition-transform duration-500 group-hover/brand:scale-110 sm:h-12 sm:w-12"
+          />
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
           {NAV.map((item) => {
             const active =
-              item.href === "/" ? pathname === "/" : pathname?.startsWith(item.href);
+              item.href === "/"
+                ? pathname === "/"
+                : pathname?.startsWith(item.href);
             return (
               <Link
                 key={item.href}

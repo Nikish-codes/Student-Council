@@ -26,7 +26,10 @@ const FOOTER_NAV = [
       { href: "https://woxsen.edu.in", label: "woxsen.edu.in" },
       { href: "mailto:council@woxsen.edu.in", label: "council@woxsen.edu.in" },
       { href: "https://instagram.com/woxsenuniversity", label: "Instagram" },
-      { href: "https://linkedin.com/school/woxsen-university", label: "LinkedIn" },
+      {
+        href: "https://linkedin.com/school/woxsen-university",
+        label: "LinkedIn",
+      },
     ],
   },
 ];
@@ -36,15 +39,37 @@ export function SiteFooter() {
     <footer className="relative mt-32 border-t border-line/10 bg-bg">
       <div className="container py-20">
         <div className="grid gap-16 lg:grid-cols-12">
-          <div className="lg:col-span-5">
-            <span className="kicker">Woxsen Student Council</span>
-            <p className="display mt-6 text-balance text-4xl sm:text-5xl">
-              Built for students.<br />Run by students.
-            </p>
-            <p className="mt-6 max-w-md text-muted">
-              The official portal of the Woxsen University Student Council.
-              Reach out, get involved, run for office.
-            </p>
+          <div className="relative flex min-h-48 items-center lg:col-span-5">
+            <span className="sr-only">Woxsen University</span>
+            {/* The university wordmark is a two-colour logo in its light-theme
+                form, so unlike the crest it can't be a single masked shape —
+                both variants stay. They are web-sized WebP (896px for a 448px
+                box) instead of the 1200px print PNGs, carry intrinsic
+                dimensions so they reserve their own space, and load lazily:
+                the footer is below the fold on every page, so these bytes have
+                no business competing with the content someone came to read. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/woxsen-university-white.webp"
+              alt=""
+              aria-hidden
+              width={896}
+              height={415}
+              loading="lazy"
+              decoding="async"
+              className="theme-logo-on-dark h-auto w-full max-w-md object-contain"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/woxsen-university-color.webp"
+              alt=""
+              aria-hidden
+              width={896}
+              height={413}
+              loading="lazy"
+              decoding="async"
+              className="theme-logo-on-light absolute inset-y-0 left-0 my-auto h-auto w-full max-w-md object-contain"
+            />
           </div>
           <div className="grid gap-10 sm:grid-cols-3 lg:col-span-7">
             {FOOTER_NAV.map((col) => (
@@ -71,7 +96,9 @@ export function SiteFooter() {
           <span className="font-mono">
             © {new Date().getFullYear()} Woxsen Student Council
           </span>
-          <span className="font-mono">v1.0 · Hyderabad, IN · Designed and built by Nikish</span>
+          <span className="font-mono">
+            v1.0 · Hyderabad, IN · Designed and built by Nikish
+          </span>
         </div>
       </div>
     </footer>
