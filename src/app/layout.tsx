@@ -42,10 +42,14 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  // The 1563×1563 master was being served as the favicon on every page load —
+  // 134KB to fill a 16px square. These are the same artwork at the sizes each
+  // slot actually renders (see scripts/optimize-brand-assets.ts). The master
+  // stays in /public for the OG card below, which genuinely wants the big one.
   icons: {
-    icon: [{ url: "/icon.png", type: "image/png" }],
-    shortcut: "/icon.png",
-    apple: "/icon.png",
+    icon: [{ url: "/favicon-48.png", type: "image/png", sizes: "48x48" }],
+    shortcut: "/favicon-48.png",
+    apple: [{ url: "/icon-180.png", sizes: "180x180" }],
   },
   openGraph: {
     title: "Woxsen Student Council",

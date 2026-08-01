@@ -68,6 +68,13 @@ export type PaymentStatus = "none" | "created" | "paid" | "failed" | "refunded";
 export type RecapGalleryItem = { url: string; caption?: string };
 export type RecapStat = { label: string; value: string };
 
+/** One "what we run" row on a club page. */
+export type ClubActivity = { title: string; description?: string };
+/** One entry in a club's video list. Any YouTube/Vimeo URL form is accepted. */
+export type ClubVideo = { url: string; title?: string };
+/** Same shape as `RecapGalleryItem`, kept separate so the two can diverge. */
+export type ClubGalleryItem = { url: string; caption?: string };
+
 // ─────────────────────────────────── users ───────────────────────────────────
 // clubId <-> clubs.leadId is a circular reference; both kept as plain integer
 // columns (no hard FK) and wired through `relations()` to avoid SQLite
@@ -150,6 +157,29 @@ export const clubs = sqliteTable(
     members: integer("members"),
     categoryId: integer("category_id").references(() => clubCategories.id),
     leadId: integer("lead_id"), // -> users.id (circular; via relations)
+    // ── /clubs/[slug] detail-page content ──
+    // All optional: a club that fills none of this still renders a valid page,
+    // it just shows fewer sections (the page numbers its sections from what is
+    // actually present, so a sparse club never shows gaps).
+    tagline: text("tagline"),
+    about: text("about"), // long-form "what we do"
+    coverId: integer("cover_id").references(() => media.id),
+    // #RRGGBB. Drives the page's --club-accent. ALWAYS re-validate on read as
+    // well as write — this value lands in a style attribute.
+    accentColor: text("accent_color"),
+    foundedYear: integer("founded_year"),
+    activities: text("activities", { mode: "json" })
+      .$type<ClubActivity[]>()
+      .default([]),
+    flagshipEvent: text("flagship_event"),
+    videos: text("videos", { mode: "json" }).$type<ClubVideo[]>().default([]),
+    gallery: text("gallery", { mode: "json" })
+      .$type<ClubGalleryItem[]>()
+      .default([]),
+    instagramUrl: text("instagram_url"),
+    linkedinUrl: text("linkedin_url"),
+    websiteUrl: text("website_url"),
+    contactEmail: text("contact_email"),
     createdAt,
     updatedAt,
   },
@@ -327,6 +357,10 @@ export const councilMembers = sqliteTable("mp_council_members", {
   // the page collects into a trailing "The team" section so a member is never
   // silently dropped just because nobody picked a group for them.
   groupId: integer("group_id").references(() => councilGroups.id),
+  // Which club this member runs, if any. Lets /clubs/[slug] show its leads with
+  // photo/role/program/LinkedIn without duplicating any of that onto mp_clubs —
+  // `clubs.leadId -> users` stays the RBAC link (mp_users has no photo).
+  clubId: integer("club_id").references(() => clubs.id),
   isPresident: integer("is_president", { mode: "boolean" })
     .notNull()
     .default(false),
@@ -535,6 +569,7 @@ export const clubCategoriesRelations = relations(
 
 export const clubsRelations = relations(clubs, ({ one, many }) => ({
   logo: one(media, { fields: [clubs.logoId], references: [media.id] }),
+  cover: one(media, { fields: [clubs.coverId], references: [media.id] }),
   lead: one(users, { fields: [clubs.leadId], references: [users.id] }),
   category: one(clubCategories, {
     fields: [clubs.categoryId],

@@ -16,6 +16,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "clubs:sync-taxonomy": "tsx scripts/sync-club-taxonomy.ts",
+    "clubs:import-content": "tsx scripts/import-club-content.ts",
+    "brand:optimize": "tsx scripts/optimize-brand-assets.ts",
     "sync:club-logos": "tsx scripts/sync-club-logos.ts"
   },
   "dependencies": {

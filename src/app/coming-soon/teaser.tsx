@@ -72,10 +72,12 @@ export function Teaser() {
       <div className="cs-grid" aria-hidden />
 
       <div className="cs-inner">
+        {/* The teaser is always dark, so this one never needed a second
+            variant — only a web-sized asset for its 72px box. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           className="cs-mark"
-          src="/brand/sc-white.png"
+          src="/brand/sc-crest.webp"
           alt="Woxsen Student Council"
           width={72}
           height={72}

@@ -194,9 +194,15 @@ export function CouncilShowcase({
             </div>
 
             <div className="relative lg:col-span-5">
+              {/* The frame is pinned to the portrait's own 4:5 ratio rather than
+                  to a viewport height. That does two things: the image fills the
+                  box exactly (so the rounded corners actually land on the photo
+                  instead of on empty space around a letterboxed image), and the
+                  portrait can no longer be scaled by the viewport into a shape
+                  that doesn't match it. */}
               <div
                 data-president-portrait
-                className="relative mx-auto h-[60vh] w-full max-w-[520px] sm:h-[70vh] lg:h-[80vh]"
+                className="relative mx-auto aspect-[4/5] w-full max-w-[380px] overflow-hidden rounded-3xl sm:max-w-[440px] lg:max-w-[500px]"
                 style={{ willChange: "transform" }}
               >
                 <CutoutPortrait
@@ -204,6 +210,7 @@ export function CouncilShowcase({
                   alt={president.name}
                   initials={initialsOf(president.name)}
                   shadow="hard"
+                  className="rounded-3xl"
                 />
               </div>
             </div>

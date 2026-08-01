@@ -1,17 +1,40 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { asc, eq } from "drizzle-orm";
+import { ArrowUpRight } from "lucide-react";
 import { db } from "@/db/client";
-import { clubCategories as catT, clubs as t, users as usersT } from "@/db/schema";
-import { requireOps } from "@/lib/rbac";
+import {
+  clubCategories as catT,
+  clubs as t,
+  users as usersT,
+  type ClubActivity,
+  type ClubGalleryItem,
+  type ClubVideo,
+} from "@/db/schema";
+import { assertCanEditClub, requireOps } from "@/lib/rbac";
 import { mediaOptions } from "@/lib/media-options";
-import { EditorShell } from "@/components/management/page-header";
-import { TextField, TextAreaField, NumberField, TagsField, SelectField, MediaField, SaveBar } from "@/components/management/fields";
+import { EditorShell, Fieldset } from "@/components/management/page-header";
+import {
+  TextField,
+  TextAreaField,
+  NumberField,
+  TagsField,
+  SelectField,
+  MediaField,
+  ColorField,
+  RepeaterField,
+  SaveBar,
+} from "@/components/management/fields";
 import { saveClub } from "../actions";
 
 export default async function ClubEditor({ params }: { params: Promise<{ id: string }> }) {
-  await requireOps();
+  const user = await requireOps();
   const { id } = await params;
   const isNew = id === "new";
+  // Guards before any query: a club lead may only open their own club, and may
+  // never open the "new club" form.
+  assertCanEditClub(user, isNew ? null : Number(id));
+
   const [row, media, leads, cats] = await Promise.all([
     isNew ? null : db.query.clubs.findFirst({ where: eq(t.id, Number(id)) }),
     mediaOptions(),
@@ -26,34 +49,146 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
 
   return (
     <EditorShell kicker={isNew ? "New club" : "Edit club"} title={row?.name ?? "Club"} action={action}>
-      <div className="grid gap-5 sm:grid-cols-2">
-        <TextField name="name" label="Name" required maxLength={60} defaultValue={row?.name} />
-        <TextField name="slug" label="Slug" hint="auto if blank" defaultValue={row?.slug} placeholder="auto from name" />
-      </div>
-      <MediaField name="logoId" label="Logo" hint="square · upload or pick" defaultValue={row?.logoId ?? null} media={media} />
-      <TextAreaField name="blurb" label="Blurb" required maxLength={200} rows={2} defaultValue={row?.blurb} />
-      <div className="grid gap-5 sm:grid-cols-2">
-        <TextField name="joinUrl" label="Join URL" hint="optional" defaultValue={row?.joinUrl} />
-        <NumberField name="members" label="Members" hint="optional" min={0} defaultValue={row?.members ?? null} />
-      </div>
-      <SelectField
-        name="categoryId"
-        label="Category"
-        hint="the heading this club sits under on /clubs"
-        defaultValue={row?.categoryId ? String(row.categoryId) : ""}
-        options={[
-          { value: "", label: "— uncategorised —" },
-          ...cats.map((c) => ({ value: String(c.id), label: c.label })),
-        ]}
-      />
-      <TagsField name="tags" label="Tags" hint="keywords · not the category" defaultValue={row?.tags} />
-      <SelectField
-        name="leadId"
-        label="Club lead"
-        hint="optional"
-        defaultValue={row?.leadId ? String(row.leadId) : ""}
-        options={[{ value: "", label: "— none —" }, ...leads.map((l) => ({ value: String(l.id), label: l.name }))]}
-      />
+      {row ? (
+        <Link
+          href={`/clubs/${row.slug}`}
+          target="_blank"
+          className="-mt-2 inline-flex w-fit items-center gap-1.5 text-xs text-muted transition-colors hover:text-ink"
+        >
+          View public page <ArrowUpRight className="h-3 w-3" />
+        </Link>
+      ) : null}
+
+      <Fieldset title="Identity" hint="What shows on the /clubs card.">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <TextField name="name" label="Name" required maxLength={60} defaultValue={row?.name} />
+          <TextField name="slug" label="Slug" hint="auto if blank" defaultValue={row?.slug} placeholder="auto from name" />
+        </div>
+        <MediaField name="logoId" label="Logo" hint="square · upload or pick" defaultValue={row?.logoId ?? null} media={media} />
+        <TextAreaField name="blurb" label="Blurb" required maxLength={200} rows={2} defaultValue={row?.blurb} />
+        <SelectField
+          name="categoryId"
+          label="Category"
+          hint="the heading this club sits under on /clubs"
+          defaultValue={row?.categoryId ? String(row.categoryId) : ""}
+          options={[
+            { value: "", label: "— uncategorised —" },
+            ...cats.map((c) => ({ value: String(c.id), label: c.label })),
+          ]}
+        />
+        <TagsField name="tags" label="Tags" hint="keywords · not the category" defaultValue={row?.tags} />
+      </Fieldset>
+
+      <Fieldset
+        title="Club page"
+        hint="Everything below is optional. Sections you leave blank simply don't appear on the page — they're numbered from what you fill in, so there are never any gaps."
+      >
+        <TextField
+          name="tagline"
+          label="Tagline"
+          hint="short line under the club name · e.g. “architecture, out loud.”"
+          maxLength={80}
+          defaultValue={row?.tagline}
+        />
+        <TextAreaField
+          name="about"
+          label="About"
+          hint="what the club is and does · leave a blank line between paragraphs"
+          rows={8}
+          defaultValue={row?.about}
+        />
+        <MediaField
+          name="coverId"
+          label="Cover image"
+          hint="wide banner behind the masthead"
+          defaultValue={row?.coverId ?? null}
+          media={media}
+        />
+        <div className="grid gap-5 sm:grid-cols-2">
+          <ColorField
+            name="accentColor"
+            label="Accent colour"
+            hint="tints this club's page · site red if blank"
+            defaultValue={row?.accentColor}
+          />
+          <NumberField
+            name="foundedYear"
+            label="Founded"
+            hint="optional"
+            min={1900}
+            max={2100}
+            defaultValue={row?.foundedYear ?? null}
+          />
+        </div>
+      </Fieldset>
+
+      <Fieldset title="What we run" hint="The activities and events this club is known for.">
+        <TextField
+          name="flagshipEvent"
+          label="Flagship event"
+          hint="the one thing you're known for · e.g. “Annual Exhibition”"
+          maxLength={80}
+          defaultValue={row?.flagshipEvent}
+        />
+        <RepeaterField
+          name="activities"
+          label="Activities"
+          hint="title + a sentence · rows without a title are dropped"
+          columns={[
+            { name: "title", label: "Activity" },
+            { name: "description", label: "What happens", type: "textarea", grow: 2 },
+          ]}
+          defaultValue={(row?.activities as ClubActivity[]) ?? []}
+          template={{ title: "", description: "" }}
+        />
+      </Fieldset>
+
+      <Fieldset
+        title="Media"
+        hint="Videos load only when a visitor clicks play, so add as many as you like."
+      >
+        <RepeaterField
+          name="videos"
+          label="Videos"
+          hint="paste any YouTube or Vimeo link · the first one shows large"
+          columns={[
+            { name: "url", label: "YouTube / Vimeo URL", grow: 2 },
+            { name: "title", label: "Caption" },
+          ]}
+          defaultValue={(row?.videos as ClubVideo[]) ?? []}
+          template={{ url: "", title: "" }}
+        />
+        <RepeaterField
+          name="gallery"
+          label="Gallery"
+          hint="image URL + caption · upload under Media first, then paste the URL"
+          columns={[
+            { name: "url", label: "Image URL", grow: 2 },
+            { name: "caption", label: "Caption" },
+          ]}
+          defaultValue={(row?.gallery as ClubGalleryItem[]) ?? []}
+          template={{ url: "", caption: "" }}
+        />
+      </Fieldset>
+
+      <Fieldset title="Reach us" hint="Shown in the sidebar of the club page.">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <TextField name="joinUrl" label="Join URL" hint="the “Join” button" defaultValue={row?.joinUrl} />
+          <TextField name="instagramUrl" label="Instagram" hint="optional" defaultValue={row?.instagramUrl} />
+          <TextField name="linkedinUrl" label="LinkedIn" hint="optional" defaultValue={row?.linkedinUrl} />
+          <TextField name="websiteUrl" label="Website" hint="optional" defaultValue={row?.websiteUrl} />
+          <TextField name="contactEmail" label="Contact email" hint="optional" defaultValue={row?.contactEmail} />
+          <NumberField name="members" label="Members" hint="optional" min={0} defaultValue={row?.members ?? null} />
+        </div>
+        <SelectField
+          name="leadId"
+          label="Club lead account"
+          hint="the portal user who may edit this club"
+          defaultValue={row?.leadId ? String(row.leadId) : ""}
+          options={[{ value: "", label: "— none —" }, ...leads.map((l) => ({ value: String(l.id), label: l.name }))]}
+        />
+      </Fieldset>
+
       <SaveBar />
     </EditorShell>
   );

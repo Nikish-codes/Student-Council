@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
+import { revalidateClubPages } from "@/lib/revalidate-club";
 import { events as eventsT, type EventStatus } from "@/db/schema";
 import {
   assertCanEditEvent,
@@ -119,6 +120,8 @@ export async function createEvent(fd: FormData) {
   if (status === "published") await onEventPublished(row.id);
 
   revalidatePath("/management/events");
+  // The club page lists its own events, so it goes stale on every event write.
+  await revalidateClubPages(clubId);
   redirect("/management/events");
 }
 
@@ -166,6 +169,8 @@ export async function updateEvent(id: number, fd: FormData) {
   revalidatePath("/events");
   revalidatePath("/archive");
   revalidatePath(`/events/${slug}`);
+  // Both clubs when the event was reassigned, so neither list is left stale.
+  await revalidateClubPages(existing.clubId, clubId);
   redirect("/management/events");
 }
 
@@ -193,11 +198,17 @@ export async function publishEvent(id: number) {
 
   await onEventPublished(id);
   revalidatePath("/management/events");
+  await revalidateClubPages(existing.clubId);
   void user;
 }
 
 export async function deleteEvent(id: number) {
   await requireRole("super_admin", "admin");
+  const existing = await db.query.events.findFirst({
+    where: eq(eventsT.id, id),
+    columns: { clubId: true },
+  });
   await db.delete(eventsT).where(eq(eventsT.id, id));
   revalidatePath("/management/events");
+  await revalidateClubPages(existing?.clubId);
 }

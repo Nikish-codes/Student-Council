@@ -54,7 +54,7 @@ export default async function CouncilPage() {
         </Reveal>
       </section>
 
-      <CouncilGroupPhoto photoSrc={groupPhoto} memberCount={members.length} />
+      <CouncilGroupPhoto photo={groupPhoto} memberCount={members.length} />
 
       <div className="mt-24 sm:mt-32">
         <CouncilShowcase president={president} sections={sections} />

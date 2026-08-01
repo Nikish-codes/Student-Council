@@ -71,6 +71,8 @@ export const councilMemberSchema = z.object({
   bio: z.string().optional(),
   memberType: councilMemberTypeSchema.default("member"),
   groupId: z.string().optional(),
+  // Set when this member runs a club — surfaces them on /clubs/[slug].
+  clubId: z.string().optional(),
   isPresident: z.boolean().default(false),
   featured: z.boolean().default(false),
   order: z.number().default(99),
@@ -123,6 +125,7 @@ export const clubCategorySchema = z.object({
 export type ClubCategory = z.infer<typeof clubCategorySchema>;
 
 export const clubSchema = z.object({
+  id: z.number().optional(),
   slug: z.string(),
   name: z.string(),
   logo: z.string(),
@@ -131,8 +134,54 @@ export const clubSchema = z.object({
   tags: z.array(z.string()).default([]),
   members: z.number().optional(),
   categoryId: z.string().optional(),
+  // Card-level extras. The full detail-page payload is `ClubDetail` below.
+  tagline: z.string().optional(),
+  accentColor: z.string().optional(),
 });
 export type Club = z.infer<typeof clubSchema>;
+
+/** One "what we run" row. */
+export const clubActivitySchema = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+});
+export type ClubActivity = z.infer<typeof clubActivitySchema>;
+
+/** One video. `url` may be any YouTube/Vimeo form; parsed by src/lib/video.ts. */
+export const clubVideoSchema = z.object({
+  url: z.string(),
+  title: z.string().optional(),
+});
+export type ClubVideo = z.infer<typeof clubVideoSchema>;
+
+export const clubGalleryItemSchema = z.object({
+  url: z.string(),
+  caption: z.string().optional(),
+});
+export type ClubGalleryItem = z.infer<typeof clubGalleryItemSchema>;
+
+/**
+ * Everything /clubs/[slug] renders. Each block is optional — the page numbers
+ * its sections from what is actually present, so a club that has filled in
+ * nothing but the card fields still gets a clean page with no empty headings.
+ */
+export const clubDetailSchema = clubSchema.extend({
+  id: z.number(),
+  about: z.string().optional(),
+  cover: z.string().optional(),
+  foundedYear: z.number().optional(),
+  activities: z.array(clubActivitySchema).default([]),
+  flagshipEvent: z.string().optional(),
+  videos: z.array(clubVideoSchema).default([]),
+  gallery: z.array(clubGalleryItemSchema).default([]),
+  instagramUrl: z.string().optional(),
+  linkedinUrl: z.string().optional(),
+  websiteUrl: z.string().optional(),
+  contactEmail: z.string().optional(),
+  categoryLabel: z.string().optional(),
+  categorySlug: z.string().optional(),
+});
+export type ClubDetail = z.infer<typeof clubDetailSchema>;
 
 export const supportChannelSchema = z.object({
   id: z.string(),

@@ -72,11 +72,15 @@ export function CouncilMemberDialog({
                 <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,400px)_1fr] lg:gap-14">
                   {/* ── Portrait ── */}
                   <div className="group/m relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-line/10 bg-surface-2">
+                    {/* `contain` for the same reason as the card: the expanded
+                        view is where someone actually looks at the photo, so it
+                        must never be the cropped version. */}
                     <MemberPortrait
                       name={m.name}
                       photo={m.photo}
                       sizes="(min-width: 1024px) 400px, 100vw"
                       priority
+                      className="object-contain"
                     />
                   </div>
 

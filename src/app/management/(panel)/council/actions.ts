@@ -6,6 +6,7 @@ import { eq, ne } from "drizzle-orm";
 import { db } from "@/db/client";
 import { councilMembers as t, siteSettings } from "@/db/schema";
 import { requireOps, requireRole } from "@/lib/rbac";
+import { revalidateClubPages } from "@/lib/revalidate-club";
 import type { CouncilMemberType } from "@/lib/schemas";
 
 const MEMBER_TYPES: CouncilMemberType[] = ["president", "member", "co_lead"];
@@ -23,6 +24,15 @@ function bust() {
 
 export async function saveCouncil(id: number | null, fd: FormData) {
   await requireOps();
+  // Captured before the write so a reassignment can flush the previous club too.
+  const previousClubId = id
+    ? (
+        await db.query.councilMembers.findFirst({
+          where: eq(t.id, id),
+          columns: { clubId: true },
+        })
+      )?.clubId
+    : null;
   // `memberType` is the source of truth; `isPresident` is written in sync so the
   // older flag never drifts and a rollback stays a plain `git revert`.
   const raw = s(fd, "memberType");
@@ -44,6 +54,7 @@ export async function saveCouncil(id: number | null, fd: FormData) {
     bio: s(fd, "bio") || null,
     memberType,
     groupId: s(fd, "groupId") ? Number(s(fd, "groupId")) : null,
+    clubId: s(fd, "clubId") ? Number(s(fd, "clubId")) : null,
     isPresident,
     featured: fd.get("featured") === "on",
     sortOrder: Number(s(fd, "sortOrder") || 99),
@@ -69,13 +80,19 @@ export async function saveCouncil(id: number | null, fd: FormData) {
   }
 
   bust();
+  await revalidateClubPages(previousClubId, values.clubId);
   redirect("/management/council");
 }
 
 export async function deleteCouncil(id: number) {
   await requireRole("super_admin", "admin");
+  const existing = await db.query.councilMembers.findFirst({
+    where: eq(t.id, id),
+    columns: { clubId: true },
+  });
   await db.delete(t).where(eq(t.id, id));
   bust();
+  await revalidateClubPages(existing?.clubId);
 }
 
 export async function saveCouncilGroupPhoto(fd: FormData) {

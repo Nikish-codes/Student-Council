@@ -3,6 +3,10 @@
 import * as React from "react";
 import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { embedSrc, isDirectVideoUrl } from "@/lib/video";
+
+// Re-exported for existing importers; the implementation now lives in lib/video.
+export { isDirectVideoUrl };
 
 type EventVideoProps = {
   src?: string;
@@ -14,49 +18,6 @@ type EventVideoProps = {
   fit?: "cover" | "contain";
   className?: string;
 };
-
-function youtubeId(url: URL): string | undefined {
-  if (url.hostname.includes("youtu.be")) return url.pathname.split("/").filter(Boolean)[0];
-  if (url.hostname.includes("youtube.com")) {
-    if (url.pathname.startsWith("/shorts/")) return url.pathname.split("/").filter(Boolean)[1];
-    if (url.pathname.startsWith("/embed/")) return url.pathname.split("/").filter(Boolean)[1];
-    return url.searchParams.get("v") || undefined;
-  }
-  return undefined;
-}
-
-function vimeoId(url: URL): string | undefined {
-  if (!url.hostname.includes("vimeo.com")) return undefined;
-  return url.pathname.split("/").filter((part) => /^\d+$/.test(part)).at(-1);
-}
-
-export function isDirectVideoUrl(src?: string): boolean {
-  if (!src) return false;
-  try {
-    const url = new URL(src);
-    const path = url.pathname.toLowerCase();
-    return (
-      /\.(mp4|webm|ogg|ogv|mov|m4v)$/.test(path) ||
-      (url.hostname.includes("res.cloudinary.com") && path.includes("/video/upload/"))
-    );
-  } catch {
-    return false;
-  }
-}
-
-function embedSrc(src?: string): { provider: "youtube" | "vimeo"; src: string; id: string } | undefined {
-  if (!src) return undefined;
-  try {
-    const url = new URL(src);
-    const yt = youtubeId(url);
-    if (yt) return { provider: "youtube", src: `https://www.youtube.com/embed/${yt}`, id: yt };
-    const vm = vimeoId(url);
-    if (vm) return { provider: "vimeo", src: `https://player.vimeo.com/video/${vm}`, id: vm };
-  } catch {
-    return undefined;
-  }
-  return undefined;
-}
 
 export function EventVideo({ src, title, poster, variant = "player", autoPlay = false, controls = true, fit = "cover", className }: EventVideoProps) {
   const [failed, setFailed] = React.useState(false);

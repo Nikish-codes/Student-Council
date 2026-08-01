@@ -48,6 +48,10 @@ const nextConfig: NextConfig = {
     // self-hosted next/font, R2-hosted images, and inline scripts/styles that
     // Next.js + GSAP inject. No nonce pipeline yet, so 'unsafe-inline' is
     // required for scripts/styles; tighten with a nonce middleware later.
+    //
+    // frame-src also lists YouTube + Vimeo: both /events/[slug] and /clubs/[slug]
+    // embed provider players. Without these the iframes are blocked outright and
+    // the video section renders as an empty black box with a console violation.
     const csp = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://va.vercel-scripts.com",
@@ -55,7 +59,7 @@ const nextConfig: NextConfig = {
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://vitals.vercel-insights.com https://va.vercel-scripts.com",
-      "frame-src https://api.razorpay.com https://checkout.razorpay.com",
+      "frame-src https://api.razorpay.com https://checkout.razorpay.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -112,6 +116,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "pub-88f0a7c5d200469fa7dbb8f90c605d45.r2.dev" },
       { protocol: "https", hostname: "*.r2.dev" },
+      // YouTube poster frames for the click-to-load video facades.
+      { protocol: "https", hostname: "i.ytimg.com" },
     ],
   },
 };
