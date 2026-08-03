@@ -12,6 +12,16 @@ interface ParallaxImageProps {
   className?: string;
   containerClassName?: string;
   fallbackLabel?: string;
+  /**
+   * Width this image occupies, for srcset selection. Defaults to full-bleed
+   * because that is what a parallax image almost always is.
+   *
+   * This used to be missing entirely, so every caller silently inherited
+   * Picture's grid-card default of `(min-width: 1280px) 320px` — the browser
+   * fetched a 320px file for a full-width banner and upscaled it, which reads
+   * as a stretched, soft image rather than as a missing attribute.
+   */
+  sizes?: string;
 }
 
 export function ParallaxImage({
@@ -21,6 +31,7 @@ export function ParallaxImage({
   className,
   containerClassName,
   fallbackLabel,
+  sizes = "100vw",
 }: ParallaxImageProps) {
   const ref = React.useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
@@ -47,6 +58,7 @@ export function ParallaxImage({
           src={src}
           alt={alt}
           fill
+          sizes={sizes}
           fallbackLabel={fallbackLabel}
           className={className}
         />

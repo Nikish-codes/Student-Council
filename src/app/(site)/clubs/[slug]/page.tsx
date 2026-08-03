@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { InstagramMark, LinkedInMark } from "@/components/ui/brand-marks";
 import { ClubVideos } from "@/components/sections/club-videos";
 import { Magnetic } from "@/components/motion/magnetic";
-import { ParallaxImage } from "@/components/motion/parallax-image";
 import { Reveal } from "@/components/motion/reveal";
 import { accentChannels } from "@/lib/club-accent";
 import { embedSrc } from "@/lib/video";
@@ -90,6 +89,7 @@ export default async function ClubDetailPage({
 
   // Falls back to the site accent when unset or malformed — see lib/club-accent.
   const accent = accentChannels(club.accentColor) ?? "var(--accent)";
+  const coverRatio = bannerRatio(club.coverWidth, club.coverHeight);
   const nextEvent = upcoming[0];
   const totalEvents = upcoming.length + past.length;
 
@@ -163,15 +163,29 @@ export default async function ClubDetailPage({
       </header>
 
       {/* ─── Cover ─── */}
+      {/* Framed at the image's OWN ratio, not a fixed viewport height. A club
+          uploading a 4:1 banner used to get it crushed into a ~2.3:1 box and
+          zoom-cropped; now the band is whatever shape was uploaded. The clamp
+          only catches genuinely unusable shapes (a square or a portrait), which
+          fall back to a cropped 3:2 rather than turning the banner into a wall. */}
       {club.cover ? (
-        <div className="mt-20 sm:mt-28">
-          <ParallaxImage
-            src={club.cover}
-            alt={`${club.name} cover`}
-            amount={50}
-            containerClassName="relative h-[46vh] w-full overflow-hidden sm:h-[62vh]"
-            className="object-cover"
-          />
+        <div className="container mt-20 sm:mt-28">
+          <div
+            className="relative w-full overflow-hidden rounded-2xl border border-line/[0.08] bg-surface-2"
+            style={{ aspectRatio: String(coverRatio) }}
+          >
+            <Picture
+              src={club.cover}
+              alt={`${club.name} cover`}
+              fill
+              // Explicit, because Picture's default is tuned for grid cards
+              // ((min-width:1280px) 320px) — a full-bleed banner served at 320px
+              // is the blurry-upscale bug this replaces.
+              sizes="(min-width: 1536px) 1536px, 100vw"
+              quality={88}
+              className="object-cover"
+            />
+          </div>
         </div>
       ) : null}
 
@@ -545,6 +559,22 @@ function Socials({ club }: { club: ClubDetail }) {
       </ul>
     </div>
   );
+}
+
+/**
+ * How tall to draw the cover band.
+ *
+ * Uses the upload's real ratio so nothing is cropped or distorted, but clamps
+ * the extremes: a portrait or square photo used as a "banner" would otherwise
+ * push the entire page below the fold, and a ratio past 5:1 becomes a letterbox
+ * slit. Inside the band (3:2 through 5:1) the image renders exactly as uploaded.
+ */
+function bannerRatio(width?: number, height?: number): number {
+  const DEFAULT = 2.4; // what the panel recommends when nothing is set
+  const MIN = 1.5; // 3:2 — anything squarer gets cropped to this
+  const MAX = 5; // 5:1 — wider than this is a slit, not a banner
+  if (!width || !height) return DEFAULT;
+  return Math.min(MAX, Math.max(MIN, width / height));
 }
 
 /** "Woxsen Debate Club" → "WDC", for logo/photo fallbacks. */

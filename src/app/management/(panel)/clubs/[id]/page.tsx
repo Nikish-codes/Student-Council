@@ -100,7 +100,7 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
         <MediaField
           name="coverId"
           label="Cover image"
-          hint="wide banner behind the masthead"
+          hint="wide banner · 2400×1000 recommended · anything from 3:2 to 5:1 shows uncropped"
           defaultValue={row?.coverId ?? null}
           media={media}
         />

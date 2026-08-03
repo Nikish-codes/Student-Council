@@ -435,6 +435,10 @@ export const getClub = cache(
       accentColor: normalizeAccent(d.accentColor),
       about: d.about || undefined,
       cover: mediaUrl(d.cover) || undefined,
+      coverWidth:
+        typeof d.cover?.width === "number" ? d.cover.width : undefined,
+      coverHeight:
+        typeof d.cover?.height === "number" ? d.cover.height : undefined,
       foundedYear: typeof d.foundedYear === "number" ? d.foundedYear : undefined,
       activities: (d.activities ?? []).filter((a) => a?.title?.trim()),
       flagshipEvent: d.flagshipEvent || undefined,

@@ -169,6 +169,11 @@ export const clubDetailSchema = clubSchema.extend({
   id: z.number(),
   about: z.string().optional(),
   cover: z.string().optional(),
+  // Intrinsic size of the cover, so the banner can be framed at the ratio the
+  // image actually is instead of a guessed one. See the cover block in
+  // app/(site)/clubs/[slug]/page.tsx.
+  coverWidth: z.number().optional(),
+  coverHeight: z.number().optional(),
   foundedYear: z.number().optional(),
   activities: z.array(clubActivitySchema).default([]),
   flagshipEvent: z.string().optional(),
