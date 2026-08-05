@@ -84,7 +84,7 @@ function VideoTile({
     return (
       <div
         className={cn(
-          "relative overflow-hidden rounded-2xl border border-line/15 bg-black",
+          "relative overflow-hidden rounded-2xl bg-black",
           className,
         )}
       >
@@ -105,8 +105,9 @@ function VideoTile({
       onClick={() => setPlaying(true)}
       aria-label={`Play ${label}`}
       className={cn(
-        "group/v relative block overflow-hidden rounded-2xl border border-line/15 bg-surface/60 text-left",
-        "transition-colors duration-500 hover:border-[rgb(var(--club-accent)/0.5)]",
+        // No outline — the poster fills the tile edge to edge, so a border only
+        // ever drew a line around an image. The play button carries the hover.
+        "group/v relative block overflow-hidden rounded-2xl bg-surface text-left",
         className,
       )}
     >

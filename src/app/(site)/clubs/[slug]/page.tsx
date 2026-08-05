@@ -270,7 +270,7 @@ export default async function ClubDetailPage({
                   <figure
                     key={`${g.url}-${i}`}
                     className={cn(
-                      "group/g relative overflow-hidden rounded-2xl border border-line/10 bg-surface/40",
+                      "group/g relative overflow-hidden rounded-2xl bg-surface",
                       i % 3 === 0 ? "aspect-[3/4]" : "aspect-square",
                       i % 3 === 0 && "sm:row-span-2 sm:aspect-[3/5]",
                     )}
@@ -306,7 +306,7 @@ export default async function ClubDetailPage({
 
         {/* ─── Sticky aside ─── */}
         <aside className="lg:col-span-4">
-          <div className="sticky top-32 space-y-7 rounded-3xl border border-line/15 bg-surface/40 p-7 backdrop-blur-md">
+          <div className="sticky top-32 space-y-7 rounded-3xl bg-surface p-7">
             {club.categoryLabel ? (
               <div>
                 <span className="kicker">Category</span>
@@ -487,7 +487,7 @@ function EventList({
 
 function LeadCard({ member }: { member: CouncilMember }) {
   return (
-    <div className="flex items-center gap-5 rounded-2xl border border-line/10 bg-surface/40 p-5">
+    <div className="flex items-center gap-5 rounded-2xl bg-surface p-5">
       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border border-line/15 bg-line/5">
         <Picture
           src={member.photo}

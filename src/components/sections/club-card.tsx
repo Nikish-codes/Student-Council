@@ -89,7 +89,9 @@ export function ClubCard({ club, index, total }: Props) {
       ref={ref}
       href={`/clubs/${club.slug}`}
       data-club-card
-      className="group/c relative flex min-h-[300px] flex-col overflow-hidden rounded-2xl border border-line/10 bg-surface/50 p-7 transition-colors duration-500 hover:border-line/30"
+      // Same treatment as the council cards: surface fill carries the card,
+      // the border is transparent until hover so nothing reflows.
+      className="group/c relative flex min-h-[300px] flex-col overflow-hidden rounded-2xl border border-transparent bg-surface p-7 transition-colors duration-500 hover:border-line/12"
       style={{ perspective: "1000px" }}
     >
       {/* Cursor halo (plain alpha blend — no mix-blend-screen, which forces an
