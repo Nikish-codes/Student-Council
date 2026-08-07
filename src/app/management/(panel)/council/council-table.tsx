@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import { DataTable, type Column } from "@/components/management/data-table";
 import { DeleteButton } from "@/components/management/delete-button";
-import { deleteCouncil } from "./actions";
+import { deleteCouncil, moveCouncilMember } from "./actions";
 
 type CouncilRow = {
   id: number;
@@ -82,8 +83,15 @@ export function CouncilTable({
       key: "actions",
       label: "",
       align: "right",
-      renderCell: (m) =>
-        admin ? <DeleteButton action={deleteCouncil.bind(null, m.id)} /> : null,
+      renderCell: (m) => (
+        <div className="flex items-center justify-end gap-1">
+          <MoveButton id={m.id} dir="up" />
+          <MoveButton id={m.id} dir="down" />
+          {admin ? (
+            <DeleteButton action={deleteCouncil.bind(null, m.id)} />
+          ) : null}
+        </div>
+      ),
     },
   ];
 
@@ -92,6 +100,7 @@ export function CouncilTable({
       rows={rows}
       columns={columns}
       searchPlaceholder="Search members…"
+      pageSize={50}
       emptyState={
         <>
           No members yet.{" "}
@@ -102,5 +111,26 @@ export function CouncilTable({
         </>
       }
     />
+  );
+}
+
+function MoveButton({
+  id,
+  dir,
+}: {
+  id: number;
+  dir: "up" | "down";
+}) {
+  const Icon = dir === "up" ? ChevronUp : ChevronDown;
+  return (
+    <form action={moveCouncilMember.bind(null, id, dir)}>
+      <button
+        type="submit"
+        aria-label={`Move ${dir}`}
+        className="grid h-7 w-7 place-items-center rounded-full text-subtle transition-colors hover:bg-line/5 hover:text-ink"
+      >
+        <Icon className="h-4 w-4" />
+      </button>
+    </form>
   );
 }

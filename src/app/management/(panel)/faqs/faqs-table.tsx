@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import { DataTable, type Column } from "@/components/management/data-table";
 import { DeleteButton } from "@/components/management/delete-button";
-import { deleteFaq } from "./actions";
+import { deleteFaq, moveFaq } from "./actions";
 
 type FaqRow = {
   id: number;
@@ -38,8 +39,13 @@ export function FaqsTable({ rows, admin }: { rows: FaqRow[]; admin: boolean }) {
       key: "actions",
       label: "",
       align: "right",
-      renderCell: (f) =>
-        admin ? <DeleteButton action={deleteFaq.bind(null, f.id)} /> : null,
+      renderCell: (f) => (
+        <div className="flex items-center justify-end gap-1">
+          <MoveButton id={f.id} dir="up" />
+          <MoveButton id={f.id} dir="down" />
+          {admin ? <DeleteButton action={deleteFaq.bind(null, f.id)} /> : null}
+        </div>
+      ),
     },
   ];
 
@@ -48,6 +54,7 @@ export function FaqsTable({ rows, admin }: { rows: FaqRow[]; admin: boolean }) {
       rows={rows}
       columns={columns}
       searchPlaceholder="Search FAQs…"
+      pageSize={50}
       emptyState={
         <>
           No FAQs yet.{" "}
@@ -58,5 +65,26 @@ export function FaqsTable({ rows, admin }: { rows: FaqRow[]; admin: boolean }) {
         </>
       }
     />
+  );
+}
+
+function MoveButton({
+  id,
+  dir,
+}: {
+  id: number;
+  dir: "up" | "down";
+}) {
+  const Icon = dir === "up" ? ChevronUp : ChevronDown;
+  return (
+    <form action={moveFaq.bind(null, id, dir)}>
+      <button
+        type="submit"
+        aria-label={`Move ${dir}`}
+        className="grid h-7 w-7 place-items-center rounded-full text-subtle transition-colors hover:bg-line/5 hover:text-ink"
+      >
+        <Icon className="h-4 w-4" />
+      </button>
+    </form>
   );
 }

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 import { db } from "@/db/client";
 import { faqs as t } from "@/db/schema";
 import { requireOps, requireRole } from "@/lib/rbac";
@@ -36,5 +36,21 @@ export async function saveFaq(id: number | null, fd: FormData) {
 export async function deleteFaq(id: number) {
   await requireRole("super_admin", "admin");
   await db.delete(t).where(eq(t.id, id));
+  bust();
+}
+
+export async function moveFaq(id: number, dir: "up" | "down") {
+  await requireOps();
+  const rows = await db.select().from(t).orderBy(asc(t.sortOrder), asc(t.id));
+  const i = rows.findIndex((g) => g.id === id);
+  const j = dir === "up" ? i - 1 : i + 1;
+  if (i < 0 || j < 0 || j >= rows.length) return;
+
+  const row = rows[i];
+  const other = rows[j];
+  const a = row.sortOrder === other.sortOrder ? i * 10 : row.sortOrder;
+  const b = row.sortOrder === other.sortOrder ? j * 10 : other.sortOrder;
+  await db.update(t).set({ sortOrder: b }).where(eq(t.id, row.id));
+  await db.update(t).set({ sortOrder: a }).where(eq(t.id, other.id));
   bust();
 }
