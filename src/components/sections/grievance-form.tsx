@@ -14,7 +14,6 @@ const schema = z.object({
   category: z.string().min(1, "Pick a category."),
   subject: z.string().min(4, "A short subject helps us route this faster."),
   message: z.string().min(20, "Please share a bit more detail (20+ characters)."),
-  email: z.string().email("Enter a valid email"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -37,7 +36,6 @@ export function GrievanceForm({
     resolver: zodResolver(schema),
     defaultValues: {
       category: categories[0]?.value ?? "",
-      email: "",
     },
   });
 
@@ -49,11 +47,10 @@ export function GrievanceForm({
     const cat = categories.find((c) => c.value === values.category);
     const to = cat?.to?.trim() || fallbackTo.trim();
     const cc = cat?.cc?.trim() || undefined;
-    const subject = `[${values.category}] ${values.subject}`;
-    const body = `${values.message}\n\n— Submitted via the Council portal by ${values.email}`;
-
-    window.location.href = outlookComposeFull({ to, cc, subject, body });
-    toast.success("Opening Outlook to send your grievance.");
+    const body = values.message;
+    const url = outlookComposeFull({ to, cc, subject: values.subject, body });
+    window.open(url, "_blank", "noopener,noreferrer");
+    toast.success("Opening Outlook in a new tab.");
     reset();
   };
 
@@ -101,19 +98,11 @@ export function GrievanceForm({
         />
       </Field>
 
-      <Field label="Your email" error={errors.email?.message}>
-        <input
-          type="email"
-          {...register("email")}
-          placeholder="you@woxsen.edu.in"
-          className="h-11 w-full rounded-lg border border-line/10 bg-bg/40 px-4 text-sm text-ink placeholder:text-subtle focus:border-line/40 focus:outline-none"
-        />
-      </Field>
-
       <div className="flex items-center justify-between border-t border-line/10 pt-6">
         <p className="max-w-md text-xs text-subtle">
           By submitting, you confirm the information shared is true to the best
-          of your knowledge. This opens Outlook with the right inbox pre-filled.
+          of your knowledge. This opens Outlook in a new tab with the right
+          inbox pre-filled.
         </p>
         <Button type="submit" disabled={isSubmitting} size="md">
           {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}

@@ -39,12 +39,11 @@ export function outlookComposeFull(opts: {
   subject?: string;
   body?: string;
 }) {
-  const params = new URLSearchParams();
-  params.set("to", opts.to.trim());
-  if (opts.cc?.trim()) params.set("cc", opts.cc.trim());
-  if (opts.subject) params.set("subject", opts.subject);
-  if (opts.body) params.set("body", opts.body);
-  return `https://outlook.office.com/mail/deeplink/compose?${params.toString()}`;
+  const parts: string[] = [`to=${encodeURIComponent(opts.to.trim())}`];
+  if (opts.cc?.trim()) parts.push(`cc=${encodeURIComponent(opts.cc.trim())}`);
+  if (opts.subject) parts.push(`subject=${encodeURIComponent(opts.subject)}`);
+  if (opts.body) parts.push(`body=${encodeURIComponent(opts.body)}`);
+  return `https://outlook.office.com/mail/deeplink/compose?${parts.join("&")}`;
 }
 
 const NUMBER_WORDS = [
