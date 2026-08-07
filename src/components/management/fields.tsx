@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import { Plus, Trash2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -596,6 +597,15 @@ export function MultiSelectField({
 
 export function SaveBar({ label = "Save" }: { label?: string }) {
   const { pending } = useFormStatus();
+  const wasPending = useRef(false);
+
+  useEffect(() => {
+    if (wasPending.current && !pending) {
+      toast.success("Saved.");
+    }
+    wasPending.current = pending;
+  }, [pending]);
+
   return (
     <div className="sticky bottom-0 mt-2 flex items-center justify-end gap-3 border-t border-line/10 bg-bg/80 py-4 backdrop-blur-xl">
       <Button type="submit" disabled={pending}>
