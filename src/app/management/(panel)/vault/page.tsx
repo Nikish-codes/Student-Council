@@ -7,6 +7,7 @@ import { VaultEditor } from "@/components/management/vault-editor";
 import { SaveBar } from "@/components/management/fields";
 import { saveVault } from "./actions";
 import type { VaultStoryConfig } from "@/lib/schemas";
+import { VAULT_FALLBACK_STORIES } from "@/lib/vault-defaults";
 
 export default async function VaultPage() {
   await requireRole("super_admin", "admin");
@@ -15,8 +16,14 @@ export default async function VaultPage() {
     where: eq(t.id, 1),
   });
 
-  const stories: VaultStoryConfig[] =
+  const dbStories: VaultStoryConfig[] =
     (row?.vaultStories as VaultStoryConfig[] | null) ?? [];
+
+  // When the DB has no custom stories, pre-populate the editor with the
+  // fallback stories that are actually displaying on the homepage so the
+  // user can see and edit what's live. Saving will persist them to the DB.
+  const stories = dbStories.length > 0 ? dbStories : VAULT_FALLBACK_STORIES;
+  const usingFallback = dbStories.length === 0;
 
   return (
     <EditorShell
@@ -31,6 +38,14 @@ export default async function VaultPage() {
         dropped on save. Leave this empty to fall back to recap-based stories
         from the Homepage editor.
       </p>
+
+      {usingFallback ? (
+        <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-200/90">
+          No custom stories saved — showing the fallback stories currently
+          displaying on the homepage. Save to make these your own (or edit and
+          save to override).
+        </p>
+      ) : null}
 
       <Fieldset
         title="Stories"
