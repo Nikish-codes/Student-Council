@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUpRight, Users } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Picture } from "@/components/ui/picture";
 import { gsap, useGSAP } from "@/lib/gsap";
 import type { Club } from "@/lib/schemas";
@@ -167,12 +167,6 @@ export function ClubCard({ club, index, total }: Props) {
               </span>
             ))}
           </div>
-          {club.members && (
-            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-subtle">
-              <Users className="h-3 w-3" />
-              {club.members}
-            </span>
-          )}
         </div>
       </div>
     </Link>

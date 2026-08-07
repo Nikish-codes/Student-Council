@@ -251,6 +251,9 @@ export function MediaField({
   const [list, setList] = useState<MediaOption[]>(media);
   const [selected, setSelected] = useState<number | null>(defaultValue ?? null);
   const [picking, setPicking] = useState(false);
+  const [pasting, setPasting] = useState(false);
+  const [urlValue, setUrlValue] = useState("");
+  const [ingesting, setIngesting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -275,6 +278,32 @@ export function MediaField({
     } finally {
       setUploading(false);
       e.target.value = "";
+    }
+  }
+
+  async function onIngest(e: React.FormEvent) {
+    e.preventDefault();
+    const url = urlValue.trim();
+    if (!url) return;
+    setIngesting(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/media/from-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Could not add URL");
+      const m: MediaOption = json.media;
+      setList((l) => [m, ...l]);
+      setSelected(m.id);
+      setPasting(false);
+      setUrlValue("");
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setIngesting(false);
     }
   }
 
@@ -306,6 +335,13 @@ export function MediaField({
             >
               Choose existing
             </button>
+            <button
+              type="button"
+              onClick={() => setPasting((p) => !p)}
+              className="rounded-full border border-line/15 px-3 py-1.5 text-xs text-ink hover:border-line/40"
+            >
+              Paste URL
+            </button>
             {current ? (
               <button
                 type="button"
@@ -318,6 +354,25 @@ export function MediaField({
           </div>
         </div>
         {error ? <p className="mt-2 text-xs text-red-400">{error}</p> : null}
+        {pasting ? (
+          <form onSubmit={onIngest} className="mt-3 flex items-center gap-2">
+            <input
+              type="url"
+              placeholder="https://res.cloudinary.com/…"
+              value={urlValue}
+              onChange={(e) => setUrlValue(e.target.value)}
+              className={cn(inputCls, "py-2")}
+              autoFocus
+            />
+            <button
+              type="submit"
+              disabled={ingesting || !urlValue.trim()}
+              className="shrink-0 rounded-full border border-line/15 px-3 py-1.5 text-xs text-ink hover:border-line/40 disabled:opacity-50"
+            >
+              {ingesting ? "Adding…" : "Add"}
+            </button>
+          </form>
+        ) : null}
         {picking ? (
           <div className="mt-3 grid max-h-56 grid-cols-4 gap-2 overflow-y-auto sm:grid-cols-6">
             {list.map((m) => (

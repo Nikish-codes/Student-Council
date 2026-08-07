@@ -5,11 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
+import { recapVideo } from "@/lib/recap-media";
 import type { VaultStory } from "@/lib/schemas";
 
 type VaultMedia =
   | { kind: "video"; src: string; poster?: string }
-  | { kind: "image"; src: string };
+  | { kind: "image"; src: string }
+  | { kind: "text" };
 
 interface VaultEntry {
   id: string;
@@ -33,7 +35,7 @@ const FALLBACK_ENTRIES: VaultEntry[] = [
     line: "Three days. Twelve venues. Unstructured infinity — the council's biggest production of the year.",
     media: {
       kind: "video",
-      src: "/recap/infinity-26-aftermovie.mp4",
+      src: recapVideo("infinity-26-aftermovie.mp4"),
       poster: "/recap/infinity-26-trailer.jpg",
     },
     thumb: "/recap/infinity-26-trailer.jpg",
@@ -48,7 +50,7 @@ const FALLBACK_ENTRIES: VaultEntry[] = [
     line: "When the lights dimmed and the spooky took over — costumes, chills, and pure chaos under the campus sky.",
     media: {
       kind: "video",
-      src: "/recap/halloween-25-recap.mp4",
+      src: recapVideo("halloween-25-recap.mp4"),
       poster: "/recap/halloween-25-a.jpg",
     },
     thumb: "/recap/halloween-25-a.jpg",
@@ -63,7 +65,7 @@ const FALLBACK_ENTRIES: VaultEntry[] = [
     line: "FC25, MK, and the gaming community in one room — the post-game glow, on tape.",
     media: {
       kind: "video",
-      src: "/recap/utopia-esports.mp4",
+      src: recapVideo("utopia-esports.mp4"),
     },
     thumb: "/recap/infinity-26-logo.jpg",
     href: "/events",
@@ -82,9 +84,17 @@ const FALLBACK_ENTRIES: VaultEntry[] = [
 ];
 
 function storyToEntry(s: VaultStory, i: number): VaultEntry {
-  const year = s.publishedAt
-    ? `'${new Date(s.publishedAt).getFullYear().toString().slice(-2)}`
-    : "";
+  const year = s.year
+    ? s.year
+    : s.publishedAt
+      ? `'${new Date(s.publishedAt).getFullYear().toString().slice(-2)}`
+      : "";
+  const media: VaultMedia =
+    s.mediaKind === "text"
+      ? { kind: "text" }
+      : s.mediaKind === "video" || s.videoUrl
+        ? { kind: "video", src: s.videoUrl || "", poster: s.posterImage }
+        : { kind: "image", src: s.posterImage };
   return {
     id: s.id,
     index: String(i + 1).padStart(2, "0"),
@@ -92,9 +102,7 @@ function storyToEntry(s: VaultStory, i: number): VaultEntry {
     title: s.title,
     year,
     line: s.blurb,
-    media: s.videoUrl
-      ? { kind: "video", src: s.videoUrl, poster: s.posterImage }
-      : { kind: "image", src: s.posterImage },
+    media,
     thumb: s.posterImage,
     href: s.href,
   };
@@ -332,7 +340,7 @@ export function HomeVault({ entries }: { entries?: VaultStory[] }) {
                 playsInline
                 preload={i === 0 ? "auto" : "metadata"}
               />
-            ) : (
+            ) : entry.media.kind === "image" ? (
               <Image
                 src={entry.media.src}
                 alt={entry.title}
@@ -341,6 +349,8 @@ export function HomeVault({ entries }: { entries?: VaultStory[] }) {
                 sizes="100vw"
                 className="object-cover"
               />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-surface-2 via-surface to-bg" />
             )}
           </div>
         ))}
@@ -463,16 +473,20 @@ export function HomeVault({ entries }: { entries?: VaultStory[] }) {
                   )}
                   aria-label={`Show ${entry.title}`}
                 >
-                  <Image
-                    src={entry.thumb}
-                    alt=""
-                    fill
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                    className={cn(
-                      "object-cover transition-all duration-500",
-                      isActive ? "grayscale-0 scale-100" : "grayscale scale-105 opacity-60 group-hover:opacity-90 group-hover:grayscale-0",
-                    )}
-                  />
+                  {entry.thumb ? (
+                    <Image
+                      src={entry.thumb}
+                      alt=""
+                      fill
+                      sizes="(max-width: 768px) 50vw, 25vw"
+                      className={cn(
+                        "object-cover transition-all duration-500",
+                        isActive ? "grayscale-0 scale-100" : "grayscale scale-105 opacity-60 group-hover:opacity-89 group-hover:grayscale-0",
+                      )}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-surface-2 via-surface to-bg" />
+                  )}
                   <div
                     className={cn(
                       "absolute inset-0 transition-opacity",

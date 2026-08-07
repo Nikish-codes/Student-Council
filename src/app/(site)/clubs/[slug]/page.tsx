@@ -13,9 +13,11 @@ import { Picture } from "@/components/ui/picture";
 import { Button } from "@/components/ui/button";
 import { InstagramMark, LinkedInMark } from "@/components/ui/brand-marks";
 import { ClubVideos } from "@/components/sections/club-videos";
+import { ClubActivities } from "@/components/sections/club-activities";
+import { ClubSectionHeader } from "@/components/sections/club-section-header";
 import { Magnetic } from "@/components/motion/magnetic";
 import { Reveal } from "@/components/motion/reveal";
-import { accentChannels } from "@/lib/club-accent";
+import { CountUp } from "@/components/motion/count-up";
 import { embedSrc } from "@/lib/video";
 import { getClub, getClubEvents, getClubLeads, getClubs } from "@/lib/content";
 import type { ClubDetail, CouncilMember, EventItem } from "@/lib/schemas";
@@ -87,17 +89,12 @@ export default async function ClubDetailPage({
     return i < 0 ? "" : String(i + 1).padStart(2, "0");
   };
 
-  // Falls back to the site accent when unset or malformed — see lib/club-accent.
-  const accent = accentChannels(club.accentColor) ?? "var(--accent)";
   const coverRatio = bannerRatio(club.coverWidth, club.coverHeight);
   const nextEvent = upcoming[0];
   const totalEvents = upcoming.length + past.length;
 
   return (
-    <article
-      className="pt-24 sm:pt-32"
-      style={{ "--club-accent": accent } as React.CSSProperties}
-    >
+    <article className="pt-24 sm:pt-32">
       {/* ─── Breadcrumb ─── */}
       <div className="container">
         <Link
@@ -113,47 +110,53 @@ export default async function ClubDetailPage({
       </div>
 
       {/* ─── Masthead ─── */}
+      {/* Club name + logo share one row: the name sits left, the large logo
+          anchors the right. The name shrinks to fit beside the logo rather
+          than running edge-to-edge, so the two read as a single lockup. */}
       <header className="container mt-12">
         <Reveal>
-          <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:gap-12">
-            {/* Logo sits in an accent-tinted well so every club's mark reads
-                against the dark surface regardless of its own colours. */}
-            <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-3xl border border-line/15 bg-[rgb(var(--club-accent)/0.08)] p-5 sm:h-36 sm:w-36">
+          <span className="kicker text-subtle">
+            {club.categoryLabel ?? "Club"}
+          </span>
+
+          <div className="mt-6 flex items-center gap-6 sm:gap-10">
+            <h1 className="display min-w-0 flex-1 text-balance text-[clamp(2.5rem,7vw,5.5rem)] leading-[0.92]">
+              {club.name}
+            </h1>
+            {/* Logo — large, right of the name, fills its rounded well. */}
+            <div className="relative aspect-square h-32 w-32 shrink-0 overflow-hidden rounded-2xl sm:h-44 sm:w-44 sm:rounded-3xl">
               <Picture
                 src={club.logo}
                 alt={`${club.name} logo`}
                 fallbackLabel={initials(club.name)}
-                className="h-full w-full object-contain"
+                className="object-cover"
               />
             </div>
-
-            <div className="min-w-0 flex-1">
-              <h1 className="display text-balance text-5xl leading-[0.92] sm:text-7xl lg:text-8xl">
-                {club.name}
-              </h1>
-              {club.tagline ? (
-                <p className="mt-5 font-display text-2xl italic leading-tight text-[rgb(var(--club-accent))] sm:text-4xl">
-                  {club.tagline}
-                </p>
-              ) : null}
-              <p className="mt-7 max-w-2xl text-pretty text-lg text-muted">
-                {club.blurb}
-              </p>
-            </div>
           </div>
+
+          {club.tagline ? (
+            <p className="mt-6 max-w-3xl font-display text-2xl italic leading-tight text-ink/70 sm:text-4xl">
+              {club.tagline}
+            </p>
+          ) : null}
+
+          <p className="mt-8 max-w-2xl text-pretty text-lg text-muted">
+            {club.blurb}
+          </p>
         </Reveal>
 
-        {/* Stat strip — only the facts this club actually has. */}
+        {/* Stat strip — only the facts this club actually has. Numbers count
+            up on scroll; the wide flagship string stays static. */}
         <Reveal delay={0.08}>
-          <dl className="mt-14 flex flex-wrap items-end gap-x-14 gap-y-8 border-t border-line/10 pt-8">
+          <dl className="mt-16 flex flex-wrap items-end gap-x-14 gap-y-8 border-t border-line/10 pt-8">
             {club.members ? (
-              <Stat label="Members" value={String(club.members)} />
+              <Stat label="Members" count={club.members} />
             ) : null}
             {totalEvents > 0 ? (
-              <Stat label="Events" value={String(totalEvents)} />
+              <Stat label="Events" count={totalEvents} />
             ) : null}
             {club.foundedYear ? (
-              <Stat label="Established" value={String(club.foundedYear)} />
+              <Stat label="Established" count={club.foundedYear} />
             ) : null}
             {club.flagshipEvent ? (
               <Stat label="Flagship" value={club.flagshipEvent} wide />
@@ -191,9 +194,9 @@ export default async function ClubDetailPage({
 
       {/* ─── Body ─── */}
       <div className="container mt-24 grid gap-16 sm:mt-32 lg:grid-cols-12 lg:gap-20">
-        <div className="space-y-28 lg:col-span-8">
+        <div className="space-y-32 lg:col-span-8">
           {club.about ? (
-            <Section number={num("about")} title="What we do">
+            <Section number={num("about")} title="About us">
               {/* Blank-line-separated paragraphs; authored as plain text in the
                   panel, so there is no markdown pipeline to trust here. */}
               <div className="space-y-6">
@@ -214,31 +217,8 @@ export default async function ClubDetailPage({
           ) : null}
 
           {club.activities.length > 0 ? (
-            <Section number={num("activities")} title="What we run">
-              {/* Hairline-separated rows, not cards — the whole page leans on
-                  rules and whitespace rather than another grid of boxes. */}
-              <ul className="border-t border-line/10">
-                {club.activities.map((a, i) => (
-                  <li
-                    key={`${a.title}-${i}`}
-                    className="group/a grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 border-b border-line/10 py-7 transition-colors hover:bg-line/[0.02] sm:gap-x-10 sm:py-9"
-                  >
-                    <span className="pt-1 font-mono text-[11px] text-subtle transition-colors group-hover/a:text-[rgb(var(--club-accent))]">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <div className="min-w-0">
-                      <h3 className="display text-2xl leading-tight text-ink sm:text-3xl">
-                        {a.title}
-                      </h3>
-                      {a.description ? (
-                        <p className="mt-3 max-w-xl text-pretty text-sm leading-relaxed text-muted sm:text-base">
-                          {a.description}
-                        </p>
-                      ) : null}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+            <Section number={num("activities")} title="Our activities">
+              <ClubActivities activities={club.activities} />
             </Section>
           ) : null}
 
@@ -250,37 +230,30 @@ export default async function ClubDetailPage({
 
           {upcoming.length > 0 || past.length > 0 ? (
             <Section number={num("events")} title="Events">
-              <div className="space-y-12">
-                {upcoming.length > 0 ? (
-                  <EventList label="Coming up" events={upcoming} upcoming />
-                ) : null}
-                {past.length > 0 ? (
-                  <EventList label="Already happened" events={past} />
-                ) : null}
-              </div>
+              <EventTimeline upcoming={upcoming} past={past} />
             </Section>
           ) : null}
 
           {club.gallery.length > 0 ? (
             <Section number={num("gallery")} title="Gallery">
-              {/* Offset grid: every third image runs tall, so the column edges
-                  stagger instead of forming a tidy rectangle. */}
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {/* Natural-ratio masonry. Each image keeps its own aspect ratio —
+                  nothing is cropped or letterboxed. CSS multi-column flows
+                  items of different heights into a Pinterest-style wall. We
+                  use a plain <img> (not next/image) because next/image needs
+                  known dimensions to preserve a true ratio, and gallery URLs
+                  are arbitrary (R2 or Cloudinary) with no server-side dims. */}
+              <div className="columns-2 gap-4 sm:columns-3">
                 {club.gallery.map((g, i) => (
                   <figure
                     key={`${g.url}-${i}`}
-                    className={cn(
-                      "group/g relative overflow-hidden rounded-2xl bg-surface",
-                      i % 3 === 0 ? "aspect-[3/4]" : "aspect-square",
-                      i % 3 === 0 && "sm:row-span-2 sm:aspect-[3/5]",
-                    )}
+                    className="group/g relative mb-4 break-inside-avoid overflow-hidden rounded-2xl bg-surface"
                   >
-                    <Picture
+                    {/* eslint-disable-next-line @next/next/no-img-element -- natural-ratio gallery, dims unknown */}
+                    <img
                       src={g.url}
                       alt={g.caption || `${club.name} photo ${i + 1}`}
-                      fill
-                      sizes="(min-width: 640px) 33vw, 50vw"
-                      className="object-cover transition-transform duration-700 ease-out group-hover/g:scale-105"
+                      loading="lazy"
+                      className="block h-auto w-full transition-transform duration-700 ease-out group-hover/g:scale-105"
                     />
                     {g.caption ? (
                       <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg/90 to-transparent p-4 text-xs text-ink opacity-0 transition-opacity duration-500 group-hover/g:opacity-100">
@@ -304,74 +277,12 @@ export default async function ClubDetailPage({
           ) : null}
         </div>
 
-        {/* ─── Sticky aside ─── */}
+        {/* ─── Sticky aside — the membership card ─── */}
         <aside className="lg:col-span-4">
-          <div className="sticky top-32 space-y-7 rounded-3xl bg-surface p-7">
-            {club.categoryLabel ? (
-              <div>
-                <span className="kicker">Category</span>
-                <p className="mt-3 text-sm text-ink">{club.categoryLabel}</p>
-              </div>
-            ) : null}
-
-            {nextEvent ? (
-              <div>
-                <span className="kicker">Next up</span>
-                <Link
-                  href={`/events/${nextEvent.slug}`}
-                  className="group/n mt-3 block"
-                >
-                  <p className="flex items-start gap-2 text-sm text-ink transition-colors group-hover/n:text-[rgb(var(--club-accent))]">
-                    <Calendar className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted" />
-                    <span>
-                      {nextEvent.title}
-                      <span className="mt-1 block font-mono text-[11px] text-subtle">
-                        {formatDate(nextEvent.date)} · {nextEvent.venue}
-                      </span>
-                    </span>
-                  </p>
-                </Link>
-              </div>
-            ) : null}
-
-            {club.tags.length > 0 ? (
-              <div>
-                <span className="kicker">Tags</span>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {club.tags.map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-full border border-line/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            <Socials club={club} />
-
-            {club.joinUrl ? (
-              <div className="border-t border-line/10 pt-6">
-                <Magnetic className="block">
-                  <Button asChild size="lg" className="w-full">
-                    <a href={club.joinUrl} target="_blank" rel="noreferrer">
-                      Join {club.name.split(" ")[0]}
-                      <ArrowUpRight className="h-4 w-4" />
-                    </a>
-                  </Button>
-                </Magnetic>
-              </div>
-            ) : (
-              <div className="border-t border-line/10 pt-6">
-                <p className="text-xs text-subtle">
-                  Recruitment opens at the start of each semester — watch this
-                  space.
-                </p>
-              </div>
-            )}
-          </div>
+          <MembershipCard
+            club={club}
+            nextEvent={nextEvent}
+          />
         </aside>
       </div>
 
@@ -401,14 +312,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <Reveal as="section">
-      <header className="mb-10 flex items-center gap-4">
-        <span className="font-mono text-xs text-[rgb(var(--club-accent))]">
-          {number}
-        </span>
-        <span className="h-px w-10 bg-line/20" aria-hidden />
-        <h2 className="kicker">{title}</h2>
-      </header>
+    <Reveal as="section" y={32}>
+      <ClubSectionHeader number={number} title={title} />
       {children}
     </Reveal>
   );
@@ -417,10 +322,12 @@ function Section({
 function Stat({
   label,
   value,
+  count,
   wide,
 }: {
   label: string;
-  value: string;
+  value?: string;
+  count?: number;
   wide?: boolean;
 }) {
   return (
@@ -432,56 +339,103 @@ function Stat({
           wide ? "max-w-xs text-2xl sm:text-3xl" : "text-4xl sm:text-5xl",
         )}
       >
-        {value}
+        {count !== undefined ? (
+          <CountUp to={count} duration={1.6} />
+        ) : (
+          value
+        )}
       </dd>
     </div>
   );
 }
 
-function EventList({
-  label,
-  events,
+/** Vertical timeline. A single hairline runs down the left; each event is a
+    node on it. Upcoming events get a filled marker, past events a hollow one
+    and a faded treatment, with a "Past" divider between the two groups. */
+function EventTimeline({
+  upcoming,
+  past,
+}: {
+  upcoming: EventItem[];
+  past: EventItem[];
+}) {
+  const hasPast = past.length > 0;
+  return (
+    <ol className="relative ml-2 space-y-10 border-l border-line/10 pl-8">
+      {upcoming.map((e) => (
+        <TimelineNode key={e.slug} event={e} upcoming />
+      ))}
+
+      {hasPast ? (
+        <li className="relative">
+          <span
+            aria-hidden
+            className="absolute -left-[2.45rem] top-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-subtle"
+          >
+            Past
+          </span>
+          <span aria-hidden className="block h-px w-full bg-line/10" />
+        </li>
+      ) : null}
+
+      {past.map((e) => (
+        <TimelineNode key={e.slug} event={e} />
+      ))}
+    </ol>
+  );
+}
+
+function TimelineNode({
+  event,
   upcoming,
 }: {
-  label: string;
-  events: EventItem[];
+  event: EventItem;
   upcoming?: boolean;
 }) {
   return (
-    <div>
-      <span className="kicker text-subtle">{label}</span>
-      <ul className="mt-5 border-t border-line/10">
-        {events.map((e) => (
-          <li key={e.slug}>
-            <Link
-              href={`/events/${e.slug}`}
-              className="group/e flex items-center gap-5 border-b border-line/10 py-5 transition-colors hover:bg-line/[0.02]"
-            >
-              <span
-                className={cn(
-                  "h-1.5 w-1.5 shrink-0 rounded-full",
-                  upcoming ? "bg-[rgb(var(--club-accent))]" : "bg-subtle/50",
-                )}
-                aria-hidden
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-base text-ink transition-colors group-hover/e:text-[rgb(var(--club-accent))]">
-                  {e.title}
-                </p>
-                <p className="mt-1 flex items-center gap-3 font-mono text-[11px] text-subtle">
-                  <span>{formatDate(e.date)}</span>
-                  <span className="inline-flex items-center gap-1">
-                    <MapPin className="h-3 w-3" />
-                    {e.venue}
-                  </span>
-                </p>
-              </div>
-              <ArrowUpRight className="h-4 w-4 shrink-0 text-subtle transition-all duration-300 group-hover/e:-translate-y-0.5 group-hover/e:translate-x-0.5 group-hover/e:text-ink" />
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <li className="group/t relative">
+      {/* Marker on the rail. Filled for upcoming, hollow for past. */}
+      <span
+        aria-hidden
+        className={cn(
+          "absolute -left-[2.05rem] top-2 grid h-3 w-3 place-items-center rounded-full",
+          upcoming
+            ? "bg-ink"
+            : "border border-line/40 bg-bg",
+        )}
+      >
+        {!upcoming ? (
+          <span className="h-1 w-1 rounded-full bg-line/30" />
+        ) : null}
+      </span>
+
+      <Link href={`/events/${event.slug}`} className="block">
+        <p className="flex items-center gap-3 font-mono text-[11px] text-subtle">
+          <Calendar className="h-3 w-3" aria-hidden />
+          {formatDate(event.date)}
+          <span aria-hidden className="text-line/30">
+            ·
+          </span>
+          <MapPin className="h-3 w-3" aria-hidden />
+          {event.venue}
+        </p>
+        <h3
+          className={cn(
+            "display mt-2 text-2xl leading-tight transition-colors sm:text-3xl",
+            upcoming
+              ? "text-ink"
+              : "text-ink/55 group-hover/t:text-ink",
+          )}
+        >
+          {event.title}
+        </h3>
+        {upcoming && event.excerpt ? (
+          <p className="mt-2 max-w-xl text-pretty text-sm text-muted">
+            {event.excerpt}
+          </p>
+        ) : null}
+      </Link>
+    </li>
   );
 }
 
@@ -500,13 +454,107 @@ function LeadCard({ member }: { member: CouncilMember }) {
       </div>
       <div className="min-w-0">
         <p className="truncate text-base text-ink">{member.name}</p>
-        <p className="mt-1 text-sm text-[rgb(var(--club-accent))]">
-          {member.role}
-        </p>
+        <p className="mt-1 text-sm text-muted">{member.role}</p>
         <p className="mt-1 truncate font-mono text-[11px] text-subtle">
           {member.program}
         </p>
       </div>
+    </div>
+  );
+}
+
+/**
+ * The right-rail "membership card" — a designed object rather than a CMS
+ * sidebar. Compact metadata rows, a horizontal social-icon strip, and a
+ * full-width join block at the foot so the CTA reads as a physical pass.
+ */
+function MembershipCard({
+  club,
+  nextEvent,
+}: {
+  club: ClubDetail;
+  nextEvent?: EventItem;
+}) {
+  return (
+    <div className="sticky top-32 space-y-6 rounded-3xl border border-line/10 bg-surface/60 p-6 sm:p-7">
+      <div className="flex items-center justify-between">
+        <span className="kicker text-subtle">Membership</span>
+        {club.foundedYear ? (
+          <span className="font-mono text-[11px] text-subtle">
+            EST. {club.foundedYear}
+          </span>
+        ) : null}
+      </div>
+
+      {club.categoryLabel ? (
+        <Meta label="Category" value={club.categoryLabel} />
+      ) : null}
+
+      {nextEvent ? (
+        <div>
+          <span className="kicker">Next up</span>
+          <Link
+            href={`/events/${nextEvent.slug}`}
+            className="group/n mt-3 block"
+          >
+            <p className="flex items-start gap-2 text-sm text-ink transition-colors group-hover/n:text-ink">
+              <Calendar className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted" />
+              <span>
+                {nextEvent.title}
+                <span className="mt-1 block font-mono text-[11px] text-subtle">
+                  {formatDate(nextEvent.date)} · {nextEvent.venue}
+                </span>
+              </span>
+            </p>
+          </Link>
+        </div>
+      ) : null}
+
+      {club.tags.length > 0 ? (
+        <div>
+          <span className="kicker">Tags</span>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {club.tags.map((t) => (
+              <span
+                key={t}
+                className="rounded-full border border-line/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted"
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      <Socials club={club} />
+
+      {club.joinUrl ? (
+        <div className="border-t border-line/10 pt-6">
+          <Magnetic className="block">
+            <Button asChild size="lg" className="w-full">
+              <a href={club.joinUrl} target="_blank" rel="noreferrer">
+                Join {club.name.split(" ")[0]}
+                <ArrowUpRight className="h-4 w-4" />
+              </a>
+            </Button>
+          </Magnetic>
+        </div>
+      ) : (
+        <div className="border-t border-line/10 pt-6">
+          <p className="text-xs text-subtle">
+            Recruitment opens at the start of each semester — watch this space.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Meta({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4">
+      <span className="kicker">{label}</span>
+      <span className="text-sm text-ink">{value}</span>
     </div>
   );
 }
@@ -542,17 +590,17 @@ function Socials({ club }: { club: ClubDetail }) {
   return (
     <div>
       <span className="kicker">Find us</span>
-      <ul className="mt-3 space-y-2">
+      <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
         {links.map((l) => (
           <li key={l.href}>
             <a
               href={l.href}
               target="_blank"
               rel="noreferrer"
-              className="group/s inline-flex items-center gap-2.5 text-sm text-muted transition-colors hover:text-ink"
+              aria-label={l.label}
+              className="group/s inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-ink"
             >
-              <l.icon className="h-3.5 w-3.5 transition-colors group-hover/s:text-[rgb(var(--club-accent))]" />
-              <span className="truncate">{l.label}</span>
+              <l.icon className="h-4 w-4 transition-colors group-hover/s:text-ink" />
             </a>
           </li>
         ))}

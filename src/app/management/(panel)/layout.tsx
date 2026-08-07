@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import {
   Calendar, Image as ImageIcon, LayoutDashboard, Megaphone, Film,
   Users, Building2, HelpCircle, LifeBuoy, Home, Settings, Sparkles,
-  UserCog, ScanLine, Rows3, Tags,
+  UserCog, ScanLine, Rows3, Tags, GalleryVerticalEnd,
 } from "lucide-react";
 import { requireOps, isAdmin, type SessionUser } from "@/lib/rbac";
 import { ROLE_LABELS } from "@/lib/roles";
@@ -20,6 +20,7 @@ const NAV = [
   { href: "/management/council/groups", label: "Council sections", icon: Rows3 },
   { href: "/management/clubs/categories", label: "Club categories", icon: Tags },
   { href: "/management/highlights", label: "Highlights", icon: Sparkles },
+  { href: "/management/vault", label: "Vault", icon: GalleryVerticalEnd },
   { href: "/management/faqs", label: "FAQs", icon: HelpCircle },
   { href: "/management/support", label: "Support", icon: LifeBuoy },
   { href: "/management/media", label: "Media", icon: ImageIcon },

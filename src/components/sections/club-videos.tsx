@@ -126,7 +126,7 @@ function VideoTile({
       ) : (
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--club-accent)/0.25)] via-surface to-bg"
+          className="absolute inset-0 bg-gradient-to-br from-surface via-surface to-bg"
         />
       )}
 
@@ -138,7 +138,7 @@ function VideoTile({
       {/* Play affordance */}
       <span
         aria-hidden
-        className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-line/25 bg-bg/60 backdrop-blur-md transition-all duration-500 group-hover/v:scale-110 group-hover/v:border-[rgb(var(--club-accent))] group-hover/v:bg-[rgb(var(--club-accent))]"
+        className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-line/25 bg-bg/60 backdrop-blur-md transition-all duration-500 group-hover/v:scale-110 group-hover/v:border-ink/40 group-hover/v:bg-ink"
       >
         <Play className="ml-0.5 h-5 w-5 fill-current text-ink transition-colors group-hover/v:text-bg" />
       </span>

@@ -1,0 +1,1 @@
+ALTER TABLE `mp_homepage_config` ADD `vault_stories` text DEFAULT '[]';

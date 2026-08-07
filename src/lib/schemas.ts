@@ -267,6 +267,27 @@ export interface VaultStory {
   videoUrl?: string;
   href: string;
   publishedAt?: string;
+  /** When set, overrides the publishedAt-derived year. */
+  year?: string;
+  /** When set, forces the media treatment instead of inferring from videoUrl. */
+  mediaKind?: "video" | "image" | "text";
+}
+
+/**
+ * A vault story as authored in the management panel. Each field maps 1:1 to
+ * what the vault renders — this is the shape stored in the homepage config's
+ * `vault_stories` JSON column and edited by the VaultEditor component.
+ */
+export interface VaultStoryConfig {
+  id: string;
+  kicker: string;
+  title: string;
+  year: string;
+  line: string;
+  mediaKind: "video" | "image" | "text";
+  mediaSrc: string;
+  posterSrc: string;
+  href: string;
 }
 
 export interface HomepageConfigData {
