@@ -7,7 +7,13 @@ import { MediaLibrary } from "./media-library";
 export default async function MediaPage() {
   await requireOps();
   const items = await db
-    .select({ id: t.id, url: t.url, filename: t.filename, mimeType: t.mimeType })
+    .select({
+      id: t.id,
+      url: t.url,
+      filename: t.filename,
+      mimeType: t.mimeType,
+      alt: t.alt,
+    })
     .from(t)
     .orderBy(desc(t.id));
   return <MediaLibrary initial={items} />;
