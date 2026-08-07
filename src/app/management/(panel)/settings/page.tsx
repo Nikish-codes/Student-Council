@@ -45,7 +45,7 @@ export default async function SettingsPage() {
           { name: "value", label: "Value (slug)" },
           { name: "label", label: "Label" },
           { name: "to", label: "To email", grow: 2 },
-          { name: "cc", label: "Cc email", grow: 2 },
+          { name: "cc", label: "Cc (comma-separated)", grow: 2 },
         ]}
         defaultValue={(row?.grievanceCategories as { value: string; label: string; to?: string; cc?: string }[]) ?? []}
         template={{ value: "", label: "", to: "", cc: "" }}

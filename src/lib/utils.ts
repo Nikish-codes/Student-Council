@@ -31,7 +31,8 @@ export function outlookCompose(email: string) {
 /**
  * Full Outlook compose deep-link with to, cc, subject, and body.
  * Used by the grievance form to route by category — each category can have
- * its own To and Cc addresses, configured in Settings.
+ * its own To and Cc addresses, configured in Settings. Multiple addresses
+ * in to/cc may be comma or semicolon separated; Outlook wants semicolons.
  */
 export function outlookComposeFull(opts: {
   to: string;
@@ -39,8 +40,15 @@ export function outlookComposeFull(opts: {
   subject?: string;
   body?: string;
 }) {
-  const parts: string[] = [`to=${encodeURIComponent(opts.to.trim())}`];
-  if (opts.cc?.trim()) parts.push(`cc=${encodeURIComponent(opts.cc.trim())}`);
+  const norm = (s: string) =>
+    s
+      .split(/[;,\s]+/)
+      .map((a) => a.trim())
+      .filter(Boolean)
+      .join(";");
+  const parts: string[] = [`to=${encodeURIComponent(norm(opts.to))}`];
+  const cc = opts.cc ? norm(opts.cc) : "";
+  if (cc) parts.push(`cc=${encodeURIComponent(cc)}`);
   if (opts.subject) parts.push(`subject=${encodeURIComponent(opts.subject)}`);
   if (opts.body) parts.push(`body=${encodeURIComponent(opts.body)}`);
   return `https://outlook.office.com/mail/deeplink/compose?${parts.join("&")}`;

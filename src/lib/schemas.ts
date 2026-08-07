@@ -319,7 +319,7 @@ export interface GrievanceCategory {
   label: string;
   /** Outlook "To" for this category. Falls back to grievanceMailTo if empty. */
   to?: string;
-  /** Outlook "Cc" for this category. Comma-separated for multiple. */
+  /** Outlook "Cc" for this category. Comma or semicolon separated for multiple. */
   cc?: string;
 }
 
