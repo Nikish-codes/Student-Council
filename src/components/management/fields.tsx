@@ -409,6 +409,10 @@ type RepeaterCol = {
 /**
  * Generic repeatable list of flat objects. Serialises to JSON in a hidden
  * input named `name`; parse with JSON.parse server-side.
+ *
+ * Pass `stacked` for rows with many/wide columns — each row becomes a
+ * bordered card with labeled fields in a 2-column grid instead of a
+ * single cramped horizontal strip.
  */
 export function RepeaterField<T extends Record<string, string | number>>({
   name,
@@ -417,6 +421,7 @@ export function RepeaterField<T extends Record<string, string | number>>({
   columns,
   defaultValue,
   template,
+  stacked,
 }: {
   name: string;
   label: string;
@@ -425,6 +430,7 @@ export function RepeaterField<T extends Record<string, string | number>>({
   defaultValue?: T[] | null;
   /** Serializable blank row. If omitted, derived from `columns`. */
   template?: T;
+  stacked?: boolean;
 }) {
   const [rows, setRows] = useState<T[]>(defaultValue ?? []);
   const blank = (): T =>
@@ -439,45 +445,98 @@ export function RepeaterField<T extends Record<string, string | number>>({
       r.map((row, idx) => (idx === i ? { ...row, [key]: value } : row)),
     );
 
+  const renderInput = (c: RepeaterCol, i: number) => {
+    const common = {
+      value: String(rows[i][c.name] ?? ""),
+      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+        update(i, c.name, e.target.value),
+    };
+    if (c.type === "textarea") {
+      return (
+        <textarea
+          key={c.name}
+          placeholder={c.label}
+          rows={2}
+          {...common}
+          className={cn(inputCls, "py-2")}
+        />
+      );
+    }
+    return (
+      <input
+        key={c.name}
+        placeholder={c.label}
+        type={c.type === "number" ? "number" : "text"}
+        {...common}
+        className={inputCls}
+      />
+    );
+  };
+
   return (
     <div>
       <Label label={label} hint={hint} />
       <input type="hidden" name={name} value={JSON.stringify(rows)} readOnly />
-      <div className="flex flex-col gap-2">
-        {rows.map((row, i) => (
-          <div key={i} className="flex items-start gap-2">
-            {columns.map((c) =>
-              c.type === "textarea" ? (
-                <textarea
-                  key={c.name}
-                  placeholder={c.label}
-                  rows={2}
-                  value={String(row[c.name] ?? "")}
-                  onChange={(e) => update(i, c.name, e.target.value)}
-                  style={{ flex: c.grow ?? 1 }}
-                  className={cn(inputCls, "py-2")}
-                />
-              ) : (
-                <input
-                  key={c.name}
-                  placeholder={c.label}
-                  type={c.type === "number" ? "number" : "text"}
-                  value={String(row[c.name] ?? "")}
-                  onChange={(e) => update(i, c.name, e.target.value)}
-                  style={{ flex: c.grow ?? 1 }}
-                  className={cn(inputCls, "py-2")}
-                />
-              ),
-            )}
-            <button
-              type="button"
-              onClick={() => setRows((r) => r.filter((_, idx) => idx !== i))}
-              className="mt-1 shrink-0 rounded-lg p-2 text-subtle hover:text-red-400"
+      <div className="flex flex-col gap-3">
+        {rows.map((row, i) =>
+          stacked ? (
+            <div
+              key={i}
+              className="relative rounded-xl border border-line/15 bg-surface-2/40 p-4"
             >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
-        ))}
+              <button
+                type="button"
+                onClick={() => setRows((r) => r.filter((_, idx) => idx !== i))}
+                className="absolute right-3 top-3 rounded-lg p-1.5 text-subtle hover:text-red-400"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+              <div className="grid gap-x-4 gap-y-3 pr-8 sm:grid-cols-2">
+                {columns.map((c) => (
+                  <div key={c.name} className="space-y-1.5">
+                    <span className="text-[11px] font-medium uppercase tracking-wide text-subtle">
+                      {c.label}
+                    </span>
+                    {renderInput(c, i)}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div key={i} className="flex items-start gap-2">
+              {columns.map((c) =>
+                c.type === "textarea" ? (
+                  <textarea
+                    key={c.name}
+                    placeholder={c.label}
+                    rows={2}
+                    value={String(row[c.name] ?? "")}
+                    onChange={(e) => update(i, c.name, e.target.value)}
+                    style={{ flex: c.grow ?? 1 }}
+                    className={cn(inputCls, "py-2")}
+                  />
+                ) : (
+                  <input
+                    key={c.name}
+                    placeholder={c.label}
+                    type={c.type === "number" ? "number" : "text"}
+                    value={String(row[c.name] ?? "")}
+                    onChange={(e) => update(i, c.name, e.target.value)}
+                    style={{ flex: c.grow ?? 1 }}
+                    className={cn(inputCls, "py-2")}
+                  />
+                ),
+              )}
+              <button
+                type="button"
+                onClick={() => setRows((r) => r.filter((_, idx) => idx !== i))}
+                className="mt-1 shrink-0 rounded-lg p-2 text-subtle hover:text-red-400"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          ),
+        )}
         <button
           type="button"
           onClick={() => setRows((r) => [...r, blank()])}

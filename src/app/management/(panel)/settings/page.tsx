@@ -41,11 +41,12 @@ export default async function SettingsPage() {
         name="grievanceCategories"
         label="Grievance categories"
         hint="to + cc route the Outlook deep-link per category"
+        stacked
         columns={[
           { name: "value", label: "Value (slug)" },
           { name: "label", label: "Label" },
-          { name: "to", label: "To email", grow: 2 },
-          { name: "cc", label: "Cc (comma-separated)", grow: 2 },
+          { name: "to", label: "To email" },
+          { name: "cc", label: "Cc (comma-separated)" },
         ]}
         defaultValue={(row?.grievanceCategories as { value: string; label: string; to?: string; cc?: string }[]) ?? []}
         template={{ value: "", label: "", to: "", cc: "" }}
