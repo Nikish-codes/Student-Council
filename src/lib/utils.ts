@@ -28,6 +28,25 @@ export function outlookCompose(email: string) {
   )}`;
 }
 
+/**
+ * Full Outlook compose deep-link with to, cc, subject, and body.
+ * Used by the grievance form to route by category — each category can have
+ * its own To and Cc addresses, configured in Settings.
+ */
+export function outlookComposeFull(opts: {
+  to: string;
+  cc?: string;
+  subject?: string;
+  body?: string;
+}) {
+  const params = new URLSearchParams();
+  params.set("to", opts.to.trim());
+  if (opts.cc?.trim()) params.set("cc", opts.cc.trim());
+  if (opts.subject) params.set("subject", opts.subject);
+  if (opts.body) params.set("body", opts.body);
+  return `https://outlook.office.com/mail/deeplink/compose?${params.toString()}`;
+}
+
 const NUMBER_WORDS = [
   "Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight",
   "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { CouncilCard } from "@/components/sections/council-card";
+import { CouncilHScroll } from "@/components/sections/council-hscroll";
 import { CouncilMemberDialog } from "@/components/sections/council-member-dialog";
 import { CutoutPortrait } from "@/components/ui/cutout-portrait";
 import { MemberLinks } from "@/components/sections/member-links";
@@ -43,17 +44,6 @@ const COLS: Record<number, string> = {
   4: "grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
   5: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5",
   6: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6",
-};
-
-/**
- * Mobile cards need enough inline space for real names, not just a scaled-down
- * desktop tile. The viewport-relative widths show a useful peek of the next
- * card while keeping the current member readable at 320px.
- */
-const HSCROLL_W: Record<string, string> = {
-  sm: "w-[78vw] min-w-[240px] max-w-[270px] sm:w-[240px]",
-  md: "w-[82vw] min-w-[260px] max-w-[310px] sm:w-[280px]",
-  lg: "w-[86vw] min-w-[280px] max-w-[340px] sm:w-[320px]",
 };
 
 export function CouncilShowcase({
@@ -291,24 +281,11 @@ function Track({ section }: { section: CouncilSection }) {
 
   if (section.layout === "hscroll") {
     return (
-      <div
-        data-card-track
-        className="no-scrollbar mask-fade-x -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 sm:-mx-0 sm:px-0"
-      >
-        {section.members.map((m, i) => (
-          <div
-            key={m.id}
-            className={cn("shrink-0 snap-start", HSCROLL_W[section.cardSize])}
-          >
-            <CouncilCard
-              member={m}
-              index={i}
-              size={section.cardSize}
-              onOpen={open ? () => open(m) : undefined}
-            />
-          </div>
-        ))}
-      </div>
+      <CouncilHScroll
+        members={section.members}
+        cardSize="md"
+        openMember={open ?? undefined}
+      />
     );
   }
 

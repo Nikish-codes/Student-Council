@@ -317,6 +317,10 @@ export interface CampusSettings {
 export interface GrievanceCategory {
   value: string;
   label: string;
+  /** Outlook "To" for this category. Falls back to grievanceMailTo if empty. */
+  to?: string;
+  /** Outlook "Cc" for this category. Comma-separated for multiple. */
+  cc?: string;
 }
 
 export interface SiteSettingsData {

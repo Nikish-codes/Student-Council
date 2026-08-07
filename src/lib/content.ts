@@ -622,10 +622,10 @@ const SITE_SETTINGS_DEFAULTS: SiteSettingsData = {
     timezoneAbbr: "IST",
   },
   grievanceCategories: [
-    { value: "harassment", label: "Harassment / discrimination" },
-    { value: "academic", label: "Academic concern" },
-    { value: "facility", label: "Facility / infrastructure" },
-    { value: "other", label: "Other" },
+    { value: "harassment", label: "Harassment / discrimination", to: "grievance@woxsen.edu.in" },
+    { value: "academic", label: "Academic concern", to: "grievance@woxsen.edu.in" },
+    { value: "facility", label: "Facility / infrastructure", to: "grievance@woxsen.edu.in" },
+    { value: "other", label: "Other", to: "grievance@woxsen.edu.in" },
   ],
   grievanceMailTo: "council@woxsen.edu.in",
 };

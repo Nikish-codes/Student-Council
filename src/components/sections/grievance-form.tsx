@@ -7,31 +7,25 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, outlookComposeFull } from "@/lib/utils";
+import type { GrievanceCategory } from "@/lib/schemas";
 
-const schema = z
-  .object({
-    category: z.enum(["academic", "campus", "harassment", "other"]),
-    subject: z.string().min(4, "A short subject helps us route this faster."),
-    message: z.string().min(20, "Please share a bit more detail (20+ characters)."),
-    anonymous: z.boolean(),
-    email: z.string().email("Enter a valid email").optional().or(z.literal("")),
-  })
-  .refine((d) => d.anonymous || (d.email && d.email.length > 0), {
-    path: ["email"],
-    message: "Email is required unless you submit anonymously.",
-  });
+const schema = z.object({
+  category: z.string().min(1, "Pick a category."),
+  subject: z.string().min(4, "A short subject helps us route this faster."),
+  message: z.string().min(20, "Please share a bit more detail (20+ characters)."),
+  email: z.string().email("Enter a valid email"),
+});
 
 type FormValues = z.infer<typeof schema>;
 
-const CATEGORIES: { value: FormValues["category"]; label: string }[] = [
-  { value: "academic", label: "Academic" },
-  { value: "campus", label: "Campus / Hostel" },
-  { value: "harassment", label: "Harassment / Conduct" },
-  { value: "other", label: "Other" },
-];
-
-export function GrievanceForm() {
+export function GrievanceForm({
+  categories,
+  fallbackTo,
+}: {
+  categories: GrievanceCategory[];
+  fallbackTo: string;
+}) {
   const {
     register,
     handleSubmit,
@@ -41,24 +35,25 @@ export function GrievanceForm() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { category: "academic", anonymous: false },
+    defaultValues: {
+      category: categories[0]?.value ?? "",
+      email: "",
+    },
   });
 
-  const anonymous = watch("anonymous");
   const category = watch("category");
 
   const onSubmit = async (values: FormValues) => {
-    await new Promise((r) => setTimeout(r, 800));
-    // v1: open mail draft. Replace with API/Forms endpoint when wired up.
-    const body = encodeURIComponent(
-      `Category: ${values.category}\nSubject: ${values.subject}\n\n${values.message}\n\n${
-        values.anonymous ? "(Submitted anonymously)" : `From: ${values.email}`
-      }`,
-    );
-    window.location.href = `mailto:grievance@woxsen.edu.in?subject=${encodeURIComponent(
-      `[${values.category}] ${values.subject}`,
-    )}&body=${body}`;
-    toast.success("Opening your mail client to send the grievance.");
+    await new Promise((r) => setTimeout(r, 600));
+
+    const cat = categories.find((c) => c.value === values.category);
+    const to = cat?.to?.trim() || fallbackTo.trim();
+    const cc = cat?.cc?.trim() || undefined;
+    const subject = `[${values.category}] ${values.subject}`;
+    const body = `${values.message}\n\n— Submitted via the Council portal by ${values.email}`;
+
+    window.location.href = outlookComposeFull({ to, cc, subject, body });
+    toast.success("Opening Outlook to send your grievance.");
     reset();
   };
 
@@ -71,7 +66,7 @@ export function GrievanceForm() {
       <div>
         <span className="kicker">Category</span>
         <div className="mt-3 flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => (
+          {categories.map((c) => (
             <button
               type="button"
               key={c.value}
@@ -106,47 +101,19 @@ export function GrievanceForm() {
         />
       </Field>
 
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-line/10 bg-bg/40 p-4">
-        <div>
-          <p className="text-sm text-ink">Submit anonymously</p>
-          <p className="text-xs text-muted">
-            Your identity will not be shared with the committee.
-          </p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={anonymous}
-          onClick={() => setValue("anonymous", !anonymous)}
-          className={cn(
-            "relative h-6 w-11 rounded-full border border-line/15 transition-colors",
-            anonymous ? "bg-ink" : "bg-surface-2",
-          )}
-        >
-          <span
-            className={cn(
-              "absolute top-0.5 h-5 w-5 rounded-full transition-all duration-300",
-              anonymous ? "left-5 bg-bg" : "left-0.5 bg-ink",
-            )}
-          />
-        </button>
-      </div>
-
-      {!anonymous && (
-        <Field label="Your email" error={errors.email?.message}>
-          <input
-            type="email"
-            {...register("email")}
-            placeholder="you@woxsen.edu.in"
-            className="h-11 w-full rounded-lg border border-line/10 bg-bg/40 px-4 text-sm text-ink placeholder:text-subtle focus:border-line/40 focus:outline-none"
-          />
-        </Field>
-      )}
+      <Field label="Your email" error={errors.email?.message}>
+        <input
+          type="email"
+          {...register("email")}
+          placeholder="you@woxsen.edu.in"
+          className="h-11 w-full rounded-lg border border-line/10 bg-bg/40 px-4 text-sm text-ink placeholder:text-subtle focus:border-line/40 focus:outline-none"
+        />
+      </Field>
 
       <div className="flex items-center justify-between border-t border-line/10 pt-6">
         <p className="max-w-md text-xs text-subtle">
           By submitting, you confirm the information shared is true to the best
-          of your knowledge. Confidentiality is maintained throughout review.
+          of your knowledge. This opens Outlook with the right inbox pre-filled.
         </p>
         <Button type="submit" disabled={isSubmitting} size="md">
           {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}

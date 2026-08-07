@@ -13,7 +13,7 @@ import {
 import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { GrievanceForm } from "@/components/sections/grievance-form";
 import { cn } from "@/lib/utils";
-import type { SupportChannel } from "@/lib/schemas";
+import type { SupportChannel, GrievanceCategory } from "@/lib/schemas";
 
 const ICONS: Record<string, LucideIcon> = {
   DoorOpen,
@@ -22,7 +22,15 @@ const ICONS: Record<string, LucideIcon> = {
   ShieldAlert,
 };
 
-export function SupportGuide({ channels }: { channels: SupportChannel[] }) {
+export function SupportGuide({
+  channels,
+  grievanceCategories,
+  grievanceMailTo,
+}: {
+  channels: SupportChannel[];
+  grievanceCategories: GrievanceCategory[];
+  grievanceMailTo: string;
+}) {
   const root = React.useRef<HTMLDivElement>(null);
 
   useGSAP(
@@ -316,7 +324,10 @@ export function SupportGuide({ channels }: { channels: SupportChannel[] }) {
             </ul>
           </div>
           <div className="lg:col-span-7">
-            <GrievanceForm />
+            <GrievanceForm
+              categories={grievanceCategories}
+              fallbackTo={grievanceMailTo}
+            />
           </div>
         </div>
       </section>
