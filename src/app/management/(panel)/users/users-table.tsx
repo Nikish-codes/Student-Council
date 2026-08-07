@@ -20,11 +20,9 @@ type UserRow = {
 
 export function UsersTable({
   rows,
-  isSuperAdmin,
   isAdmin,
 }: {
   rows: UserRow[];
-  isSuperAdmin: boolean;
   isAdmin: boolean;
 }) {
   const columns: Column<UserRow>[] = [

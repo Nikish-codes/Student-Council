@@ -43,7 +43,7 @@ export default async function UsersPage() {
         newHref="/management/users/new"
         newLabel="New user"
       />
-      <UsersTable rows={tableRows} isSuperAdmin={isSuperAdmin} isAdmin={admin} />
+      <UsersTable rows={tableRows} isAdmin={admin} />
       <p className="mt-4 text-[11px] text-subtle">
         Roles: <strong>Super Admin</strong> has full control. <strong>Admin</strong>{" "}
         manages all content + non-super-admin users. <strong>Council Member</strong>,{" "}
