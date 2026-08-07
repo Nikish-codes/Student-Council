@@ -6,11 +6,22 @@ import { useState } from "react";
 import { Menu, X, LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 import type { LucideIcon } from "lucide-react";
+import {
+  Calendar, Image as ImageIcon, LayoutDashboard, Megaphone, Film,
+  Users, Building2, HelpCircle, LifeBuoy, Home, Settings, Sparkles,
+  UserCog, ScanLine, Rows3, Tags, GalleryVerticalEnd,
+} from "lucide-react";
+
+const ICONS: Record<string, LucideIcon> = {
+  Calendar, ImageIcon, LayoutDashboard, Megaphone, Film,
+  Users, Building2, HelpCircle, LifeBuoy, Home, Settings, Sparkles,
+  UserCog, ScanLine, Rows3, Tags, GalleryVerticalEnd,
+};
 
 export type NavItem = {
   href: string;
   label: string;
-  icon: LucideIcon;
+  icon: string;
 };
 
 export type NavGroup = {
@@ -90,6 +101,7 @@ export function SidebarNav({
               <div className="flex flex-col gap-0.5">
                 {group.items.map((item) => {
                   const active = isActive(item.href);
+                  const Icon = ICONS[item.icon];
                   return (
                     <Link
                       key={item.href}
@@ -101,7 +113,7 @@ export function SidebarNav({
                           : "text-muted hover:bg-line/5 hover:text-ink"
                       }`}
                     >
-                      <item.icon className="h-4 w-4 shrink-0" />
+                      {Icon ? <Icon className="h-4 w-4 shrink-0" /> : null}
                       {item.label}
                     </Link>
                   );
