@@ -33,7 +33,16 @@ export function SpotlightCard({
       href={href}
       onMouseMove={onMove}
       className={cn(
-        "group/spot relative isolate overflow-hidden rounded-2xl border border-line/[0.08] bg-surface/40 transition-colors duration-500 hover:border-line/20",
+        // No outline at rest: the card is defined by its surface fill and the
+        // space around it, not by being drawn as a box. The border stays in the
+        // box model as `transparent` so revealing it on hover doesn't shift
+        // anything by a pixel.
+        //
+        // `bg-surface` at full opacity, not the previous `bg-surface/40` —
+        // blended at 40% over the page background that plane was within a
+        // couple of RGB steps of the page itself, which only read as a card
+        // because of the outline that is now gone.
+        "group/spot relative isolate overflow-hidden rounded-2xl border border-transparent bg-surface transition-colors duration-500 hover:border-line/12",
         className,
       )}
       {...props}

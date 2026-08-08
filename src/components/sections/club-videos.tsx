@@ -84,7 +84,7 @@ function VideoTile({
     return (
       <div
         className={cn(
-          "relative overflow-hidden rounded-2xl border border-line/15 bg-black",
+          "relative overflow-hidden rounded-2xl bg-black",
           className,
         )}
       >
@@ -105,8 +105,9 @@ function VideoTile({
       onClick={() => setPlaying(true)}
       aria-label={`Play ${label}`}
       className={cn(
-        "group/v relative block overflow-hidden rounded-2xl border border-line/15 bg-surface/60 text-left",
-        "transition-colors duration-500 hover:border-[rgb(var(--club-accent)/0.5)]",
+        // No outline — the poster fills the tile edge to edge, so a border only
+        // ever drew a line around an image. The play button carries the hover.
+        "group/v relative block overflow-hidden rounded-2xl bg-surface text-left",
         className,
       )}
     >
@@ -125,7 +126,7 @@ function VideoTile({
       ) : (
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--club-accent)/0.25)] via-surface to-bg"
+          className="absolute inset-0 bg-gradient-to-br from-surface via-surface to-bg"
         />
       )}
 
@@ -137,7 +138,7 @@ function VideoTile({
       {/* Play affordance */}
       <span
         aria-hidden
-        className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-line/25 bg-bg/60 backdrop-blur-md transition-all duration-500 group-hover/v:scale-110 group-hover/v:border-[rgb(var(--club-accent))] group-hover/v:bg-[rgb(var(--club-accent))]"
+        className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-line/25 bg-bg/60 backdrop-blur-md transition-all duration-500 group-hover/v:scale-110 group-hover/v:border-ink/40 group-hover/v:bg-ink"
       >
         <Play className="ml-0.5 h-5 w-5 fill-current text-ink transition-colors group-hover/v:text-bg" />
       </span>

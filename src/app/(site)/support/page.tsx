@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Reveal } from "@/components/motion/reveal";
 import { SupportGuide } from "@/components/sections/support-guide";
-import { getSupportChannels } from "@/lib/content";
+import { getSupportChannels, getSiteSettings } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Student Support",
@@ -10,7 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default async function SupportPage() {
-  const channels = await getSupportChannels();
+  const [channels, settings] = await Promise.all([
+    getSupportChannels(),
+    getSiteSettings(),
+  ]);
 
   return (
     <div className="pt-32 sm:pt-40">
@@ -32,7 +35,11 @@ export default async function SupportPage() {
         </Reveal>
       </section>
 
-      <SupportGuide channels={channels} />
+      <SupportGuide
+        channels={channels}
+        grievanceCategories={settings.grievanceCategories}
+        grievanceMailTo={settings.grievanceMailTo}
+      />
     </div>
   );
 }

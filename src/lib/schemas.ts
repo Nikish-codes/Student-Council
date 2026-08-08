@@ -85,6 +85,7 @@ export const eventCategorySchema = z.enum([
   "sports",
   "flagship",
   "academic",
+  "community",
 ]);
 export type EventCategory = z.infer<typeof eventCategorySchema>;
 
@@ -169,6 +170,11 @@ export const clubDetailSchema = clubSchema.extend({
   id: z.number(),
   about: z.string().optional(),
   cover: z.string().optional(),
+  // Intrinsic size of the cover, so the banner can be framed at the ratio the
+  // image actually is instead of a guessed one. See the cover block in
+  // app/(site)/clubs/[slug]/page.tsx.
+  coverWidth: z.number().optional(),
+  coverHeight: z.number().optional(),
   foundedYear: z.number().optional(),
   activities: z.array(clubActivitySchema).default([]),
   flagshipEvent: z.string().optional(),
@@ -262,6 +268,27 @@ export interface VaultStory {
   videoUrl?: string;
   href: string;
   publishedAt?: string;
+  /** When set, overrides the publishedAt-derived year. */
+  year?: string;
+  /** When set, forces the media treatment instead of inferring from videoUrl. */
+  mediaKind?: "video" | "image" | "text";
+}
+
+/**
+ * A vault story as authored in the management panel. Each field maps 1:1 to
+ * what the vault renders — this is the shape stored in the homepage config's
+ * `vault_stories` JSON column and edited by the VaultEditor component.
+ */
+export interface VaultStoryConfig {
+  id: string;
+  kicker: string;
+  title: string;
+  year: string;
+  line: string;
+  mediaKind: "video" | "image" | "text";
+  mediaSrc: string;
+  posterSrc: string;
+  href: string;
 }
 
 export interface HomepageConfigData {
@@ -291,6 +318,10 @@ export interface CampusSettings {
 export interface GrievanceCategory {
   value: string;
   label: string;
+  /** Outlook "To" for this category. Falls back to grievanceMailTo if empty. */
+  to?: string;
+  /** Outlook "Cc" for this category. Comma or semicolon separated for multiple. */
+  cc?: string;
 }
 
 export interface SiteSettingsData {

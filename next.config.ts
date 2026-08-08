@@ -57,6 +57,10 @@ const nextConfig: NextConfig = {
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://va.vercel-scripts.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
+      // media-src is needed because <video> falls back to default-src 'self'
+      // otherwise, which blocks R2-hosted recap videos. https: keeps it
+      // aligned with img-src (R2 + Cloudinary are both https).
+      "media-src 'self' https:",
       "font-src 'self' data:",
       "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://vitals.vercel-insights.com https://va.vercel-scripts.com",
       "frame-src https://api.razorpay.com https://checkout.razorpay.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
@@ -116,6 +120,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "pub-88f0a7c5d200469fa7dbb8f90c605d45.r2.dev" },
       { protocol: "https", hostname: "*.r2.dev" },
+      // Cloudinary — used for club gallery images pasted as raw URLs.
+      { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "*.cloudinary.com" },
       // YouTube poster frames for the click-to-load video facades.
       { protocol: "https", hostname: "i.ytimg.com" },
     ],

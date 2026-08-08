@@ -40,9 +40,16 @@ export default async function SettingsPage() {
       <RepeaterField
         name="grievanceCategories"
         label="Grievance categories"
-        columns={[{ name: "value", label: "Value (slug)" }, { name: "label", label: "Label" }]}
-        defaultValue={(row?.grievanceCategories as { value: string; label: string }[]) ?? []}
-        template={{ value: "", label: "" }}
+        hint="to + cc route the Outlook deep-link per category"
+        stacked
+        columns={[
+          { name: "value", label: "Value (slug)" },
+          { name: "label", label: "Label" },
+          { name: "to", label: "To email" },
+          { name: "cc", label: "Cc (comma-separated)" },
+        ]}
+        defaultValue={(row?.grievanceCategories as { value: string; label: string; to?: string; cc?: string }[]) ?? []}
+        template={{ value: "", label: "", to: "", cc: "" }}
       />
       <SaveBar label="Save settings" />
     </EditorShell>

@@ -41,6 +41,7 @@ import type {
   HomepageStat,
   ManifestoLine,
   QuickAction,
+  VaultStoryConfig,
 } from "@/lib/schemas";
 
 // ─────────────────────────── shared column helpers ───────────────────────────
@@ -164,8 +165,8 @@ export const clubs = sqliteTable(
     tagline: text("tagline"),
     about: text("about"), // long-form "what we do"
     coverId: integer("cover_id").references(() => media.id),
-    // #RRGGBB. Drives the page's --club-accent. ALWAYS re-validate on read as
-    // well as write — this value lands in a style attribute.
+    // #RRGGBB. Per-club colour. Disabled on the public site for now.
+    // ALWAYS re-validate on read as well as write.
     accentColor: text("accent_color"),
     foundedYear: integer("founded_year"),
     activities: text("activities", { mode: "json" })
@@ -407,6 +408,12 @@ export const homepageConfig = sqliteTable("mp_homepage_config", {
     .default([]),
   vaultStoryIds: text("vault_story_ids", { mode: "json" })
     .$type<number[]>()
+    .default([]),
+  // Custom vault stories — full editorial control (video URL, text, media
+  // kind) independent of the recaps table. When populated, these override the
+  // recap-based vaultStoryIds above.
+  vaultStories: text("vault_stories", { mode: "json" })
+    .$type<VaultStoryConfig[]>()
     .default([]),
   tagline: text("tagline"),
   updatedAt,

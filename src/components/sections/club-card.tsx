@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUpRight, Users } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Picture } from "@/components/ui/picture";
 import { gsap, useGSAP } from "@/lib/gsap";
 import type { Club } from "@/lib/schemas";
@@ -89,7 +89,9 @@ export function ClubCard({ club, index, total }: Props) {
       ref={ref}
       href={`/clubs/${club.slug}`}
       data-club-card
-      className="group/c relative flex min-h-[300px] flex-col overflow-hidden rounded-2xl border border-line/10 bg-surface/50 p-7 transition-colors duration-500 hover:border-line/30"
+      // Same treatment as the council cards: surface fill carries the card,
+      // the border is transparent until hover so nothing reflows.
+      className="group/c relative flex min-h-[300px] flex-col overflow-hidden rounded-2xl border border-transparent bg-surface p-7 transition-colors duration-500 hover:border-line/12"
       style={{ perspective: "1000px" }}
     >
       {/* Cursor halo (plain alpha blend — no mix-blend-screen, which forces an
@@ -165,12 +167,6 @@ export function ClubCard({ club, index, total }: Props) {
               </span>
             ))}
           </div>
-          {club.members && (
-            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-subtle">
-              <Users className="h-3 w-3" />
-              {club.members}
-            </span>
-          )}
         </div>
       </div>
     </Link>

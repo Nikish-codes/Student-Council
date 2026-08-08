@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@/auth";
 import { getTicketsByContact } from "@/lib/content";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -21,6 +22,11 @@ export async function lookupTickets(
   _prev: LookupState | undefined,
   fd: FormData,
 ): Promise<LookupState> {
+  const session = await auth();
+  if (session?.user?.role !== "super_admin") {
+    return { error: "Not authorised." };
+  }
+
   const contact = String(fd.get("contact") ?? "").trim();
   if (!contact) return { error: "Enter the email or phone you registered with." };
 

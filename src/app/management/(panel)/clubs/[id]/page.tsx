@@ -100,11 +100,11 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
         <MediaField
           name="coverId"
           label="Cover image"
-          hint="wide banner behind the masthead"
+          hint="wide banner · 2400×1000 recommended · anything from 3:2 to 5:1 shows uncropped"
           defaultValue={row?.coverId ?? null}
           media={media}
         />
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-3">
           <ColorField
             name="accentColor"
             label="Accent colour"
@@ -118,6 +118,13 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
             min={1900}
             max={2100}
             defaultValue={row?.foundedYear ?? null}
+          />
+          <NumberField
+            name="members"
+            label="Members"
+            hint="optional · shows as a stat"
+            min={0}
+            defaultValue={row?.members ?? null}
           />
         </div>
       </Fieldset>
@@ -178,7 +185,6 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
           <TextField name="linkedinUrl" label="LinkedIn" hint="optional" defaultValue={row?.linkedinUrl} />
           <TextField name="websiteUrl" label="Website" hint="optional" defaultValue={row?.websiteUrl} />
           <TextField name="contactEmail" label="Contact email" hint="optional" defaultValue={row?.contactEmail} />
-          <NumberField name="members" label="Members" hint="optional" min={0} defaultValue={row?.members ?? null} />
         </div>
         <SelectField
           name="leadId"

@@ -35,7 +35,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         // Account lockout: refuse while a lock is active.
         if (row.lockedUntil && new Date(row.lockedUntil).getTime() > Date.now()) {
-          return null;
+          const mins = Math.ceil(
+            (new Date(row.lockedUntil).getTime() - Date.now()) / 60_000,
+          );
+          throw new Error(`LOCKED:${mins}`);
         }
 
         const ok = await bcrypt.compare(password, row.password);
@@ -52,7 +55,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                   : null,
             })
             .where(eq(users.id, row.id));
-          return null;
+          const remaining = Math.max(0, MAX_LOGIN_ATTEMPTS - fails);
+          throw new Error(`FAILED:${remaining}`);
         }
 
         // Success → clear any failure state.

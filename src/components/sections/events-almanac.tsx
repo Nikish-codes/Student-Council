@@ -22,6 +22,7 @@ const CATEGORIES: { value: EventCategory | "all"; label: string }[] = [
   { value: "cultural", label: "Cultural" },
   { value: "sports", label: "Sports" },
   { value: "academic", label: "Academic" },
+  { value: "community", label: "Community" },
 ];
 
 const CAT_ACCENT: Record<EventCategory, string> = {
@@ -30,6 +31,7 @@ const CAT_ACCENT: Record<EventCategory, string> = {
   cultural: "text-rose-200",
   sports: "text-lime-300",
   academic: "text-ink",
+  community: "text-emerald-300",
 };
 
 type StatusKind = "live" | "soon" | "open" | "scheduled" | "past";

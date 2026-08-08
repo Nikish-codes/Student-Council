@@ -50,6 +50,7 @@ import type {
   SiteSettingsData,
   SupportChannel,
   VaultStory,
+  VaultStoryConfig,
 } from "./schemas";
 
 /**
@@ -435,6 +436,10 @@ export const getClub = cache(
       accentColor: normalizeAccent(d.accentColor),
       about: d.about || undefined,
       cover: mediaUrl(d.cover) || undefined,
+      coverWidth:
+        typeof d.cover?.width === "number" ? d.cover.width : undefined,
+      coverHeight:
+        typeof d.cover?.height === "number" ? d.cover.height : undefined,
       foundedYear: typeof d.foundedYear === "number" ? d.foundedYear : undefined,
       activities: (d.activities ?? []).filter((a) => a?.title?.trim()),
       flagshipEvent: d.flagshipEvent || undefined,
@@ -617,10 +622,10 @@ const SITE_SETTINGS_DEFAULTS: SiteSettingsData = {
     timezoneAbbr: "IST",
   },
   grievanceCategories: [
-    { value: "harassment", label: "Harassment / discrimination" },
-    { value: "academic", label: "Academic concern" },
-    { value: "facility", label: "Facility / infrastructure" },
-    { value: "other", label: "Other" },
+    { value: "harassment", label: "Harassment / discrimination", to: "grievance@woxsen.edu.in" },
+    { value: "academic", label: "Academic concern", to: "grievance@woxsen.edu.in" },
+    { value: "facility", label: "Facility / infrastructure", to: "grievance@woxsen.edu.in" },
+    { value: "other", label: "Other", to: "grievance@woxsen.edu.in" },
   ],
   grievanceMailTo: "council@woxsen.edu.in",
 };
@@ -661,8 +666,30 @@ export const getHomepageConfig = cache(
         .filter((s): s is string => Boolean(s));
     }
 
-    // Vault stories: explicit ids, else most-recent published recaps.
-    const vaultStories = await resolveVaultStories(raw.vaultStoryIds ?? []);
+    // Vault stories: custom stories (full editorial control) take priority;
+    // fall back to recap-based resolution (explicit ids → auto-fill recaps).
+    const customVault: VaultStoryConfig[] = raw.vaultStories ?? [];
+    const vaultStories =
+      customVault.length > 0
+        ? customVault
+            .filter((v) => v?.title?.trim())
+            .map((v): VaultStory => ({
+              id: v.id,
+              title: v.title,
+              kicker: v.kicker || "",
+              blurb: v.line || "",
+              posterImage:
+                v.mediaKind === "video"
+                  ? v.posterSrc
+                  : v.mediaKind === "image"
+                    ? v.mediaSrc
+                    : "",
+              videoUrl: v.mediaKind === "video" ? v.mediaSrc : undefined,
+              href: v.href || "/events",
+              year: v.year || undefined,
+              mediaKind: v.mediaKind,
+            }))
+        : await resolveVaultStories(raw.vaultStoryIds ?? []);
 
     return {
       hero: {

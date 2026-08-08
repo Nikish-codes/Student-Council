@@ -39,7 +39,7 @@ export function SiteFooter() {
     <footer className="relative mt-32 border-t border-line/10 bg-bg">
       <div className="container py-20">
         <div className="grid gap-16 lg:grid-cols-12">
-          <div className="relative flex min-h-48 items-center lg:col-span-5">
+          <div className="relative flex min-h-32 items-center justify-center lg:col-span-5">
             <span className="sr-only">Woxsen University</span>
             {/* The university wordmark is a two-colour logo in its light-theme
                 form, so unlike the crest it can't be a single masked shape —
@@ -57,7 +57,7 @@ export function SiteFooter() {
               height={415}
               loading="lazy"
               decoding="async"
-              className="theme-logo-on-dark h-auto w-full max-w-md object-contain"
+              className="theme-logo-on-dark h-auto w-full max-w-[14rem] object-contain"
             />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -68,7 +68,7 @@ export function SiteFooter() {
               height={413}
               loading="lazy"
               decoding="async"
-              className="theme-logo-on-light absolute inset-y-0 left-0 my-auto h-auto w-full max-w-md object-contain"
+              className="theme-logo-on-light absolute inset-y-0 left-1/2 my-auto h-auto w-full -translate-x-1/2 max-w-[14rem] object-contain"
             />
           </div>
           <div className="grid gap-10 sm:grid-cols-3 lg:col-span-7">

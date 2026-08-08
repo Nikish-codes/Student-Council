@@ -57,6 +57,13 @@
       "when": 1785603218450,
       "tag": "0007_tiresome_vulture",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1786132679072,
+      "tag": "0008_famous_husk",
+      "breakpoints": true
     }
   ]
 }

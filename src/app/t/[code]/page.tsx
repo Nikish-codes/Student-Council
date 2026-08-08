@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CalendarDays, MapPin, CheckCircle2, ShieldCheck } from "lucide-react";
 
@@ -139,12 +138,7 @@ export default async function TicketPage({
       />
 
       <p className="px-2 text-center text-xs leading-relaxed text-subtle print:hidden">
-        This link is your ticket — bookmark it or send it to yourself. You can
-        always recover it at{" "}
-        <Link href="/t/lookup" className="underline hover:text-ink">
-          /t/lookup
-        </Link>
-        .
+        This link is your ticket. Bookmark it or send it to yourself.
       </p>
     </main>
   );

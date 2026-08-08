@@ -94,8 +94,11 @@ export function CouncilGroupPhoto({
             )}
 
             <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-5 sm:p-8">
-              <div className="flex items-center justify-between gap-5">
-                <span className="kicker text-ink">Full council</span>
+              {/* The "Full council" label is gone — the photo says that by
+                  itself, and the heading above it already does. `justify-end`
+                  replaces `justify-between` so the session stamp stays pinned
+                  right instead of sliding left as the only remaining child. */}
+              <div className="flex items-center justify-end gap-5">
                 <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink/65">
                   Session 2026/27
                 </span>

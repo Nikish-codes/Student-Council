@@ -30,6 +30,18 @@ export async function loginAction(
     });
   } catch (error) {
     if (error instanceof AuthError) {
+      const msg = error.cause as Error | undefined;
+      const detail = msg?.message ?? "";
+      if (detail.startsWith("LOCKED:")) {
+        const mins = detail.slice(7);
+        return `Account locked. Try again in ${mins} minute${mins === "1" ? "" : "s"}.`;
+      }
+      if (detail.startsWith("FAILED:")) {
+        const remaining = Number(detail.slice(7));
+        if (remaining > 0)
+          return `Invalid email or password. ${remaining} attempt${remaining === 1 ? "" : "s"} left.`;
+        return "Invalid email or password. Account is now locked for 10 minutes.";
+      }
       return "Invalid email or password.";
     }
     // signIn throws a redirect on success — must propagate.

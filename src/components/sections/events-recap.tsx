@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { gsap, SplitText, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
+import { recapVideo } from "@/lib/recap-media";
 
 type RecapMedia =
   | { kind: "video"; src: string; poster?: string }
@@ -30,9 +31,9 @@ const STORIES: RecapStory[] = [
     category: "Flagship · Cultural Fest",
     blurb:
       "Three days. Twelve venues. Unstructured infinity. The Council's biggest production of the year — and we shipped it together.",
-    hero: { kind: "video", src: "/recap/infinity-26-aftermovie.mp4" },
+    hero: { kind: "video", src: recapVideo("infinity-26-aftermovie.mp4") },
     gallery: [
-      { kind: "video", src: "/recap/infinity-26-wrap.mp4" },
+      { kind: "video", src: recapVideo("infinity-26-wrap.mp4") },
       { kind: "image", src: "/recap/infinity-26-trailer.jpg" },
       { kind: "image", src: "/recap/infinity-26-logo.jpg" },
     ],
@@ -50,7 +51,7 @@ const STORIES: RecapStory[] = [
     category: "Cultural · Jashn",
     blurb:
       "When the lights dimmed and the spooky took over. A night of costumes, chills, and pure Halloween chaos under the campus sky.",
-    hero: { kind: "video", src: "/recap/halloween-25-recap.mp4" },
+    hero: { kind: "video", src: recapVideo("halloween-25-recap.mp4") },
     gallery: [
       { kind: "image", src: "/recap/halloween-25-a.jpg" },
       { kind: "image", src: "/recap/halloween-25-b.jpg" },
@@ -64,7 +65,7 @@ const STORIES: RecapStory[] = [
     category: "Tech · Gaming",
     blurb:
       "FC25, MK and the gaming community in one room — that feeling right after the final match. The community Utopia is building, on tape.",
-    hero: { kind: "video", src: "/recap/utopia-esports.mp4" },
+    hero: { kind: "video", src: recapVideo("utopia-esports.mp4") },
     gallery: [],
   },
   {
