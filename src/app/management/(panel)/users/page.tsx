@@ -48,7 +48,7 @@ export default async function UsersPage() {
         Roles: <strong>Super Admin</strong> has full control. <strong>Admin</strong>{" "}
         manages all content + non-super-admin users. <strong>Council Member</strong>,{" "}
         <strong>Editor</strong> can publish. <strong>Club Lead</strong> can only edit
-        their own club's events. <strong>Viewer</strong> has read-only access.
+        their own club events. <strong>Viewer</strong> has read-only access.
       </p>
     </div>
   );

@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs";
 
 import { db } from "@/db/client";
 import { users as t, type UserRole } from "@/db/schema";
-import { requireUser, requireRole, isAdmin, ROLES_ALL } from "@/lib/rbac";
+import { requireUser, requireRole, ROLES_ALL } from "@/lib/rbac";
 
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 const norm = (e: string) => e.toLowerCase();
