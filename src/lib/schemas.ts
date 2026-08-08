@@ -85,6 +85,7 @@ export const eventCategorySchema = z.enum([
   "sports",
   "flagship",
   "academic",
+  "community",
 ]);
 export type EventCategory = z.infer<typeof eventCategorySchema>;
 

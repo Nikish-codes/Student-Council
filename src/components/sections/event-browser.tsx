@@ -18,6 +18,7 @@ const CATEGORIES: { value: EventCategory | "all"; label: string }[] = [
   { value: "cultural", label: "Cultural" },
   { value: "sports", label: "Sports" },
   { value: "academic", label: "Academic" },
+  { value: "community", label: "Community" },
 ];
 
 export function EventBrowser({ events }: { events: EventItem[] }) {

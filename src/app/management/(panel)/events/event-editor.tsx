@@ -10,7 +10,7 @@ import { DeleteEventButton } from "./delete-button";
 
 type Option = { id: number; name?: string | null; filename?: string | null; url?: string };
 
-const CATEGORIES = ["tech", "cultural", "sports", "flagship", "academic"] as const;
+const CATEGORIES = ["tech", "cultural", "sports", "flagship", "academic", "community"] as const;
 
 function field(label: string, hint?: string) {
   return (

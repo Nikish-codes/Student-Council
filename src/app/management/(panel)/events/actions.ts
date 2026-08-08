@@ -23,6 +23,7 @@ const CATEGORIES: EventCategory[] = [
   "sports",
   "flagship",
   "academic",
+  "community",
 ];
 const STATUSES: EventStatus[] = [
   "draft",
