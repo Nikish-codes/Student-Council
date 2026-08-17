@@ -64,6 +64,20 @@
       "when": 1786132679072,
       "tag": "0008_famous_husk",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1786281930345,
+      "tag": "0009_rare_wolverine",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1786971696296,
+      "tag": "0010_lucky_christian_walker",
+      "breakpoints": true
     }
   ]
 }

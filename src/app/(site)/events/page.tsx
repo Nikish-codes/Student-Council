@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Suspense } from "react";
 import { EventsOverture } from "@/components/sections/events-overture";
 import { EventsAlmanac } from "@/components/sections/events-almanac";
-import { EventsRecap } from "@/components/sections/events-recap";
 import { getEvents } from "@/lib/content";
 import { getEventTiming } from "@/lib/event-status";
 
@@ -12,55 +11,39 @@ export const metadata: Metadata = {
     "Bootcamps, hackathons, cultural nights and sports cups — every event run by the Woxsen Student Council.",
 };
 
-// ISR: upcoming/past split depends on the current time.
+// ISR: the now/upcoming/past split depends on the current time.
 export const revalidate = 60;
 
 export default async function EventsPage() {
   const all = await getEvents();
   const now = Date.now();
-  const sevenDays = 7 * 86_400_000;
 
-  const upcoming = all.filter((e) => !getEventTiming(e, now).isPast);
-  const past = all.filter((e) => getEventTiming(e, now).isPast);
+  const live = [];
+  const upcoming = [];
+  const past = [];
+  for (const e of all) {
+    const t = getEventTiming(e, now);
+    if (t.isPast) past.push(e);
+    else if (t.isLive) live.push(e);
+    else upcoming.push(e);
+  }
 
   const next = upcoming[0];
-  const featured = upcoming.find((e) => e.featured) ?? next;
-  const thisWeekCount = upcoming.filter(
-    (e) => +new Date(e.date) - now <= sevenDays && +new Date(e.date) >= now,
-  ).length;
+  // Spotlight a featured upcoming event, then the next upcoming, then a live
+  // one so the hero banner is never empty when something is happening now.
+  const featured = upcoming.find((e) => e.featured) ?? next ?? live[0];
 
   return (
     <div>
       <EventsOverture
-        total={upcoming.length}
-        thisWeekCount={thisWeekCount}
-        next={next}
+        liveCount={live.length}
+        upcomingCount={upcoming.length}
+        pastCount={past.length}
         featured={featured}
       />
-      <EventsAlmanac events={upcoming} />
-      <EventsRecap />
-      {past.length > 0 && (
-        <section className="border-t border-line/8 bg-bg">
-          <div className="mx-auto max-w-[1720px] px-6 lg:px-10 py-16 lg:py-24 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6">
-            <div>
-              <div className="kicker mb-4 text-muted">Looking back?</div>
-              <p className="text-ink text-xl sm:text-2xl max-w-2xl leading-snug">
-                <span className="display italic text-ink">
-                  {String(past.length).padStart(2, "0")}
-                </span>{" "}
-                events already shipped. Browse the full archive.
-              </p>
-            </div>
-            <Link
-              href="/archive"
-              className="inline-flex items-center gap-3 text-sm font-mono uppercase tracking-[0.2em] text-ink border-b border-ink/40 pb-1 hover:border-ink transition-colors self-start sm:self-auto"
-            >
-              Open the archive
-              <span aria-hidden>→</span>
-            </Link>
-          </div>
-        </section>
-      )}
+      <Suspense fallback={null}>
+        <EventsAlmanac live={live} upcoming={upcoming} past={past} />
+      </Suspense>
     </div>
   );
 }

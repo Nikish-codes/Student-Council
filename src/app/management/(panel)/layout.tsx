@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { requireOps, isAdmin, type SessionUser } from "@/lib/rbac";
+import { requirePanelUser, isAdmin, type SessionUser } from "@/lib/rbac";
 import { ROLE_LABELS } from "@/lib/roles";
 import { SidebarNav, type NavGroup } from "./sidebar-nav";
 
@@ -32,6 +32,18 @@ const SHARED_NAV: NavGroup[] = [
     ],
   },
   {
+    label: "Sports",
+    items: [
+      { href: "/management/sports", label: "Dashboard", icon: "Trophy" },
+      { href: "/management/sports/tournaments", label: "Tournaments", icon: "Medal" },
+      { href: "/management/sports/leagues", label: "Leagues", icon: "BarChart3" },
+      { href: "/management/sports/matches", label: "Matches", icon: "Activity" },
+      { href: "/management/sports/teams", label: "Teams", icon: "Shirt" },
+      { href: "/management/sports/people", label: "People", icon: "UserCircle" },
+      { href: "/management/sports/settings", label: "Sports settings", icon: "Settings2" },
+    ],
+  },
+  {
     label: "Media",
     items: [
       { href: "/management/media", label: "Media library", icon: "ImageIcon" },
@@ -56,6 +68,15 @@ const ADMIN_NAV: NavGroup[] = [
   },
 ];
 
+const OVAL_NAV: NavGroup[] = [
+  {
+    label: "Dining",
+    items: [
+      { href: "/management/oval", label: "Oval menu", icon: "UtensilsCrossed" },
+    ],
+  },
+];
+
 export default async function PanelLayout({
   children,
 }: {
@@ -63,12 +84,19 @@ export default async function PanelLayout({
 }) {
   let user: SessionUser;
   try {
-    user = await requireOps();
+    user = await requirePanelUser();
   } catch {
     redirect("/management/login");
   }
 
-  const groups = isAdmin(user.role) ? [...SHARED_NAV, ...ADMIN_NAV] : SHARED_NAV;
+  const groups =
+    user.role === "food_committee_member"
+      ? OVAL_NAV
+      : user.role === "super_admin"
+        ? [...SHARED_NAV, ...OVAL_NAV, ...ADMIN_NAV]
+        : isAdmin(user.role)
+          ? [...SHARED_NAV, ...ADMIN_NAV]
+          : SHARED_NAV;
 
   return (
     <div className="min-h-screen bg-bg text-ink">

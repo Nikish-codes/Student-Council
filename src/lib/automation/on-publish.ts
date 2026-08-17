@@ -22,7 +22,7 @@ import { uniqueSlug } from "@/lib/slug";
  *  2. Recap stub     — a linked draft recap so post-event writeups are 1 click.
  *  3. Homepage       — flagship events become the featured hero; past events
  *                      get de-featured.
- *  4. Revalidate     — bust the cache for /, /events, /events/{slug}, /archive.
+ *  4. Revalidate     — bust the cache for /, /events, /events/{slug}.
  *  5. Notify         — optional Discord webhook (env-gated).
  */
 export async function onEventPublished(eventId: number): Promise<{
@@ -103,7 +103,7 @@ export async function onEventPublished(eventId: number): Promise<{
 
   // 4. Revalidate public surfaces.
   await step(steps, "revalidate", async () => {
-    for (const p of ["/", "/events", `/events/${ev.slug}`, "/archive"]) {
+    for (const p of ["/", "/events", `/events/${ev.slug}`]) {
       revalidatePath(p);
     }
     return "ok";

@@ -5,12 +5,24 @@ import {
   clubs as clubsT,
   events as eventsT,
   recaps as recapsT,
+  sportsLeagues as sportsLeaguesT,
+  sportsPeople as sportsPeopleT,
+  sportsTeams as sportsTeamsT,
+  sportsTournaments as sportsTournamentsT,
 } from "@/db/schema";
 import { slugify } from "@/lib/slugify";
 
 export { slugify };
 
-type SlugTable = "events" | "recaps" | "clubs" | "clubCategories";
+type SlugTable =
+  | "events"
+  | "recaps"
+  | "clubs"
+  | "clubCategories"
+  | "sportsTournaments"
+  | "sportsLeagues"
+  | "sportsTeams"
+  | "sportsPeople";
 
 const SLUG_TABLES = {
   events: { t: eventsT, slug: eventsT.slug, id: eventsT.id },
@@ -20,6 +32,22 @@ const SLUG_TABLES = {
     t: clubCategoriesT,
     slug: clubCategoriesT.slug,
     id: clubCategoriesT.id,
+  },
+  sportsTournaments: {
+    t: sportsTournamentsT,
+    slug: sportsTournamentsT.slug,
+    id: sportsTournamentsT.id,
+  },
+  sportsLeagues: {
+    t: sportsLeaguesT,
+    slug: sportsLeaguesT.slug,
+    id: sportsLeaguesT.id,
+  },
+  sportsTeams: { t: sportsTeamsT, slug: sportsTeamsT.slug, id: sportsTeamsT.id },
+  sportsPeople: {
+    t: sportsPeopleT,
+    slug: sportsPeopleT.slug,
+    id: sportsPeopleT.id,
   },
 } as const;
 

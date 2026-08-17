@@ -21,7 +21,9 @@ export default async function NewUserPage() {
   // admin cannot create super_admin users.
   const roles = (me.role === "super_admin"
     ? ROLES_ALL
-    : ROLES_ALL.filter((r) => r !== "super_admin")
+    : ROLES_ALL.filter(
+        (r) => r !== "super_admin" && r !== "food_committee_member",
+      )
   ).map((r) => ({ value: r, label: ROLE_LABELS[r] }));
 
   return (

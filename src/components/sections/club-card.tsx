@@ -81,6 +81,8 @@ export function ClubCard({ club, index, total }: Props) {
     .join("")
     .slice(0, 3);
 
+  const displayName = club.name.replace(/\s*\([^)]*\)\s*$/, "");
+
   return (
     // Cards open the club's own page. The external `joinUrl` used to live here,
     // which made every card a one-way exit off the site; it is now the CTA in
@@ -151,10 +153,7 @@ export function ClubCard({ club, index, total }: Props) {
 
       {/* Body */}
       <div className="relative z-10 mt-6 space-y-4">
-        <h3 className="display text-2xl text-ink">{club.name}</h3>
-        <p className="line-clamp-2 text-pretty text-sm leading-relaxed text-muted">
-          {club.blurb}
-        </p>
+        <h3 className="display text-2xl text-ink">{displayName}</h3>
 
         <div className="flex items-center justify-between gap-3 border-t border-line/10 pt-4">
           <div className="flex flex-wrap gap-1.5">

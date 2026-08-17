@@ -89,6 +89,139 @@ export const eventCategorySchema = z.enum([
 ]);
 export type EventCategory = z.infer<typeof eventCategorySchema>;
 
+// ──────────────────────────────── sports ─────────────────────────────────────
+// Enums and JSON shapes for the sports vertical. The DB-layer types live in
+// src/db/schema.ts (duplicated so the DB layer stays standalone); these are
+// the zod-validated + public-facing shapes.
+
+export const sportTypeSchema = z.enum([
+  "cue_stick",
+  "chess",
+  "carrom",
+  "badminton",
+  "table_tennis",
+  "squash",
+  "football",
+  "futsal",
+  "volleyball",
+  "athletics",
+  "pickleball",
+  "basketball",
+  "box_cricket",
+  "throwball",
+  "tennis",
+]);
+export type SportType = z.infer<typeof sportTypeSchema>;
+
+export const sportDivisionSchema = z.enum([
+  "male",
+  "female",
+  "mixed",
+  "open",
+  "3v3_male",
+  "3v3_female",
+]);
+export type SportDivision = z.infer<typeof sportDivisionSchema>;
+
+export const sportCompetitionStatusSchema = z.enum([
+  "draft",
+  "pending_review",
+  "published",
+  "archived",
+]);
+export type SportCompetitionStatus = z.infer<
+  typeof sportCompetitionStatusSchema
+>;
+
+export const sportMatchStatusSchema = z.enum([
+  "scheduled",
+  "live",
+  "finished",
+  "cancelled",
+]);
+export type SportMatchStatus = z.infer<typeof sportMatchStatusSchema>;
+
+export const sportPersonRoleSchema = z.enum(["alumni", "representative"]);
+export type SportPersonRole = z.infer<typeof sportPersonRoleSchema>;
+
+/** Human-readable label for each sport — used in dropdowns and labels. */
+export const SPORT_LABELS: Record<SportType, string> = {
+  cue_stick: "Cue Stick",
+  chess: "Chess",
+  carrom: "Carrom",
+  badminton: "Badminton",
+  table_tennis: "Table Tennis",
+  squash: "Squash",
+  football: "Football",
+  futsal: "Futsal",
+  volleyball: "Volleyball",
+  athletics: "Athletics",
+  pickleball: "Pickleball",
+  basketball: "Basketball",
+  box_cricket: "Box Cricket",
+  throwball: "Throwball",
+  tennis: "Tennis",
+};
+
+export const SPORT_DIVISION_LABELS: Record<SportDivision, string> = {
+  male: "Male",
+  female: "Female",
+  mixed: "Mixed",
+  open: "Open",
+  "3v3_male": "3v3 Male",
+  "3v3_female": "3v3 Female",
+};
+
+// JSON-column shapes (duplicated from src/db/schema.ts for the zod layer).
+
+export const sportStandingRowSchema = z.object({
+  position: z.number().optional(),
+  teamId: z.number().optional(),
+  teamName: z.string().optional(),
+  played: z.number().default(0),
+  won: z.number().default(0),
+  lost: z.number().default(0),
+  drawn: z.number().default(0),
+  points: z.number().default(0),
+});
+export type SportStandingRow = z.infer<typeof sportStandingRowSchema>;
+
+export const sportMatchEventSchema = z.object({
+  time: z.string(),
+  team: z.enum(["a", "b"]),
+  type: z.string(),
+  description: z.string().optional(),
+});
+export type SportMatchEvent = z.infer<typeof sportMatchEventSchema>;
+
+export const sportPostMatchHighlightSchema = z.object({
+  url: z.string(),
+  caption: z.string().optional(),
+});
+export type SportPostMatchHighlight = z.infer<
+  typeof sportPostMatchHighlightSchema
+>;
+
+export const sportPostMatchInterviewSchema = z.object({
+  title: z.string(),
+  videoUrl: z.string().optional(),
+  url: z.string().optional(),
+});
+export type SportPostMatchInterview = z.infer<
+  typeof sportPostMatchInterviewSchema
+>;
+
+export const sportPostMatchSchema = z.object({
+  highlights: z.array(sportPostMatchHighlightSchema).optional(),
+  interviews: z.array(sportPostMatchInterviewSchema).optional(),
+  winnerName: z.string().optional(),
+  winnerTitle: z.string().optional(),
+  winnerPhotoId: z.number().optional(),
+  runnerUpName: z.string().optional(),
+  runnerUpPhotoId: z.number().optional(),
+});
+export type SportPostMatch = z.infer<typeof sportPostMatchSchema>;
+
 export const eventSchema = z.object({
   id: z.number().optional(),
   slug: z.string(),

@@ -31,13 +31,13 @@ async function requireUserManager(): Promise<{
 
 function canActOn(actorRole: UserRole, targetRole: UserRole): boolean {
   if (actorRole === "super_admin") return true;
-  // admin cannot touch super_admin rows.
-  return targetRole !== "super_admin";
+  // Oval managers and super admins are both protected from normal admins.
+  return targetRole !== "super_admin" && targetRole !== "food_committee_member";
 }
 
 function canAssignRole(actorRole: UserRole, requestedRole: UserRole): boolean {
   if (actorRole === "super_admin") return true;
-  return requestedRole !== "super_admin";
+  return requestedRole !== "super_admin" && requestedRole !== "food_committee_member";
 }
 
 export async function createUser(fd: FormData) {

@@ -19,7 +19,7 @@ function json<T>(fd: FormData, k: string, fallback: T): T {
 }
 
 function bust() {
-  ["/", "/events", "/archive", "/management/recaps"].forEach((p) => revalidatePath(p));
+  ["/", "/events", "/management/recaps"].forEach((p) => revalidatePath(p));
 }
 
 export async function saveRecap(id: number | null, fd: FormData) {

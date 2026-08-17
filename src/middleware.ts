@@ -28,6 +28,7 @@ const PREVIEW_COOKIE = "sc_preview";
 export default auth((req) => {
   const { pathname, searchParams } = req.nextUrl;
   const isLoggedIn = !!req.auth?.user;
+  const role = req.auth?.user?.role;
 
   const isPanel =
     pathname.startsWith("/management") ||
@@ -40,6 +41,21 @@ export default auth((req) => {
     const url = req.nextUrl.clone();
     url.pathname = "/management/login";
     url.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // Food Committee sessions are valid panel sessions, but their authority is
+  // intentionally limited to Oval management. This edge check complements the
+  // server-side role guards on every Oval route and action.
+  if (
+    role === "food_committee_member" &&
+    isPanel &&
+    !isLogin &&
+    !pathname.startsWith("/management/oval")
+  ) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/management/oval";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 

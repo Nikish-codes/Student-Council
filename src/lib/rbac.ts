@@ -19,10 +19,18 @@ export const OPS_ROLES: UserRole[] = [
   "editor",
 ];
 
+/** Roles allowed to enter the panel shell. Food Committee access is then
+ * constrained to /management/oval; it is deliberately not an OPS role. */
+export const PANEL_ROLES: UserRole[] = [
+  ...OPS_ROLES,
+  "food_committee_member",
+];
+
 /** Every role known to the system — used for role-select dropdowns. */
 export const ROLES_ALL: UserRole[] = [
   "super_admin",
   "admin",
+  "food_committee_member",
   "council_member",
   "club_lead",
   "editor",
@@ -65,6 +73,9 @@ export async function requireRole(...roles: UserRole[]): Promise<SessionUser> {
 
 /** Require any ops role (can access the management panel). */
 export const requireOps = () => requireRole(...OPS_ROLES);
+export const requirePanelUser = () => requireRole(...PANEL_ROLES);
+export const requireOvalManager = () =>
+  requireRole("super_admin", "food_committee_member");
 
 /**
  * Club leads may only touch events for their own club. Admins/editors/council

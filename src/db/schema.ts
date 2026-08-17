@@ -43,6 +43,13 @@ import type {
   QuickAction,
   VaultStoryConfig,
 } from "@/lib/schemas";
+import type {
+  SportType,
+  SportDivision,
+  SportCompetitionStatus,
+  SportMatchStatus,
+  SportPersonRole,
+} from "@/lib/schemas";
 
 // ─────────────────────────── shared column helpers ───────────────────────────
 
@@ -56,6 +63,7 @@ const updatedAt = text("updated_at")
 export type UserRole =
   | "super_admin"
   | "admin"
+  | "food_committee_member"
   | "council_member"
   | "club_lead"
   | "editor"
@@ -75,6 +83,74 @@ export type ClubActivity = { title: string; description?: string };
 export type ClubVideo = { url: string; title?: string };
 /** Same shape as `RecapGalleryItem`, kept separate so the two can diverge. */
 export type ClubGalleryItem = { url: string; caption?: string };
+
+// ──────────────────────────────── sports ─────────────────────────────────────
+// JSON-column shapes for the sports tables. Enums (SportType, SportDivision,
+// …) are imported from src/lib/schemas; these row/shape types are defined here
+// for the DB layer and duplicated in schemas.ts for the zod validation layer.
+
+/** One row in a league's standings table. */
+export type SportStandingRow = {
+  position?: number;
+  teamId?: number;
+  teamName?: string; // denormalised so standings render without a join
+  played: number;
+  won: number;
+  lost: number;
+  drawn: number;
+  points: number;
+};
+
+/** One timestamped event in a live match feed (goal, card, substitution, …). */
+export type SportMatchEvent = {
+  time: string; // e.g. "23'" or "Q2 4:30"
+  team: "a" | "b";
+  type: string; // "goal" | "yellow" | "red" | "sub" | "timeout" | "point" | …
+  description?: string;
+};
+
+/** A post-match highlight photo or video thumbnail. */
+export type SportPostMatchHighlight = {
+  url: string;
+  caption?: string;
+};
+
+/** A post-match interview link. */
+export type SportPostMatchInterview = {
+  title: string;
+  videoUrl?: string;
+  url?: string;
+};
+
+/** Post-match content attached to a match (highlights, interviews, winner). */
+export type SportPostMatch = {
+  highlights?: SportPostMatchHighlight[];
+  interviews?: SportPostMatchInterview[];
+  winnerName?: string;
+  winnerTitle?: string;
+  winnerPhotoId?: number;
+  runnerUpName?: string;
+  runnerUpPhotoId?: number;
+};
+
+// ───────────────────────────────── Oval menu ─────────────────────────────────
+
+export type OvalDiet = "veg" | "egg" | "nonveg";
+export type OvalMealId = "breakfast" | "lunch" | "dinner";
+export type OvalDayStatus = "draft" | "approved";
+export type OvalImportMethod = "manual" | "spreadsheet" | "vision";
+
+export type OvalMenuItem = {
+  id: string;
+  category: string;
+  dish: string;
+  diets: OvalDiet[];
+  confidence: number;
+  needsReview: boolean;
+  sourceText?: string;
+};
+
+export type OvalMeals = Record<OvalMealId, OvalMenuItem[]>;
 
 // ─────────────────────────────────── users ───────────────────────────────────
 // clubId <-> clubs.leadId is a circular reference; both kept as plain integer
@@ -560,6 +636,219 @@ export const auditLog = sqliteTable(
   }),
 );
 
+// ──────────────────────────────── sports ────────────────────────────────────
+// The sports vertical: tournaments, leagues, teams, matches, people (alumni +
+// reps), and a single-row page config. Matches belong to either a tournament
+// or a league (both nullable — a friendly doesn't need a parent). Live scoring
+// is per-match: status "live" + scoreA/scoreB + a JSON event feed.
+
+export const sportsTournaments = sqliteTable(
+  "mp_sports_tournaments",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    title: text("title").notNull(),
+    slug: text("slug").notNull(),
+    status: text("status")
+      .$type<SportCompetitionStatus>()
+      .notNull()
+      .default("draft"),
+    sport: text("sport").$type<SportType>().notNull(),
+    year: integer("year").notNull(),
+    division: text("division")
+      .$type<SportDivision>()
+      .notNull()
+      .default("open"),
+    venue: text("venue"),
+    startDate: text("start_date"),
+    endDate: text("end_date"),
+    bannerId: integer("banner_id").references(() => media.id),
+    excerpt: text("excerpt").default(""),
+    description: text("description").default(""), // markdown
+    featured: integer("featured", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    publishedAt: text("published_at"),
+    createdAt,
+    updatedAt,
+  },
+  (t) => ({
+    slugIdx: uniqueIndex("mp_sports_tournaments_slug_idx").on(t.slug),
+    yearIdx: index("mp_sports_tournaments_year_idx").on(t.year),
+    sportIdx: index("mp_sports_tournaments_sport_idx").on(t.sport),
+    statusIdx: index("mp_sports_tournaments_status_idx").on(t.status),
+  }),
+);
+
+export const sportsLeagues = sqliteTable(
+  "mp_sports_leagues",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    title: text("title").notNull(),
+    slug: text("slug").notNull(),
+    status: text("status")
+      .$type<SportCompetitionStatus>()
+      .notNull()
+      .default("draft"),
+    sport: text("sport").$type<SportType>().notNull(),
+    year: integer("year").notNull(),
+    division: text("division")
+      .$type<SportDivision>()
+      .notNull()
+      .default("open"),
+    venue: text("venue"),
+    startDate: text("start_date"),
+    endDate: text("end_date"),
+    bannerId: integer("banner_id").references(() => media.id),
+    excerpt: text("excerpt").default(""),
+    description: text("description").default(""), // markdown
+    // League standings table — JSON array, edited in the panel via RepeaterField.
+    standings: text("standings", { mode: "json" })
+      .$type<SportStandingRow[]>()
+      .default([]),
+    featured: integer("featured", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    publishedAt: text("published_at"),
+    createdAt,
+    updatedAt,
+  },
+  (t) => ({
+    slugIdx: uniqueIndex("mp_sports_leagues_slug_idx").on(t.slug),
+    yearIdx: index("mp_sports_leagues_year_idx").on(t.year),
+    sportIdx: index("mp_sports_leagues_sport_idx").on(t.sport),
+    statusIdx: index("mp_sports_leagues_status_idx").on(t.status),
+  }),
+);
+
+export const sportsTeams = sqliteTable(
+  "mp_sports_teams",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    name: text("name").notNull(),
+    slug: text("slug").notNull(),
+    logoId: integer("logo_id").references(() => media.id),
+    // Optional link to a club (sports clubs), so a team can be "the football club's team"
+    // or a standalone ad-hoc team (house team, inter-class team).
+    clubId: integer("club_id").references(() => clubs.id),
+    createdAt,
+    updatedAt,
+  },
+  (t) => ({
+    slugIdx: uniqueIndex("mp_sports_teams_slug_idx").on(t.slug),
+    clubIdx: index("mp_sports_teams_club_idx").on(t.clubId),
+  }),
+);
+
+export const sportsMatches = sqliteTable(
+  "mp_sports_matches",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    // A match belongs to a tournament OR a league (or neither for a friendly).
+    tournamentId: integer("tournament_id").references(() => sportsTournaments.id),
+    leagueId: integer("league_id").references(() => sportsLeagues.id),
+    sport: text("sport").$type<SportType>().notNull(),
+    round: text("round"), // "Group A", "Quarterfinal", "Matchday 3", …
+    teamAId: integer("team_a_id").references(() => sportsTeams.id),
+    teamBId: integer("team_b_id").references(() => sportsTeams.id),
+    matchDate: text("match_date"),
+    venue: text("venue"),
+    status: text("status")
+      .$type<SportMatchStatus>()
+      .notNull()
+      .default("scheduled"),
+    scoreA: integer("score_a"),
+    scoreB: integer("score_b"),
+    // Live scoring event feed — appended to during a live match.
+    events: text("events", { mode: "json" })
+      .$type<SportMatchEvent[]>()
+      .default([]),
+    // Post-match content: highlights, interviews, winner info.
+    postMatch: text("post_match", { mode: "json" })
+      .$type<SportPostMatch>()
+      .default({}),
+    createdAt,
+    updatedAt,
+  },
+  (t) => ({
+    tournamentIdx: index("mp_sports_matches_tournament_idx").on(t.tournamentId),
+    leagueIdx: index("mp_sports_matches_league_idx").on(t.leagueId),
+    dateIdx: index("mp_sports_matches_date_idx").on(t.matchDate),
+    statusIdx: index("mp_sports_matches_status_idx").on(t.status),
+  }),
+);
+
+export const sportsPeople = sqliteTable(
+  "mp_sports_people",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    name: text("name").notNull(),
+    slug: text("slug").notNull(),
+    photoId: integer("photo_id").references(() => media.id),
+    role: text("role")
+      .$type<SportPersonRole>()
+      .notNull()
+      .default("representative"),
+    bio: text("bio"),
+    graduationYear: integer("graduation_year"),
+    sport: text("sport").$type<SportType>(),
+    email: text("email"),
+    phone: text("phone"),
+    sortOrder: integer("sort_order").notNull().default(99),
+    createdAt,
+    updatedAt,
+  },
+  (t) => ({
+    slugIdx: uniqueIndex("mp_sports_people_slug_idx").on(t.slug),
+    roleIdx: index("mp_sports_people_role_idx").on(t.role),
+  }),
+);
+
+// Single-row (id = 1) config for the /sports page — academy logo, tagline,
+// and the managed set of gallery images that scroll in the top marquee.
+export const sportsPageConfig = sqliteTable("mp_sports_page_config", {
+  id: integer("id").primaryKey({ autoIncrement: true }), // enforce id = 1
+  academyLogoId: integer("academy_logo_id").references(() => media.id),
+  tagline: text("tagline").default(""),
+  // Media IDs for the top gallery — resolved to URLs in the content getter.
+  galleryImageIds: text("gallery_image_ids", { mode: "json" })
+    .$type<number[]>()
+    .default([]),
+  createdAt,
+  updatedAt,
+});
+
+// One authoritative record per service day. A weekly upload writes seven rows,
+// but public reads always address exactly one approved date.
+export const ovalMenuDays = sqliteTable(
+  "mp_oval_menu_days",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    menuDate: text("menu_date").notNull(), // YYYY-MM-DD in Asia/Kolkata
+    weekStart: text("week_start").notNull(), // Monday, YYYY-MM-DD
+    status: text("status").$type<OvalDayStatus>().notNull().default("draft"),
+    meals: text("meals", { mode: "json" })
+      .$type<OvalMeals>()
+      .notNull()
+      .default({ breakfast: [], lunch: [], dinner: [] }),
+    sourceName: text("source_name"),
+    sourceMimeType: text("source_mime_type"),
+    importMethod: text("import_method")
+      .$type<OvalImportMethod>()
+      .notNull()
+      .default("manual"),
+    importedByUserId: integer("imported_by_user_id").references(() => users.id),
+    approvedByUserId: integer("approved_by_user_id").references(() => users.id),
+    approvedAt: text("approved_at"),
+    createdAt,
+    updatedAt,
+  },
+  (t) => ({
+    dateIdx: uniqueIndex("mp_oval_menu_days_date_idx").on(t.menuDate),
+    weekIdx: index("mp_oval_menu_days_week_idx").on(t.weekStart),
+    statusIdx: index("mp_oval_menu_days_status_idx").on(t.status),
+  }),
+);
+
 // ──────────────────────────────── relations ──────────────────────────────────
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -674,6 +963,67 @@ export const auditLogRelations = relations(auditLog, ({ one }) => ({
   event: one(events, { fields: [auditLog.eventId], references: [events.id] }),
 }));
 
+// ──────────────────────────── sports relations ───────────────────────────────
+
+export const sportsTournamentsRelations = relations(
+  sportsTournaments,
+  ({ one, many }) => ({
+    banner: one(media, {
+      fields: [sportsTournaments.bannerId],
+      references: [media.id],
+    }),
+    matches: many(sportsMatches),
+  }),
+);
+
+export const sportsLeaguesRelations = relations(
+  sportsLeagues,
+  ({ one, many }) => ({
+    banner: one(media, {
+      fields: [sportsLeagues.bannerId],
+      references: [media.id],
+    }),
+    matches: many(sportsMatches),
+  }),
+);
+
+export const sportsTeamsRelations = relations(sportsTeams, ({ one }) => ({
+  logo: one(media, { fields: [sportsTeams.logoId], references: [media.id] }),
+  club: one(clubs, { fields: [sportsTeams.clubId], references: [clubs.id] }),
+}));
+
+export const sportsMatchesRelations = relations(sportsMatches, ({ one }) => ({
+  tournament: one(sportsTournaments, {
+    fields: [sportsMatches.tournamentId],
+    references: [sportsTournaments.id],
+  }),
+  league: one(sportsLeagues, {
+    fields: [sportsMatches.leagueId],
+    references: [sportsLeagues.id],
+  }),
+  teamA: one(sportsTeams, {
+    relationName: "matchTeamA",
+    fields: [sportsMatches.teamAId],
+    references: [sportsTeams.id],
+  }),
+  teamB: one(sportsTeams, {
+    relationName: "matchTeamB",
+    fields: [sportsMatches.teamBId],
+    references: [sportsTeams.id],
+  }),
+}));
+
+export const sportsPeopleRelations = relations(sportsPeople, ({ one }) => ({
+  photo: one(media, { fields: [sportsPeople.photoId], references: [media.id] }),
+}));
+
+export const sportsPageConfigRelations = relations(sportsPageConfig, ({ one }) => ({
+  academyLogo: one(media, {
+    fields: [sportsPageConfig.academyLogoId],
+    references: [media.id],
+  }),
+}));
+
 // ─────────────────────────────── inferred types ──────────────────────────────
 
 export type DbUser = typeof users.$inferSelect;
@@ -690,6 +1040,13 @@ export type DbEventRegistration = typeof eventRegistrations.$inferSelect;
 export type DbAttendee = typeof attendees.$inferSelect;
 export type DbNotification = typeof notifications.$inferSelect;
 export type DbAuditLog = typeof auditLog.$inferSelect;
+export type DbSportsTournament = typeof sportsTournaments.$inferSelect;
+export type DbSportsLeague = typeof sportsLeagues.$inferSelect;
+export type DbSportsTeam = typeof sportsTeams.$inferSelect;
+export type DbSportsMatch = typeof sportsMatches.$inferSelect;
+export type DbSportsPerson = typeof sportsPeople.$inferSelect;
+export type DbSportsPageConfig = typeof sportsPageConfig.$inferSelect;
+export type DbOvalMenuDay = typeof ovalMenuDays.$inferSelect;
 
 // Marker referenced where self/cyclic FK typing is needed.
 export type _CyclicColumn = AnySQLiteColumn;

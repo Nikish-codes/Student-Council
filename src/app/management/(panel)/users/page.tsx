@@ -46,7 +46,8 @@ export default async function UsersPage() {
       <UsersTable rows={tableRows} isAdmin={admin} />
       <p className="mt-4 text-[11px] text-subtle">
         Roles: <strong>Super Admin</strong> has full control. <strong>Admin</strong>{" "}
-        manages all content + non-super-admin users. <strong>Council Member</strong>,{" "}
+        manages content and standard users. <strong>Food Committee Member</strong>{" "}
+        manages only the Oval menu. <strong>Council Member</strong>,{" "}
         <strong>Editor</strong> can publish. <strong>Club Lead</strong> can only edit
         their own club events. <strong>Viewer</strong> has read-only access.
       </p>

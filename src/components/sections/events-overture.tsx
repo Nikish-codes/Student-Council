@@ -6,20 +6,19 @@ import { ArrowUpRight, MapPin } from "lucide-react";
 import { Picture } from "@/components/ui/picture";
 import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { cn } from "@/lib/utils";
-import { getEventTiming } from "@/lib/event-status";
 import type { EventItem } from "@/lib/schemas";
 
 const KICKERS = ["What's on", "What's next", "What's live", "What's new"];
 
 export function EventsOverture({
-  total,
-  thisWeekCount,
-  next,
+  liveCount,
+  upcomingCount,
+  pastCount,
   featured,
 }: {
-  total: number;
-  thisWeekCount: number;
-  next?: EventItem;
+  liveCount: number;
+  upcomingCount: number;
+  pastCount: number;
   featured?: EventItem;
 }) {
   const root = React.useRef<HTMLDivElement>(null);
@@ -124,18 +123,6 @@ export function EventsOverture({
     { scope: root },
   );
 
-  const daysAway = next ? Math.max(0, daysFromNow(next.date)) : null;
-  const nextIsLive = next ? getEventTiming(next).isLive : false;
-  const nextValue = !next
-    ? "—"
-    : nextIsLive
-      ? "Ongoing"
-      : daysAway === 0
-        ? "Today"
-        : daysAway === 1
-          ? "Tomorrow"
-          : `${pad(daysAway ?? 0)}d`;
-
   return (
     <div ref={root}>
       {/* ─── HERO ─── */}
@@ -172,22 +159,25 @@ export function EventsOverture({
             Council is running this year, on one calendar.
           </p>
 
-          {/* Live count strip */}
+          {/* Live count strip — mirrors the Now / Upcoming / Past tabs */}
           <div
             data-meta-row
             className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-line/10 bg-line/[0.03] sm:grid-cols-3"
           >
-            <Stat label="Upcoming" value={pad(total)} suffix="events" />
             <Stat
-              label="This week"
-              value={pad(thisWeekCount)}
-              suffix={thisWeekCount === 1 ? "event" : "events"}
+              label="Happening now"
+              value={pad(liveCount)}
+              suffix={liveCount === 1 ? "live event" : "live events"}
             />
             <Stat
-              label="Next up"
-              value={nextValue}
-              suffix={next?.title ?? "Nothing scheduled"}
-              truncate
+              label="Upcoming"
+              value={pad(upcomingCount)}
+              suffix={upcomingCount === 1 ? "event" : "events"}
+            />
+            <Stat
+              label="Past"
+              value={pad(pastCount)}
+              suffix="in the archive"
             />
           </div>
         </div>
@@ -293,14 +283,6 @@ function Stat({
       </div>
     </div>
   );
-}
-
-function daysFromNow(d: string) {
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  const t = new Date(d);
-  t.setHours(0, 0, 0, 0);
-  return Math.round((+t - +now) / 86_400_000);
 }
 
 function pad(n: number) {

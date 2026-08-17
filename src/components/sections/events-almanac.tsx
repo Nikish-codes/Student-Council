@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowUpRight, MapPin, Users } from "lucide-react";
 import { Picture } from "@/components/ui/picture";
 import {
@@ -36,27 +37,82 @@ const CAT_ACCENT: Record<EventCategory, string> = {
 
 type StatusKind = "live" | "soon" | "open" | "scheduled" | "past";
 
+type View = "now" | "upcoming" | "past";
+
+const VIEWS: View[] = ["now", "upcoming", "past"];
+
+const TABS: { value: View; label: string }[] = [
+  { value: "now", label: "Now" },
+  { value: "upcoming", label: "Upcoming" },
+  { value: "past", label: "Past" },
+];
+
 type Group = { key: string; label: string; events: EventItem[] };
 
-export function EventsAlmanac({ events }: { events: EventItem[] }) {
+export function EventsAlmanac({
+  live,
+  upcoming,
+  past,
+}: {
+  live: EventItem[];
+  upcoming: EventItem[];
+  past: EventItem[];
+}) {
   const root = React.useRef<HTMLElement>(null);
+  const listRef = React.useRef<HTMLDivElement>(null);
   const [cat, setCat] = React.useState<EventCategory | "all">("all");
   const [activeKey, setActiveKey] = React.useState<string | null>(null);
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // URL is the single source of truth for the active view (?view=now|upcoming|past).
+  // Default to "now" when something is live, else "upcoming".
+  const defaultView: View = live.length > 0 ? "now" : "upcoming";
+  const paramView = searchParams.get("view");
+  const view: View = (VIEWS as readonly string[]).includes(paramView ?? "")
+    ? (paramView as View)
+    : defaultView;
+
+  const setView = React.useCallback(
+    (v: View) => {
+      const params = new URLSearchParams(searchParams);
+      params.set("view", v);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, router, pathname],
+  );
+
+  const counts: Record<View, number> = {
+    now: live.length,
+    upcoming: upcoming.length,
+    past: past.length,
+  };
+
+  // Past events arrive in ascending date order; flip to newest-first for the
+  // archive-style browse. Now/Upcoming stay ascending for month grouping.
+  const pool: EventItem[] =
+    view === "now"
+      ? live
+      : view === "upcoming"
+        ? upcoming
+        : [...past].reverse();
+
   const filtered = React.useMemo(
-    () => (cat === "all" ? events : events.filter((e) => e.category === cat)),
-    [events, cat],
+    () => (cat === "all" ? pool : pool.filter((e) => e.category === cat)),
+    [pool, cat],
   );
 
   const groups = React.useMemo<Group[]>(
-    () => groupByMonth(filtered),
-    [filtered],
+    () => (view === "past" ? groupByYearDesc(filtered) : groupByMonth(filtered)),
+    [filtered, view],
   );
 
-  // Scroll-spy on month groups
+  // Scroll-spy on group sections.
   React.useEffect(() => {
     const els = Array.from(
-      root.current?.querySelectorAll<HTMLElement>("[data-month]") ?? [],
+      root.current?.querySelectorAll<HTMLElement>("[data-group]") ?? [],
     );
     if (!els.length) return;
     const io = new IntersectionObserver(
@@ -68,16 +124,16 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
               a.target.getBoundingClientRect().top -
               b.target.getBoundingClientRect().top,
           )[0];
-          setActiveKey((top.target as HTMLElement).dataset.month ?? null);
+          setActiveKey((top.target as HTMLElement).dataset.group ?? null);
         }
       },
       { rootMargin: "-30% 0px -60% 0px", threshold: 0 },
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
-  }, [groups.length]);
+  }, [groups]);
 
-  // Reveal animations on slabs
+  // Reveal animations on slabs.
   useGSAP(
     () => {
       const reduced = window.matchMedia(
@@ -168,8 +224,31 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
       }, root);
       return () => ctx.revert();
     },
-    { scope: root, dependencies: [groups.length, cat] },
+    { scope: root, dependencies: [groups, cat, view] },
   );
+
+  // List transition when switching tabs — a gentle fade/slide on the slab
+  // column, keyed to the active view so it remounts and re-reveals.
+  useGSAP(
+    () => {
+      const reduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      if (reduced) {
+        gsap.set(listRef.current, { opacity: 1, y: 0 });
+        return;
+      }
+      gsap.fromTo(
+        listRef.current,
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+      );
+    },
+    { scope: listRef, dependencies: [view] },
+  );
+
+  const railLabel = view === "past" ? "Years" : "Months";
+  const poolTotal = pool.length;
 
   return (
     <section ref={root} className="container mt-40 sm:mt-40">
@@ -185,79 +264,106 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
           </h2>
         </div>
         <span className="hidden font-mono text-xs text-subtle sm:block">
-          {String(filtered.length).padStart(2, "0")} on the calendar
+          {String(poolTotal).padStart(2, "0")} on the calendar
         </span>
       </div>
 
-      {/* Filter — terminal-style */}
-      <div className="-mx-1 mb-12 flex flex-wrap items-center gap-x-1 gap-y-2 font-mono text-xs uppercase tracking-[0.18em]">
-        <span className="px-1 text-subtle">Filter:</span>
-        {CATEGORIES.map((c, i) => (
-          <React.Fragment key={c.value}>
-            {i > 0 && <span className="text-subtle/50">·</span>}
-            <button
-              onClick={() => setCat(c.value)}
-              className={cn(
-                "rounded px-2 py-1 transition-colors",
-                cat === c.value
-                  ? "bg-ink text-bg"
-                  : "text-muted hover:text-ink",
-              )}
-            >
-              {c.label}
-            </button>
-          </React.Fragment>
-        ))}
-        <span className="ml-auto text-subtle">
-          {String(filtered.length).padStart(2, "0")} matched
-        </span>
+      {/* View tabs — editorial segmented header (Now / Upcoming / Past) */}
+      <div className="mb-8 flex flex-col gap-6">
+        <div className="grid grid-cols-3 divide-x divide-line/10 border-y border-line/10">
+          {TABS.map((t) => {
+            const isActive = view === t.value;
+            const count = counts[t.value];
+            const suffix =
+              t.value === "now"
+                ? "live"
+                : t.value === "upcoming"
+                  ? "ahead"
+                  : "in archive";
+            return (
+              <button
+                key={t.value}
+                onClick={() => setView(t.value)}
+                aria-pressed={isActive}
+                className={cn(
+                  "group/tab relative flex flex-col gap-2 px-4 py-6 text-left transition-colors duration-300 sm:px-8 sm:py-8",
+                  isActive ? "text-ink" : "text-muted hover:text-ink",
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  <span className="display text-3xl italic sm:text-4xl">
+                    {t.label}.
+                  </span>
+                  {t.value === "now" && live.length > 0 && <LiveDot />}
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtle">
+                  {String(count).padStart(2, "0")} {suffix}
+                </span>
+                {isActive && (
+                  <span className="absolute inset-x-0 -bottom-px h-0.5 bg-accent" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Category filter — terminal-style */}
+        <div className="-mx-1 flex flex-wrap items-center gap-x-2 gap-y-3 font-mono text-sm uppercase tracking-[0.18em]">
+          <span className="px-1 text-subtle">Filter:</span>
+          {CATEGORIES.map((c, i) => (
+            <React.Fragment key={c.value}>
+              {i > 0 && <span className="text-subtle/50">·</span>}
+              <button
+                onClick={() => setCat(c.value)}
+                className={cn(
+                  "rounded-md px-3 py-1.5 transition-colors",
+                  cat === c.value
+                    ? "bg-ink text-bg"
+                    : "text-muted hover:text-ink",
+                )}
+              >
+                {c.label}
+              </button>
+            </React.Fragment>
+          ))}
+          <span className="ml-auto text-subtle">
+            {String(filtered.length).padStart(2, "0")} matched
+          </span>
+        </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="grid place-items-center border-y border-line/10 py-32 text-center">
-          <div className="space-y-4">
-            <p className="display text-3xl">Nothing here yet.</p>
-            <p className="text-sm text-muted">
-              Got an idea?{" "}
-              <Link
-                href="/support"
-                className="prose-link text-ink underline-offset-4 hover:underline"
-              >
-                Pitch one →
-              </Link>
-            </p>
-          </div>
-        </div>
+        <EmptyState view={view} upcomingCount={upcoming.length} setView={setView} />
       ) : (
         <div className="grid grid-cols-1 gap-x-12 lg:grid-cols-12">
-          {/* Sticky month rail */}
+          {/* Sticky group rail */}
           <aside className="hidden lg:col-span-3 lg:block">
-            <div className="sticky top-32 flex flex-col gap-1">
-              <span className="kicker mb-4">Months</span>
+            <div className="sticky top-32 flex flex-col gap-2">
+              <span className="kicker mb-3 text-sm tracking-[0.2em]">{railLabel}</span>
               {groups.map((g) => {
                 const isActive = activeKey === g.key;
                 return (
                   <a
                     key={g.key}
-                    href={`#month-${g.key}`}
+                    href={`#group-${g.key}`}
                     onClick={(e) => {
                       e.preventDefault();
                       document
-                        .getElementById(`month-${g.key}`)
+                        .getElementById(`group-${g.key}`)
                         ?.scrollIntoView({
                           behavior: "smooth",
                           block: "start",
                         });
                     }}
                     className={cn(
-                      "group/m relative flex items-center gap-3 py-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors",
+                      "group/m relative flex items-center gap-3 py-3 font-mono text-sm uppercase tracking-[0.18em] transition-colors",
                       isActive ? "text-ink" : "text-subtle hover:text-muted",
                     )}
                   >
                     <span
                       className={cn(
-                        "h-px transition-all duration-500",
-                        isActive ? "w-10 bg-ink" : "w-4 bg-line/30",
+                        "h-0.5 transition-all duration-500",
+                        isActive ? "w-12 bg-ink" : "w-5 bg-line/30",
                       )}
                     />
                     <span className="flex-1">{g.label}</span>
@@ -276,17 +382,30 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
           </aside>
 
           {/* Slab column */}
-          <div className="lg:col-span-9">
+          <div ref={listRef} key={view} className="lg:col-span-9">
             {groups.map((g) => (
-              <div key={g.key} id={`month-${g.key}`} data-month={g.key}>
+              <div key={g.key} id={`group-${g.key}`} data-group={g.key}>
                 <div className="sticky top-20 z-10 -mx-5 mb-6 flex items-baseline gap-4 bg-bg/85 px-5 py-4 backdrop-blur-md">
-                  <span className="display text-3xl text-ink sm:text-4xl">
-                    {g.label.split(" ")[0]}
-                  </span>
-                  <span className="font-mono text-xs uppercase tracking-[0.18em] text-subtle">
-                    {g.label.split(" ")[1]} ·{" "}
-                    {String(g.events.length).padStart(2, "0")} events
-                  </span>
+                  {view === "past" ? (
+                    <>
+                      <span className="display italic text-4xl text-ink sm:text-5xl">
+                        {g.label}
+                      </span>
+                      <span className="font-mono text-xs uppercase tracking-[0.18em] text-subtle">
+                        {String(g.events.length).padStart(2, "0")} events
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="display text-3xl text-ink sm:text-4xl">
+                        {g.label.split(" ")[0]}
+                      </span>
+                      <span className="font-mono text-xs uppercase tracking-[0.18em] text-subtle">
+                        {g.label.split(" ")[1]} ·{" "}
+                        {String(g.events.length).padStart(2, "0")} events
+                      </span>
+                    </>
+                  )}
                 </div>
                 <div className="group/list">
                   {g.events.map((e) => (
@@ -299,6 +418,101 @@ export function EventsAlmanac({ events }: { events: EventItem[] }) {
         </div>
       )}
     </section>
+  );
+}
+
+/* ─────────────── Empty state ─────────────── */
+
+function EmptyState({
+  view,
+  upcomingCount,
+  setView,
+}: {
+  view: View;
+  upcomingCount: number;
+  setView: (v: View) => void;
+}) {
+  if (view === "now") {
+    return (
+      <div className="grid place-items-center border-y border-line/10 py-32 text-center">
+        <div className="space-y-5">
+          <p className="display text-3xl">Nothing happening right now.</p>
+          <p className="text-sm text-muted">
+            {upcomingCount > 0 ? (
+              <>
+                <span className="tabular-nums text-ink">
+                  {String(upcomingCount).padStart(2, "0")}
+                </span>{" "}
+                upcoming next —{" "}
+                <button
+                  onClick={() => setView("upcoming")}
+                  className="prose-link text-ink underline-offset-4 hover:underline"
+                >
+                  see what&rsquo;s coming →
+                </button>
+              </>
+            ) : (
+              <>
+                Nothing on the horizon either.{" "}
+                <Link
+                  href="/support"
+                  className="prose-link text-ink underline-offset-4 hover:underline"
+                >
+                  Pitch one →
+                </Link>
+              </>
+            )}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === "past") {
+    return (
+      <div className="grid place-items-center border-y border-line/10 py-32 text-center">
+        <div className="space-y-4">
+          <p className="display text-3xl">No history yet.</p>
+          <p className="text-sm text-muted">
+            Past events will collect here once the first one wraps.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid place-items-center border-y border-line/10 py-32 text-center">
+      <div className="space-y-4">
+        <p className="display text-3xl">Nothing scheduled yet.</p>
+        <p className="text-sm text-muted">
+          Got an idea?{" "}
+          <Link
+            href="/support"
+            className="prose-link text-ink underline-offset-4 hover:underline"
+          >
+            Pitch one →
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────── Live indicator ─────────────── */
+
+function LiveDot({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn("relative inline-flex h-2 w-2", className)}
+      aria-hidden
+    >
+      <span className="absolute inset-0 rounded-full bg-accent opacity-75 animate-ping" />
+      <span
+        className="relative inline-flex h-2 w-2 rounded-full bg-accent"
+        style={{ boxShadow: "0 0 10px currentColor" }}
+      />
+    </span>
   );
 }
 
@@ -387,14 +601,14 @@ function Slab({ event }: { event: EventItem }) {
           </p>
           <div
             data-slab-bit
-            className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.18em] text-subtle"
+            className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-sm uppercase tracking-[0.18em] text-muted"
           >
             <span className="flex items-center gap-2">
-              <MapPin className="h-3 w-3" aria-hidden /> {event.venue}
+              <MapPin className="h-4 w-4" aria-hidden /> {event.venue}
             </span>
             {event.attendees && (
               <span className="flex items-center gap-2">
-                <Users className="h-3 w-3" aria-hidden /> Cap ·{" "}
+                <Users className="h-4 w-4" aria-hidden /> Cap ·{" "}
                 {event.attendees}
               </span>
             )}
@@ -498,6 +712,21 @@ function groupByMonth(events: EventItem[]): Group[] {
       year: "numeric",
     });
     if (!buckets.has(key)) buckets.set(key, { key, label, events: [] });
+    buckets.get(key)!.events.push(e);
+  }
+  return Array.from(buckets.values());
+}
+
+/**
+ * Past events arrive newest-first (the page reverses the ascending list).
+ * Group preserving encounter order so years surface DESC and, within a year,
+ * the most recent event is on top.
+ */
+function groupByYearDesc(events: EventItem[]): Group[] {
+  const buckets = new Map<string, Group>();
+  for (const e of events) {
+    const key = String(new Date(e.date).getFullYear());
+    if (!buckets.has(key)) buckets.set(key, { key, label: key, events: [] });
     buckets.get(key)!.events.push(e);
   }
   return Array.from(buckets.values());

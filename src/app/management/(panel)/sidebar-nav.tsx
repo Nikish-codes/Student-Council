@@ -10,12 +10,16 @@ import {
   Calendar, Image as ImageIcon, LayoutDashboard, Megaphone, Film,
   Users, Building2, HelpCircle, LifeBuoy, Home, Settings, Sparkles,
   UserCog, ScanLine, Rows3, Tags, GalleryVerticalEnd,
+  Trophy, Medal, BarChart3, Activity, Shirt, UserCircle, Settings2,
+  UtensilsCrossed,
 } from "lucide-react";
 
 const ICONS: Record<string, LucideIcon> = {
   Calendar, ImageIcon, LayoutDashboard, Megaphone, Film,
   Users, Building2, HelpCircle, LifeBuoy, Home, Settings, Sparkles,
   UserCog, ScanLine, Rows3, Tags, GalleryVerticalEnd,
+  Trophy, Medal, BarChart3, Activity, Shirt, UserCircle, Settings2,
+  UtensilsCrossed,
 };
 
 export type NavItem = {
@@ -42,7 +46,8 @@ export function SidebarNav({
   const [open, setOpen] = useState(false);
 
   const isActive = (href: string) => {
-    if (href === "/management") return pathname === "/management";
+    if (href === "/management" || href === "/management/sports")
+      return pathname === href;
     return pathname === href || pathname.startsWith(href + "/");
   };
 

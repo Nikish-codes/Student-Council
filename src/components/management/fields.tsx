@@ -39,7 +39,9 @@ export function TextField(props: {
       <Label label={label} hint={hint} />
       <input
         {...rest}
-        defaultValue={value === undefined ? props.defaultValue ?? "" : undefined}
+        defaultValue={
+          value === undefined ? (props.defaultValue ?? "") : undefined
+        }
         value={value}
         onChange={onChange ? (e) => onChange(e.target.value) : undefined}
         className={inputCls}
@@ -61,7 +63,12 @@ export function TextAreaField(props: {
   return (
     <div>
       <Label label={label} hint={hint} />
-      <textarea {...rest} rows={rows} defaultValue={defaultValue ?? ""} className={inputCls} />
+      <textarea
+        {...rest}
+        rows={rows}
+        defaultValue={defaultValue ?? ""}
+        className={inputCls}
+      />
     </div>
   );
 }
@@ -94,15 +101,25 @@ export function SelectField(props: {
   label: string;
   hint?: string;
   defaultValue?: string;
-  options: { value: string; label: string }[];
+  value?: string;
+  required?: boolean;
+  disabled?: boolean;
+  onChange?: (value: string) => void;
+  options: { value: string; label: string; disabled?: boolean }[];
 }) {
-  const { label, hint, options, ...rest } = props;
+  const { label, hint, options, onChange, ...rest } = props;
   return (
     <div>
       <Label label={label} hint={hint} />
-      <select {...rest} className={inputCls}>
+      <select
+        {...rest}
+        onChange={
+          onChange ? (event) => onChange(event.target.value) : undefined
+        }
+        className={`${inputCls} disabled:cursor-not-allowed disabled:opacity-50`}
+      >
         {options.map((o) => (
-          <option key={o.value} value={o.value}>
+          <option key={o.value} value={o.value} disabled={o.disabled}>
             {o.label}
           </option>
         ))}
@@ -136,7 +153,12 @@ export function DateTimeField(props: {
   return (
     <div>
       <Label label={label} hint={hint} />
-      <input {...rest} type="datetime-local" defaultValue={local} className={inputCls} />
+      <input
+        {...rest}
+        type="datetime-local"
+        defaultValue={local}
+        className={inputCls}
+      />
     </div>
   );
 }
@@ -268,7 +290,10 @@ export function MediaField({
     try {
       const fd = new FormData();
       fd.append("file", file);
-      const res = await fetch("/api/media/upload", { method: "POST", body: fd });
+      const res = await fetch("/api/media/upload", {
+        method: "POST",
+        body: fd,
+      });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Upload failed");
       const m: MediaOption = json.media;
@@ -316,7 +341,13 @@ export function MediaField({
         <div className="flex items-center gap-3">
           <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-line/5">
             {current ? (
-              <Image src={current.url} alt="" fill className="object-cover" sizes="64px" />
+              <Image
+                src={current.url}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="64px"
+              />
             ) : (
               <div className="flex h-full items-center justify-center text-[10px] text-subtle">
                 none
@@ -327,7 +358,12 @@ export function MediaField({
             <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-line/15 px-3 py-1.5 text-xs text-ink hover:border-line/40">
               <Upload className="h-3.5 w-3.5" />
               {uploading ? "Uploading…" : "Upload"}
-              <input type="file" hidden onChange={onUpload} accept="image/*,video/*,application/pdf" />
+              <input
+                type="file"
+                hidden
+                onChange={onUpload}
+                accept="image/*,video/*,application/pdf"
+              />
             </label>
             <button
               type="button"
@@ -386,10 +422,18 @@ export function MediaField({
                 }}
                 className={cn(
                   "relative aspect-square overflow-hidden rounded-md border",
-                  selected === m.id ? "border-ink" : "border-line/10 hover:border-line/40",
+                  selected === m.id
+                    ? "border-ink"
+                    : "border-line/10 hover:border-line/40",
                 )}
               >
-                <Image src={m.url} alt="" fill className="object-cover" sizes="80px" />
+                <Image
+                  src={m.url}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="80px"
+                />
               </button>
             ))}
           </div>
@@ -436,7 +480,7 @@ export function RepeaterField<T extends Record<string, string | number>>({
   const [rows, setRows] = useState<T[]>(defaultValue ?? []);
   const blank = (): T =>
     template
-      ? ({ ...template })
+      ? { ...template }
       : (Object.fromEntries(
           columns.map((c) => [c.name, c.type === "number" ? 0 : ""]),
         ) as T);
@@ -449,8 +493,9 @@ export function RepeaterField<T extends Record<string, string | number>>({
   const renderInput = (c: RepeaterCol, i: number) => {
     const common = {
       value: String(rows[i][c.name] ?? ""),
-      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-        update(i, c.name, e.target.value),
+      onChange: (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      ) => update(i, c.name, e.target.value),
     };
     if (c.type === "textarea") {
       return (
@@ -566,11 +611,18 @@ export function MultiSelectField({
 }) {
   const [selected, setSelected] = useState<number[]>(defaultValue ?? []);
   const toggle = (id: number) =>
-    setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+    setSelected((s) =>
+      s.includes(id) ? s.filter((x) => x !== id) : [...s, id],
+    );
   return (
     <div>
       <Label label={label} hint={hint ?? "select any"} />
-      <input type="hidden" name={name} value={JSON.stringify(selected)} readOnly />
+      <input
+        type="hidden"
+        name={name}
+        value={JSON.stringify(selected)}
+        readOnly
+      />
       <div className="flex max-h-44 flex-wrap gap-2 overflow-y-auto rounded-xl border border-line/15 bg-surface-2 p-3">
         {options.map((o) => (
           <button

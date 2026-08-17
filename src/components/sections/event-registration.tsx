@@ -13,8 +13,8 @@ type Props = {
 };
 
 type RegisterResponse =
-  | { kind: "free"; ticketCode: string; registrationId: string }
-  | { kind: "paid"; registrationId: string; orderId: string; amountPaise: number; keyId: string }
+  | { kind: "free"; ticketCode: string; registrationId: string; alreadyRegistered?: boolean }
+  | { kind: "paid"; registrationId: string; orderId: string; amountPaise: number; keyId: string; alreadyRegistered?: boolean }
   | { error: string };
 
 declare global {
@@ -69,6 +69,9 @@ export function EventRegistration({ eventId, title, priceInPaise }: Props) {
       const data: RegisterResponse = await res.json();
       if (!res.ok || "error" in data) {
         throw new Error("error" in data ? data.error : "Registration failed");
+      }
+      if (data.alreadyRegistered) {
+        throw new Error("This email is already registered for this event.");
       }
       if (data.kind === "free") {
         goToTicket(data.ticketCode);

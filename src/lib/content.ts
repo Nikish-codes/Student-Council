@@ -28,7 +28,13 @@ import {
   eventRegistrations as regT,
   faqs as faqsT,
   highlights as highlightsT,
+  media as mediaT,
   recaps as recapsT,
+  sportsLeagues as sportsLeaguesT,
+  sportsMatches as sportsMatchesT,
+  sportsPeople as sportsPeopleT,
+  sportsTeams as sportsTeamsT,
+  sportsTournaments as sportsTournamentsT,
   supportChannels as supportT,
   type RegistrationStatus,
 } from "@/db/schema";
@@ -48,6 +54,14 @@ import type {
   Highlight,
   HomepageConfigData,
   SiteSettingsData,
+  SportCompetitionStatus,
+  SportDivision,
+  SportMatchEvent,
+  SportMatchStatus,
+  SportPersonRole,
+  SportPostMatch,
+  SportStandingRow,
+  SportType,
   SupportChannel,
   VaultStory,
   VaultStoryConfig,
@@ -440,7 +454,8 @@ export const getClub = cache(
         typeof d.cover?.width === "number" ? d.cover.width : undefined,
       coverHeight:
         typeof d.cover?.height === "number" ? d.cover.height : undefined,
-      foundedYear: typeof d.foundedYear === "number" ? d.foundedYear : undefined,
+      foundedYear:
+        typeof d.foundedYear === "number" ? d.foundedYear : undefined,
       activities: (d.activities ?? []).filter((a) => a?.title?.trim()),
       flagshipEvent: d.flagshipEvent || undefined,
       videos: (d.videos ?? []).filter((v) => v?.url?.trim()),
@@ -622,9 +637,21 @@ const SITE_SETTINGS_DEFAULTS: SiteSettingsData = {
     timezoneAbbr: "IST",
   },
   grievanceCategories: [
-    { value: "harassment", label: "Harassment / discrimination", to: "grievance@woxsen.edu.in" },
-    { value: "academic", label: "Academic concern", to: "grievance@woxsen.edu.in" },
-    { value: "facility", label: "Facility / infrastructure", to: "grievance@woxsen.edu.in" },
+    {
+      value: "harassment",
+      label: "Harassment / discrimination",
+      to: "grievance@woxsen.edu.in",
+    },
+    {
+      value: "academic",
+      label: "Academic concern",
+      to: "grievance@woxsen.edu.in",
+    },
+    {
+      value: "facility",
+      label: "Facility / infrastructure",
+      to: "grievance@woxsen.edu.in",
+    },
     { value: "other", label: "Other", to: "grievance@woxsen.edu.in" },
   ],
   grievanceMailTo: "council@woxsen.edu.in",
@@ -673,22 +700,24 @@ export const getHomepageConfig = cache(
       customVault.length > 0
         ? customVault
             .filter((v) => v?.title?.trim())
-            .map((v): VaultStory => ({
-              id: v.id,
-              title: v.title,
-              kicker: v.kicker || "",
-              blurb: v.line || "",
-              posterImage:
-                v.mediaKind === "video"
-                  ? v.posterSrc
-                  : v.mediaKind === "image"
-                    ? v.mediaSrc
-                    : "",
-              videoUrl: v.mediaKind === "video" ? v.mediaSrc : undefined,
-              href: v.href || "/events",
-              year: v.year || undefined,
-              mediaKind: v.mediaKind,
-            }))
+            .map(
+              (v): VaultStory => ({
+                id: v.id,
+                title: v.title,
+                kicker: v.kicker || "",
+                blurb: v.line || "",
+                posterImage:
+                  v.mediaKind === "video"
+                    ? v.posterSrc
+                    : v.mediaKind === "image"
+                      ? v.mediaSrc
+                      : "",
+                videoUrl: v.mediaKind === "video" ? v.mediaSrc : undefined,
+                href: v.href || "/events",
+                year: v.year || undefined,
+                mediaKind: v.mediaKind,
+              }),
+            )
         : await resolveVaultStories(raw.vaultStoryIds ?? []);
 
     return {
@@ -760,7 +789,7 @@ async function resolveVaultStories(ids: number[]): Promise<VaultStory[]> {
       blurb: asString(d.blurb),
       posterImage: mediaUrl(d.heroMedia),
       videoUrl: d.heroVideoUrl || undefined,
-      href: slug ? `/events/${slug}` : "/archive",
+      href: slug ? `/events/${slug}` : "/events?view=past",
       publishedAt: d.publishedAt || undefined,
     };
   };
@@ -961,3 +990,401 @@ export async function getTicketsByContact(
     (x, y) => +new Date(y.event.date) - +new Date(x.event.date),
   );
 }
+
+// ─────────────────────────────────── sports ─────────────────────────────────
+// The sports vertical: tournaments, leagues, teams, matches, people, and the
+// /sports page config. Getters mirror the pattern above — React `cache()`,
+// defensive JSON coercion, `mediaUrl` for joined media.
+
+// ─────────────── public-facing types ───────────────
+
+export interface SportsTournament {
+  id: number;
+  slug: string;
+  title: string;
+  status: SportCompetitionStatus;
+  sport: SportType;
+  year: number;
+  division: SportDivision;
+  venue: string;
+  startDate: string | undefined;
+  endDate: string | undefined;
+  banner: string;
+  excerpt: string;
+  description: string;
+  featured: boolean;
+  publishedAt: string | undefined;
+}
+
+export interface SportsLeague extends SportsTournament {
+  standings: SportStandingRow[];
+}
+
+export interface SportsTeam {
+  id: number;
+  slug: string;
+  name: string;
+  logo: string;
+  clubId: number | undefined;
+}
+
+export interface SportsMatch {
+  id: number;
+  tournamentId: number | undefined;
+  leagueId: number | undefined;
+  sport: SportType;
+  round: string | undefined;
+  teamAId: number | undefined;
+  teamBId: number | undefined;
+  teamAName: string;
+  teamBName: string;
+  teamALogo: string;
+  teamBLogo: string;
+  competitionTitle: string;
+  competitionHref: string | undefined;
+  competitionYear: number | undefined;
+  matchDate: string | undefined;
+  venue: string | undefined;
+  status: SportMatchStatus;
+  scoreA: number | undefined;
+  scoreB: number | undefined;
+  events: SportMatchEvent[];
+  postMatch: SportPostMatch;
+}
+
+export interface SportsPerson {
+  id: number;
+  slug: string;
+  name: string;
+  photo: string;
+  role: SportPersonRole;
+  bio: string;
+  graduationYear: number | undefined;
+  sport: SportType | undefined;
+  email: string | undefined;
+  phone: string | undefined;
+}
+
+export interface SportsPageConfig {
+  academyLogo: string;
+  tagline: string;
+  galleryImages: string[];
+}
+
+// ─────────────── mappers ───────────────
+
+function mapTournament(d: {
+  id: number;
+  slug: string;
+  title: string;
+  status: SportCompetitionStatus;
+  sport: SportType;
+  year: number;
+  division: SportDivision;
+  venue: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  banner?: { url?: string | null } | null;
+  excerpt: string | null;
+  description: string | null;
+  featured: boolean;
+  publishedAt: string | null;
+}): SportsTournament {
+  return {
+    id: d.id,
+    slug: asString(d.slug),
+    title: asString(d.title),
+    status: d.status,
+    sport: d.sport,
+    year: d.year,
+    division: d.division,
+    venue: asString(d.venue),
+    startDate: d.startDate || undefined,
+    endDate: d.endDate || undefined,
+    banner: mediaUrl(d.banner),
+    excerpt: asString(d.excerpt),
+    description: asString(d.description),
+    featured: d.featured,
+    publishedAt: d.publishedAt || undefined,
+  };
+}
+
+function mapLeague(d: {
+  id: number;
+  slug: string;
+  title: string;
+  status: SportCompetitionStatus;
+  sport: SportType;
+  year: number;
+  division: SportDivision;
+  venue: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  banner?: { url?: string | null } | null;
+  excerpt: string | null;
+  description: string | null;
+  featured: boolean;
+  publishedAt: string | null;
+  standings: unknown;
+}): SportsLeague {
+  return {
+    ...mapTournament(d),
+    standings: Array.isArray(d.standings)
+      ? (d.standings as SportStandingRow[])
+      : [],
+  };
+}
+
+function mapTeam(d: {
+  id: number;
+  slug: string;
+  name: string;
+  logo?: { url?: string | null } | null;
+  clubId: number | null;
+}): SportsTeam {
+  return {
+    id: d.id,
+    slug: asString(d.slug),
+    name: asString(d.name),
+    logo: mediaUrl(d.logo),
+    clubId: d.clubId ?? undefined,
+  };
+}
+
+function mapMatch(d: {
+  id: number;
+  tournamentId: number | null;
+  leagueId: number | null;
+  sport: SportType;
+  round: string | null;
+  teamAId: number | null;
+  teamBId: number | null;
+  teamA?: { name: string; logo?: { url?: string | null } | null } | null;
+  teamB?: { name: string; logo?: { url?: string | null } | null } | null;
+  tournament?: {
+    title: string;
+    slug: string;
+    year: number;
+    status: SportCompetitionStatus;
+  } | null;
+  league?: {
+    title: string;
+    slug: string;
+    year: number;
+    status: SportCompetitionStatus;
+  } | null;
+  matchDate: string | null;
+  venue: string | null;
+  status: SportMatchStatus;
+  scoreA: number | null;
+  scoreB: number | null;
+  events: unknown;
+  postMatch: unknown;
+}): SportsMatch {
+  const publishedTournament =
+    d.tournament?.status === "published" ? d.tournament : undefined;
+  const publishedLeague =
+    d.league?.status === "published" ? d.league : undefined;
+  const competition = publishedTournament ?? publishedLeague;
+  return {
+    id: d.id,
+    tournamentId: d.tournamentId ?? undefined,
+    leagueId: d.leagueId ?? undefined,
+    sport: d.sport,
+    round: d.round || undefined,
+    teamAId: d.teamAId ?? undefined,
+    teamBId: d.teamBId ?? undefined,
+    teamAName: d.teamA?.name ?? "",
+    teamBName: d.teamB?.name ?? "",
+    teamALogo: mediaUrl(d.teamA?.logo),
+    teamBLogo: mediaUrl(d.teamB?.logo),
+    competitionTitle: competition?.title ?? "",
+    competitionHref: publishedTournament
+      ? `/sports/tournaments/${publishedTournament.slug}`
+      : publishedLeague
+        ? `/sports/leagues/${publishedLeague.slug}`
+        : undefined,
+    competitionYear: competition?.year,
+    matchDate: d.matchDate || undefined,
+    venue: asString(d.venue),
+    status: d.status,
+    scoreA: d.scoreA ?? undefined,
+    scoreB: d.scoreB ?? undefined,
+    events: Array.isArray(d.events) ? (d.events as SportMatchEvent[]) : [],
+    postMatch: (d.postMatch as SportPostMatch) ?? {},
+  };
+}
+
+function mapPerson(d: {
+  id: number;
+  slug: string;
+  name: string;
+  photo?: { url?: string | null } | null;
+  role: SportPersonRole;
+  bio: string | null;
+  graduationYear: number | null;
+  sport: SportType | null;
+  email: string | null;
+  phone: string | null;
+}): SportsPerson {
+  return {
+    id: d.id,
+    slug: asString(d.slug),
+    name: asString(d.name),
+    photo: mediaUrl(d.photo),
+    role: d.role,
+    bio: asString(d.bio),
+    graduationYear: d.graduationYear ?? undefined,
+    sport: d.sport ?? undefined,
+    email: d.email || undefined,
+    phone: d.phone || undefined,
+  };
+}
+
+// ─────────────── getters ───────────────
+
+export const getSportsTournaments = cache(
+  async (year?: number): Promise<SportsTournament[]> => {
+    const rows = await db.query.sportsTournaments.findMany({
+      where: and(
+        eq(sportsTournamentsT.status, "published"),
+        ...(year ? [eq(sportsTournamentsT.year, year)] : []),
+      ),
+      with: { banner: true },
+      orderBy: [
+        asc(sportsTournamentsT.startDate),
+        asc(sportsTournamentsT.title),
+      ],
+    });
+    return rows.map(mapTournament);
+  },
+);
+
+export const getSportsTournament = cache(
+  async (slug: string): Promise<SportsTournament | undefined> => {
+    const row = await db.query.sportsTournaments.findFirst({
+      where: and(
+        eq(sportsTournamentsT.status, "published"),
+        eq(sportsTournamentsT.slug, slug),
+      ),
+      with: { banner: true },
+    });
+    return row ? mapTournament(row) : undefined;
+  },
+);
+
+export const getSportsLeagues = cache(
+  async (year?: number): Promise<SportsLeague[]> => {
+    const rows = await db.query.sportsLeagues.findMany({
+      where: and(
+        eq(sportsLeaguesT.status, "published"),
+        ...(year ? [eq(sportsLeaguesT.year, year)] : []),
+      ),
+      with: { banner: true },
+      orderBy: [asc(sportsLeaguesT.startDate), asc(sportsLeaguesT.title)],
+    });
+    return rows.map(mapLeague);
+  },
+);
+
+export const getSportsLeague = cache(
+  async (slug: string): Promise<SportsLeague | undefined> => {
+    const row = await db.query.sportsLeagues.findFirst({
+      where: and(
+        eq(sportsLeaguesT.status, "published"),
+        eq(sportsLeaguesT.slug, slug),
+      ),
+      with: { banner: true },
+    });
+    return row ? mapLeague(row) : undefined;
+  },
+);
+
+export const getSportsTeams = cache(async (): Promise<SportsTeam[]> => {
+  const rows = await db.query.sportsTeams.findMany({
+    with: { logo: true },
+    orderBy: asc(sportsTeamsT.name),
+  });
+  return rows.map(mapTeam);
+});
+
+export const getSportsMatches = cache(
+  async (opts?: {
+    tournamentId?: number;
+    leagueId?: number;
+    year?: number;
+  }): Promise<SportsMatch[]> => {
+    const where = [];
+    if (opts?.tournamentId)
+      where.push(eq(sportsMatchesT.tournamentId, opts.tournamentId));
+    if (opts?.leagueId) where.push(eq(sportsMatchesT.leagueId, opts.leagueId));
+    const rows = await db.query.sportsMatches.findMany({
+      where: where.length ? and(...where) : undefined,
+      with: {
+        teamA: { with: { logo: true } },
+        teamB: { with: { logo: true } },
+        tournament: true,
+        league: true,
+      },
+      orderBy: asc(sportsMatchesT.matchDate),
+    });
+    let matches = rows.map(mapMatch);
+    if (opts?.year) {
+      matches = matches.filter(
+        (m) =>
+          m.competitionYear === opts.year ||
+          (m.matchDate && Number(m.matchDate.slice(0, 4)) === opts.year),
+      );
+    }
+    return matches;
+  },
+);
+
+export const getSportsMatch = cache(
+  async (id: number): Promise<SportsMatch | undefined> => {
+    const row = await db.query.sportsMatches.findFirst({
+      where: eq(sportsMatchesT.id, id),
+      with: {
+        teamA: { with: { logo: true } },
+        teamB: { with: { logo: true } },
+        tournament: true,
+        league: true,
+      },
+    });
+    return row ? mapMatch(row) : undefined;
+  },
+);
+
+export const getSportsPeople = cache(
+  async (role?: SportPersonRole): Promise<SportsPerson[]> => {
+    const rows = await db.query.sportsPeople.findMany({
+      where: role ? eq(sportsPeopleT.role, role) : undefined,
+      with: { photo: true },
+      orderBy: [asc(sportsPeopleT.sortOrder), asc(sportsPeopleT.name)],
+    });
+    return rows.map(mapPerson);
+  },
+);
+
+export const getSportsPageConfig = cache(
+  async (): Promise<SportsPageConfig> => {
+    const row = await db.query.sportsPageConfig.findFirst({
+      with: { academyLogo: true },
+    });
+    const ids = Array.isArray(row?.galleryImageIds) ? row!.galleryImageIds : [];
+    let galleryImages: string[] = [];
+    if (ids.length > 0) {
+      const mediaRows = await db
+        .select({ id: mediaT.id, url: mediaT.url })
+        .from(mediaT)
+        .where(inArray(mediaT.id, ids));
+      const urlById = new Map(mediaRows.map((m) => [m.id, m.url]));
+      galleryImages = ids.map((id) => urlById.get(id) ?? "").filter(Boolean);
+    }
+    return {
+      academyLogo: mediaUrl(row?.academyLogo),
+      tagline: asString(row?.tagline),
+      galleryImages,
+    };
+  },
+);

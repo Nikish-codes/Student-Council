@@ -30,14 +30,17 @@ export default async function EditUserPage({
   ]);
   if (!user) notFound();
 
-  // admin cannot edit super_admin accounts.
-  if (me.role !== "super_admin" && user.role === "super_admin") {
+  // Only super admins can edit privileged super-admin/Oval accounts.
+  if (
+    me.role !== "super_admin" &&
+    (user.role === "super_admin" || user.role === "food_committee_member")
+  ) {
     return (
       <div className="mx-auto max-w-3xl">
         <p className="kicker text-subtle">Users</p>
         <h1 className="display mt-1 text-3xl">Locked</h1>
         <p className="mt-6 text-sm text-muted">
-          Only a Super Admin can edit another Super Admin&apos;s account.
+          Only a Super Admin can edit Super Admin or Food Committee accounts.
         </p>
       </div>
     );
@@ -48,7 +51,9 @@ export default async function EditUserPage({
   // What roles is the actor allowed to assign?
   const assignable = (me.role === "super_admin"
     ? ROLES_ALL
-    : ROLES_ALL.filter((r) => r !== "super_admin")
+    : ROLES_ALL.filter(
+        (r) => r !== "super_admin" && r !== "food_committee_member",
+      )
   ).map((r) => ({ value: r, label: ROLE_LABELS[r] }));
 
   const bound = updateUser.bind(null, id);

@@ -168,7 +168,6 @@ export async function updateEvent(id: number, fd: FormData) {
   revalidatePath("/management/events");
   revalidatePath("/");
   revalidatePath("/events");
-  revalidatePath("/archive");
   revalidatePath(`/events/${slug}`);
   // Both clubs when the event was reassigned, so neither list is left stale.
   await revalidateClubPages(existing.clubId, clubId);
