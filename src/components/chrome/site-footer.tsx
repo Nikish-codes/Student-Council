@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NikishEasterEgg } from "@/components/chrome/nikish-easter-egg";
 
 const FOOTER_NAV = [
   {
@@ -97,7 +98,7 @@ export function SiteFooter() {
             © {new Date().getFullYear()} Woxsen Student Council
           </span>
           <span className="font-mono">
-            v1.0 · Hyderabad, IN · Designed and built by Nikish
+            v1.0 · Hyderabad, IN · Designed and built by <NikishEasterEgg />
           </span>
         </div>
       </div>
