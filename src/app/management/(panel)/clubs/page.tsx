@@ -3,12 +3,12 @@ import { asc, eq } from "drizzle-orm";
 import { Rows3 } from "lucide-react";
 import { db } from "@/db/client";
 import { clubCategories as cat, clubs as t } from "@/db/schema";
-import { requireOps, isAdmin } from "@/lib/rbac";
+import { requireClubManager, isAdmin } from "@/lib/rbac";
 import { PageHeader } from "@/components/management/page-header";
 import { ClubsTable } from "./clubs-table";
 
 export default async function ClubsPage() {
-  const user = await requireOps();
+  const user = await requireClubManager();
   const isLead = user.role === "club_lead";
   const [rows, cats] = await Promise.all([
     db

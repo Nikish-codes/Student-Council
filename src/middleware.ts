@@ -15,6 +15,7 @@
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 import { authConfig } from "@/auth.config";
+import { restrictedPanelDestination } from "@/lib/panel-access";
 
 const { auth } = NextAuth(authConfig);
 
@@ -44,17 +45,15 @@ export default auth((req) => {
     return NextResponse.redirect(url);
   }
 
-  // Food Committee sessions are valid panel sessions, but their authority is
-  // intentionally limited to Oval management. This edge check complements the
-  // server-side role guards on every Oval route and action.
-  if (
-    role === "food_committee_member" &&
-    isPanel &&
-    !isLogin &&
-    !pathname.startsWith("/management/oval")
-  ) {
+  // Narrowly scoped roles get exactly one panel destination. Server-side role
+  // guards remain authoritative for direct actions and API requests.
+  const restrictedDestination =
+    isPanel && !isLogin
+      ? restrictedPanelDestination(role, req.auth?.user?.clubId, pathname)
+      : null;
+  if (restrictedDestination) {
     const url = req.nextUrl.clone();
-    url.pathname = "/management/oval";
+    url.pathname = restrictedDestination;
     url.search = "";
     return NextResponse.redirect(url);
   }

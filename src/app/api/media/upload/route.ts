@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import sharp from "sharp";
 import { db } from "@/db/client";
 import { media as mediaT } from "@/db/schema";
-import { requireOps } from "@/lib/rbac";
+import { requireMediaContributor } from "@/lib/rbac";
 import { uploadToR2, makeKey } from "@/lib/r2";
 
 export const runtime = "nodejs";
@@ -18,7 +18,7 @@ const ALLOWED = /^(image\/|video\/|application\/pdf)/;
  */
 export async function POST(req: Request) {
   try {
-    await requireOps();
+    await requireMediaContributor();
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

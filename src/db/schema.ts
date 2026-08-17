@@ -138,7 +138,7 @@ export type SportPostMatch = {
 export type OvalDiet = "veg" | "egg" | "nonveg";
 export type OvalMealId = "breakfast" | "lunch" | "dinner";
 export type OvalDayStatus = "draft" | "approved";
-export type OvalImportMethod = "manual" | "spreadsheet" | "vision";
+export type OvalImportMethod = "manual" | "spreadsheet" | "ocr";
 
 export type OvalMenuItem = {
   id: string;

@@ -72,7 +72,7 @@ export const ovalWeekDraftSchema = z.object({
   weekStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   sourceName: z.string().trim().max(255).optional(),
   sourceMimeType: z.string().trim().max(120).optional(),
-  importMethod: z.enum(["manual", "spreadsheet", "vision"]),
+  importMethod: z.enum(["manual", "spreadsheet", "ocr"]),
   days: z
     .array(
       z.object({

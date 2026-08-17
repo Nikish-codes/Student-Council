@@ -11,6 +11,7 @@ web
 - Woxsen students use the public portal to quickly find current campus information, especially from a phone between classes and activities.
 - Student Council and operations staff use authenticated management tools to publish content and run events.
 - A `food_committee_member` role maintains the Oval mess menu without receiving broader content-administration privileges.
+- A `club_lead` (Club President / Lead) may access and edit only the management page for the club assigned to their account.
 
 ## Product Purpose
 
@@ -37,9 +38,11 @@ The portal combines public student-life information with council-owned operation
 - Each meal preserves the operational food categories used in the committee spreadsheet, including breakfast staples, beverages, salads, vegetable preparations, lentils, rice, accompaniments, dessert, Indian bread, and separate Jain lunch/dinner choices.
 - Food items need visible vegetarian, egg, and non-vegetarian markers with text equivalents.
 - Weekly menus arrive as spreadsheet screenshots or exported documents. OCR must extract the complete seven-day table into structured, editable data.
+- Image and PDF OCR runs locally in the committee member's browser with the open-source PaddleOCR model. It requires no paid API key and does not upload the source document.
 - OCR output never publishes directly: uncertain cells are flagged, committee members review/edit the current day, next day, or full week, and an authorized user explicitly approves each day before it can go live.
 - Only Super Admins and Food Committee members may access Oval management. Normal admins and every other role are excluded.
 - Food Committee members need a purpose-built weekly editor and permissions limited to Oval menus; they cannot access unrelated management surfaces.
+- Club Presidents receive a single-link management shell for their assigned club. Other clubs, events, event operations, media management, Oval, users, settings, and all unrelated server actions remain inaccessible.
 - The public experience must handle unpublished, incomplete, loading, and stale-week states clearly.
 - Oval is currently treated as the only dining venue represented by this feature.
 - Imported menu data remains private until an authorized user approves the service day.

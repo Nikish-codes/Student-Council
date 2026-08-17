@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   CircleAlert,
   FileImage,
+  FileDown,
   FileSpreadsheet,
   Loader2,
   Plus,
@@ -33,11 +34,7 @@ import {
   type OvalWeekDraft,
 } from "@/lib/oval-menu";
 import { cn } from "@/lib/utils";
-import {
-  approveOvalDay,
-  returnOvalDayToDraft,
-  saveOvalWeek,
-} from "./actions";
+import { approveOvalDay, returnOvalDayToDraft, saveOvalWeek } from "./actions";
 
 type StatusMap = Record<
   string,
@@ -70,6 +67,9 @@ export function OvalWeekEditor({
   );
   const [sourceFile, setSourceFile] = React.useState<File | null>(null);
   const [extracting, setExtracting] = React.useState(false);
+  const [extractStatus, setExtractStatus] = React.useState(
+    "Reading every cell…",
+  );
   const [dragging, setDragging] = React.useState(false);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const baseline = React.useRef(JSON.stringify(initialWeek));
@@ -94,7 +94,9 @@ export function OvalWeekEditor({
   const reviewCount = countOvalReviewFlags(selectedDay.meals);
   const approvalErrors = validateApprovableMeals(selectedDay.meals);
   const canApprove =
-    !dirty && selectedStatus?.status !== "approved" && approvalErrors.length === 0;
+    !dirty &&
+    selectedStatus?.status !== "approved" &&
+    approvalErrors.length === 0;
 
   function changeItems(
     meal: OvalMealId,
@@ -155,7 +157,21 @@ export function OvalWeekEditor({
 
   function chooseFile(file: File | null) {
     if (!file) return;
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error("The menu file must be 15 MB or smaller");
+      return;
+    }
+    if (!/\.(png|jpe?g|webp|pdf|xlsx?|csv|tsv)$/i.test(file.name)) {
+      toast.error("Choose a PNG, JPEG, WebP, PDF, XLS, XLSX, CSV, or TSV file");
+      return;
+    }
     setSourceFile(file);
+  }
+
+  async function downloadSpreadsheet() {
+    const { downloadOvalWeekXlsx } = await import("@/lib/oval-xlsx");
+    downloadOvalWeekXlsx(week);
+    toast.success("Editable XLSX downloaded");
   }
 
   async function extract() {
@@ -164,26 +180,43 @@ export function OvalWeekEditor({
       return;
     }
     setExtracting(true);
+    setExtractStatus("Reading every cell…");
     try {
-      const formData = new FormData();
-      formData.set("file", sourceFile);
-      formData.set("weekStart", week.weekStart);
-      const response = await fetch("/api/management/oval/extract", {
-        method: "POST",
-        body: formData,
-      });
-      const body = (await response.json()) as {
-        week?: OvalWeekDraft;
-        error?: string;
-      };
-      if (!response.ok || !body.week) {
-        throw new Error(body.error || "Menu extraction failed");
+      let extracted: OvalWeekDraft;
+      if (/\.(xlsx?|csv|tsv)$/i.test(sourceFile.name)) {
+        const formData = new FormData();
+        formData.set("file", sourceFile);
+        formData.set("weekStart", week.weekStart);
+        const response = await fetch("/api/management/oval/extract", {
+          method: "POST",
+          body: formData,
+        });
+        const body = (await response.json()) as {
+          week?: OvalWeekDraft;
+          error?: string;
+        };
+        if (!response.ok || !body.week) {
+          throw new Error(body.error || "Spreadsheet extraction failed");
+        }
+        extracted = body.week;
+      } else {
+        const { extractBrowserOcrWeek } =
+          await import("@/lib/oval-browser-ocr");
+        extracted = await extractBrowserOcrWeek(
+          sourceFile,
+          week.weekStart,
+          setExtractStatus,
+        );
       }
-      setWeek(body.week);
+      setWeek(extracted);
       setSelectedIndex(0);
-      toast.success("Seven days extracted. Review every flagged cell before approval.");
+      toast.success(
+        "Seven days extracted. Review every flagged cell before approval.",
+      );
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Menu extraction failed");
+      toast.error(
+        error instanceof Error ? error.message : "Menu extraction failed",
+      );
     } finally {
       setExtracting(false);
     }
@@ -196,8 +229,9 @@ export function OvalWeekEditor({
           <p className="kicker text-subtle">Import the whole week</p>
           <h2 className="display mt-2 text-3xl">Source to structured menu</h2>
           <p className="mt-4 max-w-lg text-sm leading-relaxed text-muted">
-            Spreadsheets are read cell by cell. Images and PDFs receive two OCR
-            passes. Extraction creates an editable draft and never publishes it.
+            Spreadsheets are read cell by cell. Images and PDFs use free
+            PaddleOCR privately on this device. Extraction creates a draft and
+            never publishes it.
           </p>
         </div>
         <div
@@ -243,7 +277,9 @@ export function OvalWeekEditor({
                   type="file"
                   className="sr-only"
                   accept=".png,.jpg,.jpeg,.webp,.pdf,.xls,.xlsx,.csv,.tsv"
-                  onChange={(event) => chooseFile(event.target.files?.[0] ?? null)}
+                  onChange={(event) =>
+                    chooseFile(event.target.files?.[0] ?? null)
+                  }
                 />
               </label>
               <button
@@ -257,7 +293,7 @@ export function OvalWeekEditor({
                 ) : (
                   <ScanText className="h-3.5 w-3.5" />
                 )}
-                {extracting ? "Reading every cell…" : "Extract seven days"}
+                {extracting ? extractStatus : "Extract seven days"}
               </button>
             </div>
           </div>
@@ -293,7 +329,11 @@ export function OvalWeekEditor({
                 )}
               >
                 <span className="flex items-center justify-between gap-2 text-[11px] opacity-65">
-                  {isCurrent ? "Current" : isNext ? "Next day" : OVAL_WEEKDAYS[index]}
+                  {isCurrent
+                    ? "Current"
+                    : isNext
+                      ? "Next day"
+                      : OVAL_WEEKDAYS[index]}
                   <span
                     className={cn(
                       "h-2 w-2 rounded-full",
@@ -302,10 +342,17 @@ export function OvalWeekEditor({
                   />
                 </span>
                 <span className="mt-2 block text-sm font-medium">
-                  {formatOvalDate(day.menuDate, { day: "numeric", month: "short" })}
+                  {formatOvalDate(day.menuDate, {
+                    day: "numeric",
+                    month: "short",
+                  })}
                 </span>
                 <span className="mt-2 block text-[11px] opacity-65">
-                  {flags ? `${flags} to review` : status === "approved" ? "Approved" : "Draft"}
+                  {flags
+                    ? `${flags} to review`
+                    : status === "approved"
+                      ? "Approved"
+                      : "Draft"}
                 </span>
               </button>
             );
@@ -370,8 +417,8 @@ export function OvalWeekEditor({
 
           {dirty ? (
             <div className="rounded-2xl bg-amber-500/10 p-5 text-sm text-amber-500">
-              Save changes before approving. Editing an approved day safely returns
-              it to draft.
+              Save changes before approving. Editing an approved day safely
+              returns it to draft.
             </div>
           ) : null}
 
@@ -385,9 +432,21 @@ export function OvalWeekEditor({
             </button>
           </form>
 
+          <button
+            type="button"
+            onClick={downloadSpreadsheet}
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-line/20 px-5 text-sm font-medium text-ink hover:border-line/45"
+          >
+            <FileDown className="h-4 w-4" /> Download week as XLSX
+          </button>
+
           {selectedStatus?.status === "approved" ? (
             <form action={returnOvalDayToDraft}>
-              <input type="hidden" name="menuDate" value={selectedDay.menuDate} />
+              <input
+                type="hidden"
+                name="menuDate"
+                value={selectedDay.menuDate}
+              />
               <button
                 type="submit"
                 className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-line/20 px-5 text-sm font-medium text-ink hover:border-line/45"
@@ -397,7 +456,11 @@ export function OvalWeekEditor({
             </form>
           ) : (
             <form action={approveOvalDay}>
-              <input type="hidden" name="menuDate" value={selectedDay.menuDate} />
+              <input
+                type="hidden"
+                name="menuDate"
+                value={selectedDay.menuDate}
+              />
               <button
                 type="submit"
                 disabled={!canApprove}
@@ -415,8 +478,8 @@ export function OvalWeekEditor({
             </p>
           ) : null}
           <p className="text-xs leading-relaxed text-subtle">
-            Approved days become public automatically at 4:00 AM on their service
-            date. Other days remain private.
+            Approved days become public automatically at 4:00 AM on their
+            service date. Other days remain private.
           </p>
         </aside>
       </section>
@@ -486,7 +549,9 @@ function MealEditor({
                 </span>
                 <input
                   value={item.dish}
-                  onChange={(event) => onUpdate(item.id, { dish: event.target.value })}
+                  onChange={(event) =>
+                    onUpdate(item.id, { dish: event.target.value })
+                  }
                   className={inputCls}
                   aria-label={`${label} dish`}
                 />

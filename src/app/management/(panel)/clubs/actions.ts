@@ -11,7 +11,11 @@ import {
   type ClubVideo,
 } from "@/db/schema";
 import { normalizeAccent } from "@/lib/club-accent";
-import { assertCanEditClub, requireOps, requireRole } from "@/lib/rbac";
+import {
+  assertCanEditClub,
+  requireClubManager,
+  requireRole,
+} from "@/lib/rbac";
 import { uniqueSlug, slugify } from "@/lib/slug";
 
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
@@ -36,7 +40,7 @@ function bust(...slugs: (string | undefined)[]) {
 }
 
 export async function saveClub(id: number | null, fd: FormData) {
-  const user = await requireOps();
+  const user = await requireClubManager();
   // Club leads edit only their own club, and may not create new ones.
   assertCanEditClub(user, id);
 
@@ -48,7 +52,9 @@ export async function saveClub(id: number | null, fd: FormData) {
     tags: list(fd, "tags"),
     members: s(fd, "members") ? Number(s(fd, "members")) : null,
     categoryId: s(fd, "categoryId") ? Number(s(fd, "categoryId")) : null,
-    leadId: s(fd, "leadId") ? Number(s(fd, "leadId")) : null,
+    ...(user.role === "club_lead"
+      ? {}
+      : { leadId: s(fd, "leadId") ? Number(s(fd, "leadId")) : null }),
     // ── detail-page content ──
     tagline: s(fd, "tagline") || null,
     about: s(fd, "about") || null,
@@ -93,7 +99,11 @@ export async function saveClub(id: number | null, fd: FormData) {
     await db.insert(t).values({ ...base, slug });
     bust(slug);
   }
-  redirect("/management/clubs");
+  redirect(
+    user.role === "club_lead" && id
+      ? `/management/clubs/${id}`
+      : "/management/clubs",
+  );
 }
 
 export async function deleteClub(id: number) {

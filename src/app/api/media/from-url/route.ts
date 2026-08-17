@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import sharp from "sharp";
 import { db } from "@/db/client";
 import { media as mediaT } from "@/db/schema";
-import { requireOps } from "@/lib/rbac";
+import { requireMediaContributor } from "@/lib/rbac";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -39,7 +39,7 @@ function hostAllowed(hostname: string): boolean {
  */
 export async function POST(req: Request) {
   try {
-    await requireOps();
+    await requireMediaContributor();
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

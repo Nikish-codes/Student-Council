@@ -77,6 +77,21 @@ const OVAL_NAV: NavGroup[] = [
   },
 ];
 
+function clubLeadNav(clubId: number | null): NavGroup[] {
+  return [
+    {
+      label: "Club",
+      items: [
+        {
+          href: clubId ? `/management/clubs/${clubId}` : "/management/clubs",
+          label: "Your club page",
+          icon: "Building2",
+        },
+      ],
+    },
+  ];
+}
+
 export default async function PanelLayout({
   children,
 }: {
@@ -92,6 +107,8 @@ export default async function PanelLayout({
   const groups =
     user.role === "food_committee_member"
       ? OVAL_NAV
+      : user.role === "club_lead"
+        ? clubLeadNav(user.clubId)
       : user.role === "super_admin"
         ? [...SHARED_NAV, ...OVAL_NAV, ...ADMIN_NAV]
         : isAdmin(user.role)

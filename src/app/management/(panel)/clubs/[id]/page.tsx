@@ -11,7 +11,7 @@ import {
   type ClubGalleryItem,
   type ClubVideo,
 } from "@/db/schema";
-import { assertCanEditClub, requireOps } from "@/lib/rbac";
+import { assertCanEditClub, requireClubManager } from "@/lib/rbac";
 import { mediaOptions } from "@/lib/media-options";
 import { EditorShell, Fieldset } from "@/components/management/page-header";
 import {
@@ -28,7 +28,8 @@ import {
 import { saveClub } from "../actions";
 
 export default async function ClubEditor({ params }: { params: Promise<{ id: string }> }) {
-  const user = await requireOps();
+  const user = await requireClubManager();
+  const isLead = user.role === "club_lead";
   const { id } = await params;
   const isNew = id === "new";
   // Guards before any query: a club lead may only open their own club, and may
@@ -38,7 +39,12 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
   const [row, media, leads, cats] = await Promise.all([
     isNew ? null : db.query.clubs.findFirst({ where: eq(t.id, Number(id)) }),
     mediaOptions(),
-    db.select({ id: usersT.id, name: usersT.name }).from(usersT).orderBy(asc(usersT.name)),
+    isLead
+      ? Promise.resolve([])
+      : db
+          .select({ id: usersT.id, name: usersT.name })
+          .from(usersT)
+          .orderBy(asc(usersT.name)),
     db
       .select({ id: catT.id, label: catT.label })
       .from(catT)
@@ -186,13 +192,15 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
           <TextField name="websiteUrl" label="Website" hint="optional" defaultValue={row?.websiteUrl} />
           <TextField name="contactEmail" label="Contact email" hint="optional" defaultValue={row?.contactEmail} />
         </div>
-        <SelectField
-          name="leadId"
-          label="Club lead account"
-          hint="the portal user who may edit this club"
-          defaultValue={row?.leadId ? String(row.leadId) : ""}
-          options={[{ value: "", label: "— none —" }, ...leads.map((l) => ({ value: String(l.id), label: l.name }))]}
-        />
+        {isLead ? null : (
+          <SelectField
+            name="leadId"
+            label="Club lead account"
+            hint="the portal user who may edit this club"
+            defaultValue={row?.leadId ? String(row.leadId) : ""}
+            options={[{ value: "", label: "— none —" }, ...leads.map((l) => ({ value: String(l.id), label: l.name }))]}
+          />
+        )}
       </Fieldset>
 
       <SaveBar />

@@ -13,6 +13,13 @@ const nextConfig: NextConfig = {
     "drizzle-kit",
   ],
   webpack: (config, { isServer, webpack }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...(config.resolve.fallback ?? {}),
+        fs: false,
+        path: false,
+      };
+    }
     if (isServer) {
       const externals = Array.isArray(config.externals)
         ? config.externals
@@ -54,7 +61,8 @@ const nextConfig: NextConfig = {
     // the video section renders as an empty black box with a console violation.
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://va.vercel-scripts.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://va.vercel-scripts.com https://cdn.jsdelivr.net",
+      "worker-src 'self' blob:",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       // media-src is needed because <video> falls back to default-src 'self'
@@ -62,7 +70,7 @@ const nextConfig: NextConfig = {
       // aligned with img-src (R2 + Cloudinary are both https).
       "media-src 'self' https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://vitals.vercel-insights.com https://va.vercel-scripts.com",
+      "connect-src 'self' data: https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://paddle-model-ecology.bj.bcebos.com",
       "frame-src https://api.razorpay.com https://checkout.razorpay.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
       "object-src 'none'",
       "base-uri 'self'",

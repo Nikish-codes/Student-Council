@@ -15,7 +15,6 @@ export const OPS_ROLES: UserRole[] = [
   "super_admin",
   "admin",
   "council_member",
-  "club_lead",
   "editor",
 ];
 
@@ -23,6 +22,7 @@ export const OPS_ROLES: UserRole[] = [
  * constrained to /management/oval; it is deliberately not an OPS role. */
 export const PANEL_ROLES: UserRole[] = [
   ...OPS_ROLES,
+  "club_lead",
   "food_committee_member",
 ];
 
@@ -74,6 +74,11 @@ export async function requireRole(...roles: UserRole[]): Promise<SessionUser> {
 /** Require any ops role (can access the management panel). */
 export const requireOps = () => requireRole(...OPS_ROLES);
 export const requirePanelUser = () => requireRole(...PANEL_ROLES);
+/** Club leads are excluded from general operations and may enter only their
+ * assigned club editor. These guards support that editor and its media fields. */
+export const requireClubManager = () => requireRole(...OPS_ROLES, "club_lead");
+export const requireMediaContributor = () =>
+  requireRole(...OPS_ROLES, "club_lead");
 export const requireOvalManager = () =>
   requireRole("super_admin", "food_committee_member");
 
