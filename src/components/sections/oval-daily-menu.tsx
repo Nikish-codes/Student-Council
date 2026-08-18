@@ -23,23 +23,37 @@ import { cn } from "@/lib/utils";
 
 const DIETS: Record<
   OvalDiet,
-  { short: string; label: string; className: string; square?: boolean }
+  {
+    short: string;
+    label: string;
+    textClass: string;
+    markerClass: string;
+    shapeClass: string;
+  }
 > = {
   veg: {
     short: "V",
     label: "Vegetarian",
-    className: "border-emerald-500/45 text-emerald-500",
+    textClass: "text-emerald-700 dark:text-emerald-400",
+    markerClass:
+      "border-emerald-500/70 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+    shapeClass: "rounded-full",
   },
   egg: {
     short: "E",
     label: "Contains egg",
-    className: "border-amber-500/50 text-amber-500",
+    textClass: "text-amber-700 dark:text-amber-300",
+    markerClass:
+      "border-amber-500/70 bg-amber-500/15 text-amber-700 dark:text-amber-300",
+    shapeClass: "rounded-[4px]",
   },
   nonveg: {
     short: "NV",
     label: "Non-vegetarian",
-    className: "border-rose-500/50 text-rose-500",
-    square: true,
+    textClass: "text-rose-700 dark:text-rose-400",
+    markerClass:
+      "border-rose-500/70 bg-rose-500/15 text-rose-700 dark:text-rose-300",
+    shapeClass: "rounded-none",
   },
 };
 
@@ -52,16 +66,16 @@ function DietMark({
 }) {
   const config = DIETS[diet];
   return (
-    <span className={cn("inline-flex items-center gap-1.5", config.className)}>
+    <span className={cn("inline-flex items-center gap-1.5", config.textClass)}>
       <span
         aria-hidden
         className={cn(
-          "grid shrink-0 place-items-center border font-bold",
-          compact ? "h-3.5 w-3.5 text-[0px]" : "h-4 min-w-4 px-0.5 text-[8px]",
-          config.square ? "rounded-[3px]" : "rounded-full",
+          "grid h-5 min-w-5 shrink-0 place-items-center border px-1 text-[9px] font-extrabold leading-none",
+          config.markerClass,
+          config.shapeClass,
         )}
       >
-        {compact ? "" : config.short}
+        {config.short}
       </span>
       <span className={compact ? "sr-only" : ""}>{config.label}</span>
     </span>
@@ -135,9 +149,17 @@ export function OvalDailyMenu({
           <DietMark diet="veg" />
           <DietMark diet="egg" />
           <DietMark diet="nonveg" />
-          <span className="ml-auto hidden text-subtle sm:inline">
-            Only today&apos;s approved menu is public
-          </span>
+        </div>
+
+        <div
+          role="note"
+          className="mt-4 flex items-start gap-3 rounded-xl border border-accent/35 bg-accent/[0.07] px-4 py-4 text-sm text-ink sm:px-5"
+        >
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+          <p>
+            <strong className="font-semibold text-accent">Important:</strong>{" "}
+            The menu is subject to change at any time.
+          </p>
         </div>
 
         {!day ? (
@@ -159,14 +181,6 @@ export function OvalDailyMenu({
         ) : (
           <div className="mx-auto mt-16 max-w-5xl">
             <ServiceLine meals={day.meals} phases={phases} />
-            <p className="mt-14 border-t border-line/10 pt-5 text-xs text-subtle">
-              Approved menu · Last updated{" "}
-              {new Intl.DateTimeFormat("en-IN", {
-                dateStyle: "medium",
-                timeStyle: "short",
-                timeZone: "Asia/Kolkata",
-              }).format(new Date(day.updatedAt))}
-            </p>
           </div>
         )}
       </section>
