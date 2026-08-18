@@ -10,6 +10,7 @@ import { logAudit } from "@/lib/audit";
 import {
   addIsoDays,
   getWeekStart,
+  normalizeOvalMeals,
   ovalWeekDraftSchema,
   validateApprovableMeals,
 } from "@/lib/oval-menu";
@@ -31,7 +32,9 @@ export async function saveOvalWeek(formData: FormData) {
   try {
     json = JSON.parse(raw);
   } catch {
-    throw new Error("The weekly menu payload is invalid. Refresh and try again.");
+    throw new Error(
+      "The weekly menu payload is invalid. Refresh and try again.",
+    );
   }
 
   const parsed = ovalWeekDraftSchema.safeParse(json);
@@ -61,7 +64,8 @@ export async function saveOvalWeek(formData: FormData) {
     for (const day of draft.days) {
       const previous = existingByDate.get(day.menuDate);
       const changed =
-        !previous || JSON.stringify(previous.meals) !== JSON.stringify(day.meals);
+        !previous ||
+        JSON.stringify(previous.meals) !== JSON.stringify(day.meals);
       const status = changed ? "draft" : (previous?.status ?? "draft");
 
       await tx
@@ -75,7 +79,8 @@ export async function saveOvalWeek(formData: FormData) {
           sourceMimeType: draft.sourceMimeType ?? null,
           importMethod: draft.importMethod,
           importedByUserId: Number(user.id),
-          approvedByUserId: status === "approved" ? previous?.approvedByUserId : null,
+          approvedByUserId:
+            status === "approved" ? previous?.approvedByUserId : null,
           approvedAt: status === "approved" ? previous?.approvedAt : null,
           updatedAt: now,
         })
@@ -107,8 +112,10 @@ export async function saveOvalWeek(formData: FormData) {
       sourceName: draft.sourceName ?? null,
       daysResetToDraft: draft.days.filter((day) => {
         const previous = existingByDate.get(day.menuDate);
-        return previous?.status === "approved" &&
-          JSON.stringify(previous.meals) !== JSON.stringify(day.meals);
+        return (
+          previous?.status === "approved" &&
+          JSON.stringify(previous.meals) !== JSON.stringify(day.meals)
+        );
       }).length,
     },
   });
@@ -120,13 +127,14 @@ export async function saveOvalWeek(formData: FormData) {
 export async function approveOvalDay(formData: FormData) {
   const user = await requireOvalManager();
   const menuDate = field(formData, "menuDate");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(menuDate)) throw new Error("Invalid menu date");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(menuDate))
+    throw new Error("Invalid menu date");
 
   const row = await db.query.ovalMenuDays.findFirst({
     where: eq(ovalMenuDays.menuDate, menuDate),
   });
   if (!row) throw new Error("Save this day before approving it");
-  const errors = validateApprovableMeals(row.meals);
+  const errors = validateApprovableMeals(normalizeOvalMeals(row.meals));
   if (errors.length) throw new Error(`Cannot approve: ${errors.join("; ")}`);
 
   const now = new Date().toISOString();

@@ -1,14 +1,19 @@
 /**
  * THESIS: Today is a service sequence, not a miniature weekly spreadsheet.
  * OWN-WORLD: WSC ink, paper, red, Fraunces display, precise hairlines and numbered stops.
- * STORY: Confirm the date, scan the three service windows, then read category and diet detail.
+ * STORY: Confirm the date, scan five menu sections across three service windows, then read category and diet detail.
  * FIRST VIEWPORT: Today's date and disclosure lead directly into the first numbered meal stop.
  * FORM: Selected concept 3, Service line; inherited Option 3 staging and seed 35d872d2.
  */
 
 import { AlertCircle, Check, Clock3, UtensilsCrossed } from "lucide-react";
 
-import type { DbOvalMenuDay, OvalDiet, OvalMealId, OvalMenuItem } from "@/db/schema";
+import type {
+  DbOvalMenuDay,
+  OvalDiet,
+  OvalMealId,
+  OvalMenuItem,
+} from "@/db/schema";
 import {
   OVAL_MEALS,
   type OvalMealPhase,
@@ -38,7 +43,13 @@ const DIETS: Record<
   },
 };
 
-function DietMark({ diet, compact = false }: { diet: OvalDiet; compact?: boolean }) {
+function DietMark({
+  diet,
+  compact = false,
+}: {
+  diet: OvalDiet;
+  compact?: boolean;
+}) {
   const config = DIETS[diet];
   return (
     <span className={cn("inline-flex items-center gap-1.5", config.className)}>
@@ -109,13 +120,13 @@ export function OvalDailyMenu({
               </span>
             </h1>
             <p className="mt-6 max-w-2xl text-pretty text-muted">
-              Breakfast, lunch, and dinner for this service day. The public page
-              changes automatically at 4:00 AM.
+              Breakfast, lunch, dinner, and Jain choices for this service day.
+              The public page changes automatically at 4:00 AM.
             </p>
           </div>
           <div className="border-l border-line/20 pl-5 text-sm text-muted">
-            <p className="font-medium text-ink">Three services</p>
-            <p className="mt-1">One verified daily menu</p>
+            <p className="font-medium text-ink">Five menu sections</p>
+            <p className="mt-1">Three service windows · one verified day</p>
           </div>
         </header>
 
@@ -134,10 +145,12 @@ export function OvalDailyMenu({
             <div className="mb-12 flex items-start gap-4 border-y border-line/15 py-6">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
               <div>
-                <h2 className="font-medium text-ink">Today&apos;s menu is awaiting confirmation</h2>
+                <h2 className="font-medium text-ink">
+                  Today&apos;s menu is awaiting confirmation
+                </h2>
                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-                  The Food Committee has not approved this service day yet. Nothing
-                  from another day is shown in its place.
+                  The Food Committee has not approved this service day yet.
+                  Nothing from another day is shown in its place.
                 </p>
               </div>
             </div>
@@ -147,7 +160,8 @@ export function OvalDailyMenu({
           <div className="mx-auto mt-16 max-w-5xl">
             <ServiceLine meals={day.meals} phases={phases} />
             <p className="mt-14 border-t border-line/10 pt-5 text-xs text-subtle">
-              Approved menu · Last updated {new Intl.DateTimeFormat("en-IN", {
+              Approved menu · Last updated{" "}
+              {new Intl.DateTimeFormat("en-IN", {
                 dateStyle: "medium",
                 timeStyle: "short",
                 timeZone: "Asia/Kolkata",
@@ -190,7 +204,11 @@ function ServiceLine({
                   : "border-line/25 text-ink",
               )}
             >
-              {phase === "completed" ? <Check className="h-4 w-4" /> : index + 1}
+              {phase === "completed" ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                index + 1
+              )}
             </span>
             <div>
               <h2 className="display text-3xl sm:text-4xl">{meal.label}</h2>

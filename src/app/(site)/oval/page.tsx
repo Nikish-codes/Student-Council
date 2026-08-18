@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Today's Oval Menu",
   description:
-    "Today's approved breakfast, lunch, and dinner menu for the Oval mess at Woxsen University.",
+    "Today's approved breakfast, lunch, dinner, Jain lunch, and Jain dinner menu for the Oval mess at Woxsen University.",
 };
 
 export default async function OvalPage() {

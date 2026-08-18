@@ -5,13 +5,11 @@ import {
   Check,
   CheckCircle2,
   CircleAlert,
-  FileImage,
   FileDown,
   FileSpreadsheet,
   Loader2,
   Plus,
   Save,
-  ScanText,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -24,6 +22,7 @@ import type {
   OvalMenuItem,
 } from "@/db/schema";
 import { inputCls } from "@/components/management/fields";
+import { OVAL_MATRIX_SECTIONS } from "@/lib/oval-matrix";
 import {
   OVAL_MEALS,
   OVAL_WEEKDAYS,
@@ -65,24 +64,13 @@ export function OvalWeekEditor({
   const [selectedIndex, setSelectedIndex] = React.useState(
     initialSelected >= 0 ? initialSelected : 0,
   );
+  const [selectedMeal, setSelectedMeal] = React.useState<"all" | OvalMealId>(
+    "all",
+  );
   const [sourceFile, setSourceFile] = React.useState<File | null>(null);
   const [extracting, setExtracting] = React.useState(false);
-  const [extractStatus, setExtractStatus] = React.useState(
-    "Reading every cell…",
-  );
   const [dragging, setDragging] = React.useState(false);
-  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const baseline = React.useRef(JSON.stringify(initialWeek));
-
-  React.useEffect(() => {
-    if (!sourceFile?.type.startsWith("image/")) {
-      setPreviewUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(sourceFile);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [sourceFile]);
 
   React.useEffect(() => {
     if (notice) toast.success(notice);
@@ -97,6 +85,10 @@ export function OvalWeekEditor({
     !dirty &&
     selectedStatus?.status !== "approved" &&
     approvalErrors.length === 0;
+  const visibleMeals =
+    selectedMeal === "all"
+      ? OVAL_MEALS
+      : OVAL_MEALS.filter((meal) => meal.id === selectedMeal);
 
   function changeItems(
     meal: OvalMealId,
@@ -126,11 +118,14 @@ export function OvalWeekEditor({
   }
 
   function addItem(meal: OvalMealId) {
+    const category =
+      OVAL_MATRIX_SECTIONS.find((section) => section.meal === meal)
+        ?.categories[0]?.display ?? "";
     changeItems(meal, (items) => [
       ...items,
       {
         id: crypto.randomUUID(),
-        category: "",
+        category,
         dish: "",
         diets: ["veg"],
         confidence: 1,
@@ -161,8 +156,8 @@ export function OvalWeekEditor({
       toast.error("The menu file must be 15 MB or smaller");
       return;
     }
-    if (!/\.(png|jpe?g|webp|pdf|xlsx?|csv|tsv)$/i.test(file.name)) {
-      toast.error("Choose a PNG, JPEG, WebP, PDF, XLS, XLSX, CSV, or TSV file");
+    if (!/\.(xlsx?|csv|tsv)$/i.test(file.name)) {
+      toast.error("Choose an XLS, XLSX, CSV, or TSV spreadsheet");
       return;
     }
     setSourceFile(file);
@@ -176,43 +171,29 @@ export function OvalWeekEditor({
 
   async function extract() {
     if (!sourceFile) {
-      toast.error("Choose the weekly menu image, PDF, or spreadsheet first");
+      toast.error("Choose the weekly menu spreadsheet first");
       return;
     }
     setExtracting(true);
-    setExtractStatus("Reading every cell…");
     try {
-      let extracted: OvalWeekDraft;
-      if (/\.(xlsx?|csv|tsv)$/i.test(sourceFile.name)) {
-        const formData = new FormData();
-        formData.set("file", sourceFile);
-        formData.set("weekStart", week.weekStart);
-        const response = await fetch("/api/management/oval/extract", {
-          method: "POST",
-          body: formData,
-        });
-        const body = (await response.json()) as {
-          week?: OvalWeekDraft;
-          error?: string;
-        };
-        if (!response.ok || !body.week) {
-          throw new Error(body.error || "Spreadsheet extraction failed");
-        }
-        extracted = body.week;
-      } else {
-        const { extractBrowserOcrWeek } =
-          await import("@/lib/oval-browser-ocr");
-        extracted = await extractBrowserOcrWeek(
-          sourceFile,
-          week.weekStart,
-          setExtractStatus,
-        );
+      const formData = new FormData();
+      formData.set("file", sourceFile);
+      formData.set("weekStart", week.weekStart);
+      const response = await fetch("/api/management/oval/extract", {
+        method: "POST",
+        body: formData,
+      });
+      const body = (await response.json()) as {
+        week?: OvalWeekDraft;
+        error?: string;
+      };
+      if (!response.ok || !body.week) {
+        throw new Error(body.error || "Spreadsheet extraction failed");
       }
-      setWeek(extracted);
+      setWeek(body.week);
       setSelectedIndex(0);
-      toast.success(
-        "Seven days extracted. Review every flagged cell before approval.",
-      );
+      setSelectedMeal("all");
+      toast.success("Seven weekday columns mapped into five meal sections.");
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Menu extraction failed",
@@ -229,9 +210,8 @@ export function OvalWeekEditor({
           <p className="kicker text-subtle">Import the whole week</p>
           <h2 className="display mt-2 text-3xl">Source to structured menu</h2>
           <p className="mt-4 max-w-lg text-sm leading-relaxed text-muted">
-            Spreadsheets are read cell by cell. Images and PDFs use free
-            PaddleOCR privately on this device. Extraction creates a draft and
-            never publishes it.
+            XLSX sheets are read directly by weekday column and fixed meal row.
+            No OCR or paid service is involved. Importing only creates a draft.
           </p>
         </div>
         <div
@@ -254,18 +234,14 @@ export function OvalWeekEditor({
           <div className="grid gap-5 sm:grid-cols-[1fr_auto] sm:items-center">
             <div className="flex min-w-0 items-center gap-4">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-surface-2 text-accent">
-                {sourceFile?.name.match(/\.(xlsx?|csv|tsv)$/i) ? (
-                  <FileSpreadsheet className="h-5 w-5" />
-                ) : (
-                  <FileImage className="h-5 w-5" />
-                )}
+                <FileSpreadsheet className="h-5 w-5" />
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-ink">
                   {sourceFile?.name ?? "Drop the committee sheet here"}
                 </p>
                 <p className="mt-1 text-xs text-subtle">
-                  PNG, JPEG, WebP, PDF, XLS, XLSX, CSV or TSV · up to 15 MB
+                  Standard Oval XLS, XLSX, CSV or TSV · up to 15 MB
                 </p>
               </div>
             </div>
@@ -276,7 +252,7 @@ export function OvalWeekEditor({
                 <input
                   type="file"
                   className="sr-only"
-                  accept=".png,.jpg,.jpeg,.webp,.pdf,.xls,.xlsx,.csv,.tsv"
+                  accept=".xls,.xlsx,.csv,.tsv"
                   onChange={(event) =>
                     chooseFile(event.target.files?.[0] ?? null)
                   }
@@ -291,20 +267,12 @@ export function OvalWeekEditor({
                 {extracting ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
-                  <ScanText className="h-3.5 w-3.5" />
+                  <FileSpreadsheet className="h-3.5 w-3.5" />
                 )}
-                {extracting ? extractStatus : "Extract seven days"}
+                {extracting ? "Reading matrix…" : "Read weekly matrix"}
               </button>
             </div>
           </div>
-          {previewUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- local object URL preview
-            <img
-              src={previewUrl}
-              alt="Selected weekly menu source preview"
-              className="mt-5 max-h-72 w-full rounded-xl bg-white object-contain"
-            />
-          ) : null}
         </div>
       </section>
 
@@ -360,6 +328,30 @@ export function OvalWeekEditor({
         </div>
       </section>
 
+      <section className="border-y border-line/10 py-4">
+        <div className="flex gap-2 overflow-x-auto" aria-label="Meal section">
+          {[
+            { id: "all" as const, label: "Full Menu" },
+            ...OVAL_MEALS.map((meal) => ({ id: meal.id, label: meal.label })),
+          ].map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => setSelectedMeal(option.id)}
+              aria-pressed={selectedMeal === option.id}
+              className={cn(
+                "min-h-10 shrink-0 rounded-full border px-4 text-xs font-medium transition-colors",
+                selectedMeal === option.id
+                  ? "border-ink bg-ink text-bg"
+                  : "border-line/15 text-muted hover:border-line/40 hover:text-ink",
+              )}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section className="grid gap-8 xl:grid-cols-[1fr_280px]">
         <div className="space-y-6">
           <div className="flex flex-wrap items-end justify-between gap-5 border-b border-line/15 pb-5">
@@ -386,12 +378,17 @@ export function OvalWeekEditor({
             </span>
           </div>
 
-          {OVAL_MEALS.map((meal) => (
+          {visibleMeals.map((meal) => (
             <MealEditor
               key={meal.id}
               meal={meal.id}
               label={meal.label}
               time={meal.time}
+              categories={
+                OVAL_MATRIX_SECTIONS.find(
+                  (section) => section.meal === meal.id,
+                )?.categories.map((category) => category.display) ?? []
+              }
               items={selectedDay.meals[meal.id]}
               onUpdate={(id, patch) => updateItem(meal.id, id, patch)}
               onToggleDiet={(item, diet) => toggleDiet(meal.id, item, diet)}
@@ -412,6 +409,8 @@ export function OvalWeekEditor({
               <p>{selectedDay.meals.breakfast.length} breakfast entries</p>
               <p>{selectedDay.meals.lunch.length} lunch entries</p>
               <p>{selectedDay.meals.dinner.length} dinner entries</p>
+              <p>{selectedDay.meals.jain_lunch.length} Jain lunch entries</p>
+              <p>{selectedDay.meals.jain_dinner.length} Jain dinner entries</p>
             </div>
           </div>
 
@@ -490,6 +489,7 @@ function MealEditor({
   meal,
   label,
   time,
+  categories,
   items,
   onUpdate,
   onToggleDiet,
@@ -499,6 +499,7 @@ function MealEditor({
   meal: OvalMealId;
   label: string;
   time: string;
+  categories: string[];
   items: OvalMenuItem[];
   onUpdate: (id: string, patch: Partial<OvalMenuItem>) => void;
   onToggleDiet: (item: OvalMenuItem, diet: OvalDiet) => void;
@@ -534,14 +535,23 @@ function MealEditor({
                 <span className="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-subtle">
                   Category
                 </span>
-                <input
+                <select
                   value={item.category}
                   onChange={(event) =>
                     onUpdate(item.id, { category: event.target.value })
                   }
                   className={inputCls}
                   aria-label={`${label} category`}
-                />
+                >
+                  {!categories.includes(item.category) ? (
+                    <option value={item.category}>{item.category}</option>
+                  ) : null}
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label>
                 <span className="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-subtle">
@@ -578,7 +588,7 @@ function MealEditor({
                   );
                 })}
                 <span className="ml-auto text-[11px] tabular-nums text-subtle">
-                  OCR {Math.round(item.confidence * 100)}%
+                  {item.sourceText ? "Direct spreadsheet cell" : "Manual entry"}
                 </span>
                 {item.needsReview ? (
                   <button

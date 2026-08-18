@@ -1,40 +1,45 @@
 import * as XLSX from "xlsx";
 
-import { OVAL_MEALS, OVAL_WEEKDAYS, type OvalWeekDraft } from "@/lib/oval-menu";
+import {
+  OVAL_MATRIX_SECTIONS,
+  matchesOvalMatrixLabel,
+} from "@/lib/oval-matrix";
+import { OVAL_WEEKDAYS, type OvalWeekDraft } from "@/lib/oval-menu";
 
-function categoryKey(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
+function xlsxDate(date: string): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "UTC",
+    day: "2-digit",
+    month: "short",
+  })
+    .format(new Date(`${date}T12:00:00.000Z`))
+    .replace(" ", "-");
 }
 
-/** Build a stable eight-column sheet that can be imported without OCR. */
+/** Build the same A:I matrix used by the committee's standard workbook. */
 export function ovalWeekToRows(week: OvalWeekDraft): string[][] {
   const rows: string[][] = [
-    ["", ...OVAL_WEEKDAYS.map((day) => day.toUpperCase())],
+    ["WEEKLY MENU", "", ...OVAL_WEEKDAYS.map((day) => day.toUpperCase())],
+    ["DATE", "", ...week.days.map((day) => xlsxDate(day.menuDate))],
   ];
 
-  for (const meal of OVAL_MEALS) {
-    rows.push(Array.from({ length: 8 }, () => meal.label.toUpperCase()));
-    const categories: Array<{ key: string; label: string }> = [];
-    const seen = new Set<string>();
-    for (const day of week.days) {
-      for (const item of day.meals[meal.id]) {
-        const key = categoryKey(item.category);
-        if (key && !seen.has(key)) {
-          seen.add(key);
-          categories.push({ key, label: item.category });
-        }
-      }
+  for (const section of OVAL_MATRIX_SECTIONS) {
+    if (section.parentHeader) {
+      rows.push([section.parentHeader, "", ...Array(7).fill("")]);
     }
-
-    for (const category of categories) {
+    rows.push([section.header, "", ...Array(7).fill("")]);
+    for (const category of section.categories) {
       rows.push([
-        category.label,
+        category.canonical,
+        category.display,
         ...week.days.map((day) =>
-          day.meals[meal.id]
-            .filter((item) => categoryKey(item.category) === category.key)
+          day.meals[section.meal]
+            .filter((item) =>
+              matchesOvalMatrixLabel(item.category, category.display, [
+                category.canonical,
+                ...(category.aliases ?? []),
+              ]),
+            )
             .map((item) => item.dish)
             .join(" / "),
         ),
@@ -47,7 +52,8 @@ export function ovalWeekToRows(week: OvalWeekDraft): string[][] {
 export function buildOvalWeekXlsx(week: OvalWeekDraft): ArrayBuffer {
   const worksheet = XLSX.utils.aoa_to_sheet(ovalWeekToRows(week));
   worksheet["!cols"] = [
-    { wch: 24 },
+    { wch: 22 },
+    { wch: 22 },
     ...Array.from({ length: 7 }, () => ({ wch: 32 })),
   ];
   const workbook = XLSX.utils.book_new();

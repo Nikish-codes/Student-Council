@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { extractSpreadsheetWeek, isSpreadsheetFile } from "@/lib/oval-ocr";
+import {
+  extractSpreadsheetWeek,
+  isSpreadsheetFile,
+} from "@/lib/oval-spreadsheet";
 import { getWeekStart } from "@/lib/oval-menu";
 import { rateLimit } from "@/lib/rate-limit";
 import { requireOvalManager } from "@/lib/rbac";
@@ -17,7 +20,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const limit = rateLimit(`oval-ocr:${user.id}`, 6, 10 * 60_000);
+  const limit = rateLimit(`oval-spreadsheet:${user.id}`, 6, 10 * 60_000);
   if (!limit.ok) {
     return NextResponse.json(
       { error: "Too many extraction attempts. Please wait a few minutes." },
@@ -42,7 +45,7 @@ export async function POST(request: Request) {
   }
   if (!isSpreadsheetFile(file)) {
     return NextResponse.json(
-      { error: "Images and PDFs are processed privately in your browser" },
+      { error: "Use the standard Oval XLS, XLSX, CSV, or TSV template" },
       { status: 415 },
     );
   }

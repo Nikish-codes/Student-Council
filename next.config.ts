@@ -13,13 +13,6 @@ const nextConfig: NextConfig = {
     "drizzle-kit",
   ],
   webpack: (config, { isServer, webpack }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...(config.resolve.fallback ?? {}),
-        fs: false,
-        path: false,
-      };
-    }
     if (isServer) {
       const externals = Array.isArray(config.externals)
         ? config.externals
@@ -61,7 +54,7 @@ const nextConfig: NextConfig = {
     // the video section renders as an empty black box with a console violation.
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://va.vercel-scripts.com https://cdn.jsdelivr.net",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://va.vercel-scripts.com",
       "worker-src 'self' blob:",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
@@ -70,7 +63,7 @@ const nextConfig: NextConfig = {
       // aligned with img-src (R2 + Cloudinary are both https).
       "media-src 'self' https:",
       "font-src 'self' data:",
-      "connect-src 'self' data: https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cdn.jsdelivr.net https://paddle-model-ecology.bj.bcebos.com",
+      "connect-src 'self' data: https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://vitals.vercel-insights.com https://va.vercel-scripts.com",
       "frame-src https://api.razorpay.com https://checkout.razorpay.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
       "object-src 'none'",
       "base-uri 'self'",
@@ -126,7 +119,10 @@ const nextConfig: NextConfig = {
     imageSizes: [64, 96, 128, 256, 384, 512],
     minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
-      { protocol: "https", hostname: "pub-88f0a7c5d200469fa7dbb8f90c605d45.r2.dev" },
+      {
+        protocol: "https",
+        hostname: "pub-88f0a7c5d200469fa7dbb8f90c605d45.r2.dev",
+      },
       { protocol: "https", hostname: "*.r2.dev" },
       // Cloudinary — used for club gallery images pasted as raw URLs.
       { protocol: "https", hostname: "res.cloudinary.com" },

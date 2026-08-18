@@ -32,14 +32,14 @@ The portal combines public student-life information with council-owned operation
 ## Capabilities and Constraints
 
 - Next.js App Router, React, TypeScript, Tailwind CSS, Drizzle ORM, and Turso/libSQL are established technical constraints.
-- The public menu has three canonical meal sections: Breakfast, Lunch, and Dinner. There is no Evening Snacks section.
+- The public menu has five canonical menu sections: Breakfast, Lunch, Dinner, Jain Lunch, and Jain Dinner. They share three service windows, and there is no Evening Snacks section.
 - Canonical Oval service times are Breakfast 7:00–9:45 AM, Lunch 12:00–2:45 PM, and Dinner 7:00–9:45 PM.
 - Public visitors may see only the current service day. Week and adjacent-day controls belong exclusively to management.
 - Each meal preserves the operational food categories used in the committee spreadsheet, including breakfast staples, beverages, salads, vegetable preparations, lentils, rice, accompaniments, dessert, Indian bread, and separate Jain lunch/dinner choices.
 - Food items need visible vegetarian, egg, and non-vegetarian markers with text equivalents.
-- Weekly menus arrive as spreadsheet screenshots or exported documents. OCR must extract the complete seven-day table into structured, editable data.
-- Image and PDF OCR runs locally in the committee member's browser with the open-source PaddleOCR model. It requires no paid API key and does not upload the source document.
-- OCR output never publishes directly: uncertain cells are flagged, committee members review/edit the current day, next day, or full week, and an authorized user explicitly approves each day before it can go live.
+- Weekly menus use a fixed XLS/XLSX matrix: weekdays are columns and Breakfast, Lunch, Dinner, Jain Lunch, and Jain Dinner are ordered row ranges.
+- Spreadsheet cells are read directly without OCR or a paid API. Imports with missing, moved, or renamed structural rows are rejected instead of guessed.
+- Imported data never publishes directly: committee members review/edit the current day, next day, or full week, and an authorized user explicitly approves each day before it can go live.
 - Only Super Admins and Food Committee members may access Oval management. Normal admins and every other role are excluded.
 - Food Committee members need a purpose-built weekly editor and permissions limited to Oval menus; they cannot access unrelated management surfaces.
 - Club Presidents receive a single-link management shell for their assigned club. Other clubs, events, event operations, media management, Oval, users, settings, and all unrelated server actions remain inaccessible.
@@ -57,7 +57,7 @@ The portal combines public student-life information with council-owned operation
 - The incumbent visual system is implemented in `src/app/globals.css`, `src/app/layout.tsx`, and the shared public components.
 - Brand assets are stored under `public/brand/` and `public/wordmark/`.
 - Existing authenticated role and management patterns are implemented in `src/lib/rbac.ts` and `src/app/management/`.
-- No confirmed real Oval menu data or menu artwork is currently present in the repository.
+- A real committee workbook is retained as a test fixture for exact matrix-import verification.
 
 ## Product Principles
 

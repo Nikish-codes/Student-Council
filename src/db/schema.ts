@@ -136,7 +136,12 @@ export type SportPostMatch = {
 // ───────────────────────────────── Oval menu ─────────────────────────────────
 
 export type OvalDiet = "veg" | "egg" | "nonveg";
-export type OvalMealId = "breakfast" | "lunch" | "dinner";
+export type OvalMealId =
+  | "breakfast"
+  | "lunch"
+  | "dinner"
+  | "jain_lunch"
+  | "jain_dinner";
 export type OvalDayStatus = "draft" | "approved";
 export type OvalImportMethod = "manual" | "spreadsheet" | "ocr";
 
@@ -654,19 +659,14 @@ export const sportsTournaments = sqliteTable(
       .default("draft"),
     sport: text("sport").$type<SportType>().notNull(),
     year: integer("year").notNull(),
-    division: text("division")
-      .$type<SportDivision>()
-      .notNull()
-      .default("open"),
+    division: text("division").$type<SportDivision>().notNull().default("open"),
     venue: text("venue"),
     startDate: text("start_date"),
     endDate: text("end_date"),
     bannerId: integer("banner_id").references(() => media.id),
     excerpt: text("excerpt").default(""),
     description: text("description").default(""), // markdown
-    featured: integer("featured", { mode: "boolean" })
-      .notNull()
-      .default(false),
+    featured: integer("featured", { mode: "boolean" }).notNull().default(false),
     publishedAt: text("published_at"),
     createdAt,
     updatedAt,
@@ -691,10 +691,7 @@ export const sportsLeagues = sqliteTable(
       .default("draft"),
     sport: text("sport").$type<SportType>().notNull(),
     year: integer("year").notNull(),
-    division: text("division")
-      .$type<SportDivision>()
-      .notNull()
-      .default("open"),
+    division: text("division").$type<SportDivision>().notNull().default("open"),
     venue: text("venue"),
     startDate: text("start_date"),
     endDate: text("end_date"),
@@ -705,9 +702,7 @@ export const sportsLeagues = sqliteTable(
     standings: text("standings", { mode: "json" })
       .$type<SportStandingRow[]>()
       .default([]),
-    featured: integer("featured", { mode: "boolean" })
-      .notNull()
-      .default(false),
+    featured: integer("featured", { mode: "boolean" }).notNull().default(false),
     publishedAt: text("published_at"),
     createdAt,
     updatedAt,
@@ -744,7 +739,9 @@ export const sportsMatches = sqliteTable(
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     // A match belongs to a tournament OR a league (or neither for a friendly).
-    tournamentId: integer("tournament_id").references(() => sportsTournaments.id),
+    tournamentId: integer("tournament_id").references(
+      () => sportsTournaments.id,
+    ),
     leagueId: integer("league_id").references(() => sportsLeagues.id),
     sport: text("sport").$type<SportType>().notNull(),
     round: text("round"), // "Group A", "Quarterfinal", "Matchday 3", …
@@ -829,7 +826,13 @@ export const ovalMenuDays = sqliteTable(
     meals: text("meals", { mode: "json" })
       .$type<OvalMeals>()
       .notNull()
-      .default({ breakfast: [], lunch: [], dinner: [] }),
+      .default({
+        breakfast: [],
+        lunch: [],
+        dinner: [],
+        jain_lunch: [],
+        jain_dinner: [],
+      }),
     sourceName: text("source_name"),
     sourceMimeType: text("source_mime_type"),
     importMethod: text("import_method")
@@ -1017,12 +1020,15 @@ export const sportsPeopleRelations = relations(sportsPeople, ({ one }) => ({
   photo: one(media, { fields: [sportsPeople.photoId], references: [media.id] }),
 }));
 
-export const sportsPageConfigRelations = relations(sportsPageConfig, ({ one }) => ({
-  academyLogo: one(media, {
-    fields: [sportsPageConfig.academyLogoId],
-    references: [media.id],
+export const sportsPageConfigRelations = relations(
+  sportsPageConfig,
+  ({ one }) => ({
+    academyLogo: one(media, {
+      fields: [sportsPageConfig.academyLogoId],
+      references: [media.id],
+    }),
   }),
-}));
+);
 
 // ─────────────────────────────── inferred types ──────────────────────────────
 

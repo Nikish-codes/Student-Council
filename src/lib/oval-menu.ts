@@ -39,6 +39,20 @@ export const OVAL_MEALS: ReadonlyArray<{
     startMinute: 19 * 60,
     endMinute: 21 * 60 + 45,
   },
+  {
+    id: "jain_lunch",
+    label: "Jain Lunch",
+    time: "12:00–2:45 PM",
+    startMinute: 12 * 60,
+    endMinute: 14 * 60 + 45,
+  },
+  {
+    id: "jain_dinner",
+    label: "Jain Dinner",
+    time: "7:00–9:45 PM",
+    startMinute: 19 * 60,
+    endMinute: 21 * 60 + 45,
+  },
 ];
 
 export const OVAL_WEEKDAYS = [
@@ -66,6 +80,8 @@ export const ovalMealsSchema = z.object({
   breakfast: z.array(itemSchema).max(40),
   lunch: z.array(itemSchema).max(40),
   dinner: z.array(itemSchema).max(40),
+  jain_lunch: z.array(itemSchema).max(40),
+  jain_dinner: z.array(itemSchema).max(40),
 });
 
 export const ovalWeekDraftSchema = z.object({
@@ -123,14 +139,23 @@ export function getKolkataMinutes(now = new Date()): number {
 
 export type OvalMealPhase = "completed" | "serving" | "upcoming" | "later";
 
-export function getOvalMealPhases(now = new Date()): Record<OvalMealId, OvalMealPhase> {
+export function getOvalMealPhases(
+  now = new Date(),
+): Record<OvalMealId, OvalMealPhase> {
   const minute = getKolkataMinutes(now);
   if (minute < OVAL_RELEASE_HOUR * 60) {
-    return { breakfast: "completed", lunch: "completed", dinner: "completed" };
+    return {
+      breakfast: "completed",
+      lunch: "completed",
+      dinner: "completed",
+      jain_lunch: "completed",
+      jain_dinner: "completed",
+    };
   }
   let nextFound = false;
-  return Object.fromEntries(
-    OVAL_MEALS.map((meal) => {
+  const serviceMeals = OVAL_MEALS.slice(0, 3);
+  const core = Object.fromEntries(
+    serviceMeals.map((meal) => {
       let phase: OvalMealPhase;
       if (minute >= meal.startMinute && minute < meal.endMinute) {
         phase = "serving";
@@ -145,7 +170,12 @@ export function getOvalMealPhases(now = new Date()): Record<OvalMealId, OvalMeal
       }
       return [meal.id, phase];
     }),
-  ) as Record<OvalMealId, OvalMealPhase>;
+  ) as Record<"breakfast" | "lunch" | "dinner", OvalMealPhase>;
+  return {
+    ...core,
+    jain_lunch: core.lunch,
+    jain_dinner: core.dinner,
+  };
 }
 
 export function addIsoDays(date: string, days: number): string {
@@ -162,7 +192,10 @@ export function getWeekStart(date: string): string {
   return addIsoDays(date, -(day === 0 ? 6 : day - 1));
 }
 
-export function formatOvalDate(date: string, options?: Intl.DateTimeFormatOptions) {
+export function formatOvalDate(
+  date: string,
+  options?: Intl.DateTimeFormatOptions,
+) {
   return new Intl.DateTimeFormat("en-IN", {
     timeZone: "UTC",
     ...(options ?? { weekday: "long", day: "numeric", month: "long" }),
@@ -170,7 +203,26 @@ export function formatOvalDate(date: string, options?: Intl.DateTimeFormatOption
 }
 
 export function createEmptyMeals(): OvalMeals {
-  return { breakfast: [], lunch: [], dinner: [] };
+  return {
+    breakfast: [],
+    lunch: [],
+    dinner: [],
+    jain_lunch: [],
+    jain_dinner: [],
+  };
+}
+
+/** Add newly introduced meal sections when reading older database rows. */
+export function normalizeOvalMeals(
+  value: Partial<OvalMeals> | null | undefined,
+): OvalMeals {
+  return {
+    breakfast: Array.isArray(value?.breakfast) ? value.breakfast : [],
+    lunch: Array.isArray(value?.lunch) ? value.lunch : [],
+    dinner: Array.isArray(value?.dinner) ? value.dinner : [],
+    jain_lunch: Array.isArray(value?.jain_lunch) ? value.jain_lunch : [],
+    jain_dinner: Array.isArray(value?.jain_dinner) ? value.jain_dinner : [],
+  };
 }
 
 export function createEmptyWeek(
@@ -208,7 +260,9 @@ export function inferOvalDiets(dish: string): OvalDiet[] {
 export function makeOvalItem(
   category: string,
   dish: string,
-  options?: Partial<Pick<OvalMenuItem, "confidence" | "needsReview" | "sourceText">>,
+  options?: Partial<
+    Pick<OvalMenuItem, "confidence" | "needsReview" | "sourceText">
+  >,
 ): OvalMenuItem {
   const cleanCategory = category.trim();
   const cleanDish = dish.trim();
@@ -243,6 +297,9 @@ export function validateApprovableMeals(meals: OvalMeals): string[] {
     if (meals[meal.id].length === 0) errors.push(`${meal.label} has no items`);
   }
   const flags = countOvalReviewFlags(meals);
-  if (flags > 0) errors.push(`${flags} extracted item${flags === 1 ? "" : "s"} still need review`);
+  if (flags > 0)
+    errors.push(
+      `${flags} extracted item${flags === 1 ? "" : "s"} still need review`,
+    );
   return errors;
 }
