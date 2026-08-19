@@ -17,9 +17,9 @@ const SIZE_OPTIONS: Array<{
   label: string;
   description: string;
 }> = [
-  { value: "small", label: "Small", description: "Half width" },
-  { value: "medium", label: "Medium", description: "Full width" },
-  { value: "large", label: "Large", description: "Feature photo" },
+  { value: "small", label: "Small", description: "Compact photo" },
+  { value: "medium", label: "Medium", description: "Half row on desktop" },
+  { value: "large", label: "Large", description: "Full row" },
 ];
 
 type GalleryDraft = ClubGalleryItem & { size: ClubGallerySize };
@@ -113,11 +113,13 @@ export function ClubGalleryField({
         <div>
           <p className="kicker text-subtle">Gallery photos</p>
           <p className="mt-1 max-w-xl text-xs leading-relaxed text-muted">
-            Upload JPG, PNG, GIF, or WebP images. Keep every photo under{" "}
+            Photo 1 is always the full-width highlight. Size changes width
+            only; photos keep their complete original frame. Keep every image
+            under{" "}
             <strong className="font-medium text-ink">
               {CLUB_GALLERY_UPLOAD_MAX_LABEL}
             </strong>
-            ; larger files will not be added to the club page.
+            .
           </p>
         </div>
         <button
@@ -178,16 +180,16 @@ export function ClubGalleryField({
               key={`${row.mediaId ?? row.url}-${index}`}
               className="grid gap-4 rounded-xl bg-surface-2/55 p-3 sm:grid-cols-[8rem_minmax(0,1fr)]"
             >
-              <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-line/5">
+              <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg bg-line/5">
                 {/* Gallery entries may include legacy external URLs. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={row.url}
                   alt=""
-                  className="h-full w-full object-cover"
+                  className="max-h-full max-w-full object-contain"
                 />
                 <span className="absolute bottom-2 left-2 rounded-md bg-bg/85 px-2 py-1 text-[10px] font-medium text-ink backdrop-blur-sm">
-                  {row.size}
+                  {index === 0 ? "featured" : row.size}
                 </span>
               </div>
 
@@ -221,33 +223,46 @@ export function ClubGalleryField({
                   </button>
                 </div>
 
-                <fieldset>
-                  <legend className="mb-1.5 text-[11px] font-medium text-muted">
-                    Display size
-                  </legend>
-                  <div className="grid grid-cols-3 gap-1 rounded-xl bg-bg/55 p-1">
-                    {SIZE_OPTIONS.map((option) => {
-                      const active = row.size === option.value;
-                      return (
-                        <button
-                          key={option.value}
-                          type="button"
-                          aria-pressed={active}
-                          title={option.description}
-                          onClick={() => update(index, { size: option.value })}
-                          className={cn(
-                            "min-h-9 rounded-lg px-2 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink",
-                            active
-                              ? "bg-ink font-medium text-bg"
-                              : "text-muted hover:bg-line/5 hover:text-ink",
-                          )}
-                        >
-                          {option.label}
-                        </button>
-                      );
-                    })}
+                {index === 0 ? (
+                  <div>
+                    <p className="text-[11px] font-medium text-muted">
+                      Display size
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-ink">
+                      Featured · photo 1 always appears largest and full width.
+                    </p>
                   </div>
-                </fieldset>
+                ) : (
+                  <fieldset>
+                    <legend className="mb-1.5 text-[11px] font-medium text-muted">
+                      Display size
+                    </legend>
+                    <div className="grid grid-cols-3 gap-1 rounded-xl bg-bg/55 p-1">
+                      {SIZE_OPTIONS.map((option) => {
+                        const active = row.size === option.value;
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            aria-pressed={active}
+                            title={option.description}
+                            onClick={() =>
+                              update(index, { size: option.value })
+                            }
+                            className={cn(
+                              "min-h-9 rounded-lg px-2 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink",
+                              active
+                                ? "bg-ink font-medium text-bg"
+                                : "text-muted hover:bg-line/5 hover:text-ink",
+                            )}
+                          >
+                            {option.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
+                )}
               </div>
             </article>
           ))}

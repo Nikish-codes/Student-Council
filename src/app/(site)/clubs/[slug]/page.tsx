@@ -236,18 +236,20 @@ export default async function ClubDetailPage({
 
           {club.gallery.length > 0 ? (
             <Section number={num("gallery")} title="Gallery">
-              <div className="grid auto-rows-[10rem] grid-cols-2 gap-3 sm:auto-rows-[12rem] sm:grid-cols-6 sm:gap-4">
+              <div className="flex flex-wrap items-start gap-3 sm:gap-4">
                 {club.gallery.map((g, i) => (
                   <figure
                     key={`${g.url}-${i}`}
                     className={cn(
-                      "group/g relative overflow-hidden rounded-2xl bg-surface",
-                      g.size === "small" &&
-                        "col-span-1 row-span-1 sm:col-span-2",
-                      (!g.size || g.size === "medium") &&
-                        "col-span-2 row-span-1 sm:col-span-3",
-                      g.size === "large" &&
-                        "col-span-2 row-span-2 sm:col-span-6",
+                      "group/g relative self-start overflow-hidden rounded-2xl bg-surface",
+                      i === 0 && "w-full",
+                      i > 0 &&
+                        g.size === "small" &&
+                        "w-[calc(50%_-_0.375rem)] sm:w-[calc(33.333%_-_0.667rem)]",
+                      i > 0 &&
+                        (!g.size || g.size === "medium") &&
+                        "w-full sm:w-[calc(50%_-_0.5rem)]",
+                      i > 0 && g.size === "large" && "w-full",
                     )}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element -- gallery URLs can include legacy external sources */}
@@ -255,7 +257,7 @@ export default async function ClubDetailPage({
                       src={g.url}
                       alt={g.caption || `${club.name} photo ${i + 1}`}
                       loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover/g:scale-105"
+                      className="block h-auto w-full"
                     />
                     {g.caption ? (
                       <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg/95 via-bg/60 to-transparent p-4 pt-12 text-xs text-ink sm:opacity-0 sm:transition-opacity sm:duration-500 sm:group-hover/g:opacity-100 sm:group-focus-within/g:opacity-100">
