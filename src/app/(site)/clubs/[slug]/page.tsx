@@ -236,27 +236,29 @@ export default async function ClubDetailPage({
 
           {club.gallery.length > 0 ? (
             <Section number={num("gallery")} title="Gallery">
-              {/* Natural-ratio masonry. Each image keeps its own aspect ratio —
-                  nothing is cropped or letterboxed. CSS multi-column flows
-                  items of different heights into a Pinterest-style wall. We
-                  use a plain <img> (not next/image) because next/image needs
-                  known dimensions to preserve a true ratio, and gallery URLs
-                  are arbitrary (R2 or Cloudinary) with no server-side dims. */}
-              <div className="columns-2 gap-4 sm:columns-3">
+              <div className="grid auto-rows-[10rem] grid-cols-2 gap-3 sm:auto-rows-[12rem] sm:grid-cols-6 sm:gap-4">
                 {club.gallery.map((g, i) => (
                   <figure
                     key={`${g.url}-${i}`}
-                    className="group/g relative mb-4 break-inside-avoid overflow-hidden rounded-2xl bg-surface"
+                    className={cn(
+                      "group/g relative overflow-hidden rounded-2xl bg-surface",
+                      g.size === "small" &&
+                        "col-span-1 row-span-1 sm:col-span-2",
+                      (!g.size || g.size === "medium") &&
+                        "col-span-2 row-span-1 sm:col-span-3",
+                      g.size === "large" &&
+                        "col-span-2 row-span-2 sm:col-span-6",
+                    )}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element -- natural-ratio gallery, dims unknown */}
+                    {/* eslint-disable-next-line @next/next/no-img-element -- gallery URLs can include legacy external sources */}
                     <img
                       src={g.url}
                       alt={g.caption || `${club.name} photo ${i + 1}`}
                       loading="lazy"
-                      className="block h-auto w-full transition-transform duration-700 ease-out group-hover/g:scale-105"
+                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover/g:scale-105"
                     />
                     {g.caption ? (
-                      <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg/90 to-transparent p-4 text-xs text-ink opacity-0 transition-opacity duration-500 group-hover/g:opacity-100">
+                      <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg/95 via-bg/60 to-transparent p-4 pt-12 text-xs text-ink sm:opacity-0 sm:transition-opacity sm:duration-500 sm:group-hover/g:opacity-100 sm:group-focus-within/g:opacity-100">
                         {g.caption}
                       </figcaption>
                     ) : null}

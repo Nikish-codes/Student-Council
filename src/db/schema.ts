@@ -81,8 +81,14 @@ export type RecapStat = { label: string; value: string };
 export type ClubActivity = { title: string; description?: string };
 /** One entry in a club's video list. Any YouTube/Vimeo URL form is accepted. */
 export type ClubVideo = { url: string; title?: string };
-/** Same shape as `RecapGalleryItem`, kept separate so the two can diverge. */
-export type ClubGalleryItem = { url: string; caption?: string };
+export type ClubGallerySize = "small" | "medium" | "large";
+/** A club photo plus its authored prominence in the public gallery. */
+export type ClubGalleryItem = {
+  url: string;
+  caption?: string;
+  size?: ClubGallerySize;
+  mediaId?: number;
+};
 
 // ──────────────────────────────── sports ─────────────────────────────────────
 // JSON-column shapes for the sports tables. Enums (SportType, SportDivision,

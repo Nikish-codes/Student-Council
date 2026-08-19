@@ -14,6 +14,7 @@ import {
 import { assertCanEditClub, requireClubManager } from "@/lib/rbac";
 import { mediaOptions } from "@/lib/media-options";
 import { EditorShell, Fieldset } from "@/components/management/page-header";
+import { ClubGalleryField } from "@/components/management/club-gallery-field";
 import {
   TextField,
   TextAreaField,
@@ -171,16 +172,9 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
           defaultValue={(row?.videos as ClubVideo[]) ?? []}
           template={{ url: "", title: "" }}
         />
-        <RepeaterField
+        <ClubGalleryField
           name="gallery"
-          label="Gallery"
-          hint="image URL + caption · upload under Media first, then paste the URL"
-          columns={[
-            { name: "url", label: "Image URL", grow: 2 },
-            { name: "caption", label: "Caption" },
-          ]}
           defaultValue={(row?.gallery as ClubGalleryItem[]) ?? []}
-          template={{ url: "", caption: "" }}
         />
       </Fieldset>
 

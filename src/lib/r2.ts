@@ -1,5 +1,12 @@
 import "server-only";
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import type { MediaUploadPurpose } from "@/lib/media-upload-policy";
 
 /**
  * Cloudflare R2 (S3-compatible) client + helpers. Reuses the same R2_* env the
@@ -15,6 +22,8 @@ function client(): S3Client {
     region: "auto",
     endpoint: process.env.R2_ENDPOINT,
     forcePathStyle: true,
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
     credentials: {
       accessKeyId: process.env.R2_ACCESS_KEY_ID || "",
       secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "",
@@ -28,6 +37,10 @@ export function publicUrl(key: string): string {
   return `${base}/${MEDIA_PREFIX}/${key}`;
 }
 
+function objectKey(key: string): string {
+  return `${MEDIA_PREFIX}/${key}`;
+}
+
 export async function uploadToR2(
   key: string,
   body: Buffer | Uint8Array,
@@ -36,7 +49,7 @@ export async function uploadToR2(
   await client().send(
     new PutObjectCommand({
       Bucket: process.env.R2_BUCKET || "",
-      Key: `${MEDIA_PREFIX}/${key}`,
+      Key: objectKey(key),
       Body: body,
       ContentType: contentType,
     }),
@@ -44,11 +57,59 @@ export async function uploadToR2(
   return publicUrl(key);
 }
 
+export async function createR2UploadUrl(
+  key: string,
+  contentType: string,
+  userId: string,
+  purpose?: MediaUploadPurpose,
+): Promise<{ uploadUrl: string; headers: Record<string, string> }> {
+  const uploadedBy = String(userId);
+  const metadata = {
+    "uploaded-by": uploadedBy,
+    ...(purpose ? { "upload-purpose": purpose } : {}),
+  };
+  const command = new PutObjectCommand({
+    Bucket: process.env.R2_BUCKET || "",
+    Key: objectKey(key),
+    ContentType: contentType,
+    Metadata: metadata,
+  });
+  const signedMetadataHeaders = new Set(["x-amz-meta-uploaded-by"]);
+  if (purpose) signedMetadataHeaders.add("x-amz-meta-upload-purpose");
+  const uploadUrl = await getSignedUrl(client(), command, {
+    expiresIn: 5 * 60,
+    unhoistableHeaders: signedMetadataHeaders,
+  });
+  return {
+    uploadUrl,
+    headers: {
+      "Content-Type": contentType,
+      "x-amz-meta-uploaded-by": uploadedBy,
+      ...(purpose ? { "x-amz-meta-upload-purpose": purpose } : {}),
+    },
+  };
+}
+
+export async function headR2Object(key: string) {
+  const result = await client().send(
+    new HeadObjectCommand({
+      Bucket: process.env.R2_BUCKET || "",
+      Key: objectKey(key),
+    }),
+  );
+  return {
+    size: result.ContentLength ?? 0,
+    contentType: result.ContentType ?? "",
+    uploadedBy: result.Metadata?.["uploaded-by"] ?? "",
+    uploadPurpose: result.Metadata?.["upload-purpose"] ?? "",
+  };
+}
+
 export async function deleteFromR2(key: string): Promise<void> {
   await client().send(
     new DeleteObjectCommand({
       Bucket: process.env.R2_BUCKET || "",
-      Key: `${MEDIA_PREFIX}/${key}`,
+      Key: objectKey(key),
     }),
   );
 }

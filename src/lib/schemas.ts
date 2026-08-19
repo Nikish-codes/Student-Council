@@ -291,6 +291,8 @@ export type ClubVideo = z.infer<typeof clubVideoSchema>;
 export const clubGalleryItemSchema = z.object({
   url: z.string(),
   caption: z.string().optional(),
+  size: z.enum(["small", "medium", "large"]).optional(),
+  mediaId: z.number().int().positive().optional(),
 });
 export type ClubGalleryItem = z.infer<typeof clubGalleryItemSchema>;
 

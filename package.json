@@ -24,6 +24,7 @@
   "dependencies": {
     "@auth/core": "^0.41.2",
     "@aws-sdk/client-s3": "^3.1057.0",
+    "@aws-sdk/s3-request-presigner": "^3.1112.0",
     "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^5.2.2",
     "@libsql/client": "^0.17.2",

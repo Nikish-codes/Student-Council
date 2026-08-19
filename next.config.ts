@@ -63,7 +63,7 @@ const nextConfig: NextConfig = {
       // aligned with img-src (R2 + Cloudinary are both https).
       "media-src 'self' https:",
       "font-src 'self' data:",
-      "connect-src 'self' data: https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://vitals.vercel-insights.com https://va.vercel-scripts.com",
+      "connect-src 'self' data: https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://vitals.vercel-insights.com https://va.vercel-scripts.com https://*.r2.cloudflarestorage.com",
       "frame-src https://api.razorpay.com https://checkout.razorpay.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
       "object-src 'none'",
       "base-uri 'self'",
