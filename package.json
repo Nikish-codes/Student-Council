@@ -15,6 +15,7 @@
     "db:migrate-from-payload": "tsx scripts/migrate-from-payload.ts",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e:seed": "tsx scripts/seed-club-studio-e2e.ts",
     "clubs:sync-taxonomy": "tsx scripts/sync-club-taxonomy.ts",
     "clubs:import-content": "tsx scripts/import-club-content.ts",
     "brand:optimize": "tsx scripts/optimize-brand-assets.ts",

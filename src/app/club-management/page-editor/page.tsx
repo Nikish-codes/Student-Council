@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { db } from "@/db/client";
 import { clubs, contentRevisions, media } from "@/db/schema";
-import { getClub } from "@/lib/content";
+import { getClub, getClubEvents, getClubLeads } from "@/lib/content";
 import { requireStudioClub } from "@/lib/club-studio";
 import { requireUser } from "@/lib/rbac";
 import { clubPageSnapshotSchema, type ClubPageSnapshot } from "@/lib/revisions";
@@ -22,9 +22,11 @@ export default async function ClubPageEditorPage({
   if (!active.canEditPage && active.membershipRole !== "president") {
     throw new Error("FORBIDDEN");
   }
-  const [club, clubRow] = await Promise.all([
+  const [club, clubRow, clubEvents, leads] = await Promise.all([
     getClub(active.clubSlug),
     db.query.clubs.findFirst({ where: eq(clubs.id, active.clubId) }),
+    getClubEvents(active.clubId),
+    getClubLeads(active.clubId),
   ]);
   if (!club || !clubRow) notFound();
 
@@ -99,6 +101,9 @@ export default async function ClubPageEditorPage({
       } : null}
       baseVersion={requested?.baseVersion ?? clubRow.version}
       saved={query.saved === "1"}
+      upcoming={clubEvents.upcoming}
+      past={clubEvents.past}
+      leads={leads}
     />
   );
 }

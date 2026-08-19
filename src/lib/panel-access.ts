@@ -1,5 +1,14 @@
 import type { UserRole } from "@/db/schema";
 
+export function requiredPasswordDestination(
+  mustChangePassword: boolean | undefined,
+  pathname: string,
+) {
+  return mustChangePassword && pathname !== "/management/change-password"
+    ? "/management/change-password"
+    : null;
+}
+
 /** Return the only panel destination for narrowly scoped operational roles. */
 export function restrictedPanelDestination(
   role: UserRole | undefined,

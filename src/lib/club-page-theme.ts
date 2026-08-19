@@ -21,6 +21,10 @@ export function colorContrast(first: string, second: string) {
 export function hasAccessibleClubTheme(theme: {
   background: string;
   foreground: string;
+  accent?: string;
 }) {
-  return colorContrast(theme.background, theme.foreground) >= 4.5;
+  return (
+    colorContrast(theme.background, theme.foreground) >= 4.5 &&
+    (!theme.accent || colorContrast(theme.background, theme.accent) >= 3)
+  );
 }

@@ -22,7 +22,7 @@ import { embedSrc } from "@/lib/video";
 import { getClub, getClubEvents, getClubLeads, getClubs } from "@/lib/content";
 import type { ClubDetail, CouncilMember, EventItem } from "@/lib/schemas";
 import { cn, formatDate, outlookCompose } from "@/lib/utils";
-import { ClubPageRenderer } from "@/app/club-lab/distortion/distortion-club-lab";
+import { ClubPageRenderer } from "@/components/clubs/club-page-renderer";
 
 // ISR: the page shows upcoming-vs-past event timing, which ages.
 export const revalidate = 300;

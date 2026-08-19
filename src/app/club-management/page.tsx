@@ -6,7 +6,9 @@ import { db } from "@/db/client";
 import { contentRevisions, eventFollowupTasks, events } from "@/db/schema";
 import { requireStudioClub } from "@/lib/club-studio";
 import { ensureEventFollowupTasks } from "@/lib/revisions";
+import { requireUser } from "@/lib/rbac";
 import { StatusBadge } from "@/components/management/status-badge";
+import { withdrawClubRevision } from "./actions";
 
 export default async function ClubStudioHome({
   searchParams,
@@ -14,7 +16,10 @@ export default async function ClubStudioHome({
   searchParams: Promise<{ club?: string }>;
 }) {
   const query = await searchParams;
-  const active = await requireStudioClub(query.club);
+  const [active, user] = await Promise.all([
+    requireStudioClub(query.club),
+    requireUser(),
+  ]);
   await ensureEventFollowupTasks(active.clubId);
 
   const [revisions, upcoming, followups, team] = await Promise.all([
@@ -143,6 +148,17 @@ export default async function ClubStudioHome({
                   <p className="mt-0.5 text-xs text-subtle">Version based on {revision.baseVersion}</p>
                 </div>
                 <StatusBadge status={revision.status} />
+                {revision.status === "pending_review" && revision.authorUserId === Number(user.id) ? (
+                  <form action={withdrawClubRevision}>
+                    <input type="hidden" name="revisionId" value={revision.id} />
+                    <button
+                      type="submit"
+                      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted hover:bg-line/5 hover:text-ink"
+                    >
+                      Withdraw
+                    </button>
+                  </form>
+                ) : null}
               </div>
             ))}
           </div>

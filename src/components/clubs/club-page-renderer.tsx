@@ -1,6 +1,7 @@
 "use client";
 
 /**
+ * Production club-page renderers plus the temporary five-world comparison lab.
  * THESIS: One club record can become five authored identities; the lab refuses
  * the single editorial template with cosmetic color changes.
  * OWN-WORLD: Each preset owns its page-scale color, geometry, image behavior,
@@ -26,6 +27,7 @@ import { Picture } from "@/components/ui/picture";
 import { InstagramMark } from "@/components/ui/brand-marks";
 import type { ClubDetail, CouncilMember, EventItem } from "@/lib/schemas";
 import { cn, formatDate } from "@/lib/utils";
+import { colorContrast } from "@/lib/club-page-theme";
 
 type WorldId = "stage" | "zine" | "clubhouse" | "exhibition" | "signal";
 
@@ -184,6 +186,15 @@ function clubHeading(club: ClubDetail, section: string, fallback: string) {
   return club.pageSectionHeadings?.[section] || fallback;
 }
 
+function clubLogoImageClass(club: ClubDetail, base: string) {
+  const treatment = club.pageTheme?.logoTreatment ?? "natural";
+  return cn(
+    base,
+    treatment === "badge" && "rounded-full bg-white/95 p-3 shadow-sm",
+    treatment === "monochrome" && "grayscale contrast-125",
+  );
+}
+
 export function ClubPageRenderer({
   template,
   club,
@@ -215,18 +226,37 @@ export function ClubPageRenderer({
     leads: visible.has("people") ? leads : [],
   };
   const theme = club.pageTheme;
+  const typography = club.pageTypography ?? "signal";
+  const headingFont =
+    typography === "editorial"
+      ? "var(--font-display), Georgia, serif"
+      : typography === "friendly"
+        ? "var(--font-sans), system-ui, sans-serif"
+        : "var(--font-mono), ui-monospace, monospace";
+  const templateDefaults =
+    template === "zine"
+      ? { background: "#f1ead8", foreground: "#17130f", accent: "#d93818" }
+      : template === "clubhouse"
+        ? { background: "#efffd8", foreground: "#17301e", accent: "#a92f18" }
+        : { background: "#0b0705", foreground: "#fff5e9", accent: "#ff5a1f" };
+  const accent = theme?.accent ?? templateDefaults.accent;
+  const accentInk =
+    colorContrast(accent, "#000000") >= colorContrast(accent, "#ffffff")
+      ? "#000000"
+      : "#ffffff";
   return (
     <div
       data-club-template={template}
-      data-club-type={club.pageTypography ?? "signal"}
+      data-club-type={typography}
+      className="[&_h1]:[font-family:var(--club-heading-font)] [&_h2]:[font-family:var(--club-heading-font)] [&_h3]:[font-family:var(--club-heading-font)]"
       style={
-        theme
-          ? ({
-              "--club-background": theme.background,
-              "--club-foreground": theme.foreground,
-              "--club-accent": theme.accent,
-            } as React.CSSProperties)
-          : undefined
+        {
+          "--club-background": theme?.background ?? templateDefaults.background,
+          "--club-foreground": theme?.foreground ?? templateDefaults.foreground,
+          "--club-accent": accent,
+          "--club-accent-ink": accentInk,
+          "--club-heading-font": headingFont,
+        } as React.CSSProperties
       }
     >
       {template === "stage" ? <StageWorld {...props} /> : null}
@@ -270,7 +300,7 @@ function StageWorld({ club, upcoming, past }: WorldProps) {
 
           <div className="max-w-6xl">
             <p className="mb-5 flex items-center gap-3 text-sm text-[#ff8a4d]">
-              <span className="h-2 w-2 rounded-full bg-[#ff5a1f]" />
+              <span className="h-2 w-2 rounded-full bg-[var(--club-accent)]" />
               Woxsen University
             </p>
             <h1 className="max-w-5xl font-sans text-[clamp(3.5rem,11vw,6rem)] font-black uppercase leading-[0.82] tracking-[-0.04em]">
@@ -285,7 +315,7 @@ function StageWorld({ club, upcoming, past }: WorldProps) {
               <JoinLink
                 club={club}
                 label="Join the club"
-                className="bg-[#ff5a1f] text-white hover:bg-[#ff7b43]"
+                className="bg-[var(--club-accent)] text-[var(--club-accent-ink)] hover:brightness-110"
               />
               <a
                 href="#stage-story"
@@ -298,9 +328,9 @@ function StageWorld({ club, upcoming, past }: WorldProps) {
         </div>
       </section>
 
-      <div className="overflow-hidden border-y border-[#ff5a1f]/35 bg-[#ff5a1f] py-3 text-black">
+      <div className="overflow-hidden border-y border-black/20 bg-[var(--club-accent)] py-3 text-[var(--club-accent-ink)]">
         <p className="whitespace-nowrap text-center text-xs font-black uppercase tracking-[0.28em] sm:text-sm">
-          {club.tags.join(" / ")} / {club.flagshipEvent || "Distortion"} /{" "}
+          {club.tags.join(" / ")} / {club.flagshipEvent || club.name} /{" "}
           {club.tags.join(" / ")}
         </p>
       </div>
@@ -362,7 +392,7 @@ function ZineWorld({ club, upcoming, past, leads }: WorldProps) {
   return (
     <main className="overflow-hidden bg-[#f1ead8] text-[#17130f]" style={{ backgroundColor: "var(--club-background, #f1ead8)", color: "var(--club-foreground, #17130f)" }}>
       <section className="relative min-h-[900px] border-b-2 border-[#17130f] px-5 pb-24 pt-28 sm:px-10 lg:px-16">
-        <div className="absolute -right-28 top-40 rotate-[8deg] bg-[#ff4b24] px-40 py-3 text-lg font-black uppercase tracking-[0.18em] text-[#17130f]">
+        <div className="absolute -right-28 top-40 rotate-[8deg] bg-[var(--club-accent)] px-40 py-3 text-lg font-black uppercase tracking-[0.18em] text-[var(--club-accent-ink)]">
           Campus volume / Campus volume
         </div>
 
@@ -386,7 +416,7 @@ function ZineWorld({ club, upcoming, past, leads }: WorldProps) {
               <JoinLink
                 club={club}
                 label="Get involved"
-                className="border-2 border-[#17130f] bg-[#ff4b24] text-[#17130f] shadow-[6px_6px_0_#17130f] hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+                className="border-2 border-[#17130f] bg-[var(--club-accent)] text-[var(--club-accent-ink)] shadow-[6px_6px_0_#17130f] hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
               />
             </div>
           </div>
@@ -404,17 +434,17 @@ function ZineWorld({ club, upcoming, past, leads }: WorldProps) {
                   />
                 </div>
                 <p className="pt-3 font-mono text-[10px] uppercase tracking-widest">
-                  Distortion archive / Woxsen
+                  {club.name} archive / Woxsen
                 </p>
               </div>
             ) : (
-              <div className="absolute inset-8 -rotate-3 border-2 border-[#17130f] bg-[#ff4b24] p-8 shadow-[12px_12px_0_#17130f]">
+              <div className="absolute inset-8 -rotate-3 border-2 border-[#17130f] bg-[var(--club-accent)] p-8 shadow-[12px_12px_0_#17130f]">
                 <Picture
                   src={club.logo}
                   alt={`${club.name} logo`}
                   width={500}
                   height={500}
-                  className="h-full object-contain"
+                    className={clubLogoImageClass(club, "h-full object-contain")}
                 />
               </div>
             )}
@@ -459,7 +489,7 @@ function ZineWorld({ club, upcoming, past, leads }: WorldProps) {
                 key={`${activity.title}-${index}`}
                 className={cn(
                   "border-2 border-[#17130f] p-6",
-                  index % 3 === 0 && "bg-[#ff4b24]",
+                  index % 3 === 0 && "bg-[var(--club-accent)]",
                   index % 3 === 1 && "bg-[#c8b6ff]",
                   index % 3 === 2 && "bg-[#f9dd5e]",
                 )}
@@ -505,7 +535,7 @@ function ClubhouseWorld({ club, upcoming, past, leads }: WorldProps) {
               </p>
               <h1 className="font-sans text-[clamp(3.5rem,9vw,6rem)] font-bold leading-[0.9] tracking-[-0.04em]">
                 A place for
-                <span className="block font-display italic text-[#d43d1d]">
+                <span className="block font-display italic text-[var(--club-accent)]">
                   {club.name}.
                 </span>
               </h1>
@@ -549,7 +579,7 @@ function ClubhouseWorld({ club, upcoming, past, leads }: WorldProps) {
                     fill
                     priority
                     sizes="50vw"
-                    className="object-contain p-16"
+                    className={clubLogoImageClass(club, "object-contain p-16")}
                   />
                 )}
               </div>
@@ -890,7 +920,7 @@ function LogoSticker({
         fill
         priority
         sizes="96px"
-        className="object-contain p-1"
+        className={clubLogoImageClass(club, "object-contain p-1")}
       />
     </div>
   );
@@ -996,8 +1026,8 @@ function StageClose({ club }: { club: ClubDetail }) {
       </p>
       <JoinLink
         club={club}
-        label="Join Distortion"
-        className="mx-auto mt-10 bg-[#ff5a1f] text-white"
+        label="Join the club"
+        className="mx-auto mt-10 bg-[var(--club-accent)] text-[var(--club-accent-ink)]"
       />
     </section>
   );
@@ -1082,13 +1112,13 @@ function ZineEvents({
 
 function ZineClose({ club }: { club: ClubDetail }) {
   return (
-    <section className="bg-[#ff4b24] px-5 pb-36 pt-24 text-center sm:px-10">
+    <section className="bg-[var(--club-accent)] px-5 pb-36 pt-24 text-center text-[var(--club-accent-ink)] sm:px-10">
       <p className="font-sans text-[clamp(3rem,9vw,6rem)] font-black uppercase leading-[0.85] tracking-[-0.04em]">
         Make the next issue.
       </p>
       <JoinLink
         club={club}
-        label="Join Distortion"
+        label="Join the club"
         className="mx-auto mt-10 border-2 border-[#17130f] bg-[#f1ead8] text-[#17130f] shadow-[6px_6px_0_#17130f]"
       />
     </section>
@@ -1142,7 +1172,7 @@ function ClubhouseGallery({ club }: { club: ClubDetail }) {
   return (
     <section className="px-5 py-24 sm:px-10 lg:px-16">
       <div className="mx-auto max-w-7xl">
-        <p className="text-sm font-semibold text-[#d43d1d]">{clubHeading(club, "gallery", "Recent moments")}</p>
+        <p className="text-sm font-semibold text-[var(--club-accent)]">{clubHeading(club, "gallery", "Recent moments")}</p>
         <div className="mt-8 flex flex-wrap items-start gap-4">
           {club.gallery.map((item, index) => (
             <figure

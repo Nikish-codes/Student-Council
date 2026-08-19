@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, inArray, isNotNull, lte } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, isNull, lte, or } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db/client";
@@ -24,6 +24,7 @@ import {
   isRevisionStale,
 } from "@/lib/revision-domain";
 import { newId } from "@/lib/tickets";
+import { uniqueSlug } from "@/lib/slug";
 import { revalidateClubPages } from "@/lib/revalidate-club";
 import { hasAccessibleClubTheme } from "@/lib/club-page-theme";
 
@@ -64,7 +65,7 @@ export const clubPageSnapshotSchema = z.object({
     accent: z.string().regex(/^#[0-9a-f]{6}$/i),
     logoTreatment: z.enum(["natural", "badge", "monochrome"]),
   }).refine(hasAccessibleClubTheme, {
-    message: "Page foreground and background colors must meet WCAG AA contrast.",
+    message: "Page text and accent colors must remain readable against the background.",
   }),
   pageVisibleSections: z
     .array(z.enum(["about", "activities", "videos", "events", "gallery", "people"]))
@@ -121,6 +122,40 @@ function permissionFor(type: RevisionEntityType) {
   return "manage_media" as const;
 }
 
+async function assertRevisionEntityOwnership(
+  entityType: RevisionEntityType,
+  entityId: number,
+  clubId: number,
+) {
+  if (entityType === "club_page") {
+    const club = await db.query.clubs.findFirst({
+      where: and(eq(clubs.id, entityId), eq(clubs.id, clubId)),
+      columns: { id: true },
+    });
+    if (!club) throw new Error("ENTITY_CLUB_MISMATCH");
+    return;
+  }
+  if (entityType === "event") {
+    const event = await db.query.events.findFirst({
+      where: and(eq(events.id, entityId), eq(events.clubId, clubId)),
+      columns: { id: true },
+    });
+    if (!event) throw new Error("ENTITY_CLUB_MISMATCH");
+    return;
+  }
+  const recap = await db.query.recaps.findFirst({
+    where: eq(recaps.id, entityId),
+    columns: { eventId: true },
+  });
+  const event = recap?.eventId
+    ? await db.query.events.findFirst({
+        where: and(eq(events.id, recap.eventId), eq(events.clubId, clubId)),
+        columns: { id: true },
+      })
+    : null;
+  if (!event) throw new Error("ENTITY_CLUB_MISMATCH");
+}
+
 async function authorizeRevisionAuthor(
   clubId: number,
   entityType: RevisionEntityType,
@@ -144,6 +179,11 @@ export async function saveRevisionDraft(input: {
   baseVersion: number;
   snapshot: Record<string, unknown>;
 }) {
+  await assertRevisionEntityOwnership(
+    input.entityType,
+    input.entityId,
+    input.clubId,
+  );
   const user = await authorizeRevisionAuthor(input.clubId, input.entityType);
   const snapshot = validateRevisionSnapshot(input.entityType, input.snapshot);
   const now = new Date().toISOString();
@@ -198,6 +238,11 @@ export async function submitRevision(revisionId: string) {
   if (!revision || revision.authorUserId !== Number(user.id)) {
     throw new Error("NOT_FOUND");
   }
+  await assertRevisionEntityOwnership(
+    revision.entityType,
+    revision.entityId,
+    revision.clubId,
+  );
   await authorizeRevisionAuthor(revision.clubId, revision.entityType);
   assertRevisionTransition(revision.status, "submit");
   validateRevisionSnapshot(revision.entityType, revision.snapshot);
@@ -230,6 +275,11 @@ export async function reviewRevision(input: {
     where: eq(contentRevisions.id, input.revisionId),
   });
   if (!revision) throw new Error("NOT_FOUND");
+  await assertRevisionEntityOwnership(
+    revision.entityType,
+    revision.entityId,
+    revision.clubId,
+  );
   assertRevisionTransition(revision.status, input.action);
   const note = input.note?.trim() ?? "";
   if (input.action !== "approve" && !note) throw new Error("REVIEW_NOTE_REQUIRED");
@@ -403,10 +453,22 @@ export async function withdrawRevision(revisionId: string) {
   });
   if (!revision) throw new Error("NOT_FOUND");
   assertRevisionTransition(revision.status, "withdraw");
-  await db
-    .update(contentRevisions)
-    .set({ status: "withdrawn", updatedAt: new Date().toISOString() })
-    .where(eq(contentRevisions.id, revision.id));
+  const now = new Date().toISOString();
+  await db.transaction(async (tx) => {
+    await tx
+      .update(contentRevisions)
+      .set({ status: "withdrawn", updatedAt: now })
+      .where(eq(contentRevisions.id, revision.id));
+    await tx.insert(auditLog).values({
+      id: newId(),
+      actorUserId: Number(user.id),
+      clubId: revision.clubId,
+      eventId: revision.entityType === "event" ? revision.entityId : null,
+      revisionId: revision.id,
+      action: `${revision.entityType}.withdrawn`,
+      targetId: String(revision.entityId),
+    });
+  });
 }
 
 export async function ensureEventFollowupTasks(clubId?: number) {
@@ -415,7 +477,10 @@ export async function ensureEventFollowupTasks(clubId?: number) {
     where: and(
       eq(events.status, "published"),
       isNotNull(events.clubId),
-      lte(events.endDate, now),
+      or(
+        lte(events.endDate, now),
+        and(isNull(events.endDate), lte(events.date, now)),
+      ),
       clubId ? eq(events.clubId, clubId) : undefined,
     ),
   });
@@ -429,6 +494,20 @@ export async function ensureEventFollowupTasks(clubId?: number) {
         id: newId(),
         eventId: event.id,
         clubId: event.clubId,
+      });
+    }
+    const recap = await db.query.recaps.findFirst({
+      where: eq(recaps.eventId, event.id),
+    });
+    if (!recap) {
+      await db.insert(recaps).values({
+        title: `${event.title} — Recap`,
+        slug: await uniqueSlug("recaps", `${event.slug}-recap`),
+        eventId: event.id,
+        kicker: event.category.toUpperCase(),
+        status: "draft",
+        gallery: [],
+        stats: [],
       });
     }
   }

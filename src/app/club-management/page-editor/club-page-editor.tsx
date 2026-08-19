@@ -3,11 +3,12 @@
 import { useMemo, useState } from "react";
 import { Monitor, Smartphone } from "lucide-react";
 
-import { ClubPageRenderer } from "@/app/club-lab/distortion/distortion-club-lab";
+import { ClubPageRenderer } from "@/components/clubs/club-page-renderer";
 import { ClubGalleryField } from "@/components/management/club-gallery-field";
 import { MediaField, type MediaOption } from "@/components/management/fields";
-import type { ClubDetail } from "@/lib/schemas";
+import type { ClubDetail, CouncilMember, EventItem } from "@/lib/schemas";
 import type { ClubPageSnapshot } from "@/lib/revisions";
+import { hasAccessibleClubTheme } from "@/lib/club-page-theme";
 import { cn } from "@/lib/utils";
 import { saveClubPageRevision } from "./actions";
 
@@ -17,6 +18,25 @@ const themes = {
   zine: { background: "#f1ead8", foreground: "#17130f", accent: "#d93818" },
   clubhouse: { background: "#efffd8", foreground: "#17301e", accent: "#a92f18" },
 } as const;
+
+function parseActivities(value: string) {
+  return value
+    .split("\n")
+    .map((row) => row.split("|").map((part) => part.trim()))
+    .filter(([title]) => Boolean(title))
+    .map(([title, description]) => ({
+      title,
+      description: description || undefined,
+    }));
+}
+
+function parseVideos(value: string) {
+  return value
+    .split("\n")
+    .map((url) => url.trim())
+    .filter(Boolean)
+    .map((url) => ({ url }));
+}
 
 type RevisionInfo = {
   id: string;
@@ -32,6 +52,9 @@ export function ClubPageEditor({
   revision,
   baseVersion,
   saved,
+  upcoming,
+  past,
+  leads,
 }: {
   club: ClubDetail;
   initial: ClubPageSnapshot;
@@ -39,6 +62,9 @@ export function ClubPageEditor({
   revision: RevisionInfo;
   baseVersion: number;
   saved: boolean;
+  upcoming: EventItem[];
+  past: EventItem[];
+  leads: CouncilMember[];
 }) {
   const [template, setTemplate] = useState(initial.pageTemplate);
   const [name, setName] = useState(initial.name);
@@ -48,6 +74,27 @@ export function ClubPageEditor({
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [theme, setTheme] = useState(initial.pageTheme);
   const [visible, setVisible] = useState(new Set(initial.pageVisibleSections));
+  const [typography, setTypography] = useState(initial.pageTypography);
+  const [headings, setHeadings] = useState(initial.pageSectionHeadings);
+  const [logoId, setLogoId] = useState(initial.logoId ?? null);
+  const [coverId, setCoverId] = useState(initial.coverId ?? null);
+  const [joinUrl, setJoinUrl] = useState(initial.joinUrl ?? "");
+  const [members, setMembers] = useState(initial.members?.toString() ?? "");
+  const [foundedYear, setFoundedYear] = useState(initial.foundedYear?.toString() ?? "");
+  const [flagshipEvent, setFlagshipEvent] = useState(initial.flagshipEvent ?? "");
+  const [activitiesText, setActivitiesText] = useState(() =>
+    initial.activities
+      .map((item) => `${item.title}${item.description ? ` | ${item.description}` : ""}`)
+      .join("\n"),
+  );
+  const [videosText, setVideosText] = useState(() =>
+    initial.videos.map((item) => item.url).join("\n"),
+  );
+  const [gallery, setGallery] = useState(initial.gallery);
+  const [instagramUrl, setInstagramUrl] = useState(initial.instagramUrl ?? "");
+  const [linkedinUrl, setLinkedinUrl] = useState(initial.linkedinUrl ?? "");
+  const [websiteUrl, setWebsiteUrl] = useState(initial.websiteUrl ?? "");
+  const [contactEmail, setContactEmail] = useState(initial.contactEmail ?? "");
 
   const previewClub = useMemo<ClubDetail>(() => ({
     ...club,
@@ -55,11 +102,31 @@ export function ClubPageEditor({
     tagline: tagline || undefined,
     blurb,
     about: about || undefined,
+    logo:
+      (logoId === initial.logoId
+        ? club.logo
+        : media.find((item) => item.id === logoId)?.url) ?? club.logo,
+    cover:
+      coverId === initial.coverId
+        ? club.cover
+        : media.find((item) => item.id === coverId)?.url,
+    joinUrl: joinUrl || undefined,
+    members: members ? Number(members) : undefined,
+    foundedYear: foundedYear ? Number(foundedYear) : undefined,
+    flagshipEvent: flagshipEvent || undefined,
+    activities: parseActivities(activitiesText),
+    videos: parseVideos(videosText),
+    gallery,
+    instagramUrl: instagramUrl || undefined,
+    linkedinUrl: linkedinUrl || undefined,
+    websiteUrl: websiteUrl || undefined,
+    contactEmail: contactEmail || undefined,
     pageTemplate: template,
     pageTheme: theme,
     pageVisibleSections: [...visible],
-    pageTypography: initial.pageTypography,
-  }), [about, blurb, club, initial.pageTypography, name, tagline, template, theme, visible]);
+    pageSectionHeadings: headings,
+    pageTypography: typography,
+  }), [about, activitiesText, blurb, club, contactEmail, coverId, flagshipEvent, foundedYear, gallery, headings, initial.coverId, initial.logoId, instagramUrl, joinUrl, linkedinUrl, logoId, media, members, name, tagline, template, theme, typography, videosText, visible, websiteUrl]);
 
   function chooseTemplate(value: "stage" | "zine" | "clubhouse") {
     setTemplate(value);
@@ -67,6 +134,7 @@ export function ClubPageEditor({
   }
 
   const editable = !revision || revision.status === "draft";
+  const accessibleTheme = hasAccessibleClubTheme(theme);
   return (
     <form action={saveClubPageRevision} className="space-y-8">
       <input type="hidden" name="clubId" value={club.id} />
@@ -90,7 +158,7 @@ export function ClubPageEditor({
             type="submit"
             name="intent"
             value="save"
-            disabled={!editable}
+            disabled={!editable || !accessibleTheme}
           >
             Save draft
           </button>
@@ -99,7 +167,7 @@ export function ClubPageEditor({
             type="submit"
             name="intent"
             value="submit"
-            disabled={!editable}
+            disabled={!editable || !accessibleTheme}
           >
             Submit for review
           </button>
@@ -163,11 +231,11 @@ export function ClubPageEditor({
               <textarea className={input} name="about" rows={7} value={about} onChange={(event) => setAbout(event.target.value)} />
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
-              <MediaField name="logoId" label="Logo" defaultValue={initial.logoId ?? null} media={media} />
-              <MediaField name="coverId" label="Cover image" defaultValue={initial.coverId ?? null} media={media} />
+              <MediaField name="logoId" label="Logo" defaultValue={initial.logoId ?? null} media={media} onValueChange={setLogoId} />
+              <MediaField name="coverId" label="Cover image" defaultValue={initial.coverId ?? null} media={media} onValueChange={setCoverId} />
             </div>
             <Field label="Join link">
-              <input className={input} name="joinUrl" type="url" defaultValue={initial.joinUrl ?? ""} />
+              <input className={input} name="joinUrl" type="url" value={joinUrl} onChange={(event) => setJoinUrl(event.target.value)} />
             </Field>
           </EditorSection>
 
@@ -185,9 +253,35 @@ export function ClubPageEditor({
                 </button>
               ))}
             </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {([
+                ["Background", "background"],
+                ["Text", "foreground"],
+                ["Accent", "accent"],
+              ] as const).map(([label, key]) => (
+                <label key={key} className="text-sm font-medium text-muted">
+                  {label}
+                  <span className="mt-2 flex h-11 items-center gap-3 rounded-xl border border-line/15 bg-surface-2 px-3">
+                    <input
+                      type="color"
+                      aria-label={`${label} color`}
+                      value={theme[key]}
+                      onChange={(event) => setTheme({ ...theme, [key]: event.target.value })}
+                      className="h-7 w-9 cursor-pointer border-0 bg-transparent p-0"
+                    />
+                    <span className="font-mono text-xs uppercase text-ink">{theme[key]}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+            {!accessibleTheme ? (
+              <p role="alert" className="rounded-xl bg-red-500/10 px-3 py-2.5 text-sm text-red-300">
+                Increase the contrast between the background, text, and accent colors before saving.
+              </p>
+            ) : null}
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Typography">
-                <select className={input} name="pageTypography" defaultValue={initial.pageTypography}>
+                <select className={input} name="pageTypography" value={typography} onChange={(event) => setTypography(event.target.value as ClubPageSnapshot["pageTypography"])}>
                   <option value="signal">Signal</option>
                   <option value="editorial">Editorial</option>
                   <option value="friendly">Friendly</option>
@@ -231,7 +325,8 @@ export function ClubPageEditor({
                   <input
                     className="rounded-lg border border-line/15 bg-bg px-3 py-2 text-sm outline-none focus:border-line/40"
                     name={`heading${key[0].toUpperCase()}${key.slice(1)}`}
-                    defaultValue={initial.pageSectionHeadings[key] ?? label}
+                    value={headings[key] ?? label}
+                    onChange={(event) => setHeadings((current) => ({ ...current, [key]: event.target.value }))}
                     aria-label={`${label} section heading`}
                   />
                 </div>
@@ -245,23 +340,24 @@ export function ClubPageEditor({
                 className={input}
                 name="activities"
                 rows={6}
-                defaultValue={initial.activities.map((item) => `${item.title}${item.description ? ` | ${item.description}` : ""}`).join("\n")}
+                value={activitiesText}
+                onChange={(event) => setActivitiesText(event.target.value)}
               />
             </Field>
             <Field label="Video links" hint="One YouTube or Vimeo URL per line">
-              <textarea className={input} name="videos" rows={4} defaultValue={initial.videos.map((item) => item.url).join("\n")} />
+              <textarea className={input} name="videos" rows={4} value={videosText} onChange={(event) => setVideosText(event.target.value)} />
             </Field>
-            <ClubGalleryField name="gallery" defaultValue={initial.gallery} />
+            <ClubGalleryField name="gallery" defaultValue={initial.gallery} onValueChange={setGallery} />
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Member count"><input className={input} name="members" type="number" min={0} defaultValue={initial.members ?? ""} /></Field>
-              <Field label="Founded year"><input className={input} name="foundedYear" type="number" min={1900} max={2200} defaultValue={initial.foundedYear ?? ""} /></Field>
+              <Field label="Member count"><input className={input} name="members" type="number" min={0} value={members} onChange={(event) => setMembers(event.target.value)} /></Field>
+              <Field label="Founded year"><input className={input} name="foundedYear" type="number" min={1900} max={2200} value={foundedYear} onChange={(event) => setFoundedYear(event.target.value)} /></Field>
             </div>
-            <Field label="Flagship event"><input className={input} name="flagshipEvent" defaultValue={initial.flagshipEvent ?? ""} /></Field>
+            <Field label="Flagship event"><input className={input} name="flagshipEvent" value={flagshipEvent} onChange={(event) => setFlagshipEvent(event.target.value)} /></Field>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Instagram"><input className={input} name="instagramUrl" type="url" defaultValue={initial.instagramUrl ?? ""} /></Field>
-              <Field label="LinkedIn"><input className={input} name="linkedinUrl" type="url" defaultValue={initial.linkedinUrl ?? ""} /></Field>
-              <Field label="Website"><input className={input} name="websiteUrl" type="url" defaultValue={initial.websiteUrl ?? ""} /></Field>
-              <Field label="Contact email"><input className={input} name="contactEmail" type="email" defaultValue={initial.contactEmail ?? ""} /></Field>
+              <Field label="Instagram"><input className={input} name="instagramUrl" type="url" value={instagramUrl} onChange={(event) => setInstagramUrl(event.target.value)} /></Field>
+              <Field label="LinkedIn"><input className={input} name="linkedinUrl" type="url" value={linkedinUrl} onChange={(event) => setLinkedinUrl(event.target.value)} /></Field>
+              <Field label="Website"><input className={input} name="websiteUrl" type="url" value={websiteUrl} onChange={(event) => setWebsiteUrl(event.target.value)} /></Field>
+              <Field label="Contact email"><input className={input} name="contactEmail" type="email" value={contactEmail} onChange={(event) => setContactEmail(event.target.value)} /></Field>
             </div>
           </EditorSection>
         </div>
@@ -284,7 +380,7 @@ export function ClubPageEditor({
                   transformOrigin: "top left",
                 }}
               >
-                <ClubPageRenderer template={template} club={previewClub} upcoming={[]} past={[]} leads={[]} />
+                <ClubPageRenderer template={template} club={previewClub} upcoming={upcoming} past={past} leads={leads} />
               </div>
             </div>
           </div>

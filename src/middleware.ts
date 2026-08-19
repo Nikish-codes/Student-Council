@@ -15,7 +15,10 @@
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 import { authConfig } from "@/auth.config";
-import { restrictedPanelDestination } from "@/lib/panel-access";
+import {
+  requiredPasswordDestination,
+  restrictedPanelDestination,
+} from "@/lib/panel-access";
 
 const { auth } = NextAuth(authConfig);
 
@@ -46,13 +49,15 @@ export default auth((req) => {
     return NextResponse.redirect(url);
   }
 
-  if (
-    isLoggedIn &&
-    req.auth?.user?.mustChangePassword &&
-    pathname !== "/management/change-password"
-  ) {
+  const passwordDestination = isLoggedIn
+    ? requiredPasswordDestination(
+        req.auth?.user?.mustChangePassword,
+        pathname,
+      )
+    : null;
+  if (passwordDestination) {
     const url = req.nextUrl.clone();
-    url.pathname = "/management/change-password";
+    url.pathname = passwordDestination;
     url.search = "";
     return NextResponse.redirect(url);
   }

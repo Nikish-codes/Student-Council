@@ -21,13 +21,13 @@ import type { StudioMembership } from "@/lib/club-studio";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/club-management", label: "Dashboard", icon: Gauge },
-  { href: "/club-management/page-editor", label: "Page", icon: FilePenLine },
-  { href: "/club-management/team", label: "Team", icon: Users },
-  { href: "/club-management/events", label: "Events", icon: CalendarDays },
-  { href: "/club-management/registrations", label: "Registrations", icon: CheckSquare2 },
-  { href: "/club-management/follow-up", label: "Follow-up", icon: Images },
-];
+  { href: "/club-management", label: "Dashboard", icon: Gauge, permission: "dashboard" },
+  { href: "/club-management/page-editor", label: "Page", icon: FilePenLine, permission: "page" },
+  { href: "/club-management/team", label: "Team", icon: Users, permission: "team" },
+  { href: "/club-management/events", label: "Events", icon: CalendarDays, permission: "events" },
+  { href: "/club-management/registrations", label: "Registrations", icon: CheckSquare2, permission: "events" },
+  { href: "/club-management/follow-up", label: "Follow-up", icon: Images, permission: "media" },
+] as const;
 
 export function StudioShell({
   memberships,
@@ -45,6 +45,12 @@ export function StudioShell({
   const requested = Number(search.get("club"));
   const active = memberships.find((item) => item.clubId === requested) ?? memberships[0];
   const href = (path: string) => `${path}?club=${active.clubId}`;
+  const canOpen = (permission: (typeof NAV)[number]["permission"]) =>
+    permission === "dashboard" ||
+    active.membershipRole === "president" ||
+    (permission === "page" && active.canEditPage) ||
+    (permission === "events" && active.canManageEvents) ||
+    (permission === "media" && active.canManageMedia);
 
   function switchClub(value: string) {
     const params = new URLSearchParams(search.toString());
@@ -114,7 +120,7 @@ export function StudioShell({
           </button>
         </div>
         <nav className="flex-1 space-y-1 p-3" aria-label="Club Studio">
-          {NAV.map((item) => {
+          {NAV.filter((item) => canOpen(item.permission)).map((item) => {
             const selected =
               item.href === "/club-management"
                 ? pathname === item.href

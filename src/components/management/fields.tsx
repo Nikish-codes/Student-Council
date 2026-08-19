@@ -264,12 +264,14 @@ export function MediaField({
   hint,
   defaultValue,
   media,
+  onValueChange,
 }: {
   name: string;
   label: string;
   hint?: string;
   defaultValue?: number | null;
   media: MediaOption[];
+  onValueChange?: (value: number | null) => void;
 }) {
   const [list, setList] = useState<MediaOption[]>(media);
   const [selected, setSelected] = useState<number | null>(defaultValue ?? null);
@@ -279,6 +281,11 @@ export function MediaField({
   const [ingesting, setIngesting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const choose = (value: number | null) => {
+    setSelected(value);
+    onValueChange?.(value);
+  };
 
   const current = list.find((m) => m.id === selected);
 
@@ -298,7 +305,7 @@ export function MediaField({
       if (!res.ok) throw new Error(json.error || "Upload failed");
       const m: MediaOption = json.media;
       setList((l) => [m, ...l]);
-      setSelected(m.id);
+      choose(m.id);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -323,7 +330,7 @@ export function MediaField({
       if (!res.ok) throw new Error(json.error || "Could not add URL");
       const m: MediaOption = json.media;
       setList((l) => [m, ...l]);
-      setSelected(m.id);
+      choose(m.id);
       setPasting(false);
       setUrlValue("");
     } catch (err) {
@@ -382,7 +389,7 @@ export function MediaField({
             {current ? (
               <button
                 type="button"
-                onClick={() => setSelected(null)}
+                onClick={() => choose(null)}
                 className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs text-subtle hover:text-ink"
               >
                 <X className="h-3.5 w-3.5" /> clear
@@ -417,7 +424,7 @@ export function MediaField({
                 key={m.id}
                 type="button"
                 onClick={() => {
-                  setSelected(m.id);
+                  choose(m.id);
                   setPicking(false);
                 }}
                 className={cn(

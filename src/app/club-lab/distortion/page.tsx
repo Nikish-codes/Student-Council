@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { DistortionClubLab } from "./distortion-club-lab";
+import { DistortionClubLab } from "@/components/clubs/club-page-renderer";
 import { getClub, getClubEvents, getClubLeads } from "@/lib/content";
 
 export const metadata: Metadata = {

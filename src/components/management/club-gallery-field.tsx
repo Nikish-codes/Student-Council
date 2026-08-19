@@ -34,9 +34,11 @@ function normaliseRows(rows: ClubGalleryItem[]): GalleryDraft[] {
 export function ClubGalleryField({
   name,
   defaultValue,
+  onValueChange,
 }: {
   name: string;
   defaultValue?: ClubGalleryItem[] | null;
+  onValueChange?: (value: ClubGalleryItem[]) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [rows, setRows] = useState<GalleryDraft[]>(() =>
@@ -45,8 +47,15 @@ export function ClubGalleryField({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const commit = (updater: (current: GalleryDraft[]) => GalleryDraft[]) =>
+    setRows((current) => {
+      const next = updater(current);
+      onValueChange?.(next);
+      return next;
+    });
+
   const update = (index: number, changes: Partial<GalleryDraft>) =>
-    setRows((current) =>
+    commit((current) =>
       current.map((row, rowIndex) =>
         rowIndex === index ? { ...row, ...changes } : row,
       ),
@@ -99,7 +108,7 @@ export function ClubGalleryField({
           setError(`${file.name}: ${(uploadError as Error).message}`);
         }
       }
-      if (added.length > 0) setRows((current) => [...current, ...added]);
+      if (added.length > 0) commit((current) => [...current, ...added]);
     } finally {
       setUploading(false);
     }
@@ -212,7 +221,7 @@ export function ClubGalleryField({
                   <button
                     type="button"
                     onClick={() =>
-                      setRows((current) =>
+                      commit((current) =>
                         current.filter((_, rowIndex) => rowIndex !== index),
                       )
                     }
