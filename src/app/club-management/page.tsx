@@ -6,6 +6,7 @@ import { db } from "@/db/client";
 import { contentRevisions, eventFollowupTasks, events } from "@/db/schema";
 import { requireStudioClub } from "@/lib/club-studio";
 import { ensureEventFollowupTasks } from "@/lib/revisions";
+import { StatusBadge } from "@/components/management/status-badge";
 
 export default async function ClubStudioHome({
   searchParams,
@@ -161,15 +162,4 @@ function Metric({ icon: Icon, label, value }: { icon: typeof Clock3; label: stri
       <p className="mt-1 text-sm text-muted">{label}</p>
     </div>
   );
-}
-
-export function StatusBadge({ status }: { status: string }) {
-  const styles = status === "approved"
-    ? "bg-emerald-500/12 text-emerald-400"
-    : status === "pending_review"
-      ? "bg-amber-500/12 text-amber-300"
-      : status === "changes_requested" || status === "declined"
-        ? "bg-red-500/12 text-red-300"
-        : "bg-line/8 text-muted";
-  return <span className={`rounded-full px-2.5 py-1 text-xs capitalize ${styles}`}>{status.replaceAll("_", " ")}</span>;
 }

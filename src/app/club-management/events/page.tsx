@@ -4,7 +4,7 @@ import { CalendarDays, Plus } from "lucide-react";
 
 import { db } from "@/db/client";
 import { contentRevisions, events } from "@/db/schema";
-import { StatusBadge } from "@/app/club-management/page";
+import { StatusBadge } from "@/components/management/status-badge";
 import { requireStudioClub } from "@/lib/club-studio";
 import { isEventPast } from "@/lib/event-status";
 
