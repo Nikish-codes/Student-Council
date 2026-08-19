@@ -73,6 +73,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: row.email,
           role: row.role,
           clubId: row.clubId ?? null,
+          mustChangePassword: row.mustChangePassword,
         };
       },
     }),

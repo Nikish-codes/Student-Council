@@ -464,6 +464,11 @@ export const getClub = cache(
       linkedinUrl: d.linkedinUrl || undefined,
       websiteUrl: d.websiteUrl || undefined,
       contactEmail: d.contactEmail || undefined,
+      pageTemplate: d.pageTemplate || undefined,
+      pageTheme: d.pageTheme || undefined,
+      pageVisibleSections: d.pageVisibleSections || undefined,
+      pageSectionHeadings: d.pageSectionHeadings || undefined,
+      pageTypography: d.pageTypography || undefined,
     };
   },
 );

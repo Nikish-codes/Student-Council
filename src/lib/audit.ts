@@ -13,6 +13,8 @@ import { newId } from "@/lib/tickets";
 export async function logAudit(entry: {
   actorUserId?: number | null;
   eventId?: number | null;
+  clubId?: number | null;
+  revisionId?: string | null;
   action: string;
   targetId?: string | null;
   meta?: Record<string, unknown>;
@@ -22,6 +24,8 @@ export async function logAudit(entry: {
       id: newId(),
       actorUserId: entry.actorUserId ?? null,
       eventId: entry.eventId ?? null,
+      clubId: entry.clubId ?? null,
+      revisionId: entry.revisionId ?? null,
       action: entry.action,
       targetId: entry.targetId ?? null,
       meta: entry.meta ?? null,

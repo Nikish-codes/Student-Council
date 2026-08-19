@@ -15,6 +15,8 @@ import {
 } from "@/lib/rbac";
 import { uniqueSlug, slugify } from "@/lib/slug";
 import { onEventPublished } from "@/lib/automation/on-publish";
+import { logAudit } from "@/lib/audit";
+import { saveRevisionDraft, submitRevision } from "@/lib/revisions";
 import type { EventCategory } from "@/lib/schemas";
 
 const CATEGORIES: EventCategory[] = [
@@ -106,6 +108,30 @@ export async function createEvent(fd: FormData) {
   const status = resolveStatus(s(fd, "status"), user.role);
   const slug = await uniqueSlug("events", s(fd, "slug") || data.title);
 
+  if (!canPublish(user.role)) {
+    const [event] = await db
+      .insert(eventsT)
+      .values({
+        ...data,
+        clubId,
+        slug,
+        status: "draft",
+        organizerId: Number(user.id),
+        version: 0,
+      })
+      .returning({ id: eventsT.id });
+    const revisionId = await saveRevisionDraft({
+      entityType: "event",
+      entityId: event.id,
+      clubId: clubId!,
+      baseVersion: 0,
+      snapshot: { ...data, slug, clubId },
+    });
+    if (status === "pending_review") await submitRevision(revisionId);
+    revalidatePath("/management/events");
+    redirect("/management/events");
+  }
+
   const [row] = await db
     .insert(eventsT)
     .values({
@@ -115,10 +141,18 @@ export async function createEvent(fd: FormData) {
       status,
       organizerId: Number(user.id),
       publishedAt: status === "published" ? new Date().toISOString() : null,
+      version: status === "published" ? 1 : 0,
     })
     .returning({ id: eventsT.id });
 
   if (status === "published") await onEventPublished(row.id);
+  await logAudit({
+    actorUserId: Number(user.id),
+    eventId: row.id,
+    clubId,
+    action: status === "published" ? "event.direct_published" : "event.created",
+    targetId: String(row.id),
+  });
 
   revalidatePath("/management/events");
   // The club page lists its own events, so it goes stale on every event write.
@@ -145,6 +179,20 @@ export async function updateEvent(id: number, fd: FormData) {
       ? await uniqueSlug("events", requestedSlug, id)
       : existing.slug;
 
+  if (!canPublish(user.role)) {
+    if (!clubId) throw new Error("CLUB_REQUIRED_FOR_REVIEW");
+    const revisionId = await saveRevisionDraft({
+      entityType: "event",
+      entityId: existing.id,
+      clubId,
+      baseVersion: existing.version,
+      snapshot: { ...data, slug, clubId },
+    });
+    if (status === "pending_review") await submitRevision(revisionId);
+    revalidatePath("/management/events");
+    redirect("/management/events");
+  }
+
   const justPublished =
     status === "published" && existing.status !== "published";
 
@@ -160,10 +208,19 @@ export async function updateEvent(id: number, fd: FormData) {
           ? new Date().toISOString()
           : existing.publishedAt,
       updatedAt: new Date().toISOString(),
+      version: existing.version + 1,
     })
     .where(eq(eventsT.id, id));
 
   if (justPublished) await onEventPublished(id);
+  await logAudit({
+    actorUserId: Number(user.id),
+    eventId: id,
+    clubId,
+    action: "event.direct_published",
+    targetId: String(id),
+    meta: { previousVersion: existing.version },
+  });
 
   revalidatePath("/management/events");
   revalidatePath("/");
@@ -178,9 +235,7 @@ export async function updateEvent(id: number, fd: FormData) {
 export async function publishEvent(id: number) {
   const user = await requireRole(
     "super_admin",
-    "admin",
-    "council_member",
-    "editor",
+    "operations",
   );
   const existing = await db.query.events.findFirst({
     where: eq(eventsT.id, id),
@@ -193,13 +248,20 @@ export async function publishEvent(id: number) {
       status: "published",
       publishedAt: existing.publishedAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      version: existing.version + 1,
     })
     .where(eq(eventsT.id, id));
 
   await onEventPublished(id);
+  await logAudit({
+    actorUserId: Number(user.id),
+    eventId: id,
+    clubId: existing.clubId,
+    action: "event.direct_published",
+    targetId: String(id),
+  });
   revalidatePath("/management/events");
   await revalidateClubPages(existing.clubId);
-  void user;
 }
 
 export async function deleteEvent(id: number) {

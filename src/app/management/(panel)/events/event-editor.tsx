@@ -27,9 +27,11 @@ const inputCls =
 function SaveBar({
   canPublish,
   deleteFor,
+  basePath,
 }: {
   canPublish: boolean;
   deleteFor?: { id: number; title: string };
+  basePath: string;
 }) {
   const { pending } = useFormStatus();
   return (
@@ -45,7 +47,7 @@ function SaveBar({
         </div>
       ) : null}
       <Button asChild variant="ghost" size="sm" type="button">
-        <Link href="/management/events">Cancel</Link>
+        <Link href={basePath}>Cancel</Link>
       </Button>
       <Button type="submit" disabled={pending}>
         {pending ? "Saving…" : canPublish ? "Save" : "Save / submit for review"}
@@ -62,6 +64,8 @@ export function EventEditor({
   canPublish,
   isClubLead,
   canDelete = false,
+  basePath = "/management/events",
+  lockedClubId,
 }: {
   action: (fd: FormData) => Promise<void>;
   event: DbEvent | null;
@@ -70,6 +74,8 @@ export function EventEditor({
   canPublish: boolean;
   isClubLead: boolean;
   canDelete?: boolean;
+  basePath?: string;
+  lockedClubId?: number;
 }) {
   const [title, setTitle] = useState(event?.title ?? "");
   const [slug, setSlug] = useState(event?.slug ?? "");
@@ -87,6 +93,7 @@ export function EventEditor({
 
   return (
     <form action={action} className="mx-auto max-w-3xl">
+      {lockedClubId ? <input type="hidden" name="clubId" value={lockedClubId} /> : null}
       <div className="mb-6">
         <p className="kicker text-subtle">{event ? "Edit event" : "New event"}</p>
         <h1 className="display mt-1 text-3xl">{title || "Untitled event"}</h1>
@@ -304,6 +311,7 @@ export function EventEditor({
 
       <SaveBar
         canPublish={canPublish}
+        basePath={basePath}
         deleteFor={
           canDelete && event ? { id: event.id, title: event.title } : undefined
         }

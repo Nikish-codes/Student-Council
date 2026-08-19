@@ -321,6 +321,20 @@ export const clubDetailSchema = clubSchema.extend({
   contactEmail: z.string().optional(),
   categoryLabel: z.string().optional(),
   categorySlug: z.string().optional(),
+  pageTemplate: z.enum(["stage", "zine", "clubhouse"]).optional(),
+  pageTheme: z
+    .object({
+      background: z.string(),
+      foreground: z.string(),
+      accent: z.string(),
+      logoTreatment: z.enum(["natural", "badge", "monochrome"]),
+    })
+    .optional(),
+  pageVisibleSections: z
+    .array(z.enum(["about", "activities", "videos", "events", "gallery", "people"]))
+    .optional(),
+  pageSectionHeadings: z.record(z.string(), z.string()).optional(),
+  pageTypography: z.enum(["signal", "editorial", "friendly"]).optional(),
 });
 export type ClubDetail = z.infer<typeof clubDetailSchema>;
 

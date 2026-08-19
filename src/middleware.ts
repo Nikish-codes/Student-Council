@@ -33,7 +33,8 @@ export default auth((req) => {
 
   const isPanel =
     pathname.startsWith("/management") ||
-    pathname.startsWith("/eventmanagement");
+    pathname.startsWith("/eventmanagement") ||
+    pathname.startsWith("/club-management");
   const isLogin = pathname.startsWith("/management/login");
 
   // 1) Panel protection (mirrors the old `authorized` callback). The login page
@@ -45,10 +46,21 @@ export default auth((req) => {
     return NextResponse.redirect(url);
   }
 
+  if (
+    isLoggedIn &&
+    req.auth?.user?.mustChangePassword &&
+    pathname !== "/management/change-password"
+  ) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/management/change-password";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
+
   // Narrowly scoped roles get exactly one panel destination. Server-side role
   // guards remain authoritative for direct actions and API requests.
   const restrictedDestination =
-    isPanel && !isLogin
+    isPanel && !isLogin && pathname !== "/management/change-password"
       ? restrictedPanelDestination(role, req.auth?.user?.clubId, pathname)
       : null;
   if (restrictedDestination) {

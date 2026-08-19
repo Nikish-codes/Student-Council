@@ -21,7 +21,9 @@ export const authConfig = {
       // Both the CMS panel and the event-ops cockpit are session-gated; the
       // login page (excluded here) lives under /management.
       const isProtected =
-        path.startsWith("/management") || path.startsWith("/eventmanagement");
+        path.startsWith("/management") ||
+        path.startsWith("/eventmanagement") ||
+        path.startsWith("/club-management");
       if (isProtected && !isLogin) return isLoggedIn;
       return true;
     },
@@ -30,6 +32,8 @@ export const authConfig = {
         token.uid = user.id;
         token.role = (user as { role?: UserRole }).role ?? "viewer";
         token.clubId = (user as { clubId?: number | null }).clubId ?? null;
+        token.mustChangePassword =
+          (user as { mustChangePassword?: boolean }).mustChangePassword ?? false;
       }
       return token;
     },
@@ -38,6 +42,7 @@ export const authConfig = {
         session.user.id = String(token.uid ?? "");
         session.user.role = (token.role as UserRole) ?? "viewer";
         session.user.clubId = (token.clubId as number | null) ?? null;
+        session.user.mustChangePassword = Boolean(token.mustChangePassword);
       }
       return session;
     },

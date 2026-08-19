@@ -22,6 +22,7 @@ import { embedSrc } from "@/lib/video";
 import { getClub, getClubEvents, getClubLeads, getClubs } from "@/lib/content";
 import type { ClubDetail, CouncilMember, EventItem } from "@/lib/schemas";
 import { cn, formatDate, outlookCompose } from "@/lib/utils";
+import { ClubPageRenderer } from "@/app/club-lab/distortion/distortion-club-lab";
 
 // ISR: the page shows upcoming-vs-past event timing, which ages.
 export const revalidate = 300;
@@ -65,6 +66,20 @@ export default async function ClubDetailPage({
     getClubEvents(club.id),
     getClubLeads(club.id),
   ]);
+
+  // A null template is intentional: existing clubs keep the incumbent public
+  // page until Operations approves their first Studio revision.
+  if (club.pageTemplate) {
+    return (
+      <ClubPageRenderer
+        template={club.pageTemplate}
+        club={club}
+        upcoming={upcoming}
+        past={past}
+        leads={leads}
+      />
+    );
+  }
 
   // Resolve videos HERE rather than inside ClubVideos, so the section-presence
   // check below agrees with what actually renders. A club whose only video URL

@@ -68,6 +68,30 @@ const ADMIN_NAV: NavGroup[] = [
   },
 ];
 
+const REVIEW_NAV: NavGroup[] = [
+  {
+    label: "Review",
+    items: [
+      { href: "/management/approvals", label: "Approvals", icon: "ClipboardCheck" },
+    ],
+  },
+];
+
+const OPERATIONS_NAV: NavGroup[] = [
+  ...REVIEW_NAV,
+  {
+    label: "Operations",
+    items: [
+      { href: "/management", label: "Dashboard", icon: "LayoutDashboard" },
+      { href: "/eventmanagement", label: "Event Ops", icon: "ScanLine" },
+      { href: "/management/events", label: "Events", icon: "Calendar" },
+      { href: "/management/recaps", label: "Recaps", icon: "Film" },
+      { href: "/management/clubs", label: "Clubs", icon: "Building2" },
+      { href: "/management/media", label: "Media library", icon: "ImageIcon" },
+    ],
+  },
+];
+
 const OVAL_NAV: NavGroup[] = [
   {
     label: "Dining",
@@ -109,8 +133,10 @@ export default async function PanelLayout({
       ? OVAL_NAV
       : user.role === "club_lead"
         ? clubLeadNav(user.clubId)
+      : user.role === "operations"
+        ? OPERATIONS_NAV
       : user.role === "super_admin"
-        ? [...SHARED_NAV, ...OVAL_NAV, ...ADMIN_NAV]
+        ? [...REVIEW_NAV, ...SHARED_NAV, ...OVAL_NAV, ...ADMIN_NAV]
         : isAdmin(user.role)
           ? [...SHARED_NAV, ...ADMIN_NAV]
           : SHARED_NAV;

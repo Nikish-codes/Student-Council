@@ -62,6 +62,7 @@ const updatedAt = text("updated_at")
 
 export type UserRole =
   | "super_admin"
+  | "operations"
   | "admin"
   | "food_committee_member"
   | "council_member"
@@ -70,6 +71,32 @@ export type UserRole =
   | "viewer";
 
 export type EventStatus = "draft" | "pending_review" | "published" | "archived";
+
+export type ClubMembershipRole = "president" | "member";
+export type RevisionEntityType = "club_page" | "event" | "event_followup";
+export type RevisionStatus =
+  | "draft"
+  | "pending_review"
+  | "changes_requested"
+  | "approved"
+  | "declined"
+  | "withdrawn";
+export type ClubPageTemplate = "stage" | "zine" | "clubhouse";
+export type ClubTypographyPreset = "signal" | "editorial" | "friendly";
+export type ClubPageTheme = {
+  background: string;
+  foreground: string;
+  accent: string;
+  logoTreatment: "natural" | "badge" | "monochrome";
+};
+export type ClubPageSection =
+  | "about"
+  | "activities"
+  | "videos"
+  | "events"
+  | "gallery"
+  | "people";
+export type ClubSectionHeadings = Partial<Record<ClubPageSection, string>>;
 
 export type RegistrationStatus = "pending" | "confirmed" | "cancelled";
 export type PaymentStatus = "none" | "created" | "paid" | "failed" | "refunded";
@@ -178,6 +205,9 @@ export const users = sqliteTable(
     password: text("password"),
     role: text("role").$type<UserRole>().notNull().default("viewer"),
     clubId: integer("club_id"),
+    mustChangePassword: integer("must_change_password", { mode: "boolean" })
+      .notNull()
+      .default(false),
     phone: text("phone"),
     // Optimistic lockout fields (Phase 4 rate-limiting).
     failedLoginCount: integer("failed_login_count").notNull().default(0),
@@ -268,6 +298,16 @@ export const clubs = sqliteTable(
     linkedinUrl: text("linkedin_url"),
     websiteUrl: text("website_url"),
     contactEmail: text("contact_email"),
+    // Approved public-page configuration. Null template means the club keeps
+    // the incumbent renderer until its first template revision is approved.
+    pageTemplate: text("page_template").$type<ClubPageTemplate>(),
+    pageTheme: text("page_theme", { mode: "json" }).$type<ClubPageTheme>(),
+    pageVisibleSections: text("page_visible_sections", { mode: "json" })
+      .$type<ClubPageSection[]>(),
+    pageSectionHeadings: text("page_section_headings", { mode: "json" })
+      .$type<ClubSectionHeadings>(),
+    pageTypography: text("page_typography").$type<ClubTypographyPreset>(),
+    version: integer("version").notNull().default(1),
     createdAt,
     updatedAt,
   },
@@ -306,6 +346,7 @@ export const events = sqliteTable(
     priceInPaise: integer("price_in_paise").notNull().default(0),
     capacity: integer("capacity"),
     publishedAt: text("published_at"),
+    version: integer("version").notNull().default(0),
     createdAt,
     updatedAt,
   },
@@ -339,11 +380,119 @@ export const recaps = sqliteTable(
       .$type<"draft" | "published">()
       .notNull()
       .default("draft"),
+    version: integer("version").notNull().default(0),
     createdAt,
     updatedAt,
   },
   (t) => ({
     slugIdx: uniqueIndex("mp_recaps_slug_idx").on(t.slug),
+  }),
+);
+
+// ───────────────────── club access + content approvals ─────────────────────
+
+export const clubMemberships = sqliteTable(
+  "mp_club_memberships",
+  {
+    id: text("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id),
+    clubId: integer("club_id")
+      .notNull()
+      .references(() => clubs.id),
+    membershipRole: text("membership_role")
+      .$type<ClubMembershipRole>()
+      .notNull()
+      .default("member"),
+    canEditPage: integer("can_edit_page", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    canManageEvents: integer("can_manage_events", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    canManageMedia: integer("can_manage_media", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    isActive: integer("is_active", { mode: "boolean" })
+      .notNull()
+      .default(true),
+    invitedByUserId: integer("invited_by_user_id").references(() => users.id),
+    revokedByUserId: integer("revoked_by_user_id").references(() => users.id),
+    revokedAt: text("revoked_at"),
+    createdAt,
+    updatedAt,
+  },
+  (t) => ({
+    userClubIdx: uniqueIndex("mp_club_memberships_user_club_idx").on(
+      t.userId,
+      t.clubId,
+    ),
+    clubIdx: index("mp_club_memberships_club_idx").on(t.clubId),
+    userIdx: index("mp_club_memberships_user_idx").on(t.userId),
+  }),
+);
+
+export const contentRevisions = sqliteTable(
+  "mp_content_revisions",
+  {
+    id: text("id").primaryKey(),
+    entityType: text("entity_type").$type<RevisionEntityType>().notNull(),
+    entityId: integer("entity_id").notNull(),
+    clubId: integer("club_id")
+      .notNull()
+      .references(() => clubs.id),
+    status: text("status")
+      .$type<RevisionStatus>()
+      .notNull()
+      .default("draft"),
+    snapshot: text("snapshot", { mode: "json" })
+      .$type<Record<string, unknown>>()
+      .notNull(),
+    baseVersion: integer("base_version").notNull(),
+    authorUserId: integer("author_user_id")
+      .notNull()
+      .references(() => users.id),
+    submittedAt: text("submitted_at"),
+    reviewedByUserId: integer("reviewed_by_user_id").references(() => users.id),
+    reviewedAt: text("reviewed_at"),
+    reviewNote: text("review_note"),
+    supersedesRevisionId: text("supersedes_revision_id"),
+    createdAt,
+    updatedAt,
+  },
+  (t) => ({
+    entityIdx: index("mp_content_revisions_entity_idx").on(
+      t.entityType,
+      t.entityId,
+    ),
+    clubIdx: index("mp_content_revisions_club_idx").on(t.clubId),
+    statusIdx: index("mp_content_revisions_status_idx").on(t.status),
+    submittedIdx: index("mp_content_revisions_submitted_idx").on(t.submittedAt),
+  }),
+);
+
+export const eventFollowupTasks = sqliteTable(
+  "mp_event_followup_tasks",
+  {
+    id: text("id").primaryKey(),
+    eventId: integer("event_id")
+      .notNull()
+      .references(() => events.id),
+    clubId: integer("club_id")
+      .notNull()
+      .references(() => clubs.id),
+    status: text("status").$type<"open" | "completed">().notNull().default("open"),
+    completedAt: text("completed_at"),
+    createdAt,
+    updatedAt,
+  },
+  (t) => ({
+    eventIdx: uniqueIndex("mp_event_followup_tasks_event_idx").on(t.eventId),
+    clubStatusIdx: index("mp_event_followup_tasks_club_status_idx").on(
+      t.clubId,
+      t.status,
+    ),
   }),
 );
 
@@ -636,6 +785,8 @@ export const auditLog = sqliteTable(
     id: text("id").primaryKey(), // UUID
     actorUserId: integer("actor_user_id").references(() => users.id),
     eventId: integer("event_id").references(() => events.id),
+    clubId: integer("club_id").references(() => clubs.id),
+    revisionId: text("revision_id"),
     action: text("action").notNull(),
     targetId: text("target_id"),
     meta: text("meta", { mode: "json" }).$type<Record<string, unknown>>(),
@@ -863,6 +1014,7 @@ export const ovalMenuDays = sqliteTable(
 export const usersRelations = relations(users, ({ one, many }) => ({
   club: one(clubs, { fields: [users.clubId], references: [clubs.id] }),
   ledClubs: many(clubs),
+  clubMemberships: many(clubMemberships),
 }));
 
 export const clubCategoriesRelations = relations(
@@ -881,7 +1033,58 @@ export const clubsRelations = relations(clubs, ({ one, many }) => ({
     references: [clubCategories.id],
   }),
   events: many(events),
+  memberships: many(clubMemberships),
+  revisions: many(contentRevisions),
+  followupTasks: many(eventFollowupTasks),
 }));
+
+export const clubMembershipsRelations = relations(
+  clubMemberships,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [clubMemberships.userId],
+      references: [users.id],
+    }),
+    club: one(clubs, {
+      fields: [clubMemberships.clubId],
+      references: [clubs.id],
+    }),
+  }),
+);
+
+export const contentRevisionsRelations = relations(
+  contentRevisions,
+  ({ one }) => ({
+    club: one(clubs, {
+      fields: [contentRevisions.clubId],
+      references: [clubs.id],
+    }),
+    author: one(users, {
+      fields: [contentRevisions.authorUserId],
+      references: [users.id],
+      relationName: "revisionAuthor",
+    }),
+    reviewer: one(users, {
+      fields: [contentRevisions.reviewedByUserId],
+      references: [users.id],
+      relationName: "revisionReviewer",
+    }),
+  }),
+);
+
+export const eventFollowupTasksRelations = relations(
+  eventFollowupTasks,
+  ({ one }) => ({
+    event: one(events, {
+      fields: [eventFollowupTasks.eventId],
+      references: [events.id],
+    }),
+    club: one(clubs, {
+      fields: [eventFollowupTasks.clubId],
+      references: [clubs.id],
+    }),
+  }),
+);
 
 export const eventsRelations = relations(events, ({ one, many }) => ({
   banner: one(media, { fields: [events.bannerId], references: [media.id] }),
@@ -970,6 +1173,7 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 export const auditLogRelations = relations(auditLog, ({ one }) => ({
   actor: one(users, { fields: [auditLog.actorUserId], references: [users.id] }),
   event: one(events, { fields: [auditLog.eventId], references: [events.id] }),
+  club: one(clubs, { fields: [auditLog.clubId], references: [clubs.id] }),
 }));
 
 // ──────────────────────────── sports relations ───────────────────────────────
@@ -1043,6 +1247,8 @@ export type DbEvent = typeof events.$inferSelect;
 export type DbClub = typeof clubs.$inferSelect;
 export type DbMedia = typeof media.$inferSelect;
 export type DbRecap = typeof recaps.$inferSelect;
+export type DbClubMembership = typeof clubMemberships.$inferSelect;
+export type DbContentRevision = typeof contentRevisions.$inferSelect;
 export type DbAnnouncement = typeof announcements.$inferSelect;
 export type DbHighlight = typeof highlights.$inferSelect;
 export type DbFaq = typeof faqs.$inferSelect;

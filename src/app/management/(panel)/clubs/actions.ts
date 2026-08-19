@@ -15,9 +15,12 @@ import { normalizeAccent } from "@/lib/club-accent";
 import { CLUB_GALLERY_UPLOAD_MAX_BYTES } from "@/lib/media-upload-policy";
 import {
   assertCanEditClub,
+  canPublish,
   requireClubManager,
   requireRole,
 } from "@/lib/rbac";
+import { logAudit } from "@/lib/audit";
+import { saveRevisionDraft, submitRevision } from "@/lib/revisions";
 import { uniqueSlug, slugify } from "@/lib/slug";
 
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
@@ -154,13 +157,66 @@ export async function saveClub(id: number | null, fd: FormData) {
       requested && slugify(requested) !== existing.slug
         ? await uniqueSlug("clubs", requested, id)
         : existing.slug;
-    await db
-      .update(t)
-      .set({ ...base, slug, updatedAt: new Date().toISOString() })
-      .where(eq(t.id, id));
+    if (!canPublish(user.role)) {
+      const pageTemplate = existing.pageTemplate ?? "stage";
+      const templateTheme = pageTemplate === "zine"
+        ? { background: "#f1ead8", foreground: "#17130f", accent: "#d93818", logoTreatment: "natural" as const }
+        : pageTemplate === "clubhouse"
+          ? { background: "#efffd8", foreground: "#17301e", accent: "#a92f18", logoTreatment: "natural" as const }
+          : { background: "#0b0705", foreground: "#fff5e9", accent: "#ff5a1f", logoTreatment: "natural" as const };
+      const revisionId = await saveRevisionDraft({
+        entityType: "club_page",
+        entityId: id,
+        clubId: id,
+        baseVersion: existing.version,
+        snapshot: {
+          name: base.name,
+          blurb: base.blurb,
+          tagline: base.tagline,
+          about: base.about,
+          logoId: base.logoId,
+          coverId: base.coverId,
+          joinUrl: base.joinUrl,
+          members: base.members,
+          foundedYear: base.foundedYear,
+          flagshipEvent: base.flagshipEvent,
+          activities: base.activities,
+          videos: base.videos,
+          gallery: base.gallery,
+          instagramUrl: base.instagramUrl,
+          linkedinUrl: base.linkedinUrl,
+          websiteUrl: base.websiteUrl,
+          contactEmail: base.contactEmail,
+          pageTemplate,
+          pageTheme: existing.pageTheme ?? templateTheme,
+          pageVisibleSections: existing.pageVisibleSections ?? ["about", "activities", "videos", "events", "gallery", "people"],
+          pageSectionHeadings: existing.pageSectionHeadings ?? {},
+          pageTypography: existing.pageTypography ?? "signal",
+        },
+      });
+      await submitRevision(revisionId);
+    } else {
+      await db
+        .update(t)
+        .set({
+          ...base,
+          slug,
+          version: existing.version + 1,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(t.id, id));
+      await logAudit({
+        actorUserId: Number(user.id),
+        clubId: id,
+        action: "club_page.direct_published",
+        targetId: String(id),
+        meta: { previousVersion: existing.version },
+      });
+    }
     // Flush the old slug too, or a rename leaves a stale copy behind.
     bust(slug, existing.slug);
   } else {
+    if (!canPublish(user.role)) throw new Error("FORBIDDEN");
     slug = await uniqueSlug("clubs", s(fd, "slug") || base.name);
     await db.insert(t).values({ ...base, slug });
     bust(slug);

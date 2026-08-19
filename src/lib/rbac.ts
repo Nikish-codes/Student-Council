@@ -1,6 +1,9 @@
 import "server-only";
 import { auth } from "@/auth";
 import type { UserRole } from "@/db/schema";
+import { db } from "@/db/client";
+import { clubMemberships } from "@/db/schema";
+import { and, eq, or } from "drizzle-orm";
 
 export type SessionUser = {
   id: string;
@@ -8,11 +11,13 @@ export type SessionUser = {
   email?: string | null;
   role: UserRole;
   clubId: number | null;
+  mustChangePassword: boolean;
 };
 
 /** Roles that may sign into the management panel at all. */
 export const OPS_ROLES: UserRole[] = [
   "super_admin",
+  "operations",
   "admin",
   "council_member",
   "editor",
@@ -29,6 +34,7 @@ export const PANEL_ROLES: UserRole[] = [
 /** Every role known to the system — used for role-select dropdowns. */
 export const ROLES_ALL: UserRole[] = [
   "super_admin",
+  "operations",
   "admin",
   "food_committee_member",
   "council_member",
@@ -40,9 +46,7 @@ export const ROLES_ALL: UserRole[] = [
 /** Roles that may publish (move content to `published`). */
 export const PUBLISHER_ROLES: UserRole[] = [
   "super_admin",
-  "admin",
-  "council_member",
-  "editor",
+  "operations",
 ];
 
 export const isAdmin = (role: UserRole) =>
@@ -61,6 +65,7 @@ export async function requireUser(): Promise<SessionUser> {
     email: u.email,
     role: u.role,
     clubId: u.clubId ?? null,
+    mustChangePassword: u.mustChangePassword ?? false,
   };
 }
 
@@ -77,10 +82,25 @@ export const requirePanelUser = () => requireRole(...PANEL_ROLES);
 /** Club leads are excluded from general operations and may enter only their
  * assigned club editor. These guards support that editor and its media fields. */
 export const requireClubManager = () => requireRole(...OPS_ROLES, "club_lead");
-export const requireMediaContributor = () =>
-  requireRole(...OPS_ROLES, "club_lead");
+export async function requireMediaContributor() {
+  const user = await requireUser();
+  if (OPS_ROLES.includes(user.role) || user.role === "club_lead") return user;
+  const membership = await db.query.clubMemberships.findFirst({
+    where: and(
+      eq(clubMemberships.userId, Number(user.id)),
+      eq(clubMemberships.isActive, true),
+      or(
+        eq(clubMemberships.membershipRole, "president"),
+        eq(clubMemberships.canManageMedia, true),
+      ),
+    ),
+  });
+  if (!membership) throw new Error("FORBIDDEN");
+  return user;
+}
 export const requireOvalManager = () =>
   requireRole("super_admin", "food_committee_member");
+export const requireReviewer = () => requireRole("super_admin", "operations");
 
 /**
  * Club leads may only touch events for their own club. Admins/editors/council

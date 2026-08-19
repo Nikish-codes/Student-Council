@@ -3,28 +3,38 @@ import { describe, expect, it } from "vitest";
 import { restrictedPanelDestination } from "./panel-access";
 
 describe("restricted management roles", () => {
-  it("pins a club president to only their assigned club editor", () => {
+  it("pins a club president to Club Studio", () => {
     expect(
       restrictedPanelDestination("club_lead", 42, "/management/clubs/42"),
-    ).toBeNull();
+    ).toBe("/club-management");
     expect(
       restrictedPanelDestination("club_lead", 42, "/management/clubs/7"),
-    ).toBe("/management/clubs/42");
+    ).toBe("/club-management");
     expect(
       restrictedPanelDestination("club_lead", 42, "/management/events"),
-    ).toBe("/management/clubs/42");
+    ).toBe("/club-management");
     expect(
       restrictedPanelDestination("club_lead", 42, "/eventmanagement"),
-    ).toBe("/management/clubs/42");
+    ).toBe("/club-management");
+    expect(
+      restrictedPanelDestination("club_lead", 42, "/club-management/events"),
+    ).toBeNull();
   });
 
-  it("gives an unassigned club president no route beyond the safe club screen", () => {
+  it("routes an unassigned legacy club lead to Club Studio", () => {
     expect(
       restrictedPanelDestination("club_lead", null, "/management/clubs"),
-    ).toBeNull();
+    ).toBe("/club-management");
     expect(restrictedPanelDestination("club_lead", null, "/management")).toBe(
-      "/management/clubs",
+      "/club-management",
     );
+  });
+
+  it("limits Operations to approval and event operating surfaces", () => {
+    expect(restrictedPanelDestination("operations", null, "/management/approvals")).toBeNull();
+    expect(restrictedPanelDestination("operations", null, "/management/events/2/registrations")).toBeNull();
+    expect(restrictedPanelDestination("operations", null, "/management/users")).toBe("/management/approvals");
+    expect(restrictedPanelDestination("operations", null, "/management/settings")).toBe("/management/approvals");
   });
 
   it("keeps food committee and full operations destinations separate", () => {

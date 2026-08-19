@@ -12,6 +12,7 @@ import {
   UserCog, ScanLine, Rows3, Tags, GalleryVerticalEnd,
   Trophy, Medal, BarChart3, Activity, Shirt, UserCircle, Settings2,
   UtensilsCrossed,
+  ClipboardCheck,
 } from "lucide-react";
 
 const ICONS: Record<string, LucideIcon> = {
@@ -20,6 +21,7 @@ const ICONS: Record<string, LucideIcon> = {
   UserCog, ScanLine, Rows3, Tags, GalleryVerticalEnd,
   Trophy, Medal, BarChart3, Activity, Shirt, UserCircle, Settings2,
   UtensilsCrossed,
+  ClipboardCheck,
 };
 
 export type NavItem = {
