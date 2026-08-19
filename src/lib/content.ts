@@ -17,6 +17,7 @@ import { db } from "@/db/client";
 import { normalizeAccent } from "@/lib/club-accent";
 import { attachCoLeads } from "@/lib/council";
 import { isEventPast } from "@/lib/event-status";
+import { hostedByClubWhere } from "@/lib/event-hosts";
 import {
   announcements as announcementsT,
   attendees as attendeesT,
@@ -482,7 +483,7 @@ export const getClubEvents = cache(
     clubId: number,
   ): Promise<{ upcoming: EventItem[]; past: EventItem[] }> => {
     const rows = await db.query.events.findMany({
-      where: and(eq(eventsT.status, "published"), eq(eventsT.clubId, clubId)),
+      where: and(eq(eventsT.status, "published"), hostedByClubWhere(clubId)),
       with: { banner: true },
       orderBy: asc(eventsT.date),
     });

@@ -1,6 +1,15 @@
 import "server-only";
 
-import { and, desc, eq, inArray, isNotNull, isNull, lte, or } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  lte,
+  or,
+} from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db/client";
@@ -12,6 +21,7 @@ import {
   events,
   media,
   recaps,
+  councilMembers,
   type RevisionEntityType,
 } from "@/db/schema";
 import { onEventPublished } from "@/lib/automation/on-publish";
@@ -27,8 +37,15 @@ import { newId } from "@/lib/tickets";
 import { uniqueSlug } from "@/lib/slug";
 import { revalidateClubPages } from "@/lib/revalidate-club";
 import { hasAccessibleClubTheme } from "@/lib/club-page-theme";
+import {
+  eventIsHostedByClub,
+  replaceEventHostingClubs,
+} from "@/lib/event-hosts";
 
-const optionalUrl = z.union([z.literal(""), z.string().url()]).nullable().optional();
+const optionalUrl = z
+  .union([z.literal(""), z.string().url()])
+  .nullable()
+  .optional();
 const galleryItem = z.object({
   url: z.string().url(),
   caption: z.string().max(160).optional(),
@@ -48,7 +65,12 @@ export const clubPageSnapshotSchema = z.object({
   foundedYear: z.number().int().min(1900).max(2200).nullable().optional(),
   flagshipEvent: z.string().max(160).nullable().optional(),
   activities: z
-    .array(z.object({ title: z.string().min(1), description: z.string().optional() }))
+    .array(
+      z.object({
+        title: z.string().min(1),
+        description: z.string().optional(),
+      }),
+    )
     .max(20),
   videos: z
     .array(z.object({ url: z.string().url(), title: z.string().optional() }))
@@ -57,42 +79,88 @@ export const clubPageSnapshotSchema = z.object({
   instagramUrl: optionalUrl,
   linkedinUrl: optionalUrl,
   websiteUrl: optionalUrl,
-  contactEmail: z.union([z.literal(""), z.string().email()]).nullable().optional(),
-  pageTemplate: z.enum(["stage", "zine", "clubhouse"]),
-  pageTheme: z.object({
-    background: z.string().regex(/^#[0-9a-f]{6}$/i),
-    foreground: z.string().regex(/^#[0-9a-f]{6}$/i),
-    accent: z.string().regex(/^#[0-9a-f]{6}$/i),
-    logoTreatment: z.enum(["natural", "badge", "monochrome"]),
-  }).refine(hasAccessibleClubTheme, {
-    message: "Page text and accent colors must remain readable against the background.",
-  }),
+  contactEmail: z
+    .union([z.literal(""), z.string().email()])
+    .nullable()
+    .optional(),
+  pageTemplate: z.literal("stage"),
+  pageTheme: z
+    .object({
+      background: z.string().regex(/^#[0-9a-f]{6}$/i),
+      foreground: z.string().regex(/^#[0-9a-f]{6}$/i),
+      accent: z.string().regex(/^#[0-9a-f]{6}$/i),
+      logoTreatment: z.enum(["natural", "badge", "monochrome"]),
+    })
+    .refine(hasAccessibleClubTheme, {
+      message:
+        "Page text and accent colors must remain readable against the background.",
+    }),
   pageVisibleSections: z
-    .array(z.enum(["about", "activities", "videos", "events", "gallery", "people"]))
+    .array(
+      z.enum(["about", "activities", "videos", "events", "gallery", "people"]),
+    )
     .min(1),
   pageSectionHeadings: z.record(z.string(), z.string().max(80)),
-  pageTypography: z.enum(["signal", "editorial", "friendly"]),
+  pageTypography: z.literal("friendly"),
+  people: z
+    .array(
+      z.object({
+        id: z.number().int().positive().optional(),
+        name: z.string().min(2).max(80),
+        role: z.string().min(2).max(80),
+        program: z.string().max(80),
+        photoId: z.number().int().positive().nullable().optional(),
+        email: z
+          .union([z.literal(""), z.string().email()])
+          .nullable()
+          .optional(),
+        linkedin: optionalUrl,
+        quote: z.string().max(1200).nullable().optional(),
+        bio: z.string().max(1200).nullable().optional(),
+        sortOrder: z.number().int().nonnegative(),
+      }),
+    )
+    .max(80)
+    .optional(),
 });
 
-export const eventSnapshotSchema = z.object({
-  title: z.string().min(2).max(160),
-  slug: z.string().min(2).max(180),
-  category: z.enum(["tech", "cultural", "sports", "flagship", "academic", "community"]),
-  date: z.string().min(1),
-  endDate: z.string().nullable().optional(),
-  venue: z.string().min(2).max(240),
-  excerpt: z.string().min(5).max(240),
-  description: z.string().max(20000),
-  bannerId: z.number().int().positive().nullable().optional(),
-  videoUrl: optionalUrl,
-  registrationUrl: optionalUrl,
-  attendees: z.number().int().nonnegative().nullable().optional(),
-  featured: z.boolean(),
-  clubId: z.number().int().positive(),
-  registrationEnabled: z.boolean(),
-  priceInPaise: z.number().int().nonnegative(),
-  capacity: z.number().int().positive().nullable().optional(),
-});
+export const eventSnapshotSchema = z
+  .object({
+    title: z.string().min(2).max(160),
+    slug: z.string().min(2).max(180),
+    category: z.enum([
+      "tech",
+      "cultural",
+      "sports",
+      "flagship",
+      "academic",
+      "community",
+    ]),
+    date: z.string().min(1),
+    endDate: z.string().nullable().optional(),
+    venue: z.string().min(2).max(240),
+    excerpt: z.string().min(5).max(240),
+    description: z.string().max(20000),
+    bannerId: z.number().int().positive().nullable().optional(),
+    videoUrl: optionalUrl,
+    registrationUrl: optionalUrl,
+    attendees: z.number().int().nonnegative().nullable().optional(),
+    featured: z.boolean(),
+    clubId: z.number().int().positive(),
+    clubIds: z.array(z.number().int().positive()).min(1).optional(),
+    registrationEnabled: z.boolean(),
+    priceInPaise: z.number().int().nonnegative(),
+    capacity: z.number().int().positive().nullable().optional(),
+  })
+  .transform((snapshot) => ({
+    ...snapshot,
+    // Revisions submitted before the co-host migration contained only clubId.
+    clubIds: snapshot.clubIds ?? [snapshot.clubId],
+  }))
+  .refine((snapshot) => snapshot.clubIds.includes(snapshot.clubId), {
+    message: "The primary club must be one of the event's hosting clubs.",
+    path: ["clubIds"],
+  });
 
 export const followupSnapshotSchema = z.object({
   title: z.string().min(2).max(160),
@@ -136,24 +204,18 @@ async function assertRevisionEntityOwnership(
     return;
   }
   if (entityType === "event") {
-    const event = await db.query.events.findFirst({
-      where: and(eq(events.id, entityId), eq(events.clubId, clubId)),
-      columns: { id: true },
-    });
-    if (!event) throw new Error("ENTITY_CLUB_MISMATCH");
+    if (!(await eventIsHostedByClub(entityId, clubId))) {
+      throw new Error("ENTITY_CLUB_MISMATCH");
+    }
     return;
   }
   const recap = await db.query.recaps.findFirst({
     where: eq(recaps.id, entityId),
     columns: { eventId: true },
   });
-  const event = recap?.eventId
-    ? await db.query.events.findFirst({
-        where: and(eq(events.id, recap.eventId), eq(events.clubId, clubId)),
-        columns: { id: true },
-      })
-    : null;
-  if (!event) throw new Error("ENTITY_CLUB_MISMATCH");
+  if (!recap?.eventId || !(await eventIsHostedByClub(recap.eventId, clubId))) {
+    throw new Error("ENTITY_CLUB_MISMATCH");
+  }
 }
 
 async function authorizeRevisionAuthor(
@@ -282,12 +344,18 @@ export async function reviewRevision(input: {
   );
   assertRevisionTransition(revision.status, input.action);
   const note = input.note?.trim() ?? "";
-  if (input.action !== "approve" && !note) throw new Error("REVIEW_NOTE_REQUIRED");
+  if (input.action !== "approve" && !note)
+    throw new Error("REVIEW_NOTE_REQUIRED");
 
   if (input.action === "approve") {
     await approveRevisionSnapshot(revision, Number(reviewer.id), note || null);
-    if (revision.entityType === "event") await onEventPublished(revision.entityId);
-    await revalidateClubPages(revision.clubId);
+    if (revision.entityType === "event")
+      await onEventPublished(revision.entityId);
+    const eventClubIds =
+      revision.entityType === "event"
+        ? eventSnapshotSchema.parse(revision.snapshot).clubIds
+        : [];
+    await revalidateClubPages(revision.clubId, ...eventClubIds);
     return;
   }
 
@@ -336,7 +404,10 @@ async function approveRevisionSnapshot(
   note: string | null,
 ) {
   const now = new Date().toISOString();
-  const parsed = validateRevisionSnapshot(revision.entityType, revision.snapshot);
+  const parsed = validateRevisionSnapshot(
+    revision.entityType,
+    revision.snapshot,
+  );
   await db.transaction(async (tx) => {
     if (revision.entityType === "club_page") {
       const current = await tx.query.clubs.findFirst({
@@ -346,10 +417,38 @@ async function approveRevisionSnapshot(
         throw new Error("STALE_REVISION");
       }
       const snapshot = parsed as ClubPageSnapshot;
+      const { people, ...clubFields } = snapshot;
       await tx
         .update(clubs)
-        .set({ ...snapshot, version: current.version + 1, updatedAt: now })
+        .set({ ...clubFields, version: current.version + 1, updatedAt: now })
         .where(eq(clubs.id, current.id));
+      if (people) {
+        await tx
+          .delete(councilMembers)
+          .where(eq(councilMembers.clubId, current.id));
+        if (people.length) {
+          await tx.insert(councilMembers).values(
+            people.map((person) => ({
+              name: person.name,
+              role: person.role,
+              program: person.program,
+              photoId: person.photoId ?? null,
+              email: person.email || null,
+              linkedin: person.linkedin || null,
+              quote: person.quote || null,
+              bio: person.bio || null,
+              message: null,
+              memberType: "member" as const,
+              groupId: null,
+              clubId: current.id,
+              isPresident: false,
+              featured: false,
+              sortOrder: person.sortOrder,
+              updatedAt: now,
+            })),
+          );
+        }
+      }
     } else if (revision.entityType === "event") {
       const current = await tx.query.events.findFirst({
         where: eq(events.id, revision.entityId),
@@ -358,16 +457,18 @@ async function approveRevisionSnapshot(
         throw new Error("STALE_REVISION");
       }
       const snapshot = parsed as EventSnapshot;
+      const { clubIds, ...eventFields } = snapshot;
       await tx
         .update(events)
         .set({
-          ...snapshot,
+          ...eventFields,
           status: "published",
           version: current.version + 1,
           publishedAt: current.publishedAt ?? now,
           updatedAt: now,
         })
         .where(eq(events.id, current.id));
+      await replaceEventHostingClubs(tx, current.id, clubIds);
     } else {
       const current = await tx.query.recaps.findFirst({
         where: eq(recaps.id, revision.entityId),

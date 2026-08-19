@@ -25,6 +25,7 @@ import {
   text,
   uniqueIndex,
   index,
+  primaryKey,
 } from "drizzle-orm/sqlite-core";
 import type { AnySQLiteColumn } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
@@ -302,10 +303,12 @@ export const clubs = sqliteTable(
     // the incumbent renderer until its first template revision is approved.
     pageTemplate: text("page_template").$type<ClubPageTemplate>(),
     pageTheme: text("page_theme", { mode: "json" }).$type<ClubPageTheme>(),
-    pageVisibleSections: text("page_visible_sections", { mode: "json" })
-      .$type<ClubPageSection[]>(),
-    pageSectionHeadings: text("page_section_headings", { mode: "json" })
-      .$type<ClubSectionHeadings>(),
+    pageVisibleSections: text("page_visible_sections", { mode: "json" }).$type<
+      ClubPageSection[]
+    >(),
+    pageSectionHeadings: text("page_section_headings", {
+      mode: "json",
+    }).$type<ClubSectionHeadings>(),
     pageTypography: text("page_typography").$type<ClubTypographyPreset>(),
     version: integer("version").notNull().default(1),
     createdAt,
@@ -355,6 +358,28 @@ export const events = sqliteTable(
     statusIdx: index("mp_events_status_idx").on(t.status),
     dateIdx: index("mp_events_date_idx").on(t.date),
     categoryIdx: index("mp_events_category_idx").on(t.category),
+  }),
+);
+
+/**
+ * Every club publicly associated with an event. `mp_events.club_id` remains
+ * the primary/legacy club during the migration window; this table is the
+ * authoritative list of hosts and supports co-hosted events.
+ */
+export const eventClubs = sqliteTable(
+  "mp_event_clubs",
+  {
+    eventId: integer("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    clubId: integer("club_id")
+      .notNull()
+      .references(() => clubs.id, { onDelete: "cascade" }),
+    createdAt,
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.eventId, t.clubId] }),
+    clubIdx: index("mp_event_clubs_club_idx").on(t.clubId),
   }),
 );
 
@@ -414,9 +439,7 @@ export const clubMemberships = sqliteTable(
     canManageMedia: integer("can_manage_media", { mode: "boolean" })
       .notNull()
       .default(false),
-    isActive: integer("is_active", { mode: "boolean" })
-      .notNull()
-      .default(true),
+    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
     invitedByUserId: integer("invited_by_user_id").references(() => users.id),
     revokedByUserId: integer("revoked_by_user_id").references(() => users.id),
     revokedAt: text("revoked_at"),
@@ -442,10 +465,7 @@ export const contentRevisions = sqliteTable(
     clubId: integer("club_id")
       .notNull()
       .references(() => clubs.id),
-    status: text("status")
-      .$type<RevisionStatus>()
-      .notNull()
-      .default("draft"),
+    status: text("status").$type<RevisionStatus>().notNull().default("draft"),
     snapshot: text("snapshot", { mode: "json" })
       .$type<Record<string, unknown>>()
       .notNull(),
@@ -482,7 +502,10 @@ export const eventFollowupTasks = sqliteTable(
     clubId: integer("club_id")
       .notNull()
       .references(() => clubs.id),
-    status: text("status").$type<"open" | "completed">().notNull().default("open"),
+    status: text("status")
+      .$type<"open" | "completed">()
+      .notNull()
+      .default("open"),
     completedAt: text("completed_at"),
     createdAt,
     updatedAt,
@@ -1033,6 +1056,7 @@ export const clubsRelations = relations(clubs, ({ one, many }) => ({
     references: [clubCategories.id],
   }),
   events: many(events),
+  hostedEvents: many(eventClubs),
   memberships: many(clubMemberships),
   revisions: many(contentRevisions),
   followupTasks: many(eventFollowupTasks),
@@ -1093,8 +1117,20 @@ export const eventsRelations = relations(events, ({ one, many }) => ({
     references: [users.id],
   }),
   club: one(clubs, { fields: [events.clubId], references: [clubs.id] }),
+  hostingClubs: many(eventClubs),
   recaps: many(recaps),
   registrations: many(eventRegistrations),
+}));
+
+export const eventClubsRelations = relations(eventClubs, ({ one }) => ({
+  event: one(events, {
+    fields: [eventClubs.eventId],
+    references: [events.id],
+  }),
+  club: one(clubs, {
+    fields: [eventClubs.clubId],
+    references: [clubs.id],
+  }),
 }));
 
 export const recapsRelations = relations(recaps, ({ one }) => ({
@@ -1244,6 +1280,7 @@ export const sportsPageConfigRelations = relations(
 
 export type DbUser = typeof users.$inferSelect;
 export type DbEvent = typeof events.$inferSelect;
+export type DbEventClub = typeof eventClubs.$inferSelect;
 export type DbClub = typeof clubs.$inferSelect;
 export type DbMedia = typeof media.$inferSelect;
 export type DbRecap = typeof recaps.$inferSelect;

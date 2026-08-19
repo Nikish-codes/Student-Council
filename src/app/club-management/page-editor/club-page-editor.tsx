@@ -12,12 +12,10 @@ import { hasAccessibleClubTheme } from "@/lib/club-page-theme";
 import { cn } from "@/lib/utils";
 import { saveClubPageRevision } from "./actions";
 
-const input = "mt-2 w-full rounded-xl border border-line/15 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none focus:border-line/40";
-const themes = {
-  stage: { background: "#0b0705", foreground: "#fff5e9", accent: "#ff5a1f" },
-  zine: { background: "#f1ead8", foreground: "#17130f", accent: "#d93818" },
-  clubhouse: { background: "#efffd8", foreground: "#17301e", accent: "#a92f18" },
-} as const;
+const input =
+  "mt-2 w-full rounded-xl border border-line/15 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none focus:border-line/40";
+const STAGE_BACKGROUND = "#0b0705";
+const STAGE_FOREGROUND = "#fff5e9";
 
 function parseActivities(value: string) {
   return value
@@ -66,25 +64,30 @@ export function ClubPageEditor({
   past: EventItem[];
   leads: CouncilMember[];
 }) {
-  const [template, setTemplate] = useState(initial.pageTemplate);
   const [name, setName] = useState(initial.name);
   const [tagline, setTagline] = useState(initial.tagline ?? "");
   const [blurb, setBlurb] = useState(initial.blurb);
   const [about, setAbout] = useState(initial.about ?? "");
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
-  const [theme, setTheme] = useState(initial.pageTheme);
+  const [accent, setAccent] = useState(initial.pageTheme.accent);
   const [visible, setVisible] = useState(new Set(initial.pageVisibleSections));
-  const [typography, setTypography] = useState(initial.pageTypography);
   const [headings, setHeadings] = useState(initial.pageSectionHeadings);
   const [logoId, setLogoId] = useState(initial.logoId ?? null);
   const [coverId, setCoverId] = useState(initial.coverId ?? null);
   const [joinUrl, setJoinUrl] = useState(initial.joinUrl ?? "");
   const [members, setMembers] = useState(initial.members?.toString() ?? "");
-  const [foundedYear, setFoundedYear] = useState(initial.foundedYear?.toString() ?? "");
-  const [flagshipEvent, setFlagshipEvent] = useState(initial.flagshipEvent ?? "");
+  const [foundedYear, setFoundedYear] = useState(
+    initial.foundedYear?.toString() ?? "",
+  );
+  const [flagshipEvent, setFlagshipEvent] = useState(
+    initial.flagshipEvent ?? "",
+  );
   const [activitiesText, setActivitiesText] = useState(() =>
     initial.activities
-      .map((item) => `${item.title}${item.description ? ` | ${item.description}` : ""}`)
+      .map(
+        (item) =>
+          `${item.title}${item.description ? ` | ${item.description}` : ""}`,
+      )
       .join("\n"),
   );
   const [videosText, setVideosText] = useState(() =>
@@ -96,60 +99,100 @@ export function ClubPageEditor({
   const [websiteUrl, setWebsiteUrl] = useState(initial.websiteUrl ?? "");
   const [contactEmail, setContactEmail] = useState(initial.contactEmail ?? "");
 
-  const previewClub = useMemo<ClubDetail>(() => ({
-    ...club,
-    name,
-    tagline: tagline || undefined,
-    blurb,
-    about: about || undefined,
-    logo:
-      (logoId === initial.logoId
-        ? club.logo
-        : media.find((item) => item.id === logoId)?.url) ?? club.logo,
-    cover:
-      coverId === initial.coverId
-        ? club.cover
-        : media.find((item) => item.id === coverId)?.url,
-    joinUrl: joinUrl || undefined,
-    members: members ? Number(members) : undefined,
-    foundedYear: foundedYear ? Number(foundedYear) : undefined,
-    flagshipEvent: flagshipEvent || undefined,
-    activities: parseActivities(activitiesText),
-    videos: parseVideos(videosText),
-    gallery,
-    instagramUrl: instagramUrl || undefined,
-    linkedinUrl: linkedinUrl || undefined,
-    websiteUrl: websiteUrl || undefined,
-    contactEmail: contactEmail || undefined,
-    pageTemplate: template,
-    pageTheme: theme,
-    pageVisibleSections: [...visible],
-    pageSectionHeadings: headings,
-    pageTypography: typography,
-  }), [about, activitiesText, blurb, club, contactEmail, coverId, flagshipEvent, foundedYear, gallery, headings, initial.coverId, initial.logoId, instagramUrl, joinUrl, linkedinUrl, logoId, media, members, name, tagline, template, theme, typography, videosText, visible, websiteUrl]);
-
-  function chooseTemplate(value: "stage" | "zine" | "clubhouse") {
-    setTemplate(value);
-    setTheme({ ...themes[value], logoTreatment: theme.logoTreatment });
-  }
+  const theme = useMemo(
+    () => ({
+      background: STAGE_BACKGROUND,
+      foreground: STAGE_FOREGROUND,
+      accent,
+      logoTreatment: "natural" as const,
+    }),
+    [accent],
+  );
+  const previewClub = useMemo<ClubDetail>(
+    () => ({
+      ...club,
+      name,
+      tagline: tagline || undefined,
+      blurb,
+      about: about || undefined,
+      logo:
+        (logoId === initial.logoId
+          ? club.logo
+          : media.find((item) => item.id === logoId)?.url) ?? club.logo,
+      cover:
+        coverId === initial.coverId
+          ? club.cover
+          : media.find((item) => item.id === coverId)?.url,
+      joinUrl: joinUrl || undefined,
+      members: members ? Number(members) : undefined,
+      foundedYear: foundedYear ? Number(foundedYear) : undefined,
+      flagshipEvent: flagshipEvent || undefined,
+      activities: parseActivities(activitiesText),
+      videos: parseVideos(videosText),
+      gallery,
+      instagramUrl: instagramUrl || undefined,
+      linkedinUrl: linkedinUrl || undefined,
+      websiteUrl: websiteUrl || undefined,
+      contactEmail: contactEmail || undefined,
+      pageTemplate: "stage",
+      pageTheme: theme,
+      pageVisibleSections: [...visible],
+      pageSectionHeadings: headings,
+      pageTypography: "friendly",
+    }),
+    [
+      about,
+      activitiesText,
+      blurb,
+      club,
+      contactEmail,
+      coverId,
+      flagshipEvent,
+      foundedYear,
+      gallery,
+      headings,
+      initial.coverId,
+      initial.logoId,
+      instagramUrl,
+      joinUrl,
+      linkedinUrl,
+      logoId,
+      media,
+      members,
+      name,
+      tagline,
+      theme,
+      videosText,
+      visible,
+      websiteUrl,
+    ],
+  );
 
   const editable = !revision || revision.status === "draft";
   const accessibleTheme = hasAccessibleClubTheme(theme);
   return (
     <form action={saveClubPageRevision} className="space-y-8">
       <input type="hidden" name="clubId" value={club.id} />
-      <input type="hidden" name="revisionId" value={editable ? revision?.id ?? "" : ""} />
+      <input
+        type="hidden"
+        name="revisionId"
+        value={editable ? (revision?.id ?? "") : ""}
+      />
       <input type="hidden" name="baseVersion" value={baseVersion} />
-      <input type="hidden" name="themeBackground" value={theme.background} />
-      <input type="hidden" name="themeForeground" value={theme.foreground} />
       <input type="hidden" name="themeAccent" value={theme.accent} />
+      <input type="hidden" name="pageTemplate" value="stage" />
+      <input type="hidden" name="pageTypography" value="friendly" />
+      <input type="hidden" name="logoTreatment" value="natural" />
 
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-medium text-subtle">Public page</p>
-          <h1 className="mt-1 font-display text-4xl font-semibold tracking-[-0.03em]">Page editor</h1>
+          <h1 className="mt-1 font-display text-4xl font-semibold tracking-[-0.03em]">
+            Page editor
+          </h1>
           <p className="mt-2 max-w-[65ch] text-sm leading-6 text-muted">
-            Your draft is private. Submitting freezes this version for review while the approved page stays live.
+            Your draft is private. Submitting freezes this version for review
+            while the approved page stays live.
           </p>
         </div>
         <div className="flex gap-2">
@@ -175,13 +218,17 @@ export function ClubPageEditor({
       </header>
 
       {saved ? (
-        <p role="status" className="rounded-xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+        <p
+          role="status"
+          className="rounded-xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400"
+        >
           Draft saved.
         </p>
       ) : null}
       {revision && revision.status !== "draft" ? (
         <div className="rounded-xl bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
-          This submission is {revision.status.replaceAll("_", " ")}. Submitted snapshots cannot be edited.
+          This submission is {revision.status.replaceAll("_", " ")}. Submitted
+          snapshots cannot be edited.
         </div>
       ) : null}
       {revision?.note ? (
@@ -192,133 +239,137 @@ export function ClubPageEditor({
 
       <div className="grid gap-8 xl:grid-cols-[minmax(0,0.9fr)_minmax(34rem,1.1fr)]">
         <div className="space-y-7">
-          <EditorSection title="Choose a template" description="Structure stays consistent inside each template.">
-            <div className="grid gap-2 sm:grid-cols-3">
-              {([
-                ["stage", "Stage", "Cinematic and performance-led"],
-                ["zine", "Zine", "Editorial and archive-driven"],
-                ["clubhouse", "Clubhouse", "Welcoming and people-first"],
-              ] as const).map(([value, label, description]) => (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={template === value}
-                  onClick={() => chooseTemplate(value)}
-                  className={cn(
-                    "min-h-28 rounded-2xl p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink",
-                    template === value ? "bg-ink text-bg" : "bg-surface hover:bg-line/5",
-                  )}
-                >
-                  <span className="block font-medium">{label}</span>
-                  <span className={cn("mt-2 block text-xs leading-5", template === value ? "text-bg/70" : "text-muted")}>{description}</span>
-                </button>
-              ))}
-            </div>
-            <input type="hidden" name="pageTemplate" value={template} />
-          </EditorSection>
-
-          <EditorSection title="Identity" description="The public name, introduction, and primary action.">
+          <EditorSection
+            title="Identity"
+            description="The public name, introduction, and primary action."
+          >
             <Field label="Club name">
-              <input className={input} name="name" required value={name} onChange={(event) => setName(event.target.value)} />
+              <input
+                className={input}
+                name="name"
+                required
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+              />
             </Field>
             <Field label="Tagline" hint="Up to 180 characters">
-              <input className={input} name="tagline" maxLength={180} value={tagline} onChange={(event) => setTagline(event.target.value)} />
+              <input
+                className={input}
+                name="tagline"
+                maxLength={180}
+                value={tagline}
+                onChange={(event) => setTagline(event.target.value)}
+              />
             </Field>
             <Field label="Short introduction">
-              <textarea className={input} name="blurb" required rows={3} value={blurb} onChange={(event) => setBlurb(event.target.value)} />
+              <textarea
+                className={input}
+                name="blurb"
+                required
+                rows={3}
+                value={blurb}
+                onChange={(event) => setBlurb(event.target.value)}
+              />
             </Field>
             <Field label="About">
-              <textarea className={input} name="about" rows={7} value={about} onChange={(event) => setAbout(event.target.value)} />
+              <textarea
+                className={input}
+                name="about"
+                rows={7}
+                value={about}
+                onChange={(event) => setAbout(event.target.value)}
+              />
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
-              <MediaField name="logoId" label="Logo" defaultValue={initial.logoId ?? null} media={media} onValueChange={setLogoId} />
-              <MediaField name="coverId" label="Cover image" defaultValue={initial.coverId ?? null} media={media} onValueChange={setCoverId} />
+              <MediaField
+                name="logoId"
+                label="Logo"
+                defaultValue={initial.logoId ?? null}
+                media={media}
+                onValueChange={setLogoId}
+              />
+              <MediaField
+                name="coverId"
+                label="Cover image"
+                defaultValue={initial.coverId ?? null}
+                media={media}
+                onValueChange={setCoverId}
+              />
             </div>
             <Field label="Join link">
-              <input className={input} name="joinUrl" type="url" value={joinUrl} onChange={(event) => setJoinUrl(event.target.value)} />
+              <input
+                className={input}
+                name="joinUrl"
+                type="url"
+                value={joinUrl}
+                onChange={(event) => setJoinUrl(event.target.value)}
+              />
             </Field>
           </EditorSection>
 
-          <EditorSection title="Color and type" description="Curated combinations keep text readable on every template.">
-            <div className="flex flex-wrap gap-3">
-              {Object.entries(themes).map(([key, value]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setTheme({ ...value, logoTreatment: theme.logoTreatment })}
-                  className="flex min-h-11 items-center gap-2 rounded-xl border border-line/15 px-3 text-sm capitalize hover:bg-line/5"
-                >
-                  <span className="h-5 w-5 rounded-full border border-black/15" style={{ backgroundColor: value.accent }} />
-                  {key}
-                </button>
-              ))}
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              {([
-                ["Background", "background"],
-                ["Text", "foreground"],
-                ["Accent", "accent"],
-              ] as const).map(([label, key]) => (
-                <label key={key} className="text-sm font-medium text-muted">
-                  {label}
-                  <span className="mt-2 flex h-11 items-center gap-3 rounded-xl border border-line/15 bg-surface-2 px-3">
-                    <input
-                      type="color"
-                      aria-label={`${label} color`}
-                      value={theme[key]}
-                      onChange={(event) => setTheme({ ...theme, [key]: event.target.value })}
-                      className="h-7 w-9 cursor-pointer border-0 bg-transparent p-0"
-                    />
-                    <span className="font-mono text-xs uppercase text-ink">{theme[key]}</span>
-                  </span>
-                </label>
-              ))}
-            </div>
+          <EditorSection
+            title="Accent"
+            description="Paste one six-digit hex color. Stage and Friendly are fixed for now."
+          >
+            <Field label="Accent color" hint="Format: #FF5A1F">
+              <input
+                className={input}
+                name="accentDisplay"
+                type="text"
+                inputMode="text"
+                pattern="#[0-9A-Fa-f]{6}"
+                maxLength={7}
+                placeholder="#FF5A1F"
+                value={accent}
+                onChange={(event) => setAccent(event.target.value)}
+                spellCheck={false}
+                autoComplete="off"
+                required
+              />
+            </Field>
             {!accessibleTheme ? (
-              <p role="alert" className="rounded-xl bg-red-500/10 px-3 py-2.5 text-sm text-red-300">
-                Increase the contrast between the background, text, and accent colors before saving.
+              <p
+                role="alert"
+                className="rounded-xl bg-red-500/10 px-3 py-2.5 text-sm text-red-300"
+              >
+                Choose an accent that stays visible against the Stage
+                background.
               </p>
             ) : null}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Typography">
-                <select className={input} name="pageTypography" value={typography} onChange={(event) => setTypography(event.target.value as ClubPageSnapshot["pageTypography"])}>
-                  <option value="signal">Signal</option>
-                  <option value="editorial">Editorial</option>
-                  <option value="friendly">Friendly</option>
-                </select>
-              </Field>
-              <Field label="Logo treatment">
-                <select
-                  className={input}
-                  name="logoTreatment"
-                  value={theme.logoTreatment}
-                  onChange={(event) => setTheme({ ...theme, logoTreatment: event.target.value as ClubPageSnapshot["pageTheme"]["logoTreatment"] })}
-                >
-                  <option value="natural">Natural</option>
-                  <option value="badge">Badge</option>
-                  <option value="monochrome">Monochrome</option>
-                </select>
-              </Field>
-            </div>
           </EditorSection>
 
-          <EditorSection title="Sections" description="Choose what appears, then write the heading visitors see.">
+          <EditorSection
+            title="Sections"
+            description="Choose what appears, then write the heading visitors see."
+          >
             <div className="space-y-3">
-              {([
-                ["about", "About"], ["activities", "Activities"], ["videos", "Videos"],
-                ["events", "Events"], ["gallery", "Gallery"], ["people", "People"],
-              ] as const).map(([key, label]) => (
-                <div key={key} className="grid gap-3 rounded-xl bg-surface-2 p-3 sm:grid-cols-[auto_1fr] sm:items-center">
+              {(
+                [
+                  ["about", "About"],
+                  ["activities", "Activities"],
+                  ["videos", "Videos"],
+                  ["events", "Events"],
+                  ["gallery", "Gallery"],
+                  ["people", "People"],
+                ] as const
+              ).map(([key, label]) => (
+                <div
+                  key={key}
+                  className="grid gap-3 rounded-xl bg-surface-2 p-3 sm:grid-cols-[auto_1fr] sm:items-center"
+                >
                   <label className="flex min-h-10 items-center gap-3 text-sm font-medium">
                     <input
                       type="checkbox"
                       name={`section_${key}`}
                       checked={visible.has(key)}
-                      onChange={(event) => setVisible((current) => {
-                        const next = new Set(current);
-                        if (event.target.checked) next.add(key); else next.delete(key);
-                        return next;
-                      })}
+                      onChange={(event) =>
+                        setVisible((current) => {
+                          const next = new Set(current);
+                          if (event.target.checked) next.add(key);
+                          else next.delete(key);
+                          return next;
+                        })
+                      }
                     />
                     {label}
                   </label>
@@ -326,7 +377,12 @@ export function ClubPageEditor({
                     className="rounded-lg border border-line/15 bg-bg px-3 py-2 text-sm outline-none focus:border-line/40"
                     name={`heading${key[0].toUpperCase()}${key.slice(1)}`}
                     value={headings[key] ?? label}
-                    onChange={(event) => setHeadings((current) => ({ ...current, [key]: event.target.value }))}
+                    onChange={(event) =>
+                      setHeadings((current) => ({
+                        ...current,
+                        [key]: event.target.value,
+                      }))
+                    }
                     aria-label={`${label} section heading`}
                   />
                 </div>
@@ -334,7 +390,10 @@ export function ClubPageEditor({
             </div>
           </EditorSection>
 
-          <EditorSection title="Content" description="Use one activity per line: title, a vertical bar, then its description.">
+          <EditorSection
+            title="Content"
+            description="Use one activity per line: title, a vertical bar, then its description."
+          >
             <Field label="Activities">
               <textarea
                 className={input}
@@ -345,19 +404,87 @@ export function ClubPageEditor({
               />
             </Field>
             <Field label="Video links" hint="One YouTube or Vimeo URL per line">
-              <textarea className={input} name="videos" rows={4} value={videosText} onChange={(event) => setVideosText(event.target.value)} />
+              <textarea
+                className={input}
+                name="videos"
+                rows={4}
+                value={videosText}
+                onChange={(event) => setVideosText(event.target.value)}
+              />
             </Field>
-            <ClubGalleryField name="gallery" defaultValue={initial.gallery} onValueChange={setGallery} />
+            <ClubGalleryField
+              name="gallery"
+              defaultValue={initial.gallery}
+              onValueChange={setGallery}
+            />
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Member count"><input className={input} name="members" type="number" min={0} value={members} onChange={(event) => setMembers(event.target.value)} /></Field>
-              <Field label="Founded year"><input className={input} name="foundedYear" type="number" min={1900} max={2200} value={foundedYear} onChange={(event) => setFoundedYear(event.target.value)} /></Field>
+              <Field label="Member count">
+                <input
+                  className={input}
+                  name="members"
+                  type="number"
+                  min={0}
+                  value={members}
+                  onChange={(event) => setMembers(event.target.value)}
+                />
+              </Field>
+              <Field label="Founded year">
+                <input
+                  className={input}
+                  name="foundedYear"
+                  type="number"
+                  min={1900}
+                  max={2200}
+                  value={foundedYear}
+                  onChange={(event) => setFoundedYear(event.target.value)}
+                />
+              </Field>
             </div>
-            <Field label="Flagship event"><input className={input} name="flagshipEvent" value={flagshipEvent} onChange={(event) => setFlagshipEvent(event.target.value)} /></Field>
+            <Field label="Flagship event">
+              <input
+                className={input}
+                name="flagshipEvent"
+                value={flagshipEvent}
+                onChange={(event) => setFlagshipEvent(event.target.value)}
+              />
+            </Field>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Instagram"><input className={input} name="instagramUrl" type="url" value={instagramUrl} onChange={(event) => setInstagramUrl(event.target.value)} /></Field>
-              <Field label="LinkedIn"><input className={input} name="linkedinUrl" type="url" value={linkedinUrl} onChange={(event) => setLinkedinUrl(event.target.value)} /></Field>
-              <Field label="Website"><input className={input} name="websiteUrl" type="url" value={websiteUrl} onChange={(event) => setWebsiteUrl(event.target.value)} /></Field>
-              <Field label="Contact email"><input className={input} name="contactEmail" type="email" value={contactEmail} onChange={(event) => setContactEmail(event.target.value)} /></Field>
+              <Field label="Instagram">
+                <input
+                  className={input}
+                  name="instagramUrl"
+                  type="url"
+                  value={instagramUrl}
+                  onChange={(event) => setInstagramUrl(event.target.value)}
+                />
+              </Field>
+              <Field label="LinkedIn">
+                <input
+                  className={input}
+                  name="linkedinUrl"
+                  type="url"
+                  value={linkedinUrl}
+                  onChange={(event) => setLinkedinUrl(event.target.value)}
+                />
+              </Field>
+              <Field label="Website">
+                <input
+                  className={input}
+                  name="websiteUrl"
+                  type="url"
+                  value={websiteUrl}
+                  onChange={(event) => setWebsiteUrl(event.target.value)}
+                />
+              </Field>
+              <Field label="Contact email">
+                <input
+                  className={input}
+                  name="contactEmail"
+                  type="email"
+                  value={contactEmail}
+                  onChange={(event) => setContactEmail(event.target.value)}
+                />
+              </Field>
             </div>
           </EditorSection>
         </div>
@@ -366,21 +493,45 @@ export function ClubPageEditor({
           <div className="mb-3 flex items-center justify-between">
             <p className="text-sm font-medium">Live preview</p>
             <div className="flex rounded-xl bg-surface p-1">
-              <PreviewButton active={device === "desktop"} onClick={() => setDevice("desktop")} label="Desktop"><Monitor className="h-4 w-4" /></PreviewButton>
-              <PreviewButton active={device === "mobile"} onClick={() => setDevice("mobile")} label="Mobile"><Smartphone className="h-4 w-4" /></PreviewButton>
+              <PreviewButton
+                active={device === "desktop"}
+                onClick={() => setDevice("desktop")}
+                label="Desktop"
+              >
+                <Monitor className="h-4 w-4" />
+              </PreviewButton>
+              <PreviewButton
+                active={device === "mobile"}
+                onClick={() => setDevice("mobile")}
+                label="Mobile"
+              >
+                <Smartphone className="h-4 w-4" />
+              </PreviewButton>
             </div>
           </div>
           <div className="h-[calc(100%-3.25rem)] overflow-hidden rounded-2xl bg-black/20 p-2">
-            <div className={cn("mx-auto h-full overflow-hidden rounded-xl bg-white", device === "mobile" ? "max-w-[390px]" : "w-full")}>
+            <div
+              className={cn(
+                "mx-auto h-full overflow-hidden rounded-xl bg-white",
+                device === "mobile" ? "max-w-[390px]" : "w-full",
+              )}
+            >
               <div
                 className="origin-top-left"
                 style={{
                   width: device === "mobile" ? 390 : 1280,
-                  transform: device === "mobile" ? "scale(0.78)" : "scale(0.48)",
+                  transform:
+                    device === "mobile" ? "scale(0.78)" : "scale(0.48)",
                   transformOrigin: "top left",
                 }}
               >
-                <ClubPageRenderer template={template} club={previewClub} upcoming={upcoming} past={past} leads={leads} />
+                <ClubPageRenderer
+                  template="stage"
+                  club={previewClub}
+                  upcoming={upcoming}
+                  past={past}
+                  leads={leads}
+                />
               </div>
             </div>
           </div>
@@ -390,7 +541,15 @@ export function ClubPageEditor({
   );
 }
 
-function EditorSection({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
+function EditorSection({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
   return (
     <section className="rounded-2xl bg-surface p-5 sm:p-6">
       <h2 className="text-lg font-semibold">{title}</h2>
@@ -400,23 +559,47 @@ function EditorSection({ title, description, children }: { title: string; descri
   );
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block text-sm font-medium text-muted">
-      <span>{label}</span>{hint ? <span className="ml-2 text-xs font-normal text-subtle">{hint}</span> : null}
+      <span>{label}</span>
+      {hint ? (
+        <span className="ml-2 text-xs font-normal text-subtle">{hint}</span>
+      ) : null}
       {children}
     </label>
   );
 }
 
-function PreviewButton({ active, onClick, label, children }: { active: boolean; onClick: () => void; label: string; children: React.ReactNode }) {
+function PreviewButton({
+  active,
+  onClick,
+  label,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={`${label} preview`}
       aria-pressed={active}
-      className={cn("grid h-9 w-9 place-items-center rounded-lg", active ? "bg-ink text-bg" : "text-muted hover:text-ink")}
+      className={cn(
+        "grid h-9 w-9 place-items-center rounded-lg",
+        active ? "bg-ink text-bg" : "text-muted hover:text-ink",
+      )}
     >
       {children}
     </button>

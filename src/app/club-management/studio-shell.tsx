@@ -10,6 +10,7 @@ import {
   FilePenLine,
   Gauge,
   Images,
+  KeyRound,
   LogOut,
   Menu,
   Users,
@@ -21,12 +22,48 @@ import type { StudioMembership } from "@/lib/club-studio";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/club-management", label: "Dashboard", icon: Gauge, permission: "dashboard" },
-  { href: "/club-management/page-editor", label: "Page", icon: FilePenLine, permission: "page" },
-  { href: "/club-management/team", label: "Team", icon: Users, permission: "team" },
-  { href: "/club-management/events", label: "Events", icon: CalendarDays, permission: "events" },
-  { href: "/club-management/registrations", label: "Registrations", icon: CheckSquare2, permission: "events" },
-  { href: "/club-management/follow-up", label: "Follow-up", icon: Images, permission: "media" },
+  {
+    href: "/club-management",
+    label: "Dashboard",
+    icon: Gauge,
+    permission: "dashboard",
+  },
+  {
+    href: "/club-management/page-editor",
+    label: "Page",
+    icon: FilePenLine,
+    permission: "page",
+  },
+  {
+    href: "/club-management/members",
+    label: "Members",
+    icon: Users,
+    permission: "page",
+  },
+  {
+    href: "/club-management/team",
+    label: "Team",
+    icon: KeyRound,
+    permission: "team",
+  },
+  {
+    href: "/club-management/events",
+    label: "Events",
+    icon: CalendarDays,
+    permission: "events",
+  },
+  {
+    href: "/club-management/registrations",
+    label: "Registrations",
+    icon: CheckSquare2,
+    permission: "events",
+  },
+  {
+    href: "/club-management/follow-up",
+    label: "Follow-up",
+    icon: Images,
+    permission: "media",
+  },
 ] as const;
 
 export function StudioShell({
@@ -43,7 +80,8 @@ export function StudioShell({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const requested = Number(search.get("club"));
-  const active = memberships.find((item) => item.clubId === requested) ?? memberships[0];
+  const active =
+    memberships.find((item) => item.clubId === requested) ?? memberships[0];
   const href = (path: string) => `${path}?club=${active.clubId}`;
   const canOpen = (permission: (typeof NAV)[number]["permission"]) =>
     permission === "dashboard" ||
@@ -108,7 +146,10 @@ export function StudioShell({
         )}
       >
         <div className="flex h-16 items-center justify-between border-b border-line/10 px-5">
-          <Link className="font-display text-lg font-semibold" href={href("/club-management")}>
+          <Link
+            className="font-display text-lg font-semibold"
+            href={href("/club-management")}
+          >
             Club Studio
           </Link>
           <button

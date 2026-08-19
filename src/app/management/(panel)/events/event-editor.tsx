@@ -8,9 +8,21 @@ import { Button } from "@/components/ui/button";
 import { MediaField, type MediaOption } from "@/components/management/fields";
 import { DeleteEventButton } from "./delete-button";
 
-type Option = { id: number; name?: string | null; filename?: string | null; url?: string };
+type Option = {
+  id: number;
+  name?: string | null;
+  filename?: string | null;
+  url?: string;
+};
 
-const CATEGORIES = ["tech", "cultural", "sports", "flagship", "academic", "community"] as const;
+const CATEGORIES = [
+  "tech",
+  "cultural",
+  "sports",
+  "flagship",
+  "academic",
+  "community",
+] as const;
 
 function field(label: string, hint?: string) {
   return (
@@ -26,10 +38,12 @@ const inputCls =
 
 function SaveBar({
   canPublish,
+  clubWorkflow,
   deleteFor,
   basePath,
 }: {
   canPublish: boolean;
+  clubWorkflow: boolean;
   deleteFor?: { id: number; title: string };
   basePath: string;
 }) {
@@ -49,9 +63,35 @@ function SaveBar({
       <Button asChild variant="ghost" size="sm" type="button">
         <Link href={basePath}>Cancel</Link>
       </Button>
-      <Button type="submit" disabled={pending}>
-        {pending ? "Saving…" : canPublish ? "Save" : "Save / submit for review"}
-      </Button>
+      {clubWorkflow ? (
+        <>
+          <Button
+            type="submit"
+            name="status"
+            value="draft"
+            variant="outline"
+            disabled={pending}
+          >
+            {pending ? "Saving…" : "Save draft"}
+          </Button>
+          <Button
+            type="submit"
+            name="status"
+            value="pending_review"
+            disabled={pending}
+          >
+            {pending ? "Submitting…" : "Submit for review"}
+          </Button>
+        </>
+      ) : (
+        <Button type="submit" disabled={pending}>
+          {pending
+            ? "Saving…"
+            : canPublish
+              ? "Save"
+              : "Save / submit for review"}
+        </Button>
+      )}
     </div>
   );
 }
@@ -66,6 +106,7 @@ export function EventEditor({
   canDelete = false,
   basePath = "/management/events",
   lockedClubId,
+  hostingClubIds,
 }: {
   action: (fd: FormData) => Promise<void>;
   event: DbEvent | null;
@@ -76,9 +117,20 @@ export function EventEditor({
   canDelete?: boolean;
   basePath?: string;
   lockedClubId?: number;
+  hostingClubIds?: number[];
 }) {
   const [title, setTitle] = useState(event?.title ?? "");
   const [slug, setSlug] = useState(event?.slug ?? "");
+  const [clubSearch, setClubSearch] = useState("");
+  const [selectedClubIds, setSelectedClubIds] = useState<number[]>(() => {
+    const initial = hostingClubIds ?? (event?.clubId ? [event.clubId] : []);
+    return lockedClubId && !initial.includes(lockedClubId)
+      ? [lockedClubId, ...initial]
+      : initial;
+  });
+  const visibleClubs = clubs.filter((club) =>
+    (club.name ?? "").toLowerCase().includes(clubSearch.toLowerCase()),
+  );
 
   // Format an ISO timestamp for a `datetime-local` input using the BROWSER's
   // local components — `toISOString().slice(0,16)` would silently shift by the
@@ -93,9 +145,16 @@ export function EventEditor({
 
   return (
     <form action={action} className="mx-auto max-w-3xl">
-      {lockedClubId ? <input type="hidden" name="clubId" value={lockedClubId} /> : null}
+      {lockedClubId ? (
+        <input type="hidden" name="clubId" value={lockedClubId} />
+      ) : null}
+      {selectedClubIds.map((clubId) => (
+        <input key={clubId} type="hidden" name="clubIds" value={clubId} />
+      ))}
       <div className="mb-6">
-        <p className="kicker text-subtle">{event ? "Edit event" : "New event"}</p>
+        <p className="kicker text-subtle">
+          {event ? "Edit event" : "New event"}
+        </p>
         <h1 className="display mt-1 text-3xl">{title || "Untitled event"}</h1>
       </div>
 
@@ -124,7 +183,11 @@ export function EventEditor({
           </div>
           <div>
             {field("Category")}
-            <select name="category" defaultValue={event?.category ?? "tech"} className={inputCls}>
+            <select
+              name="category"
+              defaultValue={event?.category ?? "tech"}
+              className={inputCls}
+            >
               {CATEGORIES.map((c) => (
                 <option key={c} value={c}>
                   {c}
@@ -158,7 +221,12 @@ export function EventEditor({
 
         <div>
           {field("Venue")}
-          <input name="venue" required defaultValue={event?.venue ?? ""} className={inputCls} />
+          <input
+            name="venue"
+            required
+            defaultValue={event?.venue ?? ""}
+            className={inputCls}
+          />
         </div>
 
         <div>
@@ -183,7 +251,7 @@ export function EventEditor({
           />
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div>
           <MediaField
             name="bannerId"
             label="Banner image"
@@ -191,28 +259,88 @@ export function EventEditor({
             defaultValue={event?.bannerId ?? null}
             media={media as MediaOption[]}
           />
-          <div>
-            {field("Hosting club", "optional")}
-            <select
-              name="clubId"
-              defaultValue={event?.clubId ?? ""}
-              disabled={isClubLead}
-              className={inputCls}
-            >
-              <option value="">— none —</option>
-              {clubs.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
+
+        <fieldset className="rounded-2xl border border-line/10 p-5">
+          <legend className="px-1 text-sm font-medium text-ink">
+            Hosting clubs
+          </legend>
+          <p className="mt-1 text-xs leading-5 text-subtle">
+            {lockedClubId
+              ? "Your club is always included. Select any co-hosting clubs below."
+              : "Select every club responsible for this event. Co-hosted events appear on each club page."}
+          </p>
+          {clubs.length > 6 ? (
+            <label className="mt-4 block">
+              <span className="sr-only">Search hosting clubs</span>
+              <input
+                type="search"
+                value={clubSearch}
+                onChange={(event) => setClubSearch(event.target.value)}
+                placeholder="Search clubs"
+                className={inputCls}
+              />
+            </label>
+          ) : null}
+          <div
+            className="mt-4 grid max-h-64 gap-2 overflow-y-auto sm:grid-cols-2"
+            aria-live="polite"
+          >
+            {visibleClubs.map((club) => {
+              const checked = selectedClubIds.includes(club.id);
+              const locked = club.id === lockedClubId;
+              return (
+                <label
+                  key={club.id}
+                  className={`flex min-h-11 items-center gap-3 rounded-xl border px-3 py-2 text-sm transition-colors ${
+                    checked
+                      ? "border-line/30 bg-line/10 text-ink"
+                      : "border-line/10 text-muted hover:border-line/20"
+                  } ${locked ? "cursor-not-allowed" : "cursor-pointer"}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    disabled={locked}
+                    onChange={() => {
+                      setSelectedClubIds((current) =>
+                        checked
+                          ? current.filter((id) => id !== club.id)
+                          : [...current, club.id],
+                      );
+                    }}
+                    className="h-4 w-4 rounded border-line/30 bg-surface-2"
+                  />
+                  <span className="min-w-0 flex-1 truncate">{club.name}</span>
+                  {locked ? (
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-subtle">
+                      Required
+                    </span>
+                  ) : null}
+                </label>
+              );
+            })}
+            {!visibleClubs.length ? (
+              <p className="py-4 text-sm text-muted">
+                No clubs match that search.
+              </p>
+            ) : null}
+          </div>
+          {!lockedClubId && selectedClubIds.length === 0 ? (
+            <p className="mt-3 text-xs text-subtle">
+              No hosting club selected.
+            </p>
+          ) : null}
+        </fieldset>
 
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             {field("Trailer / video URL", "optional")}
-            <input name="videoUrl" defaultValue={event?.videoUrl ?? ""} className={inputCls} />
+            <input
+              name="videoUrl"
+              defaultValue={event?.videoUrl ?? ""}
+              className={inputCls}
+            />
           </div>
           <div>
             {field("External registration URL", "optional")}
@@ -224,16 +352,24 @@ export function EventEditor({
           </div>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2">
-          <div>
-            {field("Status")}
-            <select name="status" defaultValue={event?.status ?? "draft"} className={inputCls}>
-              <option value="draft">Draft</option>
-              <option value="pending_review">Pending review</option>
-              {canPublish ? <option value="published">Published</option> : null}
-              <option value="archived">Archived</option>
-            </select>
-          </div>
+        <div className={`grid gap-5 ${isClubLead ? "" : "sm:grid-cols-2"}`}>
+          {!isClubLead ? (
+            <div>
+              {field("Status")}
+              <select
+                name="status"
+                defaultValue={event?.status ?? "draft"}
+                className={inputCls}
+              >
+                <option value="draft">Draft</option>
+                <option value="pending_review">Pending review</option>
+                {canPublish ? (
+                  <option value="published">Published</option>
+                ) : null}
+                <option value="archived">Archived</option>
+              </select>
+            </div>
+          ) : null}
           <div>
             {field("Headcount", "past events · optional")}
             <input
@@ -246,15 +382,17 @@ export function EventEditor({
           </div>
         </div>
 
-        <label className="flex items-center gap-3 text-sm text-muted">
-          <input
-            type="checkbox"
-            name="featured"
-            defaultChecked={event?.featured ?? false}
-            className="h-4 w-4 rounded border-line/30 bg-surface-2"
-          />
-          Feature on the homepage
-        </label>
+        {!isClubLead ? (
+          <label className="flex items-center gap-3 text-sm text-muted">
+            <input
+              type="checkbox"
+              name="featured"
+              defaultChecked={event?.featured ?? false}
+              className="h-4 w-4 rounded border-line/30 bg-surface-2"
+            />
+            Feature on the homepage
+          </label>
+        ) : null}
 
         {/* Registration & tickets */}
         <div className="rounded-2xl border border-line/10 p-5">
@@ -286,7 +424,9 @@ export function EventEditor({
                 name="priceRupees"
                 min={0}
                 step="1"
-                defaultValue={event?.priceInPaise ? event.priceInPaise / 100 : ""}
+                defaultValue={
+                  event?.priceInPaise ? event.priceInPaise / 100 : ""
+                }
                 placeholder="0"
                 className={inputCls}
               />
@@ -303,14 +443,15 @@ export function EventEditor({
             </div>
           </div>
           <p className="mt-3 text-xs text-subtle">
-            Paid events require Razorpay keys in the environment. Free events issue
-            a ticket instantly.
+            Paid events require Razorpay keys in the environment. Free events
+            issue a ticket instantly.
           </p>
         </div>
       </div>
 
       <SaveBar
         canPublish={canPublish}
+        clubWorkflow={isClubLead}
         basePath={basePath}
         deleteFor={
           canDelete && event ? { id: event.id, title: event.title } : undefined

@@ -17,6 +17,12 @@ import { uniqueSlug, slugify } from "@/lib/slug";
 import { onEventPublished } from "@/lib/automation/on-publish";
 import { logAudit } from "@/lib/audit";
 import { saveRevisionDraft, submitRevision } from "@/lib/revisions";
+import {
+  getEventHostingClubIds,
+  hostingClubIdsFromForm,
+  primaryHostingClubId,
+  replaceEventHostingClubs,
+} from "@/lib/event-hosts";
 import type { EventCategory } from "@/lib/schemas";
 
 const CATEGORIES: EventCategory[] = [
@@ -56,14 +62,16 @@ type ParsedEvent = {
   attendees: number | null;
   featured: boolean;
   clubId: number | null;
+  clubIds: number[];
   registrationEnabled: boolean;
   priceInPaise: number;
   capacity: number | null;
 };
 
-function parse(fd: FormData): ParsedEvent {
+function parse(fd: FormData, preferredClubId?: number | null): ParsedEvent {
   const category = s(fd, "category") as EventCategory;
   const rupees = Number(s(fd, "priceRupees") || 0);
+  const clubIds = hostingClubIdsFromForm(fd);
   return {
     title: s(fd, "title"),
     category: CATEGORIES.includes(category) ? category : "tech",
@@ -77,7 +85,8 @@ function parse(fd: FormData): ParsedEvent {
     registrationUrl: s(fd, "registrationUrl") || null,
     attendees: optNum(fd, "attendees"),
     featured: fd.get("featured") === "on",
-    clubId: optNum(fd, "clubId"),
+    clubId: primaryHostingClubId(clubIds, preferredClubId),
+    clubIds,
     registrationEnabled: fd.get("registrationEnabled") === "on",
     priceInPaise: Number.isFinite(rupees) ? Math.round(rupees * 100) : 0,
     capacity: optNum(fd, "capacity"),
@@ -102,48 +111,58 @@ export async function createEvent(fd: FormData) {
   const data = parse(fd);
 
   // Club leads can only create events for their own club.
-  const clubId = user.role === "club_lead" ? user.clubId : data.clubId;
+  const clubId = data.clubId;
   assertCanEditEvent(user, clubId);
+  const { clubIds, ...eventData } = data;
 
   const status = resolveStatus(s(fd, "status"), user.role);
   const slug = await uniqueSlug("events", s(fd, "slug") || data.title);
 
   if (!canPublish(user.role)) {
-    const [event] = await db
-      .insert(eventsT)
-      .values({
-        ...data,
-        clubId,
-        slug,
-        status: "draft",
-        organizerId: Number(user.id),
-        version: 0,
-      })
-      .returning({ id: eventsT.id });
+    if (!clubId) throw new Error("CLUB_REQUIRED_FOR_REVIEW");
+    const event = await db.transaction(async (tx) => {
+      const [created] = await tx
+        .insert(eventsT)
+        .values({
+          ...eventData,
+          clubId,
+          slug,
+          status: "draft",
+          organizerId: Number(user.id),
+          version: 0,
+        })
+        .returning({ id: eventsT.id });
+      await replaceEventHostingClubs(tx, created.id, clubIds);
+      return created;
+    });
     const revisionId = await saveRevisionDraft({
       entityType: "event",
       entityId: event.id,
       clubId: clubId!,
       baseVersion: 0,
-      snapshot: { ...data, slug, clubId },
+      snapshot: { ...eventData, slug, clubId, clubIds },
     });
     if (status === "pending_review") await submitRevision(revisionId);
     revalidatePath("/management/events");
     redirect("/management/events");
   }
 
-  const [row] = await db
-    .insert(eventsT)
-    .values({
-      ...data,
-      clubId,
-      slug,
-      status,
-      organizerId: Number(user.id),
-      publishedAt: status === "published" ? new Date().toISOString() : null,
-      version: status === "published" ? 1 : 0,
-    })
-    .returning({ id: eventsT.id });
+  const row = await db.transaction(async (tx) => {
+    const [created] = await tx
+      .insert(eventsT)
+      .values({
+        ...eventData,
+        clubId,
+        slug,
+        status,
+        organizerId: Number(user.id),
+        publishedAt: status === "published" ? new Date().toISOString() : null,
+        version: status === "published" ? 1 : 0,
+      })
+      .returning({ id: eventsT.id });
+    await replaceEventHostingClubs(tx, created.id, clubIds);
+    return created;
+  });
 
   if (status === "published") await onEventPublished(row.id);
   await logAudit({
@@ -156,7 +175,7 @@ export async function createEvent(fd: FormData) {
 
   revalidatePath("/management/events");
   // The club page lists its own events, so it goes stale on every event write.
-  await revalidateClubPages(clubId);
+  await revalidateClubPages(clubId, ...clubIds);
   redirect("/management/events");
 }
 
@@ -168,8 +187,9 @@ export async function updateEvent(id: number, fd: FormData) {
   if (!existing) throw new Error("NOT_FOUND");
   assertCanEditEvent(user, existing.clubId);
 
-  const data = parse(fd);
-  const clubId = user.role === "club_lead" ? existing.clubId : data.clubId;
+  const data = parse(fd, existing.clubId);
+  const clubId = data.clubId;
+  const { clubIds, ...eventData } = data;
   const status = resolveStatus(s(fd, "status"), user.role);
 
   // Re-slug only if the slug field changed (keep existing otherwise).
@@ -186,7 +206,7 @@ export async function updateEvent(id: number, fd: FormData) {
       entityId: existing.id,
       clubId,
       baseVersion: existing.version,
-      snapshot: { ...data, slug, clubId },
+      snapshot: { ...eventData, slug, clubId, clubIds },
     });
     if (status === "pending_review") await submitRevision(revisionId);
     revalidatePath("/management/events");
@@ -196,21 +216,25 @@ export async function updateEvent(id: number, fd: FormData) {
   const justPublished =
     status === "published" && existing.status !== "published";
 
-  await db
-    .update(eventsT)
-    .set({
-      ...data,
-      clubId,
-      slug,
-      status,
-      publishedAt:
-        justPublished && !existing.publishedAt
-          ? new Date().toISOString()
-          : existing.publishedAt,
-      updatedAt: new Date().toISOString(),
-      version: existing.version + 1,
-    })
-    .where(eq(eventsT.id, id));
+  const previousClubIds = await getEventHostingClubIds(id);
+  await db.transaction(async (tx) => {
+    await tx
+      .update(eventsT)
+      .set({
+        ...eventData,
+        clubId,
+        slug,
+        status,
+        publishedAt:
+          justPublished && !existing.publishedAt
+            ? new Date().toISOString()
+            : existing.publishedAt,
+        updatedAt: new Date().toISOString(),
+        version: existing.version + 1,
+      })
+      .where(eq(eventsT.id, id));
+    await replaceEventHostingClubs(tx, id, clubIds);
+  });
 
   if (justPublished) await onEventPublished(id);
   await logAudit({
@@ -227,16 +251,18 @@ export async function updateEvent(id: number, fd: FormData) {
   revalidatePath("/events");
   revalidatePath(`/events/${slug}`);
   // Both clubs when the event was reassigned, so neither list is left stale.
-  await revalidateClubPages(existing.clubId, clubId);
+  await revalidateClubPages(
+    existing.clubId,
+    clubId,
+    ...previousClubIds,
+    ...clubIds,
+  );
   redirect("/management/events");
 }
 
 /** One-click publish from the approval queue (publishers only). */
 export async function publishEvent(id: number) {
-  const user = await requireRole(
-    "super_admin",
-    "operations",
-  );
+  const user = await requireRole("super_admin", "operations");
   const existing = await db.query.events.findFirst({
     where: eq(eventsT.id, id),
   });

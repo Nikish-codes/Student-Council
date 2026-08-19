@@ -1,10 +1,20 @@
 import { notFound } from "next/navigation";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { clubs as clubsT, events as eventsT, media as mediaT } from "@/db/schema";
-import { canPublish, requireOps, assertCanEditEvent, isAdmin } from "@/lib/rbac";
+import {
+  clubs as clubsT,
+  events as eventsT,
+  media as mediaT,
+} from "@/db/schema";
+import {
+  canPublish,
+  requireOps,
+  assertCanEditEvent,
+  isAdmin,
+} from "@/lib/rbac";
 import { createEvent, updateEvent } from "../actions";
 import { EventEditor } from "../event-editor";
+import { getEventHostingClubIds } from "@/lib/event-hosts";
 
 export default async function EventEditPage({
   params,
@@ -23,7 +33,7 @@ export default async function EventEditPage({
   if (!isNew && !event) notFound();
   if (event) assertCanEditEvent(user, event.clubId);
 
-  const [clubList, mediaList] = await Promise.all([
+  const [clubList, mediaList, hostingClubIds] = await Promise.all([
     db
       .select({ id: clubsT.id, name: clubsT.name })
       .from(clubsT)
@@ -32,11 +42,10 @@ export default async function EventEditPage({
       .select({ id: mediaT.id, filename: mediaT.filename, url: mediaT.url })
       .from(mediaT)
       .orderBy(asc(mediaT.filename)),
+    event ? getEventHostingClubIds(event.id) : Promise.resolve([]),
   ]);
 
-  const action = isNew
-    ? createEvent
-    : updateEvent.bind(null, Number(id));
+  const action = isNew ? createEvent : updateEvent.bind(null, Number(id));
 
   return (
     <EventEditor
@@ -47,6 +56,7 @@ export default async function EventEditPage({
       canPublish={canPublish(user.role)}
       isClubLead={user.role === "club_lead"}
       canDelete={!isNew && isAdmin(user.role)}
+      hostingClubIds={hostingClubIds}
     />
   );
 }

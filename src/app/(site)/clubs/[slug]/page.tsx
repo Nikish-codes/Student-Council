@@ -72,11 +72,22 @@ export default async function ClubDetailPage({
   if (club.pageTemplate) {
     return (
       <ClubPageRenderer
-        template={club.pageTemplate}
-        club={club}
+        template="stage"
+        club={{
+          ...club,
+          pageTemplate: "stage",
+          pageTypography: "friendly",
+          pageTheme: {
+            background: "#0b0705",
+            foreground: "#fff5e9",
+            accent: club.pageTheme?.accent ?? "#ff5a1f",
+            logoTreatment: "natural",
+          },
+        }}
         upcoming={upcoming}
         past={past}
         leads={leads}
+        siteHeaderOffset
       />
     );
   }
@@ -298,10 +309,7 @@ export default async function ClubDetailPage({
 
         {/* ─── Sticky aside — the membership card ─── */}
         <aside className="lg:col-span-4">
-          <MembershipCard
-            club={club}
-            nextEvent={nextEvent}
-          />
+          <MembershipCard club={club} nextEvent={nextEvent} />
         </aside>
       </div>
 
@@ -358,11 +366,7 @@ function Stat({
           wide ? "max-w-xs text-2xl sm:text-3xl" : "text-4xl sm:text-5xl",
         )}
       >
-        {count !== undefined ? (
-          <CountUp to={count} duration={1.6} />
-        ) : (
-          value
-        )}
+        {count !== undefined ? <CountUp to={count} duration={1.6} /> : value}
       </dd>
     </div>
   );
@@ -418,9 +422,7 @@ function TimelineNode({
         aria-hidden
         className={cn(
           "absolute -left-[2.05rem] top-2 grid h-3 w-3 place-items-center rounded-full",
-          upcoming
-            ? "bg-ink"
-            : "border border-line/40 bg-bg",
+          upcoming ? "bg-ink" : "border border-line/40 bg-bg",
         )}
       >
         {!upcoming ? (
@@ -441,9 +443,7 @@ function TimelineNode({
         <h3
           className={cn(
             "display mt-2 text-2xl leading-tight transition-colors sm:text-3xl",
-            upcoming
-              ? "text-ink"
-              : "text-ink/55 group-hover/t:text-ink",
+            upcoming ? "text-ink" : "text-ink/55 group-hover/t:text-ink",
           )}
         >
           {event.title}

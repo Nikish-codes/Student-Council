@@ -66,18 +66,23 @@ export default async function ClubPageEditorPage({
     linkedinUrl: club.linkedinUrl ?? null,
     websiteUrl: club.websiteUrl ?? null,
     contactEmail: club.contactEmail ?? null,
-    pageTemplate: club.pageTemplate ?? "stage",
-    pageTheme: club.pageTheme ?? {
+    pageTemplate: "stage",
+    pageTheme: {
       background: "#0b0705",
       foreground: "#fff5e9",
-      accent: "#ff5a1f",
+      accent: club.pageTheme?.accent ?? "#ff5a1f",
       logoTreatment: "natural",
     },
     pageVisibleSections: club.pageVisibleSections ?? [
-      "about", "activities", "videos", "events", "gallery", "people",
+      "about",
+      "activities",
+      "videos",
+      "events",
+      "gallery",
+      "people",
     ],
     pageSectionHeadings: club.pageSectionHeadings ?? {},
-    pageTypography: club.pageTypography ?? "signal",
+    pageTypography: "friendly",
   };
   const parsed = requested
     ? clubPageSnapshotSchema.safeParse(requested.snapshot)
@@ -93,12 +98,16 @@ export default async function ClubPageEditorPage({
       club={club}
       initial={initial}
       media={mediaRows}
-      revision={requested ? {
-        id: requested.id,
-        status: requested.status,
-        note: requested.reviewNote,
-        baseVersion: requested.baseVersion,
-      } : null}
+      revision={
+        requested
+          ? {
+              id: requested.id,
+              status: requested.status,
+              note: requested.reviewNote,
+              baseVersion: requested.baseVersion,
+            }
+          : null
+      }
       baseVersion={requested?.baseVersion ?? clubRow.version}
       saved={query.saved === "1"}
       upcoming={clubEvents.upcoming}

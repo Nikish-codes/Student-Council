@@ -171,7 +171,7 @@ function pageSnapshot(name: string) {
       "people",
     ] as const,
     pageSectionHeadings: { about: "Our story" },
-    pageTypography: "signal" as const,
+    pageTypography: "friendly" as const,
   };
 }
 
@@ -191,10 +191,17 @@ function eventSnapshot(clubId: number, title: string, slug: string) {
     attendees: null,
     featured: false,
     clubId,
+    clubIds: [clubId],
     registrationEnabled: true,
     priceInPaise: 0,
     capacity: 120,
   };
+}
+
+function eventRow(clubId: number, title: string, slug: string) {
+  const { clubIds: _clubIds, ...row } = eventSnapshot(clubId, title, slug);
+  void _clubIds;
+  return row;
 }
 
 beforeAll(async () => {
@@ -211,7 +218,9 @@ describe.sequential("club workflow integration", () => {
     await addMembership(president.id, club.id, "president");
     setActor({ ...president, clubId: club.id });
 
-    await expect(access.requireClubMembership(otherClub.id, "edit_page")).rejects.toThrow("FORBIDDEN");
+    await expect(
+      access.requireClubMembership(otherClub.id, "edit_page"),
+    ).rejects.toThrow("FORBIDDEN");
 
     await access.inviteClubMember({
       clubId: club.id,
@@ -321,10 +330,33 @@ describe.sequential("club workflow integration", () => {
       entityId: club.id,
       clubId: club.id,
       baseVersion: 1,
-      snapshot: pageSnapshot("Approved after changes"),
+      snapshot: {
+        ...pageSnapshot("Approved after changes"),
+        people: [
+          {
+            name: "Public club member",
+            role: "Design lead",
+            program: "Class of 2030",
+            photoId: null,
+            email: null,
+            linkedin: null,
+            quote: null,
+            bio: "Builds the club's visual identity.",
+            sortOrder: 0,
+          },
+        ],
+      },
     });
     await revisions.submitRevision(first);
-    expect((await db.query.clubs.findFirst({ where: eq(schema.clubs.id, club.id) }))?.name).toBe(club.name);
+    expect(
+      (await db.query.clubs.findFirst({ where: eq(schema.clubs.id, club.id) }))
+        ?.name,
+    ).toBe(club.name);
+    expect(
+      await db.query.councilMembers.findFirst({
+        where: eq(schema.councilMembers.clubId, club.id),
+      }),
+    ).toBeUndefined();
 
     setActor(reviewer);
     await revisions.reviewRevision({
@@ -340,10 +372,20 @@ describe.sequential("club workflow integration", () => {
     setActor(author);
     await revisions.submitRevision(replacement!.id);
     setActor(reviewer);
-    await revisions.reviewRevision({ revisionId: replacement!.id, action: "approve" });
-    const approved = await db.query.clubs.findFirst({ where: eq(schema.clubs.id, club.id) });
+    await revisions.reviewRevision({
+      revisionId: replacement!.id,
+      action: "approve",
+    });
+    const approved = await db.query.clubs.findFirst({
+      where: eq(schema.clubs.id, club.id),
+    });
     expect(approved?.name).toBe("Approved after changes");
     expect(approved?.version).toBe(2);
+    expect(
+      await db.query.councilMembers.findFirst({
+        where: eq(schema.councilMembers.clubId, club.id),
+      }),
+    ).toMatchObject({ name: "Public club member", role: "Design lead" });
 
     setActor(author);
     const declined = await revisions.saveRevisionDraft({
@@ -355,8 +397,18 @@ describe.sequential("club workflow integration", () => {
     });
     await revisions.submitRevision(declined);
     setActor(reviewer);
-    await revisions.reviewRevision({ revisionId: declined, action: "decline", note: "Not aligned." });
-    expect((await db.query.contentRevisions.findFirst({ where: eq(schema.contentRevisions.id, declined) }))?.status).toBe("declined");
+    await revisions.reviewRevision({
+      revisionId: declined,
+      action: "decline",
+      note: "Not aligned.",
+    });
+    expect(
+      (
+        await db.query.contentRevisions.findFirst({
+          where: eq(schema.contentRevisions.id, declined),
+        })
+      )?.status,
+    ).toBe("declined");
 
     setActor(author);
     const withdrawn = await revisions.saveRevisionDraft({
@@ -368,10 +420,21 @@ describe.sequential("club workflow integration", () => {
     });
     await revisions.submitRevision(withdrawn);
     await revisions.withdrawRevision(withdrawn);
-    expect((await db.query.contentRevisions.findFirst({ where: eq(schema.contentRevisions.id, withdrawn) }))?.status).toBe("withdrawn");
-    expect(await db.query.auditLog.findFirst({
-      where: and(eq(schema.auditLog.revisionId, withdrawn), eq(schema.auditLog.action, "club_page.withdrawn")),
-    })).toBeTruthy();
+    expect(
+      (
+        await db.query.contentRevisions.findFirst({
+          where: eq(schema.contentRevisions.id, withdrawn),
+        })
+      )?.status,
+    ).toBe("withdrawn");
+    expect(
+      await db.query.auditLog.findFirst({
+        where: and(
+          eq(schema.auditLog.revisionId, withdrawn),
+          eq(schema.auditLog.action, "club_page.withdrawn"),
+        ),
+      }),
+    ).toBeTruthy();
 
     const stale = await revisions.saveRevisionDraft({
       entityType: "club_page",
@@ -381,23 +444,37 @@ describe.sequential("club workflow integration", () => {
       snapshot: pageSnapshot("Stale title"),
     });
     await revisions.submitRevision(stale);
-    await db.update(schema.clubs).set({ version: 3 }).where(eq(schema.clubs.id, club.id));
+    await db
+      .update(schema.clubs)
+      .set({ version: 3 })
+      .where(eq(schema.clubs.id, club.id));
     setActor(reviewer);
-    await expect(revisions.reviewRevision({ revisionId: stale, action: "approve" })).rejects.toThrow("STALE_REVISION");
+    await expect(
+      revisions.reviewRevision({ revisionId: stale, action: "approve" }),
+    ).rejects.toThrow("STALE_REVISION");
 
-    const protectedEvent = await db.insert(schema.events).values({
-      ...eventSnapshot(otherClub.id, "Protected event", `protected-${++sequence}`),
-      status: "draft",
-      version: 0,
-    }).returning();
+    const protectedEvent = await db
+      .insert(schema.events)
+      .values({
+        ...eventRow(otherClub.id, "Protected event", `protected-${++sequence}`),
+        status: "draft",
+        version: 0,
+      })
+      .returning();
     setActor(author);
-    await expect(revisions.saveRevisionDraft({
-      entityType: "event",
-      entityId: protectedEvent[0].id,
-      clubId: club.id,
-      baseVersion: 0,
-      snapshot: eventSnapshot(club.id, "Cross-club edit", `cross-${++sequence}`),
-    })).rejects.toThrow("ENTITY_CLUB_MISMATCH");
+    await expect(
+      revisions.saveRevisionDraft({
+        entityType: "event",
+        entityId: protectedEvent[0].id,
+        clubId: club.id,
+        baseVersion: 0,
+        snapshot: eventSnapshot(
+          club.id,
+          "Cross-club edit",
+          `cross-${++sequence}`,
+        ),
+      }),
+    ).rejects.toThrow("ENTITY_CLUB_MISMATCH");
   });
 
   it("keeps new and edited events private until approval and runs publication automation once", async () => {
@@ -405,14 +482,22 @@ describe.sequential("club workflow integration", () => {
     const author = await seedUser("viewer", "Event author");
     const reviewer = await seedUser("operations", "Event reviewer");
     const club = await seedClub("Events Club");
+    const cohost = await seedClub("Co-host Club");
     await addMembership(author.id, club.id);
-    const initial = eventSnapshot(club.id, "Private launch", `private-launch-${++sequence}`);
-    const [event] = await db.insert(schema.events).values({
-      ...initial,
-      status: "draft",
-      version: 0,
-      organizerId: author.id,
-    }).returning();
+    const initial = eventSnapshot(
+      club.id,
+      "Private launch",
+      `private-launch-${++sequence}`,
+    );
+    const [event] = await db
+      .insert(schema.events)
+      .values({
+        ...eventRow(club.id, initial.title, initial.slug),
+        status: "draft",
+        version: 0,
+        organizerId: author.id,
+      })
+      .returning();
 
     setActor(author);
     const revision = await revisions.saveRevisionDraft({
@@ -423,16 +508,44 @@ describe.sequential("club workflow integration", () => {
       snapshot: initial,
     });
     await revisions.submitRevision(revision);
-    expect((await db.query.events.findFirst({ where: eq(schema.events.id, event.id) }))?.status).toBe("draft");
+    expect(
+      (
+        await db.query.events.findFirst({
+          where: eq(schema.events.id, event.id),
+        })
+      )?.status,
+    ).toBe("draft");
 
     setActor(reviewer);
     await revisions.reviewRevision({ revisionId: revision, action: "approve" });
-    expect((await db.query.events.findFirst({ where: eq(schema.events.id, event.id) }))?.status).toBe("published");
+    expect(
+      (
+        await db.query.events.findFirst({
+          where: eq(schema.events.id, event.id),
+        })
+      )?.status,
+    ).toBe("published");
     await automation.onEventPublished(event.id);
-    expect((await db.query.announcements.findMany({ where: eq(schema.announcements.eventId, event.id) })).length).toBe(1);
-    expect((await db.query.recaps.findMany({ where: eq(schema.recaps.eventId, event.id) })).length).toBe(1);
+    expect(
+      (
+        await db.query.announcements.findMany({
+          where: eq(schema.announcements.eventId, event.id),
+        })
+      ).length,
+    ).toBe(1);
+    expect(
+      (
+        await db.query.recaps.findMany({
+          where: eq(schema.recaps.eventId, event.id),
+        })
+      ).length,
+    ).toBe(1);
 
-    const editedSnapshot = { ...initial, title: "Approved launch update" };
+    const editedSnapshot = {
+      ...initial,
+      title: "Approved launch update",
+      clubIds: [club.id, cohost.id],
+    };
     setActor(author);
     const edit = await revisions.saveRevisionDraft({
       entityType: "event",
@@ -442,13 +555,43 @@ describe.sequential("club workflow integration", () => {
       snapshot: editedSnapshot,
     });
     await revisions.submitRevision(edit);
-    expect((await db.query.events.findFirst({ where: eq(schema.events.id, event.id) }))?.title).toBe("Private launch");
+    expect(
+      (
+        await db.query.events.findFirst({
+          where: eq(schema.events.id, event.id),
+        })
+      )?.title,
+    ).toBe("Private launch");
+    expect(
+      await db.query.eventClubs.findFirst({
+        where: and(
+          eq(schema.eventClubs.eventId, event.id),
+          eq(schema.eventClubs.clubId, cohost.id),
+        ),
+      }),
+    ).toBeUndefined();
     setActor(reviewer);
     await revisions.reviewRevision({ revisionId: edit, action: "approve" });
-    const updated = await db.query.events.findFirst({ where: eq(schema.events.id, event.id) });
+    const updated = await db.query.events.findFirst({
+      where: eq(schema.events.id, event.id),
+    });
     expect(updated?.title).toBe("Approved launch update");
     expect(updated?.version).toBe(2);
-    expect((await db.query.announcements.findMany({ where: eq(schema.announcements.eventId, event.id) })).length).toBe(1);
+    expect(
+      await db.query.eventClubs.findFirst({
+        where: and(
+          eq(schema.eventClubs.eventId, event.id),
+          eq(schema.eventClubs.clubId, cohost.id),
+        ),
+      }),
+    ).toBeTruthy();
+    expect(
+      (
+        await db.query.announcements.findMany({
+          where: eq(schema.announcements.eventId, event.id),
+        })
+      ).length,
+    ).toBe(1);
   });
 
   it("creates persistent follow-up tasks without endDate and clears them only after approved valid media", async () => {
@@ -457,32 +600,40 @@ describe.sequential("club workflow integration", () => {
     const reviewer = await seedUser("operations", "Media reviewer");
     const club = await seedClub("Media Club");
     await addMembership(author.id, club.id);
-    const [event] = await db.insert(schema.events).values({
-      ...eventSnapshot(club.id, "Past event", `past-event-${++sequence}`),
-      date: "2020-01-01T10:00:00.000Z",
-      endDate: null,
-      status: "published",
-      version: 1,
-      publishedAt: "2020-01-01T09:00:00.000Z",
-    }).returning();
+    const [event] = await db
+      .insert(schema.events)
+      .values({
+        ...eventRow(club.id, "Past event", `past-event-${++sequence}`),
+        date: "2020-01-01T10:00:00.000Z",
+        endDate: null,
+        status: "published",
+        version: 1,
+        publishedAt: "2020-01-01T09:00:00.000Z",
+      })
+      .returning();
 
     await revisions.ensureEventFollowupTasks(club.id);
     await revisions.ensureEventFollowupTasks(club.id);
     const tasks = await db.query.eventFollowupTasks.findMany({
       where: eq(schema.eventFollowupTasks.eventId, event.id),
     });
-    const recap = await db.query.recaps.findFirst({ where: eq(schema.recaps.eventId, event.id) });
+    const recap = await db.query.recaps.findFirst({
+      where: eq(schema.recaps.eventId, event.id),
+    });
     expect(tasks).toHaveLength(1);
     expect(tasks[0].status).toBe("open");
     expect(recap).toBeTruthy();
 
-    const [photo] = await db.insert(schema.media).values({
-      alt: "Approved event photo",
-      url: "https://example.com/photo.jpg",
-      filename: "photo.jpg",
-      mimeType: "image/jpeg",
-      filesize: 512_000,
-    }).returning();
+    const [photo] = await db
+      .insert(schema.media)
+      .values({
+        alt: "Approved event photo",
+        url: "https://example.com/photo.jpg",
+        filename: "photo.jpg",
+        mimeType: "image/jpeg",
+        filesize: 512_000,
+      })
+      .returning();
     setActor(author);
     const followup = await revisions.saveRevisionDraft({
       entityType: "event_followup",
@@ -499,10 +650,28 @@ describe.sequential("club workflow integration", () => {
       },
     });
     await revisions.submitRevision(followup);
-    expect((await db.query.eventFollowupTasks.findFirst({ where: eq(schema.eventFollowupTasks.eventId, event.id) }))?.status).toBe("open");
+    expect(
+      (
+        await db.query.eventFollowupTasks.findFirst({
+          where: eq(schema.eventFollowupTasks.eventId, event.id),
+        })
+      )?.status,
+    ).toBe("open");
     setActor(reviewer);
     await revisions.reviewRevision({ revisionId: followup, action: "approve" });
-    expect((await db.query.eventFollowupTasks.findFirst({ where: eq(schema.eventFollowupTasks.eventId, event.id) }))?.status).toBe("completed");
-    expect((await db.query.recaps.findFirst({ where: eq(schema.recaps.id, recap!.id) }))?.status).toBe("published");
+    expect(
+      (
+        await db.query.eventFollowupTasks.findFirst({
+          where: eq(schema.eventFollowupTasks.eventId, event.id),
+        })
+      )?.status,
+    ).toBe("completed");
+    expect(
+      (
+        await db.query.recaps.findFirst({
+          where: eq(schema.recaps.id, recap!.id),
+        })
+      )?.status,
+    ).toBe("published");
   });
 });
