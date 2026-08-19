@@ -199,7 +199,7 @@ export function HomeVault({ entries }: { entries?: VaultStory[] }) {
       setActive((i) => (i + 1) % ENTRIES.length);
     }, ROTATE_MS);
     return () => window.clearInterval(id);
-  }, [paused]);
+  }, [paused, ENTRIES.length]);
 
   // Play active video, pause others
   React.useEffect(() => {

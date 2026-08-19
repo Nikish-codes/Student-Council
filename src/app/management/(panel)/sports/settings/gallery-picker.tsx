@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Plus, Upload, Link as LinkIcon, X } from "lucide-react";
+import { Upload, Link as LinkIcon, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type MediaOption = { id: number; url: string; filename?: string | null };

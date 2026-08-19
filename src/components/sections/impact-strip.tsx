@@ -55,7 +55,7 @@ export function ImpactStrip({ numbers }: { numbers: ImpactNumber[] }) {
       className="relative border-y border-line/10 bg-bg"
     >
       <div className="mx-auto grid max-w-[1720px] grid-cols-2 divide-x divide-y divide-line/10 sm:grid-cols-4 sm:divide-y-0">
-        {numbers.map((n, i) => (
+        {numbers.map((n) => (
           <div
             key={n.label}
             data-impact-item
