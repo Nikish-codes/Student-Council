@@ -22,11 +22,13 @@ import {
   ArrowUpRight,
   ChevronLeft,
   ChevronRight,
+  Globe,
+  Mail,
 } from "lucide-react";
 import { Picture } from "@/components/ui/picture";
-import { InstagramMark } from "@/components/ui/brand-marks";
+import { InstagramMark, LinkedInMark } from "@/components/ui/brand-marks";
 import type { ClubDetail, CouncilMember, EventItem } from "@/lib/schemas";
-import { cn, formatDate } from "@/lib/utils";
+import { cn, formatDate, outlookCompose } from "@/lib/utils";
 import { colorContrast } from "@/lib/club-page-theme";
 
 type WorldId = "stage" | "zine" | "clubhouse" | "exhibition" | "signal";
@@ -277,6 +279,8 @@ export function ClubPageRenderer({
 }
 
 function StageWorld({ club, upcoming, past, leads }: WorldProps) {
+  // Prefer the dedicated banner. When a club has not supplied one, the first
+  // gallery item is its authored highlight and becomes the masthead fallback.
   const hero = club.cover || club.gallery[0]?.url;
   const eventsAreUpcoming = upcoming.length > 0;
   const events = (eventsAreUpcoming ? upcoming : past).slice(0, 3);
@@ -334,6 +338,7 @@ function StageWorld({ club, upcoming, past, leads }: WorldProps) {
                 Enter the story <ArrowRight className="h-4 w-4" />
               </a>
             </div>
+            <StageSocialRail club={club} />
           </div>
         </div>
       </section>
@@ -945,6 +950,73 @@ function JoinLink({
   );
 }
 
+type ClubSocialLink = {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+};
+
+function clubSocialLinks(club: ClubDetail): ClubSocialLink[] {
+  const links: ClubSocialLink[] = [];
+  if (club.instagramUrl) {
+    links.push({
+      href: club.instagramUrl,
+      label: "Instagram",
+      icon: InstagramMark,
+    });
+  }
+  if (club.linkedinUrl) {
+    links.push({
+      href: club.linkedinUrl,
+      label: "LinkedIn",
+      icon: LinkedInMark,
+    });
+  }
+  if (club.websiteUrl) {
+    links.push({ href: club.websiteUrl, label: "Website", icon: Globe });
+  }
+  if (club.contactEmail) {
+    links.push({
+      href: outlookCompose(club.contactEmail),
+      label: "Email",
+      icon: Mail,
+    });
+  }
+  return links;
+}
+
+function StageSocialRail({ club }: { club: ClubDetail }) {
+  const links = clubSocialLinks(club);
+  if (links.length === 0) return null;
+
+  return (
+    <nav
+      aria-label={`${club.name} social links`}
+      className="mt-8 flex max-w-3xl flex-col gap-2 border-y border-white/20 py-3 sm:flex-row sm:items-center sm:gap-6"
+    >
+      <span className="shrink-0 font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--club-accent)]">
+        Connect
+      </span>
+      <ul className="flex flex-wrap gap-x-1 gap-y-1">
+        {links.map((link) => (
+          <li key={link.href}>
+            <a
+              href={link.href}
+              target="_blank"
+              rel="noreferrer"
+              className="group/social inline-flex min-h-11 items-center gap-2 px-3 text-sm font-semibold text-white transition-colors hover:bg-white/10 hover:text-[var(--club-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--club-accent)]"
+            >
+              <link.icon className="h-5 w-5 shrink-0" />
+              {link.label}
+              <ArrowUpRight className="h-3.5 w-3.5 opacity-50 transition-opacity group-hover/social:opacity-100" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
 function LogoSticker({
   club,
   className,
@@ -1105,8 +1177,7 @@ function StageClose({ club }: { club: ClubDetail }) {
     <section
       className="border-t px-5 pb-32 pt-24 text-center sm:px-10"
       style={{
-        borderColor:
-          "color-mix(in srgb, var(--club-accent) 30%, transparent)",
+        borderColor: "color-mix(in srgb, var(--club-accent) 30%, transparent)",
       }}
     >
       <p className="font-sans text-[clamp(3rem,9vw,6rem)] font-black uppercase leading-[0.84] tracking-[-0.04em]">

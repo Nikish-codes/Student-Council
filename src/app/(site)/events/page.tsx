@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { EventsOverture } from "@/components/sections/events-overture";
+import { findFeaturedEvent } from "@/lib/event-featured";
 import { EventsAlmanac } from "@/components/sections/events-almanac";
 import { getEvents } from "@/lib/content";
 import { getEventTiming } from "@/lib/event-status";
@@ -28,10 +29,9 @@ export default async function EventsPage() {
     else upcoming.push(e);
   }
 
-  const next = upcoming[0];
-  // Spotlight a featured upcoming event, then the next upcoming, then a live
-  // one so the hero banner is never empty when something is happening now.
-  const featured = upcoming.find((e) => e.featured) ?? next ?? live[0];
+  // The large spotlight is editorial, not an automatic promotion. With no
+  // explicitly featured upcoming event, the page goes straight to the lists.
+  const featured = findFeaturedEvent(upcoming);
 
   return (
     <div>

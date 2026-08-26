@@ -1,5 +1,5 @@
 import { createClient } from "@libsql/client";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { mkdtempSync, readFileSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -55,14 +55,16 @@ async function loadWorkflow() {
   delete (globalThis as { __mpDb?: unknown }).__mpDb;
   vi.resetModules();
 
-  const [{ db }, schema, access, revisions, automation] = await Promise.all([
-    import("@/db/client"),
-    import("@/db/schema"),
-    import("@/lib/club-access"),
-    import("@/lib/revisions"),
-    import("@/lib/automation/on-publish"),
-  ]);
-  return { db, schema, access, revisions, automation };
+  const [{ db }, schema, access, revisions, automation, eventDeletion] =
+    await Promise.all([
+      import("@/db/client"),
+      import("@/db/schema"),
+      import("@/lib/club-access"),
+      import("@/lib/revisions"),
+      import("@/lib/automation/on-publish"),
+      import("@/lib/event-deletion"),
+    ]);
+  return { db, schema, access, revisions, automation, eventDeletion };
 }
 
 function setActor(user: {
@@ -673,5 +675,271 @@ describe.sequential("club workflow integration", () => {
         })
       )?.status,
     ).toBe("published");
+  });
+
+  it("promotes only an explicitly featured published event", async () => {
+    const { db, schema, automation } = loaded;
+    const admin = await seedUser("super_admin", "Featuring admin");
+    const club = await seedClub("Featured Events Club");
+    const [currentFeature] = await db
+      .insert(schema.events)
+      .values({
+        ...eventRow(
+          club.id,
+          "Current feature",
+          `current-feature-${++sequence}`,
+        ),
+        status: "published",
+        featured: true,
+        version: 1,
+        organizerId: admin.id,
+      })
+      .returning();
+    const [pendingFeature] = await db
+      .insert(schema.events)
+      .values({
+        ...eventRow(
+          club.id,
+          "Pending feature",
+          `pending-feature-${++sequence}`,
+        ),
+        status: "draft",
+        featured: true,
+        version: 0,
+        organizerId: admin.id,
+      })
+      .returning();
+    const [flagshipCategoryOnly] = await db
+      .insert(schema.events)
+      .values({
+        ...eventRow(
+          club.id,
+          "Flagship category only",
+          `flagship-category-only-${++sequence}`,
+        ),
+        category: "flagship",
+        status: "published",
+        featured: false,
+        version: 1,
+        organizerId: admin.id,
+      })
+      .returning();
+    await db
+      .insert(schema.homepageConfig)
+      .values({ id: 1, flagshipEventId: currentFeature.id })
+      .onConflictDoUpdate({
+        target: schema.homepageConfig.id,
+        set: { flagshipEventId: currentFeature.id },
+      });
+
+    await automation.onEventPublished(flagshipCategoryOnly.id);
+    expect(
+      (
+        await db.query.homepageConfig.findFirst({
+          where: eq(schema.homepageConfig.id, 1),
+        })
+      )?.flagshipEventId,
+    ).toBe(currentFeature.id);
+
+    const [nextFeature] = await db
+      .insert(schema.events)
+      .values({
+        ...eventRow(club.id, "Next feature", `next-feature-${++sequence}`),
+        status: "published",
+        featured: true,
+        version: 1,
+        organizerId: admin.id,
+      })
+      .returning();
+    await automation.onEventPublished(nextFeature.id);
+    expect(
+      (
+        await db.query.homepageConfig.findFirst({
+          where: eq(schema.homepageConfig.id, 1),
+        })
+      )?.flagshipEventId,
+    ).toBe(nextFeature.id);
+    expect(
+      (
+        await db.query.events.findFirst({
+          where: eq(schema.events.id, currentFeature.id),
+        })
+      )?.featured,
+    ).toBe(false);
+    expect(
+      (
+        await db.query.events.findFirst({
+          where: eq(schema.events.id, pendingFeature.id),
+        })
+      )?.featured,
+    ).toBe(true);
+  });
+
+  it("deletes an event and every event-owned record in one transaction", async () => {
+    const { db, schema, eventDeletion } = loaded;
+    const admin = await seedUser("admin", "Deleting admin");
+    const attendeeUser = await seedUser("viewer", "Attendee");
+    const club = await seedClub("Deletion Club");
+    const [event] = await db
+      .insert(schema.events)
+      .values({
+        ...eventRow(club.id, "Delete me", `delete-me-${++sequence}`),
+        status: "published",
+        featured: true,
+        version: 1,
+        organizerId: admin.id,
+        publishedAt: "2030-09-01T10:00:00.000Z",
+      })
+      .returning();
+    await db.insert(schema.eventClubs).values({
+      eventId: event.id,
+      clubId: club.id,
+    });
+    const [recap] = await db
+      .insert(schema.recaps)
+      .values({
+        title: "Delete me — Recap",
+        slug: `delete-me-recap-${++sequence}`,
+        eventId: event.id,
+        status: "draft",
+      })
+      .returning();
+    await db.insert(schema.eventFollowupTasks).values({
+      id: `followup-${++sequence}`,
+      eventId: event.id,
+      clubId: club.id,
+    });
+    await db.insert(schema.announcements).values({
+      title: "New event: Delete me",
+      date: "2030-09-01T10:00:00.000Z",
+      eventId: event.id,
+    });
+    const registrationId = `registration-${++sequence}`;
+    await db.insert(schema.eventRegistrations).values({
+      id: registrationId,
+      eventId: event.id,
+      name: attendeeUser.name,
+      email: attendeeUser.email,
+    });
+    await db.insert(schema.attendees).values({
+      id: `attendee-${++sequence}`,
+      registrationId,
+      eventId: event.id,
+      ticketCode: `ticket-${++sequence}`,
+    });
+    await db.insert(schema.notifications).values({
+      id: `notification-${++sequence}`,
+      registrationId,
+      template: "ticket-issued",
+    });
+    const eventRevisionId = `event-revision-${++sequence}`;
+    const followupRevisionId = `followup-revision-${++sequence}`;
+    await db.insert(schema.contentRevisions).values([
+      {
+        id: eventRevisionId,
+        entityType: "event",
+        entityId: event.id,
+        clubId: club.id,
+        snapshot: eventSnapshot(club.id, event.title, event.slug),
+        baseVersion: 1,
+        authorUserId: admin.id,
+      },
+      {
+        id: followupRevisionId,
+        entityType: "event_followup",
+        entityId: recap.id,
+        clubId: club.id,
+        snapshot: { title: recap.title, photoMediaIds: [], videoLinks: [] },
+        baseVersion: 0,
+        authorUserId: admin.id,
+      },
+    ]);
+    await db.insert(schema.auditLog).values({
+      id: `event-audit-${++sequence}`,
+      actorUserId: admin.id,
+      eventId: event.id,
+      clubId: club.id,
+      action: "event.created",
+      targetId: String(event.id),
+    });
+    await db
+      .insert(schema.homepageConfig)
+      .values({ id: 1, flagshipEventId: event.id })
+      .onConflictDoUpdate({
+        target: schema.homepageConfig.id,
+        set: { flagshipEventId: event.id },
+      });
+
+    const result = await eventDeletion.deleteEventEverywhere({
+      eventId: event.id,
+      actorUserId: admin.id,
+    });
+    expect(result).toMatchObject({ id: event.id, slug: event.slug });
+    expect(
+      await db.query.events.findFirst({
+        where: eq(schema.events.id, event.id),
+      }),
+    ).toBeUndefined();
+    expect(
+      await db.query.eventClubs.findFirst({
+        where: eq(schema.eventClubs.eventId, event.id),
+      }),
+    ).toBeUndefined();
+    expect(
+      await db.query.eventRegistrations.findFirst({
+        where: eq(schema.eventRegistrations.eventId, event.id),
+      }),
+    ).toBeUndefined();
+    expect(
+      await db.query.attendees.findFirst({
+        where: eq(schema.attendees.eventId, event.id),
+      }),
+    ).toBeUndefined();
+    expect(
+      await db.query.notifications.findFirst({
+        where: eq(schema.notifications.registrationId, registrationId),
+      }),
+    ).toBeUndefined();
+    expect(
+      await db.query.eventFollowupTasks.findFirst({
+        where: eq(schema.eventFollowupTasks.eventId, event.id),
+      }),
+    ).toBeUndefined();
+    expect(
+      await db.query.announcements.findFirst({
+        where: eq(schema.announcements.eventId, event.id),
+      }),
+    ).toBeUndefined();
+    expect(
+      await db.query.recaps.findFirst({
+        where: eq(schema.recaps.eventId, event.id),
+      }),
+    ).toBeUndefined();
+    expect(
+      await db.query.contentRevisions.findFirst({
+        where: eq(schema.contentRevisions.id, eventRevisionId),
+      }),
+    ).toBeUndefined();
+    expect(
+      await db.query.contentRevisions.findFirst({
+        where: eq(schema.contentRevisions.id, followupRevisionId),
+      }),
+    ).toBeUndefined();
+    expect(
+      (
+        await db.query.homepageConfig.findFirst({
+          where: eq(schema.homepageConfig.id, 1),
+        })
+      )?.flagshipEventId,
+    ).toBeNull();
+    expect(
+      await db.query.auditLog.findFirst({
+        where: and(
+          eq(schema.auditLog.action, "event.deleted"),
+          eq(schema.auditLog.targetId, String(event.id)),
+          isNull(schema.auditLog.eventId),
+        ),
+      }),
+    ).toBeTruthy();
   });
 });

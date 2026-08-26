@@ -290,7 +290,7 @@ export function ClubPageEditor({
               />
               <MediaField
                 name="coverId"
-                label="Cover image"
+                label="Club banner"
                 defaultValue={initial.coverId ?? null}
                 media={media}
                 onValueChange={setCoverId}

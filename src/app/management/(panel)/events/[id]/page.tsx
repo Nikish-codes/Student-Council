@@ -54,6 +54,7 @@ export default async function EventEditPage({
       clubs={clubList}
       media={mediaList}
       canPublish={canPublish(user.role)}
+      canFeature={isAdmin(user.role)}
       isClubLead={user.role === "club_lead"}
       canDelete={!isNew && isAdmin(user.role)}
       hostingClubIds={hostingClubIds}

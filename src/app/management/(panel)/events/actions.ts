@@ -2,14 +2,19 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { revalidateClubPages } from "@/lib/revalidate-club";
-import { events as eventsT, type EventStatus } from "@/db/schema";
+import {
+  events as eventsT,
+  homepageConfig as homepageT,
+  type EventStatus,
+} from "@/db/schema";
 import {
   assertCanEditEvent,
   canPublish,
+  isAdmin,
   requireOps,
   requireRole,
 } from "@/lib/rbac";
@@ -24,6 +29,8 @@ import {
   replaceEventHostingClubs,
 } from "@/lib/event-hosts";
 import type { EventCategory } from "@/lib/schemas";
+import { resolveEventFeatured } from "@/lib/event-featured";
+import { deleteEventEverywhere } from "@/lib/event-deletion";
 
 const CATEGORIES: EventCategory[] = [
   "tech",
@@ -68,7 +75,14 @@ type ParsedEvent = {
   capacity: number | null;
 };
 
-function parse(fd: FormData, preferredClubId?: number | null): ParsedEvent {
+function parse(
+  fd: FormData,
+  options: {
+    preferredClubId?: number | null;
+    canFeature: boolean;
+    existingFeatured?: boolean | null;
+  },
+): ParsedEvent {
   const category = s(fd, "category") as EventCategory;
   const rupees = Number(s(fd, "priceRupees") || 0);
   const clubIds = hostingClubIdsFromForm(fd);
@@ -84,8 +98,12 @@ function parse(fd: FormData, preferredClubId?: number | null): ParsedEvent {
     videoUrl: s(fd, "videoUrl") || null,
     registrationUrl: s(fd, "registrationUrl") || null,
     attendees: optNum(fd, "attendees"),
-    featured: fd.get("featured") === "on",
-    clubId: primaryHostingClubId(clubIds, preferredClubId),
+    featured: resolveEventFeatured({
+      requested: fd.get("featured") === "on",
+      existing: options.existingFeatured,
+      canFeature: options.canFeature,
+    }),
+    clubId: primaryHostingClubId(clubIds, options.preferredClubId),
     clubIds,
     registrationEnabled: fd.get("registrationEnabled") === "on",
     priceInPaise: Number.isFinite(rupees) ? Math.round(rupees * 100) : 0,
@@ -108,7 +126,7 @@ function resolveStatus(
 
 export async function createEvent(fd: FormData) {
   const user = await requireOps();
-  const data = parse(fd);
+  const data = parse(fd, { canFeature: isAdmin(user.role) });
 
   // Club leads can only create events for their own club.
   const clubId = data.clubId;
@@ -148,6 +166,12 @@ export async function createEvent(fd: FormData) {
   }
 
   const row = await db.transaction(async (tx) => {
+    if (status === "published" && eventData.featured) {
+      await tx
+        .update(eventsT)
+        .set({ featured: false })
+        .where(eq(eventsT.status, "published"));
+    }
     const [created] = await tx
       .insert(eventsT)
       .values({
@@ -161,6 +185,12 @@ export async function createEvent(fd: FormData) {
       })
       .returning({ id: eventsT.id });
     await replaceEventHostingClubs(tx, created.id, clubIds);
+    if (status === "published" && eventData.featured) {
+      await tx
+        .update(homepageT)
+        .set({ flagshipEventId: created.id })
+        .where(eq(homepageT.id, 1));
+    }
     return created;
   });
 
@@ -187,7 +217,11 @@ export async function updateEvent(id: number, fd: FormData) {
   if (!existing) throw new Error("NOT_FOUND");
   assertCanEditEvent(user, existing.clubId);
 
-  const data = parse(fd, existing.clubId);
+  const data = parse(fd, {
+    preferredClubId: existing.clubId,
+    canFeature: isAdmin(user.role),
+    existingFeatured: existing.featured,
+  });
   const clubId = data.clubId;
   const { clubIds, ...eventData } = data;
   const status = resolveStatus(s(fd, "status"), user.role);
@@ -218,6 +252,12 @@ export async function updateEvent(id: number, fd: FormData) {
 
   const previousClubIds = await getEventHostingClubIds(id);
   await db.transaction(async (tx) => {
+    if (status === "published" && eventData.featured) {
+      await tx
+        .update(eventsT)
+        .set({ featured: false })
+        .where(and(eq(eventsT.status, "published"), ne(eventsT.id, id)));
+    }
     await tx
       .update(eventsT)
       .set({
@@ -234,6 +274,17 @@ export async function updateEvent(id: number, fd: FormData) {
       })
       .where(eq(eventsT.id, id));
     await replaceEventHostingClubs(tx, id, clubIds);
+    if (status === "published" && eventData.featured) {
+      await tx
+        .update(homepageT)
+        .set({ flagshipEventId: id })
+        .where(eq(homepageT.id, 1));
+    } else {
+      await tx
+        .update(homepageT)
+        .set({ flagshipEventId: null })
+        .where(eq(homepageT.flagshipEventId, id));
+    }
   });
 
   if (justPublished) await onEventPublished(id);
@@ -268,15 +319,34 @@ export async function publishEvent(id: number) {
   });
   if (!existing) throw new Error("NOT_FOUND");
 
-  await db
-    .update(eventsT)
-    .set({
-      status: "published",
-      publishedAt: existing.publishedAt ?? new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      version: existing.version + 1,
-    })
-    .where(eq(eventsT.id, id));
+  await db.transaction(async (tx) => {
+    if (existing.featured) {
+      await tx
+        .update(eventsT)
+        .set({ featured: false })
+        .where(and(eq(eventsT.status, "published"), ne(eventsT.id, id)));
+    }
+    await tx
+      .update(eventsT)
+      .set({
+        status: "published",
+        publishedAt: existing.publishedAt ?? new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        version: existing.version + 1,
+      })
+      .where(eq(eventsT.id, id));
+    if (existing.featured) {
+      await tx
+        .update(homepageT)
+        .set({ flagshipEventId: id })
+        .where(eq(homepageT.id, 1));
+    } else {
+      await tx
+        .update(homepageT)
+        .set({ flagshipEventId: null })
+        .where(eq(homepageT.flagshipEventId, id));
+    }
+  });
 
   await onEventPublished(id);
   await logAudit({
@@ -291,12 +361,19 @@ export async function publishEvent(id: number) {
 }
 
 export async function deleteEvent(id: number) {
-  await requireRole("super_admin", "admin");
-  const existing = await db.query.events.findFirst({
-    where: eq(eventsT.id, id),
-    columns: { clubId: true },
+  const user = await requireRole("super_admin", "admin");
+  const hostingClubIds = await getEventHostingClubIds(id);
+  const deleted = await deleteEventEverywhere({
+    eventId: id,
+    actorUserId: Number(user.id),
   });
-  await db.delete(eventsT).where(eq(eventsT.id, id));
   revalidatePath("/management/events");
-  await revalidateClubPages(existing?.clubId);
+  revalidatePath("/management/recaps");
+  revalidatePath("/management/announcements");
+  revalidatePath("/management/approvals");
+  revalidatePath("/club-management/events");
+  revalidatePath("/");
+  revalidatePath("/events");
+  revalidatePath(`/events/${deleted.slug}`);
+  await revalidateClubPages(deleted.clubId, ...hostingClubIds);
 }

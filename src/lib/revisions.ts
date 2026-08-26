@@ -8,6 +8,7 @@ import {
   isNotNull,
   isNull,
   lte,
+  ne,
   or,
 } from "drizzle-orm";
 import { z } from "zod";
@@ -19,6 +20,7 @@ import {
   contentRevisions,
   eventFollowupTasks,
   events,
+  homepageConfig,
   media,
   recaps,
   councilMembers,
@@ -458,6 +460,14 @@ async function approveRevisionSnapshot(
       }
       const snapshot = parsed as EventSnapshot;
       const { clubIds, ...eventFields } = snapshot;
+      if (eventFields.featured) {
+        await tx
+          .update(events)
+          .set({ featured: false })
+          .where(
+            and(eq(events.status, "published"), ne(events.id, current.id)),
+          );
+      }
       await tx
         .update(events)
         .set({
@@ -469,6 +479,17 @@ async function approveRevisionSnapshot(
         })
         .where(eq(events.id, current.id));
       await replaceEventHostingClubs(tx, current.id, clubIds);
+      if (eventFields.featured) {
+        await tx
+          .update(homepageConfig)
+          .set({ flagshipEventId: current.id })
+          .where(eq(homepageConfig.id, 1));
+      } else {
+        await tx
+          .update(homepageConfig)
+          .set({ flagshipEventId: null })
+          .where(eq(homepageConfig.flagshipEventId, current.id));
+      }
     } else {
       const current = await tx.query.recaps.findFirst({
         where: eq(recaps.id, revision.entityId),

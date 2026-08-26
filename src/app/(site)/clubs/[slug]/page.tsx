@@ -169,6 +169,8 @@ export default async function ClubDetailPage({
           <p className="mt-8 max-w-2xl text-pretty text-lg text-muted">
             {club.blurb}
           </p>
+
+          <Socials club={club} />
         </Reveal>
 
         {/* Stat strip — only the facts this club actually has. Numbers count
@@ -484,8 +486,8 @@ function LeadCard({ member }: { member: CouncilMember }) {
 
 /**
  * The right-rail "membership card" — a designed object rather than a CMS
- * sidebar. Compact metadata rows, a horizontal social-icon strip, and a
- * full-width join block at the foot so the CTA reads as a physical pass.
+ * sidebar. Compact metadata rows and a full-width join block at the foot make
+ * the CTA read as a physical pass; social discovery lives in the masthead.
  */
 function MembershipCard({
   club,
@@ -545,8 +547,6 @@ function MembershipCard({
         </div>
       ) : null}
 
-      <Socials club={club} />
-
       {club.joinUrl ? (
         <div className="border-t border-line/10 pt-6">
           <Magnetic className="block">
@@ -593,7 +593,7 @@ function Socials({ club }: { club: ClubDetail }) {
     club.websiteUrl && { icon: Globe, label: "Website", href: club.websiteUrl },
     club.contactEmail && {
       icon: Mail,
-      label: club.contactEmail,
+      label: "Email",
       // Council inboxes are Office 365; outlookCompose lands in the right
       // client instead of whatever mailto: happens to be registered.
       href: outlookCompose(club.contactEmail),
@@ -607,9 +607,11 @@ function Socials({ club }: { club: ClubDetail }) {
   if (links.length === 0) return null;
 
   return (
-    <div>
-      <span className="kicker">Find us</span>
-      <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+    <nav
+      aria-label={`${club.name} social links`}
+      className="mt-10 max-w-3xl border-y border-line/15 py-3"
+    >
+      <ul className="flex flex-wrap gap-1">
         {links.map((l) => (
           <li key={l.href}>
             <a
@@ -617,14 +619,16 @@ function Socials({ club }: { club: ClubDetail }) {
               target="_blank"
               rel="noreferrer"
               aria-label={l.label}
-              className="group/s inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-ink"
+              className="group/s inline-flex min-h-11 items-center gap-2 px-3 text-sm font-medium text-muted transition-colors hover:bg-line/5 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
-              <l.icon className="h-4 w-4 transition-colors group-hover/s:text-ink" />
+              <l.icon className="h-5 w-5 shrink-0 text-ink transition-colors group-hover/s:text-accent" />
+              <span>{l.label}</span>
+              <ArrowUpRight className="h-3.5 w-3.5 text-subtle transition-colors group-hover/s:text-accent" />
             </a>
           </li>
         ))}
       </ul>
-    </div>
+    </nav>
   );
 }
 

@@ -102,6 +102,7 @@ export function EventEditor({
   clubs,
   media,
   canPublish,
+  canFeature = false,
   isClubLead,
   canDelete = false,
   basePath = "/management/events",
@@ -113,6 +114,7 @@ export function EventEditor({
   clubs: Option[];
   media: Option[];
   canPublish: boolean;
+  canFeature?: boolean;
   isClubLead: boolean;
   canDelete?: boolean;
   basePath?: string;
@@ -382,7 +384,7 @@ export function EventEditor({
           </div>
         </div>
 
-        {!isClubLead ? (
+        {canFeature ? (
           <label className="flex items-center gap-3 text-sm text-muted">
             <input
               type="checkbox"
@@ -390,7 +392,7 @@ export function EventEditor({
               defaultChecked={event?.featured ?? false}
               className="h-4 w-4 rounded border-line/30 bg-surface-2"
             />
-            Feature on the homepage
+            Show as the large featured event
           </label>
         ) : null}
 

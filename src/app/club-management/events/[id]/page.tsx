@@ -93,6 +93,7 @@ export default async function ClubEventEditorPage({
         clubs={clubRows}
         media={mediaRows}
         canPublish={false}
+        canFeature={false}
         isClubLead
         basePath={`/club-management/events?club=${active.clubId}`}
         lockedClubId={active.clubId}

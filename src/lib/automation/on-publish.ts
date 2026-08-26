@@ -1,6 +1,6 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
-import { and, eq, isNotNull, lt } from "drizzle-orm";
+import { and, eq, isNotNull, lt, ne } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import {
@@ -20,8 +20,8 @@ import { uniqueSlug } from "@/lib/slug";
  * Steps:
  *  1. Announcement   — "New event: {title}" into the ticker (dedupe by event).
  *  2. Recap stub     — a linked draft recap so post-event writeups are 1 click.
- *  3. Homepage       — flagship events become the featured hero; past events
- *                      get de-featured.
+ *  3. Homepage       — an explicitly featured event becomes the hero; past
+ *                      events get de-featured.
  *  4. Revalidate     — bust the cache for /, /events, /events/{slug}.
  *  5. Notify         — optional Discord webhook (env-gated).
  */
@@ -77,9 +77,20 @@ export async function onEventPublished(eventId: number): Promise<{
     return "ok";
   });
 
-  // 3. Homepage: flagship → featured hero; de-feature past events.
+  // 3. Homepage: only the explicit admin-controlled feature flag may choose
+  // the hero. Event category alone never promotes an event.
   await step(steps, "homepageFlagship", async () => {
-    if (ev.category !== "flagship") return "skipped";
+    if (!ev.featured) return "skipped";
+    await db
+      .update(eventsT)
+      .set({ featured: false })
+      .where(
+        and(
+          eq(eventsT.featured, true),
+          eq(eventsT.status, "published"),
+          ne(eventsT.id, eventId),
+        ),
+      );
     await db
       .update(homepageT)
       .set({ flagshipEventId: eventId })

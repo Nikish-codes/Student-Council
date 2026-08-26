@@ -39,7 +39,9 @@ export default async function HomePage() {
     ? await getEvent(homepage.flagshipEventSlug)
     : undefined;
   const featuredEvent =
-    configuredFeaturedEvent && !isEventPast(configuredFeaturedEvent)
+    configuredFeaturedEvent &&
+    configuredFeaturedEvent.featured &&
+    !isEventPast(configuredFeaturedEvent)
       ? configuredFeaturedEvent
       : upcoming.find((event) => event.featured);
 

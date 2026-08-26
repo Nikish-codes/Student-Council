@@ -24,7 +24,12 @@ export function DeleteEventButton({
   const router = useRouter();
 
   const onClick = () => {
-    if (!confirm(`Delete “${title}”? This cannot be undone.`)) return;
+    if (
+      !confirm(
+        `Delete “${title}” and its registrations, attendance, announcements, and recap data? This cannot be undone.`,
+      )
+    )
+      return;
     start(async () => {
       try {
         await deleteEvent(id);
@@ -32,7 +37,7 @@ export function DeleteEventButton({
         if (redirectTo) router.push(redirectTo);
         else router.refresh();
       } catch {
-        toast.error("Couldn't delete — you may not have permission.");
+        toast.error("The event could not be deleted. Refresh and try again.");
       }
     });
   };
