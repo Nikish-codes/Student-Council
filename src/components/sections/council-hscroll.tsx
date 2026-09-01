@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, MoveHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CouncilCardSize } from "@/lib/schemas";
 import type { CouncilMemberWithCoLeads } from "@/lib/content";
@@ -10,9 +10,9 @@ import { CouncilCard } from "@/components/sections/council-card";
 /**
  * Horizontally-scrolling card track with auto-scroll + drag-to-scroll.
  *
- * Auto-scrolls slowly by default; pauses on hover, drag, or touch. On release
- * it resumes after a short delay. Drag works with both mouse and touch via
- * Pointer Events — one code path, both platforms.
+ * Auto-scrolls slowly for desktop pointer users. Touch devices use native
+ * momentum scrolling instead, so a horizontal swipe never competes with the
+ * animation or a custom gesture handler.
  *
  * Cards are sized to match the core member grid cards (md), not the narrower
  * sm widths the old hscroll used, so club presidents read at the same scale
@@ -55,7 +55,11 @@ export function CouncilHScroll({
     const el = trackRef.current;
     if (!el) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    const narrowViewport = window.matchMedia("(max-width: 639px)").matches;
+    if (reduced || coarsePointer || narrowViewport) return;
+
+    lastTsRef.current = performance.now();
 
     const step = (ts: number) => {
       rafRef.current = requestAnimationFrame(step);
@@ -97,10 +101,14 @@ export function CouncilHScroll({
   // ── Drag-to-scroll (pointer events — mouse + touch) ──
   const onPointerDown = React.useCallback((e: React.PointerEvent) => {
     const el = trackRef.current;
-    if (!el) return;
-    // Don't hijack clicks on links/buttons inside cards.
+    // Touch and pen use the browser's native, momentum-enabled horizontal
+    // scrolling. The custom pointer path exists only to give mouse users the
+    // familiar grab-to-drag interaction.
+    if (!el || e.pointerType !== "mouse") return;
+    // Links keep their native interaction; the stretched card button is safe
+    // because click capture suppresses it after an actual drag.
     const target = e.target as HTMLElement;
-    if (target.closest("a,button")) return;
+    if (target.closest("a")) return;
     dragRef.current = {
       active: true,
       startX: e.clientX,
@@ -161,6 +169,11 @@ export function CouncilHScroll({
 
   return (
     <div className="relative">
+      <p className="mb-3 flex items-center gap-2 text-xs text-subtle sm:hidden">
+        <MoveHorizontal className="h-4 w-4" aria-hidden />
+        Swipe to browse
+      </p>
+
       {/* Arrow buttons — desktop only (touch users drag). */}
       <button
         type="button"
@@ -187,18 +200,26 @@ export function CouncilHScroll({
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         onClickCapture={onClickCapture}
+        onTouchStart={pauseAuto}
+        onTouchEnd={resumeAuto}
+        onTouchCancel={resumeAuto}
         className={cn(
-          "no-scrollbar mask-fade-x flex cursor-grab gap-4 overflow-x-auto pb-2",
+          "no-scrollbar mask-fade-x flex snap-x snap-proximity gap-4 overflow-x-auto overscroll-x-contain pb-2 sm:cursor-grab sm:snap-none",
           "active:cursor-grabbing",
           "-mx-5 px-5 sm:-mx-0 sm:px-0",
         )}
-        style={{ touchAction: "pan-y" }}
+        style={{ touchAction: "pan-x pan-y pinch-zoom" }}
       >
         {[...members, ...members].map((m, i) => (
           <div
             key={`${m.id}-${i}`}
             data-card
-            className={cn("shrink-0", CARD_WIDTH)}
+            className={cn(
+              "shrink-0 snap-start scroll-ml-5 sm:scroll-ml-0",
+              i >= members.length &&
+                "hidden sm:block [@media(pointer:coarse)]:hidden",
+              CARD_WIDTH,
+            )}
           >
             <CouncilCard
               member={m}

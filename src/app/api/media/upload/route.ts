@@ -4,11 +4,11 @@ import { db } from "@/db/client";
 import { media as mediaT } from "@/db/schema";
 import { requireMediaContributor } from "@/lib/rbac";
 import { uploadToR2, makeKey } from "@/lib/r2";
+import { MEDIA_UPLOAD_MAX_BYTES } from "@/lib/media-upload-policy";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const MAX_BYTES = 25 * 1024 * 1024; // 25MB
 const ALLOWED = /^(image\/|video\/|application\/pdf)/;
 
 /**
@@ -30,8 +30,11 @@ export async function POST(req: Request) {
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "No file provided" }, { status: 400 });
   }
-  if (file.size > MAX_BYTES) {
-    return NextResponse.json({ error: "File too large (max 25MB)" }, { status: 413 });
+  if (file.size > MEDIA_UPLOAD_MAX_BYTES) {
+    return NextResponse.json(
+      { error: "File too large (max 25MB)" },
+      { status: 413 },
+    );
   }
   if (!ALLOWED.test(file.type)) {
     return NextResponse.json(
@@ -57,7 +60,11 @@ export async function POST(req: Request) {
   const key = makeKey(file.name || "upload");
 
   try {
-    const url = await uploadToR2(key, buf, file.type || "application/octet-stream");
+    const url = await uploadToR2(
+      key,
+      buf,
+      file.type || "application/octet-stream",
+    );
     const [row] = await db
       .insert(mediaT)
       .values({

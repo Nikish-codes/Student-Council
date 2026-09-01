@@ -135,7 +135,7 @@ export function OvalDailyMenu({
             </h1>
             <p className="mt-6 max-w-2xl text-pretty text-muted">
               Breakfast, lunch, dinner, and Jain choices for this service day.
-              The public page changes automatically at 4:00 AM.
+              The day&apos;s menu is available each morning.
             </p>
           </div>
           <div className="border-l border-line/20 pl-5 text-sm text-muted">

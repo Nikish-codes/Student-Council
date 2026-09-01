@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { Plus, Trash2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { uploadMediaDirect } from "@/lib/direct-media-upload";
 import { cn } from "@/lib/utils";
 
 export const inputCls =
@@ -295,15 +296,7 @@ export function MediaField({
     setUploading(true);
     setError(null);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/media/upload", {
-        method: "POST",
-        body: fd,
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Upload failed");
-      const m: MediaOption = json.media;
+      const m: MediaOption = await uploadMediaDirect(file);
       setList((l) => [m, ...l]);
       choose(m.id);
     } catch (err) {
@@ -368,6 +361,7 @@ export function MediaField({
               <input
                 type="file"
                 hidden
+                disabled={uploading}
                 onChange={onUpload}
                 accept="image/*,video/*,application/pdf"
               />

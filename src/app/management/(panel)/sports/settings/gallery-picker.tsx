@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Upload, Link as LinkIcon, X } from "lucide-react";
+import { uploadMediaDirect } from "@/lib/direct-media-upload";
 import { cn } from "@/lib/utils";
 
 type MediaOption = { id: number; url: string; filename?: string | null };
@@ -23,7 +24,9 @@ export function GalleryPicker({
   const [error, setError] = useState<string | null>(null);
 
   const toggle = (id: number) =>
-    setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+    setSelected((s) =>
+      s.includes(id) ? s.filter((x) => x !== id) : [...s, id],
+    );
 
   async function onUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -33,12 +36,7 @@ export function GalleryPicker({
     try {
       const added: MediaOption[] = [];
       for (const file of files) {
-        const fd = new FormData();
-        fd.append("file", file);
-        const res = await fetch("/api/media/upload", { method: "POST", body: fd });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error || "Upload failed");
-        added.push(json.media as MediaOption);
+        added.push(await uploadMediaDirect(file));
       }
       setList((l) => [...added, ...l]);
       setSelected((s) => [...s, ...added.map((m) => m.id)]);
@@ -98,6 +96,7 @@ export function GalleryPicker({
             type="file"
             hidden
             multiple
+            disabled={uploading}
             onChange={onUpload}
             accept="image/*"
           />
@@ -159,7 +158,13 @@ export function GalleryPicker({
                 : "border-line/10 hover:border-line/40",
             )}
           >
-            <Image src={m.url} alt="" fill className="object-cover" sizes="120px" />
+            <Image
+              src={m.url}
+              alt=""
+              fill
+              className="object-cover"
+              sizes="120px"
+            />
             {selected.includes(m.id) && (
               <div className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-[10px] text-bg">
                 ✓

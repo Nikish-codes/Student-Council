@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import { Upload, Search, Trash2, Pencil, Check, X } from "lucide-react";
 import { toast } from "sonner";
+import { uploadMediaDirect } from "@/lib/direct-media-upload";
 import { deleteMedia, updateMediaAlt } from "./actions";
 
 type Item = {
@@ -48,15 +49,8 @@ export function MediaLibrary({ initial }: { initial: Item[] }) {
     setUploading(true);
     try {
       for (const file of files) {
-        const fd = new FormData();
-        fd.append("file", file);
-        const res = await fetch("/api/media/upload", { method: "POST", body: fd });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error || "Upload failed");
-        setItems((l) => [
-          { ...json.media, alt: json.media.alt ?? "" },
-          ...l,
-        ]);
+        const media = await uploadMediaDirect(file);
+        setItems((l) => [{ ...media, alt: media.alt ?? "" }, ...l]);
       }
       toast.success(`Uploaded ${files.length} file(s)`);
       setPage(0);
@@ -113,6 +107,7 @@ export function MediaLibrary({ initial }: { initial: Item[] }) {
             type="file"
             hidden
             multiple
+            disabled={uploading}
             onChange={onUpload}
             accept="image/*,video/*,application/pdf"
           />

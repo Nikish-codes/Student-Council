@@ -78,6 +78,8 @@ export function CouncilCard({
   onOpen?: () => void;
 }) {
   const s = SIZES[size];
+  const portraitRef = React.useRef<HTMLDivElement>(null);
+  const [mobileVisible, setMobileVisible] = React.useState(false);
   const compactPad =
     size === "sm" ? undefined : size === "md" ? "p-3.5 sm:p-5" : "p-3.5 sm:p-6";
   const compactName =
@@ -92,6 +94,32 @@ export function CouncilCard({
       : size === "md"
         ? "text-sm sm:text-base"
         : "text-sm sm:text-lg";
+
+  React.useEffect(() => {
+    const portrait = portraitRef.current;
+    if (!portrait) return;
+
+    const mobileInteraction = window.matchMedia(
+      "(max-width: 767px), (hover: none)",
+    );
+    if (!mobileInteraction.matches) return;
+    if (!("IntersectionObserver" in window)) {
+      setMobileVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setMobileVisible(entry.isIntersecting && entry.intersectionRatio >= 0.45);
+      },
+      {
+        threshold: [0, 0.25, 0.45, 0.7, 1],
+        rootMargin: "-8% 0px -8% 0px",
+      },
+    );
+    observer.observe(portrait);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <SpotlightCard
@@ -115,6 +143,8 @@ export function CouncilCard({
 
       {/* ── Portrait ── */}
       <div
+        ref={portraitRef}
+        data-mobile-visible={mobileVisible || undefined}
         className={cn(
           "pointer-events-none relative w-full overflow-hidden bg-surface-2",
           s.aspect,
@@ -131,7 +161,10 @@ export function CouncilCard({
           photo={member.photo}
           index={index}
           sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-          className="object-contain grayscale transition-[filter] duration-700 ease-out group-hover/m:grayscale-0"
+          className={cn(
+            "object-contain grayscale transition-[filter] duration-700 ease-out group-hover/m:grayscale-0 motion-reduce:duration-0",
+            mobileVisible && "grayscale-0",
+          )}
         />
       </div>
 
