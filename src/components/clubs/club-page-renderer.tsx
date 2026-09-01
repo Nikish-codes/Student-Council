@@ -316,12 +316,12 @@ function StageWorld({ club, upcoming, past, leads }: WorldProps) {
             <LogoSticker club={club} className="rotate-3" />
           </div>
 
-          <div className="max-w-6xl">
-            <h1 className="max-w-5xl font-sans text-[clamp(3.5rem,11vw,6rem)] font-black uppercase leading-[0.82] tracking-[-0.04em]">
+          <div className="max-w-5xl">
+            <h1 className="max-w-4xl break-words font-sans text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold uppercase leading-[0.92] tracking-[-0.03em]">
               {club.name}
             </h1>
             {club.tagline ? (
-              <p className="mt-6 max-w-3xl text-pretty text-xl font-medium leading-tight text-[#ffe5d6] sm:text-3xl">
+              <p className="mt-5 max-w-[60ch] text-pretty text-lg font-medium leading-[1.4] text-[#ffe5d6] sm:text-xl">
                 {club.tagline}
               </p>
             ) : null}
@@ -353,13 +353,13 @@ function StageWorld({ club, upcoming, past, leads }: WorldProps) {
       {hasClubSection(club, "about") ? (
         <section
           id="stage-story"
-          className="grid gap-14 px-5 py-24 sm:px-10 lg:grid-cols-12 lg:px-16 lg:py-32"
+          className="grid gap-12 px-5 py-20 sm:px-10 lg:grid-cols-12 lg:px-16 lg:py-24"
         >
           <div className="lg:col-span-7">
             <StageLabel>
               {clubHeading(club, "about", "Why we exist")}
             </StageLabel>
-            <p className="mt-7 max-w-4xl text-pretty text-3xl font-semibold leading-[1.05] sm:text-5xl">
+            <p className="mt-6 max-w-[65ch] whitespace-pre-line text-pretty text-lg font-medium leading-[1.65] sm:text-xl">
               {club.about || club.blurb}
             </p>
           </div>
@@ -379,7 +379,7 @@ function StageWorld({ club, upcoming, past, leads }: WorldProps) {
       ) : null}
 
       {club.activities.length > 0 ? (
-        <section className="border-t border-white/10 px-5 py-24 sm:px-10 lg:px-16">
+        <section className="border-t border-white/10 px-5 py-20 sm:px-10 lg:px-16 lg:py-24">
           <StageLabel>
             {clubHeading(club, "activities", "What happens here")}
           </StageLabel>
@@ -392,10 +392,10 @@ function StageWorld({ club, upcoming, past, leads }: WorldProps) {
                 <span className="font-mono text-xs text-[var(--club-accent)]">
                   {String(index + 1).padStart(2, "0")}
                 </span>
-                <h2 className="text-2xl font-bold sm:text-4xl">
+                <h2 className="break-words text-xl font-bold leading-tight sm:text-2xl">
                   {activity.title}
                 </h2>
-                <p className="max-w-lg text-sm leading-relaxed text-[#d4b8a8] sm:text-base">
+                <p className="max-w-[65ch] text-base leading-[1.65] text-[#d4b8a8]">
                   {activity.description}
                 </p>
               </li>
@@ -994,7 +994,7 @@ function StageSocialRail({ club }: { club: ClubDetail }) {
       aria-label={`${club.name} social links`}
       className="mt-8 flex max-w-3xl flex-col gap-2 border-y border-white/20 py-3 sm:flex-row sm:items-center sm:gap-6"
     >
-      <span className="shrink-0 font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--club-accent)]">
+      <span className="shrink-0 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--club-accent)]">
         Connect
       </span>
       <ul className="flex flex-wrap gap-x-1 gap-y-1">
@@ -1065,11 +1065,11 @@ function StageLabel({ children }: { children: React.ReactNode }) {
 function StageStat({ label, value }: { label: string; value?: number }) {
   if (value == null) return null;
   return (
-    <div className="bg-[#120b08] p-6">
+    <div className="bg-[#120b08] p-5 sm:p-6">
       <dt className="text-xs uppercase tracking-[0.18em] text-[#b89583]">
         {label}
       </dt>
-      <dd className="mt-4 text-4xl font-black text-[#fff5e9]">{value}</dd>
+      <dd className="mt-3 text-3xl font-bold text-[#fff5e9]">{value}</dd>
     </div>
   );
 }
@@ -1077,7 +1077,7 @@ function StageStat({ label, value }: { label: string; value?: number }) {
 function StageGallery({ club }: { club: ClubDetail }) {
   if (club.gallery.length === 0) return null;
   return (
-    <section className="border-t border-white/10 px-5 py-24 sm:px-10 lg:px-16">
+    <section className="border-t border-white/10 px-5 py-20 sm:px-10 lg:px-16 lg:py-24">
       <StageLabel>{clubHeading(club, "gallery", "Seen and heard")}</StageLabel>
       <div className="mt-10 columns-1 gap-4 sm:columns-2 lg:columns-3">
         {club.gallery.map((item, index) => (
@@ -1112,7 +1112,7 @@ function StagePeople({
 }) {
   if (leads.length === 0) return null;
   return (
-    <section className="border-t border-white/10 px-5 py-24 sm:px-10 lg:px-16">
+    <section className="border-t border-white/10 px-5 py-20 sm:px-10 lg:px-16 lg:py-24">
       <StageLabel>{clubHeading(club, "people", "Our members")}</StageLabel>
       <div className="mt-10 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
         {leads.map((lead) => (
@@ -1123,10 +1123,12 @@ function StagePeople({
                 alt={lead.name}
                 fill
                 sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                className="object-cover"
+                className="object-contain object-center"
               />
             </div>
-            <h3 className="mt-5 text-xl font-bold">{lead.name}</h3>
+            <h3 className="mt-4 break-words text-lg font-bold leading-tight">
+              {lead.name}
+            </h3>
             <p className="mt-1 text-sm text-[#b89583]">{lead.role}</p>
             {lead.program ? (
               <p className="mt-1 text-xs text-[#8e7467]">{lead.program}</p>
@@ -1149,7 +1151,7 @@ function StageEvents({
 }) {
   if (events.length === 0) return null;
   return (
-    <section className="border-t border-white/10 px-5 py-24 sm:px-10 lg:px-16">
+    <section className="border-t border-white/10 px-5 py-20 sm:px-10 lg:px-16 lg:py-24">
       <StageLabel>
         {clubHeading(club, "events", upcoming ? "On the bill" : "Past shows")}
       </StageLabel>
@@ -1163,7 +1165,9 @@ function StageEvents({
             <span className="font-mono text-xs text-[#b89583]">
               {formatDate(event.date)}
             </span>
-            <span className="text-2xl font-bold">{event.title}</span>
+            <span className="break-words text-xl font-bold leading-tight sm:text-2xl">
+              {event.title}
+            </span>
             <ArrowUpRight className="h-5 w-5" />
           </Link>
         ))}
@@ -1175,12 +1179,12 @@ function StageEvents({
 function StageClose({ club }: { club: ClubDetail }) {
   return (
     <section
-      className="border-t px-5 pb-32 pt-24 text-center sm:px-10"
+      className="border-t px-5 pb-24 pt-20 text-center sm:px-10 sm:pb-28 sm:pt-24"
       style={{
         borderColor: "color-mix(in srgb, var(--club-accent) 30%, transparent)",
       }}
     >
-      <p className="font-sans text-[clamp(3rem,9vw,6rem)] font-black uppercase leading-[0.84] tracking-[-0.04em]">
+      <p className="font-sans text-[clamp(2.25rem,6vw,4.5rem)] font-extrabold uppercase leading-[0.94] tracking-[-0.03em]">
         Find your place in the sound.
       </p>
       <JoinLink

@@ -28,18 +28,42 @@ export function ClubCard({ club, index, total }: Props) {
       const border = borderRef.current;
       if (!el || !logo || !halo || !border) return;
 
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
       const coarse = window.matchMedia("(pointer: coarse)").matches;
       if (reduced || coarse) return;
 
-      const xTo = gsap.quickTo(logo, "rotationY", { duration: 0.6, ease: "power3.out" });
-      const yTo = gsap.quickTo(logo, "rotationX", { duration: 0.6, ease: "power3.out" });
-      const sTo = gsap.quickTo(logo, "scale", { duration: 0.6, ease: "power3.out" });
-      const hxTo = gsap.quickTo(halo, "x", { duration: 0.4, ease: "power3.out" });
-      const hyTo = gsap.quickTo(halo, "y", { duration: 0.4, ease: "power3.out" });
+      const xTo = gsap.quickTo(logo, "rotationY", {
+        duration: 0.6,
+        ease: "power3.out",
+      });
+      const yTo = gsap.quickTo(logo, "rotationX", {
+        duration: 0.6,
+        ease: "power3.out",
+      });
+      const sTo = gsap.quickTo(logo, "scale", {
+        duration: 0.6,
+        ease: "power3.out",
+      });
+      const hxTo = gsap.quickTo(halo, "x", {
+        duration: 0.4,
+        ease: "power3.out",
+      });
+      const hyTo = gsap.quickTo(halo, "y", {
+        duration: 0.4,
+        ease: "power3.out",
+      });
 
-      const perimeter = (border.getBoundingClientRect().width + border.getBoundingClientRect().height) * 2;
-      gsap.set(border, { strokeDasharray: perimeter, strokeDashoffset: perimeter, opacity: 0 });
+      const perimeter =
+        (border.getBoundingClientRect().width +
+          border.getBoundingClientRect().height) *
+        2;
+      gsap.set(border, {
+        strokeDasharray: perimeter,
+        strokeDashoffset: perimeter,
+        opacity: 0,
+      });
 
       const onMove = (e: MouseEvent) => {
         const rect = el.getBoundingClientRect();
@@ -52,14 +76,24 @@ export function ClubCard({ club, index, total }: Props) {
       };
       const onEnter = () => {
         sTo(1.06);
-        gsap.to(border, { strokeDashoffset: 0, opacity: 1, duration: 1.2, ease: "expo.out" });
+        gsap.to(border, {
+          strokeDashoffset: 0,
+          opacity: 1,
+          duration: 1.2,
+          ease: "expo.out",
+        });
         gsap.to(halo, { opacity: 1, duration: 0.5 });
       };
       const onLeave = () => {
         xTo(0);
         yTo(0);
         sTo(1);
-        gsap.to(border, { strokeDashoffset: perimeter, opacity: 0, duration: 0.8, ease: "power3.out" });
+        gsap.to(border, {
+          strokeDashoffset: perimeter,
+          opacity: 0,
+          duration: 0.8,
+          ease: "power3.out",
+        });
         gsap.to(halo, { opacity: 0, duration: 0.4, x: 0, y: 0 });
       };
 
@@ -93,7 +127,7 @@ export function ClubCard({ club, index, total }: Props) {
       data-club-card
       // Same treatment as the council cards: surface fill carries the card,
       // the border is transparent until hover so nothing reflows.
-      className="group/c relative flex min-h-[300px] flex-col overflow-hidden rounded-2xl border border-transparent bg-surface p-7 transition-colors duration-500 hover:border-line/12"
+      className="group/c relative flex min-h-[280px] flex-col overflow-hidden rounded-2xl border border-transparent bg-surface p-6 transition-colors duration-500 hover:border-line/12"
       style={{ perspective: "1000px" }}
     >
       {/* Cursor halo (plain alpha blend — no mix-blend-screen, which forces an
@@ -128,18 +162,21 @@ export function ClubCard({ club, index, total }: Props) {
       </svg>
 
       {/* Index */}
-      <div className="absolute left-7 top-7 z-10 font-mono text-[10px] uppercase tracking-[0.22em] text-subtle">
+      <div className="absolute left-6 top-6 z-10 font-mono text-[11px] uppercase tracking-[0.18em] text-subtle">
         {String(index + 1).padStart(2, "0")}
-        <span className="text-subtle/40"> / {String(total).padStart(2, "0")}</span>
+        <span className="text-subtle/40">
+          {" "}
+          / {String(total).padStart(2, "0")}
+        </span>
       </div>
 
       <ArrowUpRight className="absolute right-6 top-6 z-10 h-5 w-5 text-muted transition-all duration-500 group-hover/c:-translate-y-0.5 group-hover/c:translate-x-0.5 group-hover/c:text-ink" />
 
       {/* Logo - dominant element */}
-      <div className="relative z-0 flex min-h-[140px] flex-1 items-center justify-center">
+      <div className="relative z-0 flex min-h-[120px] flex-1 items-center justify-center">
         <div
           ref={logoRef}
-          className="relative aspect-square w-[55%] max-w-[140px]"
+          className="relative aspect-square w-[52%] max-w-[120px]"
           style={{ transformStyle: "preserve-3d" }}
         >
           <Picture
@@ -152,15 +189,17 @@ export function ClubCard({ club, index, total }: Props) {
       </div>
 
       {/* Body */}
-      <div className="relative z-10 mt-6 space-y-4">
-        <h3 className="display text-2xl text-ink">{displayName}</h3>
+      <div className="relative z-10 mt-5 space-y-4">
+        <h3 className="display break-words text-xl leading-[1.12] text-ink sm:text-2xl">
+          {displayName}
+        </h3>
 
         <div className="flex items-center justify-between gap-3 border-t border-line/10 pt-4">
           <div className="flex flex-wrap gap-1.5">
             {club.tags.slice(0, 2).map((tag) => (
               <span
                 key={tag}
-                className="rounded-full border border-line/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted transition-colors group-hover/c:border-line/25 group-hover/c:text-ink"
+                className="rounded-full border border-line/10 px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.12em] text-muted transition-colors group-hover/c:border-line/25 group-hover/c:text-ink"
               >
                 {tag}
               </span>

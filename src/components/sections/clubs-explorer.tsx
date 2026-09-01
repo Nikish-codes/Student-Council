@@ -33,7 +33,8 @@ export function ClubsExplorer({
       items: clubs.filter((club) => club.categoryId === c.id),
     }));
     const orphans = clubs.filter(
-      (club) => !club.categoryId || !categories.some((c) => c.id === club.categoryId),
+      (club) =>
+        !club.categoryId || !categories.some((c) => c.id === club.categoryId),
     );
     if (orphans.length) sections.push({ ...UNCATEGORISED, items: orphans });
     return sections.filter((g) => g.items.length > 0);
@@ -48,55 +49,64 @@ export function ClubsExplorer({
   // scrolling stutter on laptops.
   useGSAP(
     () => {
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
       const ctx = gsap.context(() => {
         // ── Section headers: one fade-rise per title ──
-        root.current?.querySelectorAll<HTMLElement>("[data-group-title]").forEach((el) => {
-          gsap.set(el, { opacity: 1 });
-          if (reduced) return;
-          gsap.from(el, {
-            opacity: 0,
-            y: 32,
-            duration: 0.8,
-            ease: "power3.out",
-            scrollTrigger: { trigger: el, start: "top 85%", once: true },
+        root.current
+          ?.querySelectorAll<HTMLElement>("[data-group-title]")
+          .forEach((el) => {
+            gsap.set(el, { opacity: 1 });
+            if (reduced) return;
+            gsap.from(el, {
+              opacity: 0,
+              y: 32,
+              duration: 0.8,
+              ease: "power3.out",
+              scrollTrigger: { trigger: el, start: "top 85%", once: true },
+            });
           });
-        });
 
         // ── Group meta lines ──
-        root.current?.querySelectorAll<HTMLElement>("[data-group-meta]").forEach((el) => {
-          gsap.set(el, { opacity: 1 });
-          if (reduced) return;
-          gsap.from(el, {
-            opacity: 0,
-            x: -20,
-            duration: 0.8,
-            ease: "power3.out",
-            scrollTrigger: { trigger: el, start: "top 88%", once: true },
+        root.current
+          ?.querySelectorAll<HTMLElement>("[data-group-meta]")
+          .forEach((el) => {
+            gsap.set(el, { opacity: 1 });
+            if (reduced) return;
+            gsap.from(el, {
+              opacity: 0,
+              x: -20,
+              duration: 0.8,
+              ease: "power3.out",
+              scrollTrigger: { trigger: el, start: "top 88%", once: true },
+            });
           });
-        });
 
         // ── Cards: single staggered fade-up per grid ──
-        root.current?.querySelectorAll<HTMLElement>("[data-group-grid]").forEach((grid) => {
-          const cards = grid.querySelectorAll("[data-club-card]");
-          if (!cards.length) return;
-          if (reduced) {
-            gsap.set(cards, { opacity: 1 });
-            return;
-          }
-          gsap.set(cards, { opacity: 0, y: 28 });
-          gsap.to(cards, {
-            opacity: 1,
-            y: 0,
-            duration: 0.7,
-            ease: "power3.out",
-            stagger: 0.05,
-            scrollTrigger: { trigger: grid, start: "top 88%", once: true },
+        root.current
+          ?.querySelectorAll<HTMLElement>("[data-group-grid]")
+          .forEach((grid) => {
+            const cards = grid.querySelectorAll("[data-club-card]");
+            if (!cards.length) return;
+            if (reduced) {
+              gsap.set(cards, { opacity: 1 });
+              return;
+            }
+            gsap.set(cards, { opacity: 0, y: 28 });
+            gsap.to(cards, {
+              opacity: 1,
+              y: 0,
+              duration: 0.7,
+              ease: "power3.out",
+              stagger: 0.05,
+              scrollTrigger: { trigger: grid, start: "top 88%", once: true },
+            });
           });
-        });
 
         // ── Stats row reveal ──
-        const stats = root.current?.querySelectorAll<HTMLElement>("[data-stat]");
+        const stats =
+          root.current?.querySelectorAll<HTMLElement>("[data-stat]");
         if (stats?.length) {
           gsap.set(stats, { opacity: 1 });
           if (!reduced) {
@@ -116,7 +126,8 @@ export function ClubsExplorer({
         }
 
         // ── Category jump-nav: underline scroll-spy ──
-        const navLinks = root.current?.querySelectorAll<HTMLAnchorElement>("[data-cat-link]");
+        const navLinks =
+          root.current?.querySelectorAll<HTMLAnchorElement>("[data-cat-link]");
         navLinks?.forEach((link) => {
           const id = link.getAttribute("href")?.slice(1);
           if (!id) return;
@@ -149,7 +160,7 @@ export function ClubsExplorer({
   return (
     <div ref={root}>
       {/* ── Stats row ── */}
-      <div className="grid grid-cols-2 gap-x-8 gap-y-10 border-y border-line/10 py-12 sm:grid-cols-4 sm:py-16">
+      <div className="grid grid-cols-2 gap-x-8 gap-y-8 border-y border-line/10 py-10 sm:grid-cols-4 sm:py-12">
         <Stat label="Active clubs" value={clubs.length} suffix="" />
         <Stat label="Members" value={totalMembers} suffix="+" />
         <Stat label="Categories" value={grouped.length} suffix="" />
@@ -160,7 +171,7 @@ export function ClubsExplorer({
       {/* backdrop-blur-md, not -xl: the sticky bar re-blurs its backdrop every
           scroll frame; blur cost scales with radius. md is visually identical
           over bg/85. */}
-      <nav className="sticky top-20 z-30 -mx-5 my-12 border-b border-line/10 bg-bg/85 px-5 py-4 backdrop-blur-md sm:mx-0 sm:rounded-2xl sm:border">
+      <nav className="sticky top-20 z-30 -mx-5 my-10 border-b border-line/10 bg-bg/85 px-5 py-4 backdrop-blur-md sm:mx-0 sm:rounded-2xl sm:border">
         <div className="flex items-center gap-6 overflow-x-auto no-scrollbar">
           <span className="kicker shrink-0 text-subtle">Jump to</span>
           {grouped.map((g) => (
@@ -185,18 +196,18 @@ export function ClubsExplorer({
       </nav>
 
       {/* ── Grouped sections ── */}
-      <div className="space-y-32 sm:space-y-40">
+      <div className="space-y-24 sm:space-y-32">
         {grouped.map((g, gi) => (
           <section key={g.key} id={`cat-${g.key}`} className="relative">
             {/* Bg watermark - the giant first-tag word, drifting */}
             <div
               aria-hidden
-              className="pointer-events-none absolute -top-10 right-0 hidden select-none text-[14rem] font-display italic leading-none text-ink/[0.025] sm:block"
+              className="pointer-events-none absolute -top-8 right-0 hidden select-none text-[10rem] font-display italic leading-none text-ink/[0.025] sm:block"
             >
               {g.label.split(" ")[0]}
             </div>
 
-            <header className="relative mb-12 sm:mb-16">
+            <header className="relative mb-10 sm:mb-12">
               <div data-group-meta className="mb-6 flex items-center gap-4">
                 <span className="font-mono text-xs text-subtle">
                   {String(gi + 1).padStart(2, "0")}
@@ -206,12 +217,12 @@ export function ClubsExplorer({
               </div>
               <h2
                 data-group-title
-                className="display text-balance text-5xl leading-[0.9] sm:text-7xl lg:text-8xl"
+                className="display text-balance text-[clamp(36px,5vw,64px)] leading-[0.98]"
               >
                 {g.label}.
               </h2>
               {g.blurb && (
-                <p className="mt-6 max-w-2xl text-pretty text-muted">
+                <p className="mt-5 max-w-[65ch] text-pretty text-base leading-relaxed text-muted">
                   {g.blurb}
                 </p>
               )}
@@ -251,7 +262,7 @@ function Stat({
   return (
     <div data-stat className="flex flex-col gap-3">
       <span className="kicker">{label}</span>
-      <span className="display text-5xl text-ink sm:text-6xl">
+      <span className="display text-4xl text-ink sm:text-5xl">
         <CountUp to={value} prefix={prefix} suffix={suffix} duration={2.2} />
       </span>
     </div>
