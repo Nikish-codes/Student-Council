@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { clubs as clubsT, sportsTeams as t } from "@/db/schema";
-import { requireOps } from "@/lib/rbac";
+import { requireSportsManager } from "@/lib/rbac";
 import { mediaOptions } from "@/lib/media-options";
 import { EditorShell, Fieldset } from "@/components/management/page-header";
 import {
@@ -18,12 +18,14 @@ export default async function TeamEditor({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireOps();
+  await requireSportsManager();
   const { id } = await params;
   const isNew = id === "new";
 
   const [row, media, clubList] = await Promise.all([
-    isNew ? null : db.query.sportsTeams.findFirst({ where: eq(t.id, Number(id)) }),
+    isNew
+      ? null
+      : db.query.sportsTeams.findFirst({ where: eq(t.id, Number(id)) }),
     mediaOptions(),
     db
       .select({ id: clubsT.id, name: clubsT.name })
@@ -41,10 +43,27 @@ export default async function TeamEditor({
     >
       <Fieldset title="Identity" hint="Name, logo, and optional club link.">
         <div className="grid gap-5 sm:grid-cols-2">
-          <TextField name="name" label="Name" required defaultValue={row?.name} />
-          <TextField name="slug" label="Slug" hint="auto if blank" defaultValue={row?.slug} placeholder="auto from name" />
+          <TextField
+            name="name"
+            label="Name"
+            required
+            defaultValue={row?.name}
+          />
+          <TextField
+            name="slug"
+            label="Slug"
+            hint="auto if blank"
+            defaultValue={row?.slug}
+            placeholder="auto from name"
+          />
         </div>
-        <MediaField name="logoId" label="Logo" hint="square · team crest" defaultValue={row?.logoId ?? null} media={media} />
+        <MediaField
+          name="logoId"
+          label="Logo"
+          hint="square · team crest"
+          defaultValue={row?.logoId ?? null}
+          media={media}
+        />
         <SelectField
           name="clubId"
           label="Linked club"

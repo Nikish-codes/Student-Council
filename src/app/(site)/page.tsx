@@ -3,7 +3,7 @@ import { ImpactStrip } from "@/components/sections/impact-strip";
 import { HomeLazySections } from "@/components/sections/home-lazy-sections";
 import {
   getClubs,
-  getCouncil,
+  getCouncilPageMembers,
   getEvent,
   getEvents,
   getHomepageConfig,
@@ -23,7 +23,7 @@ export default async function HomePage() {
       getUpcomingEvents(8),
       getClubs(),
       getEvents(),
-      getCouncil(),
+      getCouncilPageMembers(),
       getHomepageConfig(),
       getSiteSettings(),
     ]);

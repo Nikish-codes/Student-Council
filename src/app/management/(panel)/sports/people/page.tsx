@@ -1,12 +1,12 @@
 import { asc } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sportsPeople as t } from "@/db/schema";
-import { requireOps } from "@/lib/rbac";
+import { requireSportsManager } from "@/lib/rbac";
 import { PageHeader } from "@/components/management/page-header";
 import { PeopleTable } from "./people-table";
 
 export default async function PeoplePage() {
-  await requireOps();
+  await requireSportsManager();
   const rows = await db.query.sportsPeople.findMany({
     with: { photo: true },
     orderBy: [asc(t.sortOrder), asc(t.name)],

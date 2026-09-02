@@ -27,6 +27,7 @@ export const OPS_ROLES: UserRole[] = [
  * constrained to /management/oval; it is deliberately not an OPS role. */
 export const PANEL_ROLES: UserRole[] = [
   ...OPS_ROLES,
+  "sports_lead",
   "club_lead",
   "food_committee_member",
 ];
@@ -36,6 +37,7 @@ export const ROLES_ALL: UserRole[] = [
   "super_admin",
   "operations",
   "admin",
+  "sports_lead",
   "food_committee_member",
   "council_member",
   "club_lead",
@@ -44,15 +46,25 @@ export const ROLES_ALL: UserRole[] = [
 ];
 
 /** Roles that may publish (move content to `published`). */
-export const PUBLISHER_ROLES: UserRole[] = [
+export const PUBLISHER_ROLES: UserRole[] = ["super_admin", "operations"];
+
+/** Full sports editors. Sports leads are intentionally not general ops users. */
+export const SPORTS_MANAGER_ROLES: UserRole[] = [...OPS_ROLES, "sports_lead"];
+
+/** Destructive sports actions preserve the existing admin-only policy while
+ * allowing the dedicated sports owner to manage the section end to end. */
+export const SPORTS_DELETE_ROLES: UserRole[] = [
   "super_admin",
-  "operations",
+  "admin",
+  "sports_lead",
 ];
 
 export const isAdmin = (role: UserRole) =>
   role === "super_admin" || role === "admin";
 
 export const canPublish = (role: UserRole) => PUBLISHER_ROLES.includes(role);
+export const canPublishSports = (role: UserRole) =>
+  role === "sports_lead" || canPublish(role);
 
 /** Throwing guard: returns the session user or throws if not signed in. */
 export async function requireUser(): Promise<SessionUser> {
@@ -79,12 +91,19 @@ export async function requireRole(...roles: UserRole[]): Promise<SessionUser> {
 /** Require any ops role (can access the management panel). */
 export const requireOps = () => requireRole(...OPS_ROLES);
 export const requirePanelUser = () => requireRole(...PANEL_ROLES);
+export const requireSportsManager = () => requireRole(...SPORTS_MANAGER_ROLES);
+export const requireSportsDelete = () => requireRole(...SPORTS_DELETE_ROLES);
 /** Club leads are excluded from general operations and may enter only their
  * assigned club editor. These guards support that editor and its media fields. */
 export const requireClubManager = () => requireRole(...OPS_ROLES, "club_lead");
 export async function requireMediaContributor() {
   const user = await requireUser();
-  if (OPS_ROLES.includes(user.role) || user.role === "club_lead") return user;
+  if (
+    OPS_ROLES.includes(user.role) ||
+    user.role === "sports_lead" ||
+    user.role === "club_lead"
+  )
+    return user;
   const membership = await db.query.clubMemberships.findFirst({
     where: and(
       eq(clubMemberships.userId, Number(user.id)),

@@ -9,7 +9,7 @@ import {
   type SportMatchEvent,
   type SportPostMatch,
 } from "@/db/schema";
-import { requireOps, requireRole } from "@/lib/rbac";
+import { requireSportsDelete, requireSportsManager } from "@/lib/rbac";
 import type { SportType, SportMatchStatus } from "@/lib/schemas";
 
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
@@ -65,7 +65,7 @@ function bust(matchId?: number) {
 }
 
 export async function saveMatch(id: number | null, fd: FormData) {
-  await requireOps();
+  await requireSportsManager();
   const sport = (
     SPORTS.includes(s(fd, "sport") as SportType) ? s(fd, "sport") : "football"
   ) as SportType;
@@ -121,7 +121,7 @@ export async function updateMatchScore(
   scoreB: number,
   status: SportMatchStatus,
 ) {
-  await requireOps();
+  await requireSportsManager();
   await db
     .update(t)
     .set({ scoreA, scoreB, status, updatedAt: new Date().toISOString() })
@@ -131,7 +131,7 @@ export async function updateMatchScore(
 
 /** Append a match event (goal, card, etc.) for the live feed. */
 export async function addMatchEvent(id: number, event: SportMatchEvent) {
-  await requireOps();
+  await requireSportsManager();
   const existing = await db.query.sportsMatches.findFirst({
     where: eq(t.id, id),
     columns: { events: true },
@@ -148,7 +148,7 @@ export async function addMatchEvent(id: number, event: SportMatchEvent) {
 
 /** Remove a match event by index (for correcting mistakes in the cockpit). */
 export async function removeMatchEvent(id: number, index: number) {
-  await requireOps();
+  await requireSportsManager();
   const existing = await db.query.sportsMatches.findFirst({
     where: eq(t.id, id),
     columns: { events: true },
@@ -164,7 +164,7 @@ export async function removeMatchEvent(id: number, index: number) {
 }
 
 export async function deleteMatch(id: number) {
-  await requireRole("super_admin", "admin");
+  await requireSportsDelete();
   await db.delete(t).where(eq(t.id, id));
   bust();
 }

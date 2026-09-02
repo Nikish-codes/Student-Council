@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  panelHomeDestination,
   requiredPasswordDestination,
   restrictedPanelDestination,
 } from "./panel-access";
@@ -44,10 +45,59 @@ describe("restricted management roles", () => {
   });
 
   it("limits Operations to approval and event operating surfaces", () => {
-    expect(restrictedPanelDestination("operations", null, "/management/approvals")).toBeNull();
-    expect(restrictedPanelDestination("operations", null, "/management/events/2/registrations")).toBeNull();
-    expect(restrictedPanelDestination("operations", null, "/management/users")).toBe("/management/approvals");
-    expect(restrictedPanelDestination("operations", null, "/management/settings")).toBe("/management/approvals");
+    expect(
+      restrictedPanelDestination("operations", null, "/management/approvals"),
+    ).toBeNull();
+    expect(
+      restrictedPanelDestination(
+        "operations",
+        null,
+        "/management/events/2/registrations",
+      ),
+    ).toBeNull();
+    expect(
+      restrictedPanelDestination("operations", null, "/management/users"),
+    ).toBe("/management/approvals");
+    expect(
+      restrictedPanelDestination("operations", null, "/management/settings"),
+    ).toBe("/management/approvals");
+  });
+
+  it("pins a sports lead to the complete sports workspace only", () => {
+    expect(
+      restrictedPanelDestination("sports_lead", null, "/management/sports"),
+    ).toBeNull();
+    expect(
+      restrictedPanelDestination(
+        "sports_lead",
+        null,
+        "/management/sports/matches/12",
+      ),
+    ).toBeNull();
+    expect(
+      restrictedPanelDestination("sports_lead", null, "/management/users"),
+    ).toBe("/management/sports");
+    expect(restrictedPanelDestination("sports_lead", null, "/management")).toBe(
+      "/management/sports",
+    );
+    expect(
+      restrictedPanelDestination("sports_lead", null, "/club-management"),
+    ).toBe("/management/sports");
+    expect(
+      restrictedPanelDestination(
+        "sports_lead",
+        null,
+        "/management/sportscaster",
+      ),
+    ).toBe("/management/sports");
+  });
+
+  it("sends sports leads to Sports even when they also belong to a club", () => {
+    expect(panelHomeDestination("sports_lead", true)).toBe(
+      "/management/sports",
+    );
+    expect(panelHomeDestination("club_lead", false)).toBe("/club-management");
+    expect(panelHomeDestination("editor", false)).toBe("/management");
   });
 
   it("keeps food committee and full operations destinations separate", () => {

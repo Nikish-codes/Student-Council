@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { asc } from "drizzle-orm";
-import { ChevronDown, ChevronUp, CornerDownRight, MoveHorizontal } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  CornerDownRight,
+  MoveHorizontal,
+} from "lucide-react";
 import { db } from "@/db/client";
 import { councilGroups as t, councilMembers as m } from "@/db/schema";
 import { requireOps, isAdmin } from "@/lib/rbac";
@@ -45,8 +50,8 @@ export default async function CouncilGroupsPage() {
         Sections are the headings on <span className="text-ink">/council</span>,
         top to bottom. A section with a parent is nested under it — that&rsquo;s
         how The Board shows large VP cards and then smaller officer cards under
-        one heading. Deleting a section never deletes its people; they fall back
-        to an ungrouped &ldquo;The team&rdquo; block until reassigned.
+        one heading. Deleting a section never deletes its people; they stay
+        saved but leave the public Council page until reassigned.
       </p>
 
       <div className="overflow-hidden rounded-2xl border border-line/10">
@@ -108,7 +113,7 @@ export default async function CouncilGroupsPage() {
                     {admin ? (
                       <DeleteButton
                         action={deleteCouncilGroup.bind(null, g.id)}
-                        confirmText={`Delete "${g.title}"? Its members stay on the site but become ungrouped.`}
+                        confirmText={`Delete "${g.title}"? Its people remain saved but leave the public Council page until reassigned.`}
                       />
                     ) : null}
                   </div>

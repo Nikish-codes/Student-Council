@@ -5,7 +5,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { CouncilGroupPhoto } from "@/components/sections/council-group-photo";
 import { CouncilShowcase } from "@/components/sections/council-showcase";
 import {
-  getCouncil,
+  getCouncilPageMembers,
   getCouncilGroupPhoto,
   getCouncilSections,
   getFaqs,
@@ -23,7 +23,7 @@ export const revalidate = 60;
 
 export default async function CouncilPage() {
   const [members, president, sections, faqs, groupPhoto] = await Promise.all([
-    getCouncil(),
+    getCouncilPageMembers(),
     getPresident(),
     getCouncilSections(),
     getFaqs("council"),

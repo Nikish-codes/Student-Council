@@ -9,7 +9,7 @@ import {
   type SportMatchEvent,
   type SportPostMatch,
 } from "@/db/schema";
-import { requireOps } from "@/lib/rbac";
+import { requireSportsManager } from "@/lib/rbac";
 import { EditorShell, Fieldset } from "@/components/management/page-header";
 import {
   TextField,
@@ -28,7 +28,7 @@ export default async function MatchEditor({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireOps();
+  await requireSportsManager();
   const { id } = await params;
   const isNew = id === "new";
 

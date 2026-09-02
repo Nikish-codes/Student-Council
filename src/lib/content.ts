@@ -147,6 +147,17 @@ export const getCouncil = cache(async (): Promise<CouncilMember[]> => {
   }));
 });
 
+/** People intentionally placed on the public Council page. Club-only profiles
+ * stay available to their club page without inflating Council/homepage counts. */
+export const getCouncilPageMembers = cache(
+  async (): Promise<CouncilMember[]> => {
+    const members = await getCouncil();
+    return members.filter(
+      (member) => member.memberType === "president" || Boolean(member.groupId),
+    );
+  },
+);
+
 /** A member as the page renders them: with the co-leads working under them. */
 export type CouncilMemberWithCoLeads = CouncilMember & {
   coLeads: CouncilMember[];
@@ -166,8 +177,9 @@ const LAYOUTS: CouncilGroupLayout[] = ["grid", "hscroll"];
  * members and sub-sections (the Board's VP / officer tiers). The president is
  * excluded — they get the takeover, not a card.
  *
- * Members whose group was deleted or never set are collected into a synthetic
- * trailing section so nobody silently disappears from the page.
+ * Only members assigned to a Council section appear here. Ungrouped profiles
+ * may belong exclusively to an individual club page and must not leak into a
+ * generic Council section.
  *
  * Co-leads are deliberately NOT placed in any section — they hang off their
  * lead (see src/lib/council.ts) and surface only in that lead's expanded card.
@@ -201,7 +213,6 @@ export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
   });
 
   const byGroup = new Map<string, CouncilMemberWithCoLeads[]>();
-  const ungrouped: CouncilMemberWithCoLeads[] = [];
   for (const m of members) {
     // The president gets the full-width takeover — never a card.
     if (m.memberType === "president") continue;
@@ -210,10 +221,7 @@ export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
     // section so they render as normal cards on the page too.
     if (m.memberType === "co_lead" && !m.groupId) continue;
     const entry = withCoLeads(m);
-    if (!m.groupId) {
-      ungrouped.push(entry);
-      continue;
-    }
+    if (!m.groupId) continue;
     const list = byGroup.get(m.groupId);
     if (list) list.push(entry);
     else byGroup.set(m.groupId, [entry]);
@@ -232,31 +240,6 @@ export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
   // Anything pointing at a missing parent would otherwise never render.
   const orphaned = groups.filter((g) => g.parentId && !known.has(g.parentId));
   sections.push(...orphaned.map(build));
-
-  const strays = [
-    ...ungrouped,
-    ...members
-      .filter(
-        (m) =>
-          m.memberType !== "president" &&
-          !(m.memberType === "co_lead" && !m.groupId) &&
-          m.groupId &&
-          !known.has(m.groupId),
-      )
-      .map(withCoLeads),
-  ];
-  if (strays.length > 0) {
-    sections.push({
-      id: "ungrouped",
-      title: "The team",
-      perRow: 4,
-      cardSize: "md",
-      layout: "grid",
-      order: 999,
-      members: strays,
-      children: [],
-    });
-  }
 
   return sections;
 });

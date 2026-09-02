@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sportsTournaments as t } from "@/db/schema";
-import { requireOps, canPublish } from "@/lib/rbac";
+import { requireSportsManager, canPublishSports } from "@/lib/rbac";
 import { mediaOptions } from "@/lib/media-options";
 import { EditorShell, Fieldset } from "@/components/management/page-header";
 import {
@@ -26,17 +26,19 @@ export default async function TournamentEditor({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await requireOps();
+  const user = await requireSportsManager();
   const { id } = await params;
   const isNew = id === "new";
 
   const [row, media] = await Promise.all([
-    isNew ? null : db.query.sportsTournaments.findFirst({ where: eq(t.id, Number(id)) }),
+    isNew
+      ? null
+      : db.query.sportsTournaments.findFirst({ where: eq(t.id, Number(id)) }),
     mediaOptions(),
   ]);
   if (!isNew && !row) notFound();
   const action = saveTournament.bind(null, isNew ? null : Number(id));
-  const publisher = canPublish(user.role);
+  const publisher = canPublishSports(user.role);
 
   return (
     <EditorShell
@@ -46,8 +48,20 @@ export default async function TournamentEditor({
     >
       <Fieldset title="Basics" hint="What this tournament is and when it runs.">
         <div className="grid gap-5 sm:grid-cols-2">
-          <TextField name="title" label="Title" required maxLength={80} defaultValue={row?.title} />
-          <TextField name="slug" label="Slug" hint="auto if blank" defaultValue={row?.slug} placeholder="auto from title" />
+          <TextField
+            name="title"
+            label="Title"
+            required
+            maxLength={80}
+            defaultValue={row?.title}
+          />
+          <TextField
+            name="slug"
+            label="Slug"
+            hint="auto if blank"
+            defaultValue={row?.slug}
+            placeholder="auto from title"
+          />
         </div>
         <div className="grid gap-5 sm:grid-cols-3">
           <SelectField
@@ -71,20 +85,56 @@ export default async function TournamentEditor({
             defaultValue={row?.year ?? new Date().getFullYear()}
           />
         </div>
-        <TextField name="venue" label="Venue" hint="optional" defaultValue={row?.venue} />
+        <TextField
+          name="venue"
+          label="Venue"
+          hint="optional"
+          defaultValue={row?.venue}
+        />
         <div className="grid gap-5 sm:grid-cols-2">
-          <DateTimeField name="startDate" label="Start date" hint="when the tournament begins" defaultValue={row?.startDate} />
-          <DateTimeField name="endDate" label="End date" hint="when it wraps up" defaultValue={row?.endDate} />
+          <DateTimeField
+            name="startDate"
+            label="Start date"
+            hint="when the tournament begins"
+            defaultValue={row?.startDate}
+          />
+          <DateTimeField
+            name="endDate"
+            label="End date"
+            hint="when it wraps up"
+            defaultValue={row?.endDate}
+          />
         </div>
       </Fieldset>
 
       <Fieldset title="Page" hint="Banner, excerpt, and full description.">
-        <MediaField name="bannerId" label="Banner image" hint="16:9 or wider recommended" defaultValue={row?.bannerId ?? null} media={media} />
-        <TextField name="excerpt" label="Excerpt" hint="one line · shows on the list" maxLength={200} defaultValue={row?.excerpt} />
-        <TextAreaField name="description" label="Description" hint="markdown · full detail on the tournament page" rows={6} defaultValue={row?.description} />
+        <MediaField
+          name="bannerId"
+          label="Banner image"
+          hint="16:9 or wider recommended"
+          defaultValue={row?.bannerId ?? null}
+          media={media}
+        />
+        <TextField
+          name="excerpt"
+          label="Excerpt"
+          hint="one line · shows on the list"
+          maxLength={200}
+          defaultValue={row?.excerpt}
+        />
+        <TextAreaField
+          name="description"
+          label="Description"
+          hint="markdown · full detail on the tournament page"
+          rows={6}
+          defaultValue={row?.description}
+        />
       </Fieldset>
 
-      <Fieldset title="Publishing" hint="Status, featured flag, and visibility.">
+      <Fieldset
+        title="Publishing"
+        hint="Status, featured flag, and visibility."
+      >
         <SelectField
           name="status"
           label="Status"
@@ -100,7 +150,11 @@ export default async function TournamentEditor({
               : []),
           ]}
         />
-        <CheckboxField name="featured" label="Featured on the sports page" defaultChecked={row?.featured ?? false} />
+        <CheckboxField
+          name="featured"
+          label="Featured on the sports page"
+          defaultChecked={row?.featured ?? false}
+        />
       </Fieldset>
 
       <SaveBar label={publisher ? "Save" : "Save / submit for review"} />

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sportsTeams as t } from "@/db/schema";
-import { requireOps, requireRole } from "@/lib/rbac";
+import { requireSportsDelete, requireSportsManager } from "@/lib/rbac";
 import { uniqueSlug, slugify } from "@/lib/slug";
 
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
@@ -22,7 +22,7 @@ function bust() {
 }
 
 export async function saveTeam(id: number | null, fd: FormData) {
-  await requireOps();
+  await requireSportsManager();
   const base = {
     name: s(fd, "name"),
     logoId: s(fd, "logoId") ? Number(s(fd, "logoId")) : null,
@@ -52,7 +52,7 @@ export async function saveTeam(id: number | null, fd: FormData) {
 }
 
 export async function deleteTeam(id: number) {
-  await requireRole("super_admin", "admin");
+  await requireSportsDelete();
   await db.delete(t).where(eq(t.id, id));
   bust();
 }

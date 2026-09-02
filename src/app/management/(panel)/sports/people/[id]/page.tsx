@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sportsPeople as t } from "@/db/schema";
-import { requireOps } from "@/lib/rbac";
+import { requireSportsManager } from "@/lib/rbac";
 import { mediaOptions } from "@/lib/media-options";
 import { EditorShell, Fieldset } from "@/components/management/page-header";
 import {
@@ -13,9 +13,7 @@ import {
   MediaField,
   SaveBar,
 } from "@/components/management/fields";
-import {
-  SPORT_TYPE_OPTIONS,
-} from "@/lib/sports-options";
+import { SPORT_TYPE_OPTIONS } from "@/lib/sports-options";
 import { savePerson } from "../actions";
 
 export default async function PersonEditor({
@@ -23,12 +21,14 @@ export default async function PersonEditor({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireOps();
+  await requireSportsManager();
   const { id } = await params;
   const isNew = id === "new";
 
   const [row, media] = await Promise.all([
-    isNew ? null : db.query.sportsPeople.findFirst({ where: eq(t.id, Number(id)) }),
+    isNew
+      ? null
+      : db.query.sportsPeople.findFirst({ where: eq(t.id, Number(id)) }),
     mediaOptions(),
   ]);
   if (!isNew && !row) notFound();
@@ -42,10 +42,27 @@ export default async function PersonEditor({
     >
       <Fieldset title="Identity" hint="Sports alumni or representative.">
         <div className="grid gap-5 sm:grid-cols-2">
-          <TextField name="name" label="Name" required defaultValue={row?.name} />
-          <TextField name="slug" label="Slug" hint="auto if blank" defaultValue={row?.slug} placeholder="auto from name" />
+          <TextField
+            name="name"
+            label="Name"
+            required
+            defaultValue={row?.name}
+          />
+          <TextField
+            name="slug"
+            label="Slug"
+            hint="auto if blank"
+            defaultValue={row?.slug}
+            placeholder="auto from name"
+          />
         </div>
-        <MediaField name="photoId" label="Photo" hint="portrait · 1:1 or 4:5" defaultValue={row?.photoId ?? null} media={media} />
+        <MediaField
+          name="photoId"
+          label="Photo"
+          hint="portrait · 1:1 or 4:5"
+          defaultValue={row?.photoId ?? null}
+          media={media}
+        />
         <SelectField
           name="role"
           label="Role"
@@ -59,9 +76,22 @@ export default async function PersonEditor({
       </Fieldset>
 
       <Fieldset title="Details" hint="Optional — show what you fill in.">
-        <TextAreaField name="bio" label="Bio" hint="short paragraph" rows={4} defaultValue={row?.bio} />
+        <TextAreaField
+          name="bio"
+          label="Bio"
+          hint="short paragraph"
+          rows={4}
+          defaultValue={row?.bio}
+        />
         <div className="grid gap-5 sm:grid-cols-3">
-          <NumberField name="graduationYear" label="Graduation year" hint="optional" min={2000} max={2100} defaultValue={row?.graduationYear ?? null} />
+          <NumberField
+            name="graduationYear"
+            label="Graduation year"
+            hint="optional"
+            min={2000}
+            max={2100}
+            defaultValue={row?.graduationYear ?? null}
+          />
           <SelectField
             name="sport"
             label="Sport"
@@ -69,7 +99,14 @@ export default async function PersonEditor({
             defaultValue={row?.sport ?? ""}
             options={[{ value: "", label: "— none —" }, ...SPORT_TYPE_OPTIONS]}
           />
-          <NumberField name="sortOrder" label="Sort order" hint="lower = higher" min={0} max={999} defaultValue={row?.sortOrder ?? 99} />
+          <NumberField
+            name="sortOrder"
+            label="Sort order"
+            hint="lower = higher"
+            min={0}
+            max={999}
+            defaultValue={row?.sortOrder ?? 99}
+          />
         </div>
       </Fieldset>
 

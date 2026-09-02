@@ -7,32 +7,42 @@ import {
   sportsTeams as teamT,
   sportsPeople as peopleT,
 } from "@/db/schema";
-import { requireOps } from "@/lib/rbac";
+import { requireSportsManager } from "@/lib/rbac";
 
 export default async function SportsDashboard() {
-  await requireOps();
-  const [
-    tournaments,
-    leagues,
-    matches,
-    teams,
-    people,
-    liveMatches,
-  ] = await Promise.all([
-    db.query.sportsTournaments.findMany({ orderBy: desc(tourT.id) }),
-    db.query.sportsLeagues.findMany({ orderBy: desc(leagueT.id) }),
-    db.query.sportsMatches.findMany({ orderBy: desc(matchT.id) }),
-    db.query.sportsTeams.findMany({ orderBy: desc(teamT.id) }),
-    db.query.sportsPeople.findMany({ orderBy: desc(peopleT.id) }),
-    db.query.sportsMatches.findMany({ where: eq(matchT.status, "live") }),
-  ]);
+  await requireSportsManager();
+  const [tournaments, leagues, matches, teams, people, liveMatches] =
+    await Promise.all([
+      db.query.sportsTournaments.findMany({ orderBy: desc(tourT.id) }),
+      db.query.sportsLeagues.findMany({ orderBy: desc(leagueT.id) }),
+      db.query.sportsMatches.findMany({ orderBy: desc(matchT.id) }),
+      db.query.sportsTeams.findMany({ orderBy: desc(teamT.id) }),
+      db.query.sportsPeople.findMany({ orderBy: desc(peopleT.id) }),
+      db.query.sportsMatches.findMany({ where: eq(matchT.status, "live") }),
+    ]);
 
   const stats = [
-    { label: "Tournaments", count: tournaments.length, href: "/management/sports/tournaments" },
-    { label: "Leagues", count: leagues.length, href: "/management/sports/leagues" },
-    { label: "Matches", count: matches.length, href: "/management/sports/matches" },
+    {
+      label: "Tournaments",
+      count: tournaments.length,
+      href: "/management/sports/tournaments",
+    },
+    {
+      label: "Leagues",
+      count: leagues.length,
+      href: "/management/sports/leagues",
+    },
+    {
+      label: "Matches",
+      count: matches.length,
+      href: "/management/sports/matches",
+    },
     { label: "Teams", count: teams.length, href: "/management/sports/teams" },
-    { label: "People", count: people.length, href: "/management/sports/people" },
+    {
+      label: "People",
+      count: people.length,
+      href: "/management/sports/people",
+    },
   ];
 
   return (
@@ -47,7 +57,8 @@ export default async function SportsDashboard() {
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
             <span className="kicker text-accent">
-              {liveMatches.length} live match{liveMatches.length > 1 ? "es" : ""}
+              {liveMatches.length} live match
+              {liveMatches.length > 1 ? "es" : ""}
             </span>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -72,7 +83,9 @@ export default async function SportsDashboard() {
             className="group rounded-2xl border border-line/15 bg-surface-2 p-5 transition-colors hover:border-line/40"
           >
             <span className="kicker text-subtle">{s.label}</span>
-            <div className="mt-2 display text-4xl tabular-nums text-ink">{s.count}</div>
+            <div className="mt-2 display text-4xl tabular-nums text-ink">
+              {s.count}
+            </div>
             <span className="mt-1 block text-xs text-subtle group-hover:text-muted">
               View all →
             </span>

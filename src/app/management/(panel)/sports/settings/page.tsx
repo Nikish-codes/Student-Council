@@ -1,17 +1,13 @@
 import { db } from "@/db/client";
-import { requireOps } from "@/lib/rbac";
+import { requireSportsManager } from "@/lib/rbac";
 import { mediaOptions } from "@/lib/media-options";
 import { EditorShell, Fieldset } from "@/components/management/page-header";
-import {
-  TextField,
-  MediaField,
-  SaveBar,
-} from "@/components/management/fields";
+import { TextField, MediaField, SaveBar } from "@/components/management/fields";
 import { GalleryPicker } from "./gallery-picker";
 import { saveSportsSettings } from "./actions";
 
 export default async function SportsSettingsPage() {
-  await requireOps();
+  await requireSportsManager();
   const [config, media] = await Promise.all([
     db.query.sportsPageConfig.findFirst(),
     mediaOptions(),
@@ -28,7 +24,10 @@ export default async function SportsSettingsPage() {
       title="Sports page settings"
       action={action}
     >
-      <Fieldset title="Branding" hint="Academy logo + tagline shown on the /sports page.">
+      <Fieldset
+        title="Branding"
+        hint="Academy logo + tagline shown on the /sports page."
+      >
         <MediaField
           name="academyLogoId"
           label="Academy logo"
@@ -45,7 +44,10 @@ export default async function SportsSettingsPage() {
         />
       </Fieldset>
 
-      <Fieldset title="Gallery" hint="Images that scroll in the top marquee on /sports.">
+      <Fieldset
+        title="Gallery"
+        hint="Images that scroll in the top marquee on /sports."
+      >
         <GalleryPicker media={media} selectedIds={galleryIds} />
       </Fieldset>
 

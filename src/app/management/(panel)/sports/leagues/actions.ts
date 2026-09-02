@@ -5,7 +5,11 @@ import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sportsLeagues as t, type SportStandingRow } from "@/db/schema";
-import { requireOps, requireRole, canPublish } from "@/lib/rbac";
+import {
+  requireSportsDelete,
+  requireSportsManager,
+  canPublishSports,
+} from "@/lib/rbac";
 import { uniqueSlug, slugify } from "@/lib/slug";
 import type {
   SportType,
@@ -30,14 +34,15 @@ function json<T>(fd: FormData, k: string, fallback: T): T {
 
 function resolveStatus(
   requested: string,
-  role: Parameters<typeof canPublish>[0],
+  role: Parameters<typeof canPublishSports>[0],
 ): SportCompetitionStatus {
   const status = (
     ["draft", "pending_review", "published", "archived"].includes(requested)
       ? requested
       : "draft"
   ) as SportCompetitionStatus;
-  if (status === "published" && !canPublish(role)) return "pending_review";
+  if (status === "published" && !canPublishSports(role))
+    return "pending_review";
   return status;
 }
 
@@ -80,7 +85,7 @@ function bust(...slugs: (string | undefined)[]) {
 }
 
 export async function saveLeague(id: number | null, fd: FormData) {
-  const user = await requireOps();
+  const user = await requireSportsManager();
   const sport = (
     SPORTS.includes(s(fd, "sport") as SportType) ? s(fd, "sport") : "football"
   ) as SportType;
@@ -148,7 +153,7 @@ export async function saveLeague(id: number | null, fd: FormData) {
 }
 
 export async function deleteLeague(id: number) {
-  await requireRole("super_admin", "admin");
+  await requireSportsDelete();
   const existing = await db.query.sportsLeagues.findFirst({
     where: eq(t.id, id),
     columns: { slug: true },

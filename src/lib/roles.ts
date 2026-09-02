@@ -4,6 +4,7 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   super_admin: "Super Admin",
   operations: "Operations",
   admin: "Admin",
+  sports_lead: "Sports Lead",
   food_committee_member: "Food Committee Member",
   council_member: "Council Member",
   club_lead: "Club President / Lead",

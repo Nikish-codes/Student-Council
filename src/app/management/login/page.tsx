@@ -5,21 +5,22 @@ import { LoginForm } from "./login-form";
 import { db } from "@/db/client";
 import { and, eq } from "drizzle-orm";
 import { clubMemberships } from "@/db/schema";
+import { panelHomeDestination } from "@/lib/panel-access";
 
 export const metadata: Metadata = { title: "Sign in · Management" };
 
 export default async function ManagementLoginPage() {
   const session = await auth();
   if (session?.user) {
-    if (session.user.mustChangePassword) redirect("/management/change-password");
+    if (session.user.mustChangePassword)
+      redirect("/management/change-password");
     const membership = await db.query.clubMemberships.findFirst({
       where: and(
         eq(clubMemberships.userId, Number(session.user.id)),
         eq(clubMemberships.isActive, true),
       ),
     });
-    if (session.user.role === "club_lead" || membership) redirect("/club-management");
-    redirect("/management");
+    redirect(panelHomeDestination(session.user.role, Boolean(membership)));
   }
 
   return (

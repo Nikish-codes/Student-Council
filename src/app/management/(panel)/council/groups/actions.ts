@@ -14,8 +14,8 @@ const LAYOUTS = ["grid", "hscroll"] as const;
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 
 function bust() {
-  ["/council", "/management/council", "/management/council/groups"].forEach((p) =>
-    revalidatePath(p),
+  ["/council", "/management/council", "/management/council/groups"].forEach(
+    (p) => revalidatePath(p),
   );
 }
 
@@ -68,8 +68,8 @@ export async function saveCouncilGroup(id: number | null, fd: FormData) {
 /**
  * Deleting a section does NOT delete the people in it: members are detached
  * (group_id → null) and any sub-groups are promoted to top level, so the page
- * still renders everyone. Detached members show up under the trailing
- * "The team" section until they're reassigned.
+ * keeps every profile saved. Detached members stop appearing on the public
+ * Council page until they are assigned to another section.
  */
 export async function deleteCouncilGroup(id: number) {
   await requireRole("super_admin", "admin");

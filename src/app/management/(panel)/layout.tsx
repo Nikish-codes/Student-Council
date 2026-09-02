@@ -16,7 +16,11 @@ const SHARED_NAV: NavGroup[] = [
     items: [
       { href: "/management/events", label: "Events", icon: "Calendar" },
       { href: "/management/recaps", label: "Recaps", icon: "Film" },
-      { href: "/management/announcements", label: "Announcements", icon: "Megaphone" },
+      {
+        href: "/management/announcements",
+        label: "Announcements",
+        icon: "Megaphone",
+      },
       { href: "/management/highlights", label: "Highlights", icon: "Sparkles" },
     ],
   },
@@ -24,9 +28,17 @@ const SHARED_NAV: NavGroup[] = [
     label: "Organisation",
     items: [
       { href: "/management/clubs", label: "Clubs", icon: "Building2" },
-      { href: "/management/clubs/categories", label: "Club categories", icon: "Tags" },
+      {
+        href: "/management/clubs/categories",
+        label: "Club categories",
+        icon: "Tags",
+      },
       { href: "/management/council", label: "Council", icon: "Users" },
-      { href: "/management/council/groups", label: "Council sections", icon: "Rows3" },
+      {
+        href: "/management/council/groups",
+        label: "Council sections",
+        icon: "Rows3",
+      },
       { href: "/management/faqs", label: "FAQs", icon: "HelpCircle" },
       { href: "/management/support", label: "Support", icon: "LifeBuoy" },
     ],
@@ -35,12 +47,32 @@ const SHARED_NAV: NavGroup[] = [
     label: "Sports",
     items: [
       { href: "/management/sports", label: "Dashboard", icon: "Trophy" },
-      { href: "/management/sports/tournaments", label: "Tournaments", icon: "Medal" },
-      { href: "/management/sports/leagues", label: "Leagues", icon: "BarChart3" },
-      { href: "/management/sports/matches", label: "Matches", icon: "Activity" },
+      {
+        href: "/management/sports/tournaments",
+        label: "Tournaments",
+        icon: "Medal",
+      },
+      {
+        href: "/management/sports/leagues",
+        label: "Leagues",
+        icon: "BarChart3",
+      },
+      {
+        href: "/management/sports/matches",
+        label: "Matches",
+        icon: "Activity",
+      },
       { href: "/management/sports/teams", label: "Teams", icon: "Shirt" },
-      { href: "/management/sports/people", label: "People", icon: "UserCircle" },
-      { href: "/management/sports/settings", label: "Sports settings", icon: "Settings2" },
+      {
+        href: "/management/sports/people",
+        label: "People",
+        icon: "UserCircle",
+      },
+      {
+        href: "/management/sports/settings",
+        label: "Sports settings",
+        icon: "Settings2",
+      },
     ],
   },
   {
@@ -56,7 +88,11 @@ const ADMIN_NAV: NavGroup[] = [
     label: "Homepage",
     items: [
       { href: "/management/vault", label: "Vault", icon: "GalleryVerticalEnd" },
-      { href: "/management/homepage", label: "Homepage composer", icon: "Home" },
+      {
+        href: "/management/homepage",
+        label: "Homepage composer",
+        icon: "Home",
+      },
     ],
   },
   {
@@ -72,7 +108,11 @@ const REVIEW_NAV: NavGroup[] = [
   {
     label: "Review",
     items: [
-      { href: "/management/approvals", label: "Approvals", icon: "ClipboardCheck" },
+      {
+        href: "/management/approvals",
+        label: "Approvals",
+        icon: "ClipboardCheck",
+      },
     ],
   },
 ];
@@ -97,6 +137,45 @@ const OVAL_NAV: NavGroup[] = [
     label: "Dining",
     items: [
       { href: "/management/oval", label: "Oval menu", icon: "UtensilsCrossed" },
+    ],
+  },
+];
+
+const SPORTS_NAV: NavGroup[] = [
+  {
+    label: "Sports",
+    items: [
+      { href: "/management/sports", label: "Dashboard", icon: "Trophy" },
+      {
+        href: "/management/sports/tournaments",
+        label: "Tournaments",
+        icon: "Medal",
+      },
+      {
+        href: "/management/sports/leagues",
+        label: "Leagues",
+        icon: "BarChart3",
+      },
+      {
+        href: "/management/sports/matches",
+        label: "Matches",
+        icon: "Activity",
+      },
+      {
+        href: "/management/sports/teams",
+        label: "Teams",
+        icon: "Shirt",
+      },
+      {
+        href: "/management/sports/people",
+        label: "People",
+        icon: "UserCircle",
+      },
+      {
+        href: "/management/sports/settings",
+        label: "Sports settings",
+        icon: "Settings2",
+      },
     ],
   },
 ];
@@ -131,15 +210,17 @@ export default async function PanelLayout({
   const groups =
     user.role === "food_committee_member"
       ? OVAL_NAV
-      : user.role === "club_lead"
-        ? clubLeadNav(user.clubId)
-      : user.role === "operations"
-        ? OPERATIONS_NAV
-      : user.role === "super_admin"
-        ? [...REVIEW_NAV, ...SHARED_NAV, ...OVAL_NAV, ...ADMIN_NAV]
-        : isAdmin(user.role)
-          ? [...SHARED_NAV, ...ADMIN_NAV]
-          : SHARED_NAV;
+      : user.role === "sports_lead"
+        ? SPORTS_NAV
+        : user.role === "club_lead"
+          ? clubLeadNav(user.clubId)
+          : user.role === "operations"
+            ? OPERATIONS_NAV
+            : user.role === "super_admin"
+              ? [...REVIEW_NAV, ...SHARED_NAV, ...OVAL_NAV, ...ADMIN_NAV]
+              : isAdmin(user.role)
+                ? [...SHARED_NAV, ...ADMIN_NAV]
+                : SHARED_NAV;
 
   return (
     <div className="min-h-screen bg-bg text-ink">

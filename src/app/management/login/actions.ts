@@ -7,6 +7,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { db } from "@/db/client";
 import { clubMemberships, users } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
+import { panelHomeDestination } from "@/lib/panel-access";
 
 export async function loginAction(
   _prev: string | undefined,
@@ -26,7 +27,9 @@ export async function loginAction(
   }
 
   try {
-    const email = String(formData.get("email") ?? "").trim().toLowerCase();
+    const email = String(formData.get("email") ?? "")
+      .trim()
+      .toLowerCase();
     const account = await db.query.users.findFirst({
       where: eq(users.email, email),
     });
@@ -40,11 +43,7 @@ export async function loginAction(
       : null;
     const redirectTo = account?.mustChangePassword
       ? "/management/change-password"
-      : account?.role === "food_committee_member"
-        ? "/management/oval"
-        : account?.role === "club_lead" || membership
-          ? "/club-management"
-          : "/management";
+      : panelHomeDestination(account?.role, Boolean(membership));
     await signIn("credentials", {
       email,
       password: formData.get("password"),

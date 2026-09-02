@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sportsPeople as t } from "@/db/schema";
-import { requireOps, requireRole } from "@/lib/rbac";
+import { requireSportsDelete, requireSportsManager } from "@/lib/rbac";
 import { uniqueSlug, slugify } from "@/lib/slug";
 
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
@@ -21,7 +21,7 @@ function bust() {
 }
 
 export async function savePerson(id: number | null, fd: FormData) {
-  await requireOps();
+  await requireSportsManager();
   const base = {
     name: s(fd, "name"),
     photoId: optNum(fd, "photoId"),
@@ -37,7 +37,9 @@ export async function savePerson(id: number | null, fd: FormData) {
   };
   let slug: string;
   if (id) {
-    const existing = await db.query.sportsPeople.findFirst({ where: eq(t.id, id) });
+    const existing = await db.query.sportsPeople.findFirst({
+      where: eq(t.id, id),
+    });
     if (!existing) throw new Error("NOT_FOUND");
     const requested = s(fd, "slug");
     slug =
@@ -57,7 +59,7 @@ export async function savePerson(id: number | null, fd: FormData) {
 }
 
 export async function deletePerson(id: number) {
-  await requireRole("super_admin", "admin");
+  await requireSportsDelete();
   await db.delete(t).where(eq(t.id, id));
   bust();
 }

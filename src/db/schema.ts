@@ -65,6 +65,7 @@ export type UserRole =
   | "super_admin"
   | "operations"
   | "admin"
+  | "sports_lead"
   | "food_committee_member"
   | "council_member"
   | "club_lead"
@@ -613,9 +614,8 @@ export const councilMembers = sqliteTable("mp_council_members", {
     .$type<CouncilMemberType>()
     .notNull()
     .default("member"),
-  // Which section of /council this member appears in. Null → ungrouped, which
-  // the page collects into a trailing "The team" section so a member is never
-  // silently dropped just because nobody picked a group for them.
+  // Which section of /council this member appears in. Null means the profile is
+  // not shown there; club-linked profiles can still appear on their club page.
   groupId: integer("group_id").references(() => councilGroups.id),
   // Which club this member runs, if any. Lets /clubs/[slug] show its leads with
   // photo/role/program/LinkedIn without duplicating any of that onto mp_clubs —

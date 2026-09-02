@@ -1,12 +1,12 @@
 import { desc } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sportsTournaments as t } from "@/db/schema";
-import { requireOps } from "@/lib/rbac";
+import { requireSportsManager } from "@/lib/rbac";
 import { PageHeader } from "@/components/management/page-header";
 import { TournamentsTable } from "./tournaments-table";
 
 export default async function TournamentsPage() {
-  await requireOps();
+  await requireSportsManager();
   const rows = await db.query.sportsTournaments.findMany({
     orderBy: [desc(t.year), desc(t.id)],
   });

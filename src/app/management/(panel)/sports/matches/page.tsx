@@ -1,12 +1,12 @@
 import { desc } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sportsMatches as t } from "@/db/schema";
-import { requireOps } from "@/lib/rbac";
+import { requireSportsManager } from "@/lib/rbac";
 import { PageHeader } from "@/components/management/page-header";
 import { MatchesTable } from "./matches-table";
 
 export default async function MatchesPage() {
-  await requireOps();
+  await requireSportsManager();
   const rows = await db.query.sportsMatches.findMany({
     with: { teamA: true, teamB: true },
     orderBy: [desc(t.id)],

@@ -1,12 +1,12 @@
 import { desc } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sportsLeagues as t } from "@/db/schema";
-import { requireOps } from "@/lib/rbac";
+import { requireSportsManager } from "@/lib/rbac";
 import { PageHeader } from "@/components/management/page-header";
 import { LeaguesTable } from "./leagues-table";
 
 export default async function LeaguesPage() {
-  await requireOps();
+  await requireSportsManager();
   const rows = await db.query.sportsLeagues.findMany({
     orderBy: [desc(t.year), desc(t.id)],
   });
