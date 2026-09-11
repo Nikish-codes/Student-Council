@@ -119,6 +119,10 @@ const nextConfig: NextConfig = {
     imageSizes: [64, 96, 128, 256, 384, 512],
     minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
+      // R2 media custom domain (bucket served by Cloudflare).
+      { protocol: "https", hostname: "media.woxsenstudentcouncil.in" },
+      // Legacy r2.dev sources sprinkled in older content. Kept so nothing 404s
+      // while rows are migrated; delete once the DB has zero r2.dev URLs.
       {
         protocol: "https",
         hostname: "pub-88f0a7c5d200469fa7dbb8f90c605d45.r2.dev",
