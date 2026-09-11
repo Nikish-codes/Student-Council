@@ -31,6 +31,7 @@ export function matchesClubSearch(
 
 export const CLUB_APPLY_LIMIT = 3;
 export const CLUB_APPLY_STORAGE_KEY = "clubsignup:applies:v1";
+export const CLUB_APPLY_CONFIRM_KEY = "clubsignup:confirm-opened:v1";
 
 export type ClubApplyEntry = { slug: string; name: string; at: number };
 

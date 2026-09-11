@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Check,
   CircleAlert,
@@ -11,6 +11,7 @@ import {
 import { Picture } from "@/components/ui/picture";
 import type { Club, ClubCategory } from "@/lib/schemas";
 import {
+  CLUB_APPLY_CONFIRM_KEY,
   CLUB_APPLY_LIMIT,
   CLUB_APPLY_STORAGE_KEY,
   clubApplyState,
@@ -40,8 +41,15 @@ export function ClubSignupDirectory({
   const [category, setCategory] = useState("");
   const [readyOnly, setReadyOnly] = useState(false);
   const [applies, setApplies] = useState<ClubApplyEntry[]>([]);
+  const [confirmSeen, setConfirmSeen] = useState(false);
+  const [pending, setPending] = useState<Club | null>(null);
   useEffect(() => {
     setApplies(readApplies());
+    try {
+      setConfirmSeen(localStorage.getItem(CLUB_APPLY_CONFIRM_KEY) === "1");
+    } catch {
+      return;
+    }
   }, []);
   const limitReached = applies.length >= CLUB_APPLY_LIMIT;
   const applyToClub = (club: Club) => {
@@ -56,6 +64,37 @@ export function ClubSignupDirectory({
       return;
     }
     setApplies(next);
+  };
+  const onApplyClick = (club: Club, event: React.MouseEvent) => {
+    if (confirmSeen) {
+      applyToClub(club);
+      return;
+    }
+    event.preventDefault();
+    setPending(club);
+  };
+  const cancelPending = useCallback(() => setPending(null), []);
+  useEffect(() => {
+    if (!pending) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPending(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [pending]);
+  const confirmPending = () => {
+    const club = pending;
+    cancelPending();
+    if (!club) return;
+    try {
+      localStorage.setItem(CLUB_APPLY_CONFIRM_KEY, "1");
+    } catch {
+      return;
+    }
+    setConfirmSeen(true);
+    applyToClub(club);
+    const link = registrationLink(club.joinUrl);
+    if (link) window.location.assign(link);
   };
   const visible = clubs
     .filter(
@@ -167,6 +206,10 @@ export function ClubSignupDirectory({
             </span>
           )}
         </p>
+        <p className="mt-1.5 text-[11px] leading-relaxed text-muted sm:text-xs">
+          Nothing is submitted on this page. Each club&rsquo;s form does its own
+          submitting.
+        </p>
       </div>
       {visible.length ? (
         <div className="grid gap-3 pt-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -175,7 +218,7 @@ export function ClubSignupDirectory({
             return (
               <article
                 key={club.slug}
-                className="grid grid-cols-[2.5rem_minmax(0,1fr)] content-start gap-x-3 gap-y-1.5 rounded-xl border border-line/10 bg-surface/40 p-3"
+                className="relative grid grid-cols-[2.5rem_minmax(0,1fr)] content-start gap-x-3 gap-y-1.5 rounded-xl border border-line/10 bg-surface/40 p-3"
               >
                 <div className="row-span-2 h-10 w-10 overflow-hidden rounded-lg bg-surface-2">
                   <Picture
@@ -200,10 +243,11 @@ export function ClubSignupDirectory({
                     clubApplyState(applies, club.slug) === "applied" ? (
                       <a
                         href={link}
-                        aria-label={`Applied to ${club.name} (reopen the form)`}
+                        title="You used one of your chances. Nothing was submitted here; each club's form has its own Submit button."
+                        aria-label={`Form opened for ${club.name}. Reopen the form.`}
                         className="inline-flex min-h-8 shrink-0 items-center gap-1 rounded-md border border-accent/40 bg-accent/10 px-2 text-xs font-semibold text-accent transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
                       >
-                        Applied <Check aria-hidden className="h-3 w-3" />
+                        Form opened <Check aria-hidden className="h-3 w-3" />
                       </a>
                     ) : clubApplyState(applies, club.slug) === "blocked" ? (
                       <button
@@ -218,7 +262,7 @@ export function ClubSignupDirectory({
                     ) : (
                       <a
                         href={link}
-                        onClick={() => applyToClub(club)}
+                        onClick={(event) => onApplyClick(club, event)}
                         aria-label={`Apply to ${club.name}`}
                         className="inline-flex min-h-8 shrink-0 items-center gap-1 rounded-md bg-accent px-2 text-xs font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
                       >
@@ -234,6 +278,42 @@ export function ClubSignupDirectory({
                 <p className="col-start-2 break-words text-xs leading-relaxed text-muted sm:text-sm">
                   {club.blurb}
                 </p>
+                {pending?.slug === club.slug && (
+                  <div
+                    role="dialog"
+                    aria-label={`Confirm opening the ${club.name} signup form`}
+                    className="absolute left-2 right-2 top-14 z-30 rounded-xl border border-line/20 bg-surface p-3 shadow-lg shadow-black/25"
+                  >
+                    <p className="text-xs font-semibold sm:text-sm">
+                      Open the {club.name} form?
+                    </p>
+                    <p className="mt-1 text-[11px] leading-relaxed text-muted sm:text-xs">
+                      This opens {club.name}&rsquo;s form and uses 1 of your
+                      chances. Only the club&rsquo;s own form submits anything.
+                    </p>
+                    <div className="mt-2.5 grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        autoFocus
+                        onClick={confirmPending}
+                        className="inline-flex min-h-9 items-center justify-center gap-1 rounded-lg bg-accent px-3 text-xs font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+                      >
+                        Open form <ArrowUpRight aria-hidden className="h-3 w-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={cancelPending}
+                        className="inline-flex min-h-9 items-center justify-center rounded-lg border border-line/20 px-3 text-xs font-medium transition-colors hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    <p className="mt-2 text-[11px] leading-relaxed text-muted">
+                      Asked once per device. Cancel opens nothing and spends
+                      nothing.
+                    </p>
+                  </div>
+                )}
               </article>
             );
           })}
