@@ -38,7 +38,7 @@ function json<T>(fd: FormData, k: string, fallback: T): T {
 }
 
 function bust(...slugs: (string | undefined)[]) {
-  ["/", "/clubs", "/management/clubs", "/management/clubs/categories"].forEach(
+  ["/", "/clubs", "/clubsignup", "/management/clubs", "/management/clubs/categories"].forEach(
     (p) => revalidatePath(p),
   );
   for (const slug of slugs) if (slug) revalidatePath(`/clubs/${slug}`);

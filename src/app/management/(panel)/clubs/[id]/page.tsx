@@ -28,7 +28,11 @@ import {
 } from "@/components/management/fields";
 import { saveClub } from "../actions";
 
-export default async function ClubEditor({ params }: { params: Promise<{ id: string }> }) {
+export default async function ClubEditor({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const user = await requireClubManager();
   const isLead = user.role === "club_lead";
   const { id } = await params;
@@ -55,7 +59,11 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
   const action = saveClub.bind(null, isNew ? null : Number(id));
 
   return (
-    <EditorShell kicker={isNew ? "New club" : "Edit club"} title={row?.name ?? "Club"} action={action}>
+    <EditorShell
+      kicker={isNew ? "New club" : "Edit club"}
+      title={row?.name ?? "Club"}
+      action={action}
+    >
       {row ? (
         <Link
           href={`/clubs/${row.slug}`}
@@ -68,11 +76,37 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
 
       <Fieldset title="Identity" hint="What shows on the /clubs card.">
         <div className="grid gap-5 sm:grid-cols-2">
-          <TextField name="name" label="Name" required maxLength={60} defaultValue={row?.name} />
-          <TextField name="slug" label="Slug" hint="auto if blank" defaultValue={row?.slug} placeholder="auto from name" />
+          <TextField
+            name="name"
+            label="Name"
+            required
+            maxLength={60}
+            defaultValue={row?.name}
+          />
+          <TextField
+            name="slug"
+            label="Page address"
+            hint="Generated from the club name if left empty"
+            defaultValue={row?.slug}
+            placeholder="e.g. photography-club"
+          />
         </div>
-        <MediaField name="logoId" label="Logo" hint="square · upload or pick" defaultValue={row?.logoId ?? null} media={media} />
-        <TextAreaField name="blurb" label="Blurb" required maxLength={200} rows={2} defaultValue={row?.blurb} />
+        <MediaField
+          name="logoId"
+          label="Logo"
+          hint="square · upload or pick"
+          defaultValue={row?.logoId ?? null}
+          media={media}
+        />
+        <TextAreaField
+          name="blurb"
+          label="Short club description"
+          hint="One sentence shown on club lists and the signup page"
+          required
+          maxLength={200}
+          rows={2}
+          defaultValue={row?.blurb}
+        />
         <SelectField
           name="categoryId"
           label="Category"
@@ -83,7 +117,12 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
             ...cats.map((c) => ({ value: String(c.id), label: c.label })),
           ]}
         />
-        <TagsField name="tags" label="Tags" hint="keywords · not the category" defaultValue={row?.tags} />
+        <TagsField
+          name="tags"
+          label="Tags"
+          hint="keywords · not the category"
+          defaultValue={row?.tags}
+        />
       </Fieldset>
 
       <Fieldset
@@ -136,7 +175,10 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
         </div>
       </Fieldset>
 
-      <Fieldset title="What we run" hint="The activities and events this club is known for.">
+      <Fieldset
+        title="What we run"
+        hint="The activities and events this club is known for."
+      >
         <TextField
           name="flagshipEvent"
           label="Flagship event"
@@ -150,7 +192,12 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
           hint="title + a sentence · rows without a title are dropped"
           columns={[
             { name: "title", label: "Activity" },
-            { name: "description", label: "What happens", type: "textarea", grow: 2 },
+            {
+              name: "description",
+              label: "What happens",
+              type: "textarea",
+              grow: 2,
+            },
           ]}
           defaultValue={(row?.activities as ClubActivity[]) ?? []}
           template={{ title: "", description: "" }}
@@ -180,11 +227,36 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
 
       <Fieldset title="Reach us" hint="Shown in the sidebar of the club page.">
         <div className="grid gap-5 sm:grid-cols-2">
-          <TextField name="joinUrl" label="Join URL" hint="the “Join” button" defaultValue={row?.joinUrl} />
-          <TextField name="instagramUrl" label="Instagram" hint="optional" defaultValue={row?.instagramUrl} />
-          <TextField name="linkedinUrl" label="LinkedIn" hint="optional" defaultValue={row?.linkedinUrl} />
-          <TextField name="websiteUrl" label="Website" hint="optional" defaultValue={row?.websiteUrl} />
-          <TextField name="contactEmail" label="Contact email" hint="optional" defaultValue={row?.contactEmail} />
+          <TextField
+            name="joinUrl"
+            label="Registration link"
+            hint="Paste the link opened by Sign up on /clubsignup"
+            defaultValue={row?.joinUrl}
+          />
+          <TextField
+            name="instagramUrl"
+            label="Instagram"
+            hint="optional"
+            defaultValue={row?.instagramUrl}
+          />
+          <TextField
+            name="linkedinUrl"
+            label="LinkedIn"
+            hint="optional"
+            defaultValue={row?.linkedinUrl}
+          />
+          <TextField
+            name="websiteUrl"
+            label="Website"
+            hint="optional"
+            defaultValue={row?.websiteUrl}
+          />
+          <TextField
+            name="contactEmail"
+            label="Contact email"
+            hint="optional"
+            defaultValue={row?.contactEmail}
+          />
         </div>
         {isLead ? null : (
           <SelectField
@@ -192,7 +264,10 @@ export default async function ClubEditor({ params }: { params: Promise<{ id: str
             label="Club lead account"
             hint="the portal user who may edit this club"
             defaultValue={row?.leadId ? String(row.leadId) : ""}
-            options={[{ value: "", label: "— none —" }, ...leads.map((l) => ({ value: String(l.id), label: l.name }))]}
+            options={[
+              { value: "", label: "— none —" },
+              ...leads.map((l) => ({ value: String(l.id), label: l.name })),
+            ]}
           />
         )}
       </Fieldset>

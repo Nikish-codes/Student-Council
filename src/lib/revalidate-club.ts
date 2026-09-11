@@ -20,6 +20,7 @@ import { clubs as clubsT } from "@/db/schema";
 export async function revalidateClubPages(
   ...clubIds: (number | null | undefined)[]
 ) {
+  revalidatePath("/clubsignup");
   const ids = [...new Set(clubIds.filter((x): x is number => Boolean(x)))];
   if (ids.length === 0) return;
   const rows = await db

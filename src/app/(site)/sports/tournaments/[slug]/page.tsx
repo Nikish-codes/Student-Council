@@ -1,3 +1,4 @@
+import { SportsCompetitionResult } from "@/components/sections/sports-competition-result";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -123,6 +124,7 @@ export default async function TournamentDetail({
         </section>
       )}
 
+      <SportsCompetitionResult result={tournament.result} />
       {/* Matches */}
       <section className="container pb-32">
         <div className="mb-10 border-b border-line/10 pb-10">
@@ -176,7 +178,7 @@ export default async function TournamentDetail({
           </div>
         )}
 
-        {matches.length === 0 && (
+        {matches.length === 0 && !tournament.result?.winnerName && (
           <div className="border-y border-line/10 py-20 text-center">
             <p className="display text-xl text-muted">
               No matches scheduled yet.

@@ -19,6 +19,7 @@
  *    already defined in `src/lib/schemas.ts`.
  */
 import { sql } from "drizzle-orm";
+import type { CompetitionResult } from "@/lib/sports-results";
 import {
   integer,
   sqliteTable,
@@ -832,6 +833,7 @@ export const sportsTournaments = sqliteTable(
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     title: text("title").notNull(),
+    result: text("result", { mode: "json" }).$type<CompetitionResult>(),
     slug: text("slug").notNull(),
     status: text("status")
       .$type<SportCompetitionStatus>()
@@ -864,6 +866,7 @@ export const sportsLeagues = sqliteTable(
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     title: text("title").notNull(),
+    result: text("result", { mode: "json" }).$type<CompetitionResult>(),
     slug: text("slug").notNull(),
     status: text("status")
       .$type<SportCompetitionStatus>()
@@ -925,6 +928,12 @@ export const sportsMatches = sqliteTable(
     leagueId: integer("league_id").references(() => sportsLeagues.id),
     sport: text("sport").$type<SportType>().notNull(),
     round: text("round"), // "Group A", "Quarterfinal", "Matchday 3", …
+    participantType: text("participant_type")
+      .$type<"teams" | "people">()
+      .notNull()
+      .default("teams"),
+    participantAName: text("participant_a_name"),
+    participantBName: text("participant_b_name"),
     teamAId: integer("team_a_id").references(() => sportsTeams.id),
     teamBId: integer("team_b_id").references(() => sportsTeams.id),
     matchDate: text("match_date"),

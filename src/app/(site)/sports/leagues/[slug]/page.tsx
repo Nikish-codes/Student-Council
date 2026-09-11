@@ -1,3 +1,4 @@
+import { SportsCompetitionResult } from "@/components/sections/sports-competition-result";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -136,7 +137,9 @@ export default async function LeagueDetail({
                     Pos
                   </th>
                   <th className="px-4 py-3 text-left font-mono text-xs uppercase tracking-[0.18em] text-subtle">
-                    Team
+                    {league.result?.participantType === "people"
+                      ? "Player"
+                      : "Team"}
                   </th>
                   <th className="px-4 py-3 text-center font-mono text-xs uppercase tracking-[0.18em] text-subtle">
                     P
@@ -190,6 +193,7 @@ export default async function LeagueDetail({
         </section>
       )}
 
+      <SportsCompetitionResult result={league.result} />
       {/* Matches */}
       <section className="container pb-32">
         <div className="mb-10 border-b border-line/10 pb-10">
@@ -243,7 +247,7 @@ export default async function LeagueDetail({
           </div>
         )}
 
-        {matches.length === 0 && (
+        {matches.length === 0 && !league.result?.winnerName && (
           <div className="border-y border-line/10 py-20 text-center">
             <p className="display text-xl text-muted">
               No matches scheduled yet.

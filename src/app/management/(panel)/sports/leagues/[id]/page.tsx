@@ -1,3 +1,5 @@
+import { SportsResultFields } from "@/components/management/sports-result-fields";
+import { SportsCompetitionMatches } from "@/components/management/sports-competition-matches";
 import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
@@ -143,7 +145,7 @@ export default async function LeagueEditor({
           stacked
           columns={[
             { name: "position", label: "Pos", type: "number" },
-            { name: "teamName", label: "Team name" },
+            { name: "teamName", label: "Team or player name" },
             { name: "played", label: "Played", type: "number" },
             { name: "won", label: "Won", type: "number" },
             { name: "lost", label: "Lost", type: "number" },
@@ -189,6 +191,13 @@ export default async function LeagueEditor({
         />
       </Fieldset>
 
+      <SportsResultFields result={row?.result} media={media} />
+      <SportsCompetitionMatches
+        id={row?.id}
+        kind="league"
+        sport={row?.sport ?? "football"}
+        participantType={row?.result?.participantType}
+      />
       <SaveBar label={publisher ? "Save" : "Save / submit for review"} />
     </EditorShell>
   );

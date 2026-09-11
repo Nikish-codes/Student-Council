@@ -219,7 +219,7 @@ export default async function PanelLayout({
             : user.role === "super_admin"
               ? [...REVIEW_NAV, ...SHARED_NAV, ...OVAL_NAV, ...ADMIN_NAV]
               : isAdmin(user.role)
-                ? [...SHARED_NAV, ...ADMIN_NAV]
+                ? [...REVIEW_NAV, ...SHARED_NAV, ...ADMIN_NAV]
                 : SHARED_NAV;
 
   return (

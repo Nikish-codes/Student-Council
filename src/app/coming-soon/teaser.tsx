@@ -99,6 +99,13 @@ export function Teaser() {
 
         <Countdown />
 
+        <a
+          href="/clubsignup"
+          className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 focus-visible:ring-offset-bg"
+        >
+          Sign up for a club
+        </a>
+
         <div className="cs-tag">
           <span className="cs-dot" />
           <span>Launching soon · stay tuned</span>
@@ -117,8 +124,8 @@ export function Teaser() {
 
 const css = `
 .cs-root {
-  position: fixed;
-  inset: 0;
+  position: relative;
+  min-height: 100svh;
   overflow: hidden;
   display: grid;
   place-items: center;

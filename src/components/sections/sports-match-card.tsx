@@ -10,15 +10,18 @@ import { SPORT_LABELS } from "@/lib/schemas";
 const STATUS_LABELS: Record<SportsMatch["status"], string> = {
   scheduled: "Scheduled",
   live: "Live",
-  finished: "Full time",
+  finished: "Finished",
   cancelled: "Cancelled",
 };
 
 export function SportsMatchCard({ match }: { match: SportsMatch }) {
   const matchTime = formatSportsMatchTime(match.matchDate);
-  const hasScore = match.status === "live" || match.status === "finished";
-  const teamAName = match.teamAName || "Team to be confirmed";
-  const teamBName = match.teamBName || "Team to be confirmed";
+  const hasScore =
+    (match.status === "live" || match.status === "finished") &&
+    match.scoreA != null &&
+    match.scoreB != null;
+  const teamAName = match.teamAName || "Participant to be confirmed";
+  const teamBName = match.teamBName || "Participant to be confirmed";
 
   return (
     <article
@@ -97,10 +100,23 @@ export function SportsMatchCard({ match }: { match: SportsMatch }) {
         <TeamIdentity name={teamBName} logo={match.teamBLogo} />
       </div>
 
+      {match.status === "finished" &&
+        (match.postMatch.winnerName || match.postMatch.winnerTitle) && (
+          <div className="border-t border-line/10 px-5 py-4 text-sm sm:px-7">
+            {match.postMatch.winnerName && (
+              <p className="font-medium text-accent">
+                Winner: {match.postMatch.winnerName}
+              </p>
+            )}
+            {match.postMatch.winnerTitle && (
+              <p className="mt-1 text-muted">{match.postMatch.winnerTitle}</p>
+            )}
+          </div>
+        )}
       <footer className="grid bg-surface-2/60 sm:grid-cols-2">
         <div className="px-5 py-4 sm:px-7 sm:py-5">
           <p className="font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-subtle">
-            Kick-off
+            Match date
           </p>
           <p className="mt-1 text-sm font-medium text-muted sm:text-base">
             <time dateTime={match.matchDate}>
@@ -123,7 +139,7 @@ export function SportsMatchCard({ match }: { match: SportsMatch }) {
 }
 
 function TeamIdentity({ name, logo }: { name: string; logo: string }) {
-  const isUnconfirmed = name === "Team to be confirmed";
+  const isUnconfirmed = name === "Participant to be confirmed";
   return (
     <div className="flex min-w-0 flex-col items-center gap-3 sm:gap-4">
       <div className="relative grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-2xl bg-surface-2 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-subtle sm:h-16 sm:w-16">

@@ -119,7 +119,9 @@ export async function requireMediaContributor() {
 }
 export const requireOvalManager = () =>
   requireRole("super_admin", "food_committee_member");
-export const requireReviewer = () => requireRole("super_admin", "operations");
+/** Club submissions may be reviewed by central administrators and Operations. */
+export const requireReviewer = () =>
+  requireRole("super_admin", "operations", "admin");
 
 /**
  * Club leads may only touch events for their own club. Admins/editors/council

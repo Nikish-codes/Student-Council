@@ -11,6 +11,7 @@ import {
 } from "@/db/schema";
 import { requireSportsDelete, requireSportsManager } from "@/lib/rbac";
 import type { SportType, SportMatchStatus } from "@/lib/schemas";
+import { parseMatchParticipants } from "@/lib/sports-results";
 
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 function optNum(fd: FormData, k: string): number | null {
@@ -76,22 +77,45 @@ export async function saveMatch(id: number | null, fd: FormData) {
   ) as SportMatchStatus;
 
   const tournamentId = optNum(fd, "tournamentId");
+  const leagueId = optNum(fd, "leagueId");
+  if (tournamentId && leagueId)
+    throw new Error("Choose a tournament or a league, not both.");
+  const competition = tournamentId
+    ? await db.query.sportsTournaments.findFirst({
+        where: (table, { eq }) => eq(table.id, tournamentId),
+      })
+    : leagueId
+      ? await db.query.sportsLeagues.findFirst({
+          where: (table, { eq }) => eq(table.id, leagueId),
+        })
+      : null;
+  if ((tournamentId || leagueId) && !competition)
+    throw new Error("Competition not found.");
+  const score = (key: string) => {
+    const value = optNum(fd, key);
+    if (value !== null && (!Number.isInteger(value) || value < 0))
+      throw new Error("Scores must be non-negative whole numbers.");
+    return value;
+  };
   const base = {
     tournamentId,
     // A match can have one competition parent. Prefer the tournament if a
     // stale or hand-crafted form submits both values.
-    leagueId: tournamentId ? null : optNum(fd, "leagueId"),
-    sport,
+    leagueId,
+    sport: competition?.sport ?? sport,
     round: s(fd, "round") || null,
-    teamAId: optNum(fd, "teamAId"),
-    teamBId: optNum(fd, "teamBId"),
+    ...parseMatchParticipants(fd),
     matchDate: s(fd, "matchDate") || null,
     venue: s(fd, "venue") || null,
     status,
-    scoreA: optNum(fd, "scoreA"),
-    scoreB: optNum(fd, "scoreB"),
+    scoreA: score("scoreA"),
+    scoreB: score("scoreB"),
     events: json<SportMatchEvent[]>(fd, "events", []),
-    postMatch: json<SportPostMatch>(fd, "postMatch", {}),
+    postMatch: {
+      ...json<SportPostMatch>(fd, "postMatch", {}),
+      winnerName: s(fd, "winnerName").slice(0, 160) || undefined,
+      winnerTitle: s(fd, "winnerTitle").slice(0, 500) || undefined,
+    },
   };
 
   if (id) {
@@ -110,6 +134,14 @@ export async function saveMatch(id: number | null, fd: FormData) {
       .values({ ...base })
       .returning({ id: t.id });
     bust(row.id);
+  }
+  if (tournamentId) {
+    revalidatePath(`/management/sports/tournaments/${tournamentId}`);
+    redirect(`/management/sports/tournaments/${tournamentId}`);
+  }
+  if (leagueId) {
+    revalidatePath(`/management/sports/leagues/${leagueId}`);
+    redirect(`/management/sports/leagues/${leagueId}`);
   }
   redirect("/management/sports/matches");
 }

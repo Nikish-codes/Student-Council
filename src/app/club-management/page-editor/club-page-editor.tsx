@@ -261,7 +261,10 @@ export function ClubPageEditor({
                 onChange={(event) => setTagline(event.target.value)}
               />
             </Field>
-            <Field label="Short introduction">
+            <Field label="Short club description">
+              <p className="mb-2 text-sm text-muted">
+                One sentence shown on club lists and the signup page.
+              </p>
               <textarea
                 className={input}
                 name="blurb"
@@ -296,7 +299,10 @@ export function ClubPageEditor({
                 onValueChange={setCoverId}
               />
             </div>
-            <Field label="Join link">
+            <Field label="Registration link">
+              <p className="mb-2 text-sm text-muted">
+                Paste the link students should open when they tap Sign up.
+              </p>
               <input
                 className={input}
                 name="joinUrl"

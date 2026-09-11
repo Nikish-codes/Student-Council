@@ -11,6 +11,7 @@ import {
   canPublishSports,
 } from "@/lib/rbac";
 import { uniqueSlug, slugify } from "@/lib/slug";
+import { parseCompetitionResult } from "@/lib/sports-results";
 import type {
   SportType,
   SportDivision,
@@ -98,6 +99,7 @@ export async function saveLeague(id: number | null, fd: FormData) {
   const justPublished = id ? false : status === "published";
 
   const base = {
+    result: parseCompetitionResult(fd),
     title: s(fd, "title"),
     sport,
     division,

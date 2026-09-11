@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Reveal } from "@/components/motion/reveal";
 import { ClubsExplorer } from "@/components/sections/clubs-explorer";
 import { getClubCategories, getClubs } from "@/lib/content";
@@ -6,7 +7,7 @@ import { getClubCategories, getClubs } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Student Clubs",
   description:
-    "28 student-run clubs across design, performing arts, professional development, social impact and academics at Woxsen.",
+    "Student-run clubs across design, performing arts, professional development, social impact and academics at Woxsen.",
 };
 
 export default async function ClubsPage() {
@@ -31,6 +32,12 @@ export default async function ClubsPage() {
             Browse by category, or just scroll — they reveal themselves as you
             go.
           </p>
+          <Link
+            href="/clubsignup"
+            className="mt-6 inline-flex min-h-11 items-center rounded-xl border border-accent px-5 text-sm font-semibold text-ink hover:bg-accent/10"
+          >
+            Find a club and sign up
+          </Link>
         </Reveal>
       </section>
 

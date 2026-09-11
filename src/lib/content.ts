@@ -15,6 +15,7 @@ import {
 
 import { db } from "@/db/client";
 import { normalizeAccent } from "@/lib/club-accent";
+import type { CompetitionResult } from "@/lib/sports-results";
 import { attachCoLeads } from "@/lib/council";
 import { isEventPast } from "@/lib/event-status";
 import { hostedByClubWhere } from "@/lib/event-hosts";
@@ -988,6 +989,7 @@ export async function getTicketsByContact(
 // ─────────────── public-facing types ───────────────
 
 export interface SportsTournament {
+  result?: CompetitionResult | null;
   id: number;
   slug: string;
   title: string;
@@ -1063,6 +1065,7 @@ export interface SportsPageConfig {
 // ─────────────── mappers ───────────────
 
 function mapTournament(d: {
+  result?: CompetitionResult | null;
   id: number;
   slug: string;
   title: string;
@@ -1092,6 +1095,7 @@ function mapTournament(d: {
     endDate: d.endDate || undefined,
     banner: mediaUrl(d.banner),
     excerpt: asString(d.excerpt),
+    result: d.result,
     description: asString(d.description),
     featured: d.featured,
     publishedAt: d.publishedAt || undefined,
@@ -1099,6 +1103,7 @@ function mapTournament(d: {
 }
 
 function mapLeague(d: {
+  result?: CompetitionResult | null;
   id: number;
   slug: string;
   title: string;
@@ -1141,6 +1146,8 @@ function mapTeam(d: {
 }
 
 function mapMatch(d: {
+  participantAName?: string | null;
+  participantBName?: string | null;
   id: number;
   tournamentId: number | null;
   leagueId: number | null;
@@ -1183,8 +1190,8 @@ function mapMatch(d: {
     round: d.round || undefined,
     teamAId: d.teamAId ?? undefined,
     teamBId: d.teamBId ?? undefined,
-    teamAName: d.teamA?.name ?? "",
-    teamBName: d.teamB?.name ?? "",
+    teamAName: d.participantAName || d.teamA?.name || "",
+    teamBName: d.participantBName || d.teamB?.name || "",
     teamALogo: mediaUrl(d.teamA?.logo),
     teamBLogo: mediaUrl(d.teamB?.logo),
     competitionTitle: competition?.title ?? "",
@@ -1315,9 +1322,15 @@ export const getSportsMatches = cache(
         tournament: true,
         league: true,
       },
-      orderBy: asc(sportsMatchesT.matchDate),
+      orderBy: [asc(sportsMatchesT.matchDate), asc(sportsMatchesT.id)],
     });
-    let matches = rows.map(mapMatch);
+    let matches = rows
+      .filter(
+        (row) =>
+          (!row.tournamentId || row.tournament?.status === "published") &&
+          (!row.leagueId || row.league?.status === "published"),
+      )
+      .map(mapMatch);
     if (opts?.year) {
       matches = matches.filter(
         (m) =>
@@ -1340,7 +1353,13 @@ export const getSportsMatch = cache(
         league: true,
       },
     });
-    return row ? mapMatch(row) : undefined;
+    if (
+      !row ||
+      (row.tournamentId && row.tournament?.status !== "published") ||
+      (row.leagueId && row.league?.status !== "published")
+    )
+      return undefined;
+    return mapMatch(row);
   },
 );
 

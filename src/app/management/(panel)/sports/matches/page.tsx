@@ -13,8 +13,8 @@ export default async function MatchesPage() {
   });
   const tableRows = rows.map((r) => ({
     id: r.id,
-    teamAName: r.teamA?.name ?? "TBD",
-    teamBName: r.teamB?.name ?? "TBD",
+    teamAName: r.participantAName || r.teamA?.name || "TBD",
+    teamBName: r.participantBName || r.teamB?.name || "TBD",
     sport: r.sport,
     status: r.status,
     matchDate: r.matchDate,

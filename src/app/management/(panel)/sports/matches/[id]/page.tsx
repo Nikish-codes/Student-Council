@@ -25,12 +25,17 @@ import { saveMatch } from "../actions";
 
 export default async function MatchEditor({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   await requireSportsManager();
   const { id } = await params;
   const isNew = id === "new";
+  const query = await searchParams;
+  const preset = (key: string) =>
+    isNew && typeof query[key] === "string" ? (query[key] as string) : "";
 
   const [row, teams, tournaments, leagues] = await Promise.all([
     isNew
@@ -65,7 +70,7 @@ export default async function MatchEditor({
       title={
         isNew
           ? "New match"
-          : `${row?.teamA?.name ?? "Team A"} vs ${row?.teamB?.name ?? "Team B"}`
+          : `${row?.participantAName || row?.teamA?.name || "Participant A"} vs ${row?.participantBName || row?.teamB?.name || "Participant B"}`
       }
       action={action}
     >
@@ -74,13 +79,13 @@ export default async function MatchEditor({
           <SelectField
             name="sport"
             label="Sport"
-            defaultValue={row?.sport ?? "football"}
+            defaultValue={row?.sport ?? (preset("sport") || "football")}
             options={SPORT_TYPE_OPTIONS}
           />
           <SelectField
             name="status"
             label="Status"
-            defaultValue={row?.status ?? "scheduled"}
+            defaultValue={row?.status ?? (preset("status") || "scheduled")}
             options={[
               { value: "scheduled", label: "Scheduled" },
               { value: "live", label: "Live" },
@@ -99,15 +104,19 @@ export default async function MatchEditor({
             label: l.title,
           }))}
           initialTournamentId={
-            row?.tournamentId ? String(row.tournamentId) : ""
+            row?.tournamentId
+              ? String(row.tournamentId)
+              : preset("tournamentId")
           }
-          initialLeagueId={row?.leagueId ? String(row.leagueId) : ""}
+          initialLeagueId={
+            row?.leagueId ? String(row.leagueId) : preset("leagueId")
+          }
         />
         <TextField
           name="round"
           label="Round"
-          hint="e.g. Quarterfinal, Matchday 3, Group A"
-          defaultValue={row?.round}
+          hint="e.g. Match 1, Match 2, Semi-final, Final"
+          defaultValue={row?.round ?? preset("round")}
         />
         <div className="grid gap-5 sm:grid-cols-2">
           <DateTimeField
@@ -119,7 +128,7 @@ export default async function MatchEditor({
         </div>
       </Fieldset>
 
-      <Fieldset title="Teams" hint="The two teams playing.">
+      <Fieldset title="Participants" hint="Teams or individual players.">
         <TeamFields
           teams={teams.map((team) => ({
             value: String(team.id),
@@ -127,6 +136,12 @@ export default async function MatchEditor({
           }))}
           initialTeamAId={row?.teamAId ? String(row.teamAId) : ""}
           initialTeamBId={row?.teamBId ? String(row.teamBId) : ""}
+          initialType={
+            row?.participantType ??
+            (preset("participantType") === "people" ? "people" : "teams")
+          }
+          initialAName={row?.participantAName}
+          initialBName={row?.participantBName}
         />
       </Fieldset>
 
@@ -137,18 +152,32 @@ export default async function MatchEditor({
         <div className="grid gap-5 sm:grid-cols-3">
           <NumberField
             name="scoreA"
-            label="Team A score"
+            label="Side A score"
             min={0}
             defaultValue={row?.scoreA ?? null}
           />
           <NumberField
             name="scoreB"
-            label="Team B score"
+            label="Side B score"
             min={0}
             defaultValue={row?.scoreB ?? null}
           />
         </div>
         {/* Hidden JSON inputs for events + postMatch — preserved on save */}
+        <TextField
+          name="winnerName"
+          label="Match winner"
+          hint="Optional · useful when no score is recorded"
+          maxLength={160}
+          defaultValue={row?.postMatch?.winnerName}
+        />
+        <TextField
+          name="winnerTitle"
+          label="Result details"
+          hint="Optional · e.g. won in straight sets or walkover"
+          maxLength={500}
+          defaultValue={row?.postMatch?.winnerTitle}
+        />
         <input
           type="hidden"
           name="events"
@@ -170,8 +199,8 @@ export default async function MatchEditor({
         >
           <MatchCockpit
             matchId={Number(id)}
-            teamAName={row?.teamA?.name ?? "Team A"}
-            teamBName={row?.teamB?.name ?? "Team B"}
+            teamAName={row?.participantAName || row?.teamA?.name || "Side A"}
+            teamBName={row?.participantBName || row?.teamB?.name || "Side B"}
             scoreA={row?.scoreA ?? 0}
             scoreB={row?.scoreB ?? 0}
             status={row?.status ?? "scheduled"}

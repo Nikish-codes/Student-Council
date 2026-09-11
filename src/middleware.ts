@@ -33,6 +33,8 @@ export default auth((req) => {
   const { pathname, searchParams } = req.nextUrl;
   const isLoggedIn = !!req.auth?.user;
   const role = req.auth?.user?.role;
+  // The signup directory is a public entry point, including during previews.
+  if (pathname === "/clubsignup") return NextResponse.next();
 
   const isPanel =
     pathname.startsWith("/management") ||
@@ -50,10 +52,7 @@ export default auth((req) => {
   }
 
   const passwordDestination = isLoggedIn
-    ? requiredPasswordDestination(
-        req.auth?.user?.mustChangePassword,
-        pathname,
-      )
+    ? requiredPasswordDestination(req.auth?.user?.mustChangePassword, pathname)
     : null;
   if (passwordDestination) {
     const url = req.nextUrl.clone();

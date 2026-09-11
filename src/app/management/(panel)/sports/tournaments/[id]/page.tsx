@@ -1,3 +1,5 @@
+import { SportsResultFields } from "@/components/management/sports-result-fields";
+import { SportsCompetitionMatches } from "@/components/management/sports-competition-matches";
 import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
@@ -157,6 +159,13 @@ export default async function TournamentEditor({
         />
       </Fieldset>
 
+      <SportsResultFields result={row?.result} media={media} />
+      <SportsCompetitionMatches
+        id={row?.id}
+        kind="tournament"
+        sport={row?.sport ?? "football"}
+        participantType={row?.result?.participantType}
+      />
       <SaveBar label={publisher ? "Save" : "Save / submit for review"} />
     </EditorShell>
   );
