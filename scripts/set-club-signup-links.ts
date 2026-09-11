@@ -73,6 +73,51 @@ const CLUB_SIGNUP_LINKS: Array<{ club: string; aliases: string[]; url: string }>
     aliases: ["Distortion"],
     url: "https://forms.cloud.microsoft/r/navHmG9edk",
   },
+  {
+    club: "CD (Communication Design) Club",
+    aliases: ["Communication design club", "Communication Design Club"],
+    url: "https://forms.gle/aGgX7tNXwanv9WaCA",
+  },
+  {
+    club: "Humanique (HR Club)",
+    aliases: ["Humanique Club", "Humanique"],
+    url: "https://forms.cloud.microsoft/r/43GR43qs4p",
+  },
+  {
+    club: "Just Naach (Dance Club)",
+    aliases: ["Just naach", "Just Naach"],
+    url: "https://forms.gle/58AqdDJwqNVAwJCT8",
+  },
+  {
+    club: "Interior Design Club",
+    aliases: ["Interior design club", "Interior Design Club"],
+    url: "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=LSD36rPvekOhA1Bbufv3XxY9QHVPSqZNqI7pXt7LwuNUMTYzQUhKTFY5Uk9ZQlgyMk44S1Q3MUowMC4u",
+  },
+  {
+    club: "Nexus Club",
+    aliases: ["The Nexus Club", "Nexus Club"],
+    url: "https://forms.cloud.microsoft/r/0G0U8Wcqss",
+  },
+  {
+    club: "Rotaract Club",
+    aliases: ["Rotaract club of Woxsen University", "Rotaract Club"],
+    url: "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=LSD36rPvekOhA1Bbufv3X6eTDoGrD8FHrJQ8_v5Y8fJUNzRENU5RSVVNR0dETUJaWVZQVzVWVkxQNS4u",
+  },
+  {
+    club: "Tantra (Operations Club)",
+    aliases: ["Tantra"],
+    url: "https://forms.cloud.microsoft/r/xf3rYMDBhX",
+  },
+  {
+    club: "The Law Club",
+    aliases: ["The Law Club"],
+    url: "https://forms.cloud.microsoft/r/V1kq6HiQ4J",
+  },
+  {
+    club: "The Literature Club",
+    aliases: ["The Literature Club"],
+    url: "https://forms.cloud.microsoft/r/pdEWpLjnX4",
+  },
 ];
 
 const normalize = (value: string) =>
