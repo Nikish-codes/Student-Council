@@ -822,6 +822,16 @@ export const auditLog = sqliteTable(
   }),
 );
 
+// ─────────────── club signup click stats (/stats) ───────────────
+// One row per club slug; the public beacon route upserts total. Super admins
+// read it on /stats. Counts the first apply click per device (not reopens).
+
+export const clubSignupClicks = sqliteTable("mp_club_signup_clicks", {
+  slug: text("slug").primaryKey(),
+  total: integer("total").notNull().default(0),
+  updatedAt: integer("updated_at").notNull(),
+});
+
 // ──────────────────────────────── sports ────────────────────────────────────
 // The sports vertical: tournaments, leagues, teams, matches, people (alumni +
 // reps), and a single-row page config. Matches belong to either a tournament

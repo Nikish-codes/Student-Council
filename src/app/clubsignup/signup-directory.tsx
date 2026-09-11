@@ -30,6 +30,23 @@ function readApplies(): ClubApplyEntry[] {
   }
 }
 
+/** Fire-and-forget click count for /stats. Surviving navigation via beacon. */
+function sendClickStat(slug: string) {
+  try {
+    const body = JSON.stringify({ slug });
+    const blob = new Blob([body], { type: "application/json" });
+    if (navigator.sendBeacon?.("/api/club-signup/click", blob)) return;
+    void fetch("/api/club-signup/click", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    return;
+  }
+}
+
 export function ClubSignupDirectory({
   clubs,
   categories,
@@ -64,6 +81,7 @@ export function ClubSignupDirectory({
       return;
     }
     setApplies(next);
+    sendClickStat(club.slug);
   };
   const onApplyClick = (club: Club, event: React.MouseEvent) => {
     if (confirmSeen) {

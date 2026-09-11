@@ -23,6 +23,7 @@ import {
   announcements as announcementsT,
   attendees as attendeesT,
   clubCategories as clubCategoriesT,
+  clubSignupClicks,
   clubs as clubsT,
   councilGroups as councilGroupsT,
   councilMembers as councilT,
@@ -1396,3 +1397,16 @@ export const getSportsPageConfig = cache(
     };
   },
 );
+
+/** /stats dashboard. One row per club signup click stat (super admins only). */
+export const getClubSignupClicks = cache(async () => {
+  const rows = await db
+    .select({
+      slug: clubSignupClicks.slug,
+      total: clubSignupClicks.total,
+      updatedAt: clubSignupClicks.updatedAt,
+    })
+    .from(clubSignupClicks)
+    .orderBy(desc(clubSignupClicks.total));
+  return rows;
+});

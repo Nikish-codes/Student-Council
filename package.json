@@ -21,7 +21,8 @@
     "clubs:set-signup-links": "tsx scripts/set-club-signup-links.ts",
     "brand:optimize": "tsx scripts/optimize-brand-assets.ts",
     "sync:club-logos": "tsx scripts/sync-club-logos.ts",
-    "sync:recap-videos": "tsx scripts/sync-recap-videos.ts"
+    "sync:recap-videos": "tsx scripts/sync-recap-videos.ts",
+    "media:rasterize-svgs": "tsx scripts/rasterize-svg-media.ts"
   },
   "dependencies": {
     "@auth/core": "^0.41.2",
