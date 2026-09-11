@@ -51,7 +51,7 @@ export default async function ClubSignupPage() {
           </p>
           <p className="mt-3 text-sm font-semibold text-accent">
             You can only click &ldquo;Apply now&rdquo; for a maximum of{" "}
-            <strong>3 clubs</strong>. Be mindful!
+            <strong>2 clubs</strong>. Be mindful!
           </p>
         </div>
         <ClubSignupDirectory clubs={clubs} categories={categories} />

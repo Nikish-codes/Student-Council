@@ -153,19 +153,16 @@ export function ClubSignupDirectory({
           />
           {limitReached ? (
             <span>
-              You&rsquo;ve used all {CLUB_APPLY_LIMIT} chances. The clubs you
-              applied to stay open, and all other Apply buttons are locked.
+              You&rsquo;ve used all your chances. The clubs you applied to stay
+              open, and all other Apply buttons are locked.
             </span>
           ) : applies.length === CLUB_APPLY_LIMIT - 1 ? (
+            <span>Fine, you can do one more!</span>
+          ) : applies.length === 1 ? (
             <span>Be mindful! You only have 1 chance left!</span>
-          ) : applies.length > 0 ? (
-            <span>
-              Be mindful! You only have {CLUB_APPLY_LIMIT - applies.length}{" "}
-              chances left!
-            </span>
           ) : (
             <span>
-              You can only click Apply now for {CLUB_APPLY_LIMIT} clubs. Be
+              You can only click Apply now for {CLUB_APPLY_LIMIT - 1} clubs. Be
               mindful and pick the clubs that matter to you!
             </span>
           )}
@@ -212,8 +209,8 @@ export function ClubSignupDirectory({
                       <button
                         type="button"
                         disabled
-                        title={`You can apply to ${CLUB_APPLY_LIMIT} clubs max`}
-                        aria-label={`Apply to ${club.name} (club application limit reached)`}
+                        title="You have used all your chances"
+                        aria-label={`Apply to ${club.name} (all chances used)`}
                         className="inline-flex min-h-8 shrink-0 cursor-not-allowed items-center gap-1 rounded-md bg-accent/35 px-2 text-xs font-semibold text-bg opacity-70"
                       >
                         Apply now
