@@ -47,7 +47,11 @@ export default async function ClubSignupPage() {
             Find your club<span className="text-accent">.</span>
           </h1>
           <p className="mt-2 text-sm text-muted sm:text-base">
-            A new interest. Your kind of people. Sign up here.
+            A new interest. Your kind of people. Apply here.
+          </p>
+          <p className="mt-3 text-sm font-semibold text-accent">
+            You can only click &ldquo;Apply now&rdquo; for a maximum of{" "}
+            <strong>3 clubs</strong>. Be mindful!
           </p>
         </div>
         <ClubSignupDirectory clubs={clubs} categories={categories} />

@@ -28,3 +28,41 @@ export function matchesClubSearch(
     .filter(Boolean)
     .every((word) => text.includes(word));
 }
+
+export const CLUB_APPLY_LIMIT = 3;
+export const CLUB_APPLY_STORAGE_KEY = "clubsignup:applies:v1";
+
+export type ClubApplyEntry = { slug: string; name: string; at: number };
+
+export function parseClubApplies(raw: unknown): ClubApplyEntry[] {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set<string>();
+  const entries: ClubApplyEntry[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const record = item as Record<string, unknown>;
+    const slug = typeof record.slug === "string" ? record.slug.trim() : "";
+    const name = typeof record.name === "string" ? record.name.trim() : "";
+    if (!slug || !name || seen.has(slug)) continue;
+    seen.add(slug);
+    entries.push({
+      slug,
+      name,
+      at: typeof record.at === "number" ? record.at : 0,
+    });
+  }
+  return entries.slice(0, CLUB_APPLY_LIMIT);
+}
+
+export type ClubApplyState = "open" | "applied" | "blocked";
+
+export function clubApplyState(
+  applies: readonly ClubApplyEntry[],
+  slug: string,
+): ClubApplyState {
+  return applies.some((entry) => entry.slug === slug)
+    ? "applied"
+    : applies.length >= CLUB_APPLY_LIMIT
+      ? "blocked"
+      : "open";
+}

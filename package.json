@@ -18,6 +18,7 @@
     "test:e2e:seed": "tsx scripts/seed-club-studio-e2e.ts",
     "clubs:sync-taxonomy": "tsx scripts/sync-club-taxonomy.ts",
     "clubs:import-content": "tsx scripts/import-club-content.ts",
+    "clubs:set-signup-links": "tsx scripts/set-club-signup-links.ts",
     "brand:optimize": "tsx scripts/optimize-brand-assets.ts",
     "sync:club-logos": "tsx scripts/sync-club-logos.ts",
     "sync:recap-videos": "tsx scripts/sync-recap-videos.ts"

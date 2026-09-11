@@ -1,10 +1,33 @@
 "use client";
 
-import { useState } from "react";
-import { Search, X, ArrowUpRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Check,
+  CircleAlert,
+  Search,
+  X,
+  ArrowUpRight,
+} from "lucide-react";
 import { Picture } from "@/components/ui/picture";
 import type { Club, ClubCategory } from "@/lib/schemas";
-import { matchesClubSearch, registrationLink } from "@/lib/club-signup";
+import {
+  CLUB_APPLY_LIMIT,
+  CLUB_APPLY_STORAGE_KEY,
+  clubApplyState,
+  parseClubApplies,
+  type ClubApplyEntry,
+  matchesClubSearch,
+  registrationLink,
+} from "@/lib/club-signup";
+
+function readApplies(): ClubApplyEntry[] {
+  try {
+    const raw = localStorage.getItem(CLUB_APPLY_STORAGE_KEY);
+    return parseClubApplies(raw ? JSON.parse(raw) : null);
+  } catch {
+    return [];
+  }
+}
 
 export function ClubSignupDirectory({
   clubs,
@@ -16,6 +39,24 @@ export function ClubSignupDirectory({
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [readyOnly, setReadyOnly] = useState(false);
+  const [applies, setApplies] = useState<ClubApplyEntry[]>([]);
+  useEffect(() => {
+    setApplies(readApplies());
+  }, []);
+  const limitReached = applies.length >= CLUB_APPLY_LIMIT;
+  const applyToClub = (club: Club) => {
+    if (applies.some((entry) => entry.slug === club.slug)) return;
+    const next = parseClubApplies([
+      ...applies,
+      { slug: club.slug, name: club.name, at: Date.now() },
+    ]);
+    try {
+      localStorage.setItem(CLUB_APPLY_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      return;
+    }
+    setApplies(next);
+  };
   const visible = clubs
     .filter(
       (club) =>
@@ -93,9 +134,42 @@ export function ClubSignupDirectory({
               onChange={(e) => setReadyOnly(e.target.checked)}
               className="h-4 w-4 accent-accent"
             />
-            Ready to sign up
+            Ready to apply
           </label>
         </div>
+        <p
+          role="status"
+          aria-live="polite"
+          className={
+            "mt-2 flex items-start gap-2 rounded-lg border px-3 py-2 text-xs leading-relaxed sm:text-sm " +
+            (limitReached
+              ? "border-accent/40 bg-accent/10 text-ink"
+              : "border-line/20 bg-surface/60 text-muted")
+          }
+        >
+          <CircleAlert
+            aria-hidden
+            className="mt-0.5 h-4 w-4 shrink-0 text-accent"
+          />
+          {limitReached ? (
+            <span>
+              You&rsquo;ve used all {CLUB_APPLY_LIMIT} chances. The clubs you
+              applied to stay open, and all other Apply buttons are locked.
+            </span>
+          ) : applies.length === CLUB_APPLY_LIMIT - 1 ? (
+            <span>Be mindful! You only have 1 chance left!</span>
+          ) : applies.length > 0 ? (
+            <span>
+              Be mindful! You only have {CLUB_APPLY_LIMIT - applies.length}{" "}
+              chances left!
+            </span>
+          ) : (
+            <span>
+              You can only click Apply now for {CLUB_APPLY_LIMIT} clubs. Be
+              mindful and pick the clubs that matter to you!
+            </span>
+          )}
+        </p>
       </div>
       {visible.length ? (
         <div className="grid gap-3 pt-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -126,13 +200,34 @@ export function ClubSignupDirectory({
                     {club.name}
                   </h2>
                   {link ? (
-                    <a
-                      href={link}
-                      aria-label={`Sign up for ${club.name}`}
-                      className="inline-flex min-h-8 shrink-0 items-center gap-1 rounded-md bg-accent px-2 text-xs font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
-                    >
-                      Sign up <ArrowUpRight aria-hidden className="h-3 w-3" />
-                    </a>
+                    clubApplyState(applies, club.slug) === "applied" ? (
+                      <a
+                        href={link}
+                        aria-label={`Applied to ${club.name} (reopen the form)`}
+                        className="inline-flex min-h-8 shrink-0 items-center gap-1 rounded-md border border-accent/40 bg-accent/10 px-2 text-xs font-semibold text-accent transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+                      >
+                        Applied <Check aria-hidden className="h-3 w-3" />
+                      </a>
+                    ) : clubApplyState(applies, club.slug) === "blocked" ? (
+                      <button
+                        type="button"
+                        disabled
+                        title={`You can apply to ${CLUB_APPLY_LIMIT} clubs max`}
+                        aria-label={`Apply to ${club.name} (club application limit reached)`}
+                        className="inline-flex min-h-8 shrink-0 cursor-not-allowed items-center gap-1 rounded-md bg-accent/35 px-2 text-xs font-semibold text-bg opacity-70"
+                      >
+                        Apply now
+                      </button>
+                    ) : (
+                      <a
+                        href={link}
+                        onClick={() => applyToClub(club)}
+                        aria-label={`Apply to ${club.name}`}
+                        className="inline-flex min-h-8 shrink-0 items-center gap-1 rounded-md bg-accent px-2 text-xs font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+                      >
+                        Apply now <ArrowUpRight aria-hidden className="h-3 w-3" />
+                      </a>
+                    )
                   ) : (
                     <span className="max-w-16 shrink-0 self-center text-right text-[11px] leading-snug text-muted">
                       Link coming soon

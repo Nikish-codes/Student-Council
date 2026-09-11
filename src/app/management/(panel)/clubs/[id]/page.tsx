@@ -230,7 +230,7 @@ export default async function ClubEditor({
           <TextField
             name="joinUrl"
             label="Registration link"
-            hint="Paste the link opened by Sign up on /clubsignup"
+            hint="Paste the club's form link. This is what the Apply now button opens on /clubsignup"
             defaultValue={row?.joinUrl}
           />
           <TextField
