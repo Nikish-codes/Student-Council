@@ -7,7 +7,9 @@
  *    ONLY /coming-soon. The real site stays reachable for:
  *      - logged-in team members (any role — a valid session unlocks everything),
  *      - anyone with the shareable preview link (`?preview=<SITE_PREVIEW_KEY>`,
- *        which drops an unlock cookie for stakeholders without accounts).
+ *        which drops an unlock cookie for stakeholders without accounts),
+ *      - search-engine crawlers (so the real site can be indexed while the
+ *        teaser is still up for humans).
  *
  * Toggle the gate off (reveal the site to the world) by setting COMING_SOON=off
  * in the environment — no code change or redeploy of source needed.
@@ -28,6 +30,13 @@ const GATE_ON = process.env.COMING_SOON !== "off";
 // log in. Unset (empty) → no preview-link bypass exists.
 const PREVIEW_KEY = process.env.SITE_PREVIEW_KEY;
 const PREVIEW_COOKIE = "sc_preview";
+
+// Search crawlers pass the coming-soon gate so the real site keeps getting
+// indexed while humans still see the teaser. Matched on user-agent, since edge
+// middleware can't verify crawlers by reverse DNS; a spoofed UA would slip
+// through too, which is an accepted trade-off for a teaser gate.
+const SEARCH_BOTS =
+  /(Googlebot|Google-InspectionTool|AdsBot|Mediapartners|Bingbot|bingpreview|YandexBot|DuckDuckBot|Baiduspider|Applebot|facebookexternalhit|LinkedInBot|Twitterbot|Slurp)/;
 
 export default auth((req) => {
   const { pathname, searchParams } = req.nextUrl;
@@ -100,6 +109,11 @@ export default auth((req) => {
   const hasPreviewCookie =
     !!PREVIEW_KEY && req.cookies.get(PREVIEW_COOKIE)?.value === PREVIEW_KEY;
   if (isLoggedIn || hasPreviewCookie) return NextResponse.next();
+
+  // B1) Search crawlers see the real site so indexing never stops.
+  if (SEARCH_BOTS.test(req.headers.get("user-agent") ?? "")) {
+    return NextResponse.next();
+  }
 
   // Everyone else visiting the domain → the teaser.
   const url = req.nextUrl.clone();
