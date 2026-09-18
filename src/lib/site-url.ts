@@ -7,7 +7,7 @@
 /** Absolute site origin with any trailing slash removed. */
 export function siteUrl(): string {
   const u =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://woxsenstudentcouncil.com";
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.woxsenstudentcouncil.in";
   return u.replace(/\/+$/, "");
 }
 

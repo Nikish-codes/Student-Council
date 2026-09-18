@@ -7,12 +7,12 @@ import {
   getSportsTournaments,
 } from "@/lib/content";
 
-// Matches the canonical URLs hardcoded in page metadata (apex, not www) so
-// Google never sees duplicates between sitemap and rel=canonical.
+// Matches the canonical URLs (www is primary; the apex 308-redirects to it, so
+// sitemap entries must be the final URLs to avoid wasted redirect crawls).
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = "https://woxsenstudentcouncil.in";
+  const base = "https://www.woxsenstudentcouncil.in";
   const now = new Date();
   const staticPaths = [
     { path: "/", freq: "daily", priority: 1 },

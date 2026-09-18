@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Join a club · Woxsen Student Council",
   description:
     "Find your club at Woxsen. Browse student clubs and sign up in one place.",
-  alternates: { canonical: "https://woxsenstudentcouncil.in/clubsignup" },
+  alternates: { canonical: "https://www.woxsenstudentcouncil.in/clubsignup" },
 };
 
 export default async function ClubSignupPage() {
