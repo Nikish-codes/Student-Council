@@ -70,6 +70,7 @@ export default async function HomePage() {
         upcoming={upcoming}
         featuredEvent={featuredEvent}
         clubs={clubs}
+        allClubCount={allClubs.length}
       />
     </>
   );

@@ -2,335 +2,508 @@
 
 import * as React from "react";
 import {
-  BookOpen,
-  Briefcase,
-  DoorOpen,
-  ShieldAlert,
+  ArrowDown,
   ArrowRight,
+  BookOpen,
+  BrainCircuit,
+  BriefcaseBusiness,
+  Building2,
   Check,
+  ExternalLink,
+  HeartPulse,
+  Leaf,
+  LibraryBig,
+  Lightbulb,
+  Mail,
+  MapPin,
+  Plane,
+  Presentation,
+  Search,
+  ShieldCheck,
+  X,
   type LucideIcon,
 } from "lucide-react";
-import { gsap, prefersSimpleTextMotion, SplitText, useGSAP } from "@/lib/gsap";
 import { GrievanceForm } from "@/components/sections/grievance-form";
+import {
+  grievanceRecommendation,
+  searchSupportDepartments,
+  type SupportDepartment,
+} from "@/lib/support-directory";
 import { cn } from "@/lib/utils";
-import type { SupportChannel, GrievanceCategory } from "@/lib/schemas";
+import type { GrievanceCategory } from "@/lib/schemas";
 
-const ICONS: Record<string, LucideIcon> = {
-  DoorOpen,
-  BookOpen,
-  Briefcase,
-  ShieldAlert,
-};
-
-export function SupportGuide({
-  channels,
-  grievanceCategories,
-  grievanceMailTo,
-}: {
-  channels: SupportChannel[];
+type SupportGuideProps = {
+  channels: unknown[];
   grievanceCategories: GrievanceCategory[];
   grievanceMailTo: string;
-}) {
-  const root = React.useRef<HTMLDivElement>(null);
+};
 
-  useGSAP(
-    () => {
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const simpleText = prefersSimpleTextMotion();
-      if (reduced) return;
-      const ctx = gsap.context(() => {
-        // SplitText section titles
-        root.current?.querySelectorAll<HTMLElement>("[data-split]").forEach((el) => {
-          gsap.set(el, { opacity: 1 });
-          if (simpleText) {
-            gsap.from(el, {
-              opacity: 0,
-              y: 24,
-              duration: 0.7,
-              ease: "power2.out",
-              scrollTrigger: { trigger: el, start: "top 85%", once: true },
-            });
-            return;
-          }
-          const split = new SplitText(el, { type: "chars,words", charsClass: "char" });
-          gsap.set(split.chars, {
-            opacity: 0,
-            y: 60,
-            rotateX: -60,
-          });
-          gsap.to(split.chars, {
-            opacity: 1,
-            y: 0,
-            rotateX: 0,
-            duration: 0.9,
-            ease: "expo.out",
-            stagger: { each: 0.025, from: "start" },
-            scrollTrigger: { trigger: el, start: "top 85%", once: true },
-          });
-        });
+const DEPARTMENT_ICONS: Record<SupportDepartment["icon"], LucideIcon> = {
+  campus: Building2,
+  academic: BookOpen,
+  career: BriefcaseBusiness,
+  research: BrainCircuit,
+  leadership: Presentation,
+  startup: Lightbulb,
+  international: Plane,
+  sustainability: Leaf,
+  wellness: HeartPulse,
+  library: LibraryBig,
+};
 
-        // Channel sections rising in
-        root.current?.querySelectorAll<HTMLElement>("[data-channel]").forEach((sec) => {
-          const big = sec.querySelector<HTMLElement>("[data-channel-watermark]");
-          const left = sec.querySelectorAll<HTMLElement>("[data-channel-meta] > *");
-          const list = sec.querySelectorAll<HTMLElement>("[data-bring-item]");
-          if (big) {
-            gsap.set(big, { opacity: 1 });
-            gsap.from(big, {
-              x: -60,
-              opacity: 0,
-              duration: 1.4,
-              ease: "expo.out",
-              scrollTrigger: { trigger: sec, start: "top 80%", once: true },
-            });
-          }
-          if (left.length) {
-            gsap.set(left, { opacity: 1 });
-            gsap.from(left, {
-              y: 30,
-              opacity: 0,
-              duration: 0.8,
-              ease: "power3.out",
-              stagger: 0.08,
-              scrollTrigger: { trigger: sec, start: "top 80%", once: true },
-            });
-          }
-          if (list.length) {
-            gsap.set(list, { opacity: 1 });
-            gsap.from(list, {
-              x: -16,
-              opacity: 0,
-              duration: 0.6,
-              ease: "power2.out",
-              stagger: 0.06,
-              scrollTrigger: { trigger: sec, start: "top 75%", once: true },
-            });
-          }
-        });
+const SPOTLIGHT_SUGGESTIONS = [
+  "My room AC is not working",
+  "MyCAMU attendance is wrong",
+  "I want to start a company",
+  "I need counselling support",
+  "How do I study abroad?",
+  "I need help with placements",
+];
 
-        // Truth panel rows
-        const truthRows = root.current?.querySelectorAll<HTMLElement>("[data-truth-row]");
-        if (truthRows?.length) {
-          gsap.set(truthRows, { opacity: 1 });
-          gsap.from(truthRows, {
-            opacity: 0,
-            y: 20,
-            duration: 0.7,
-            ease: "power3.out",
-            stagger: 0.08,
-            scrollTrigger: { trigger: truthRows[0], start: "top 85%", once: true },
-          });
-        }
-      }, root);
-      return () => ctx.revert();
-    },
-    { scope: root },
+export function SupportGuide({
+  grievanceCategories,
+  grievanceMailTo,
+}: SupportGuideProps) {
+  const [query, setQuery] = React.useState("");
+  const [selectedId, setSelectedId] = React.useState("");
+  const hasQuery = query.trim().length > 0;
+  const results = React.useMemo(() => searchSupportDepartments(query), [query]);
+  const recommendation = React.useMemo(
+    () => grievanceRecommendation(query),
+    [query],
   );
+  const selected =
+    results.find((result) => result.department.id === selectedId) ?? results[0];
+
+  function updateQuery(value: string) {
+    setQuery(value);
+    setSelectedId("");
+  }
 
   return (
-    <div ref={root}>
-      {/* ── Truth panel: what we do / don't do ── */}
-      <section className="container mt-32">
-        <div className="grid gap-px overflow-hidden rounded-3xl border border-line/15 bg-line/10 sm:grid-cols-2">
-          <div data-truth-row className="bg-bg p-8 sm:p-10">
-            <span className="kicker text-ink">What the Council does</span>
-            <ul className="mt-8 space-y-4 text-sm text-muted">
-              {[
-                "Point you to the right office, person or process",
-                "Walk you through what to prepare and what to expect",
-                "Follow up if a request stalls or goes unanswered",
-                "Own grievance & feedback channels directly",
-              ].map((line) => (
-                <li key={line} className="flex gap-3">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-ink" aria-hidden />
-                  <span>{line}</span>
-                </li>
+    <div className="min-h-screen bg-bg text-ink selection:bg-accent selection:text-accent-ink">
+      <section
+        className={cn(
+          "container flex min-h-[calc(100svh-11rem)] flex-col transition-[padding] duration-500",
+          hasQuery
+            ? "justify-start py-8 sm:py-10"
+            : "justify-center py-16 sm:py-24",
+        )}
+      >
+        <div className="mx-auto w-full max-w-6xl">
+          <h1
+            className={cn(
+              "text-balance font-display tracking-[-0.04em] transition-[font-size,line-height] duration-500",
+              hasQuery
+                ? "max-w-4xl text-4xl leading-[0.95] sm:text-6xl"
+                : "text-center text-[clamp(4rem,9vw,8.5rem)] leading-[0.82]",
+            )}
+          >
+            What do you need help with?
+          </h1>
+          {!hasQuery && (
+            <p className="mx-auto mt-8 max-w-2xl text-center text-lg text-muted">
+              Describe the problem, not the department. Search Desk covers all
+              11 departments in the university guide and ranks the useful
+              routes.
+            </p>
+          )}
+          <SearchField
+            value={query}
+            onChange={updateQuery}
+            placeholder="Try: I need counselling, my room AC is broken, or I want to study abroad"
+            className={cn("mt-9", !hasQuery && "mx-auto max-w-5xl sm:mt-12")}
+            inputClassName={cn(
+              "rounded-2xl bg-surface pl-16 pr-16 shadow-[0_24px_70px_-42px_rgb(var(--ink)/0.4)]",
+              hasQuery
+                ? "h-16 text-base sm:h-20 sm:text-xl"
+                : "h-24 text-lg sm:h-28 sm:pl-20 sm:text-2xl",
+            )}
+            iconClassName={cn(
+              "text-accent",
+              hasQuery
+                ? "left-6 h-5 w-5"
+                : "left-6 h-6 w-6 sm:left-7 sm:h-7 sm:w-7",
+            )}
+          />
+
+          {!hasQuery && (
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              {SPOTLIGHT_SUGGESTIONS.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => updateQuery(suggestion)}
+                  className="min-h-11 rounded-full border border-line/15 px-4 text-sm text-muted transition-colors hover:border-accent hover:text-ink"
+                >
+                  {suggestion}
+                </button>
               ))}
-            </ul>
-          </div>
-          <div data-truth-row className="bg-bg p-8 sm:p-10">
-            <span className="kicker text-muted">What we cannot do</span>
-            <ul className="mt-8 space-y-4 text-sm text-muted">
-              {[
-                "Run a portal or ticketing system for academics, hostel or placements",
-                "Override decisions taken by faculty, deans or operations",
-                "Process complaints anonymously outside the grievance lane",
-                "Promise turnaround times we don't control",
-              ].map((line) => (
-                <li key={line} className="flex gap-3">
-                  <span
-                    className="mt-1.5 h-3 w-3 shrink-0 rounded-full border border-line/40"
+            </div>
+          )}
+
+          {hasQuery && (
+            <div
+              className="mt-4 overflow-hidden rounded-2xl border border-line/10 bg-surface shadow-[0_22px_60px_-42px_rgb(var(--ink)/0.45)]"
+              aria-live="polite"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line/10 px-5 py-4 sm:px-6">
+                <p className="text-sm font-semibold">
+                  {results.length > 0
+                    ? `${results.length} ${results.length === 1 ? "route" : "routes"} found`
+                    : "No department matched yet"}
+                </p>
+              </div>
+
+              {recommendation && (
+                <a
+                  href="#grievance-form"
+                  className={cn(
+                    "flex items-start gap-4 border-b border-line/10 px-5 py-5 sm:px-6",
+                    recommendation.strength === "recommended"
+                      ? "bg-accent text-accent-ink"
+                      : "bg-line/[0.06] text-ink",
+                  )}
+                >
+                  <ShieldCheck
+                    className="mt-0.5 h-5 w-5 shrink-0"
                     aria-hidden
                   />
-                  <span>{line}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Channels — three editorial sections, no fake links ── */}
-      <section className="container mt-40 sm:mt-40">
-        <header className="mb-16 max-w-3xl">
-          <span className="kicker">Three guided lanes</span>
-          <h2 data-split className="display mt-6 text-balance text-5xl leading-[0.92] sm:text-7xl">
-            Know who actually owns what.
-          </h2>
-          <p className="mt-8 text-pretty text-muted">
-            Gateway, Bridge and Career Connect aren&apos;t systems we operate.
-            They&apos;re names for the lanes through which the university already
-            handles your concern. Here&apos;s what each one is for, who runs it,
-            and how we can help you reach it.
-          </p>
-        </header>
-
-        <div className="space-y-32 sm:space-y-44">
-          {channels.map((c, i) => {
-            const Icon = ICONS[c.icon] ?? DoorOpen;
-            const isOdd = i % 2 === 1;
-            return (
-              <article
-                key={c.id}
-                id={c.id}
-                data-channel
-                className="relative grid gap-12 lg:grid-cols-12"
-              >
-                {/* Left meta column */}
-                <div
-                  data-channel-meta
-                  className={cn(
-                    "relative z-10 flex flex-col gap-6 lg:col-span-5",
-                    isOdd && "lg:order-2",
-                  )}
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="font-mono text-xs text-subtle">
-                      {String(i + 1).padStart(2, "0")} / {String(channels.length).padStart(2, "0")}
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold">
+                      {recommendation.title}
                     </span>
-                    <span className="h-px flex-1 bg-line/20" />
-                  </div>
-                  <div className="grid h-14 w-14 place-items-center rounded-2xl border border-line/15 bg-bg/60">
-                    <Icon className="h-6 w-6 text-ink" aria-hidden />
-                  </div>
-                  <span className="kicker">{c.purpose}</span>
-                  <h3
-                    data-split
-                    className="display text-6xl leading-none sm:text-7xl"
+                    <span
+                      className={cn(
+                        "mt-1 block text-sm leading-relaxed",
+                        recommendation.strength === "recommended"
+                          ? "text-accent-ink/75"
+                          : "text-muted",
+                      )}
+                    >
+                      {recommendation.reason}
+                    </span>
+                  </span>
+                  <span className="hidden min-h-11 shrink-0 items-center gap-2 rounded-full bg-ink px-4 text-xs font-semibold text-bg sm:inline-flex">
+                    Fill grievance form
+                    <ArrowRight className="h-4 w-4" aria-hidden />
+                  </span>
+                </a>
+              )}
+
+              {results.length > 0 ? (
+                <div className="grid lg:h-[620px] lg:max-h-[calc(100vh-14rem)] lg:grid-cols-[0.72fr_1.28fr]">
+                  <div
+                    className="max-h-60 min-h-0 overflow-y-auto overscroll-contain border-b border-line/10 p-2 lg:h-full lg:max-h-none lg:border-b-0 lg:border-r [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-line/20 hover:[&::-webkit-scrollbar-thumb]:bg-line/40"
+                    role="listbox"
+                    aria-label="Matching departments"
                   >
-                    {c.name}.
-                  </h3>
-                  <p className="text-pretty text-muted">{c.description}</p>
-                </div>
-
-                {/* Right detail column */}
-                <div
-                  className={cn(
-                    "relative z-10 flex flex-col gap-10 lg:col-span-7",
-                    isOdd && "lg:order-1",
-                  )}
-                >
-                  {/* Owned-by callout */}
-                  <div className="rounded-2xl border border-line/15 p-6 sm:p-8">
-                    <span className="kicker text-subtle">Owned by</span>
-                    <p className="display mt-3 text-2xl text-ink sm:text-3xl">
-                      {c.ownedBy}
-                    </p>
-                  </div>
-
-                  {/* Bring-this checklist */}
-                  <div>
-                    <span className="kicker">Before you reach out, prepare</span>
-                    <ul className="mt-6 divide-y divide-line/10 border-y border-line/10">
-                      {c.bring.map((item, j) => (
-                        <li
-                          key={item}
-                          data-bring-item
-                          className="flex items-baseline gap-5 py-4"
+                    {results.map((result, index) => {
+                      const department = result.department;
+                      const Icon = DEPARTMENT_ICONS[department.icon];
+                      const isSelected =
+                        selected?.department.id === department.id;
+                      return (
+                        <button
+                          key={department.id}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          onClick={() => setSelectedId(department.id)}
+                          className={cn(
+                            "flex min-h-20 w-full items-center gap-4 rounded-xl px-4 text-left transition-colors",
+                            isSelected
+                              ? "bg-ink text-bg"
+                              : "hover:bg-line/[0.06]",
+                          )}
                         >
-                          <span className="font-mono text-xs text-subtle">
-                            {String(j + 1).padStart(2, "0")}
+                          <Icon
+                            className={cn(
+                              "h-5 w-5 shrink-0",
+                              isSelected ? "text-accent" : "text-muted",
+                            )}
+                            aria-hidden
+                          />
+                          <span className="min-w-0 flex-1">
+                            <span className="flex items-center gap-2">
+                              <span className="truncate font-semibold">
+                                {department.shortName ?? department.name}
+                              </span>
+                              {index === 0 && (
+                                <span className="rounded-full bg-accent px-2 py-1 text-[10px] font-semibold text-accent-ink">
+                                  Best match
+                                </span>
+                              )}
+                            </span>
+                            <span
+                              className={cn(
+                                "mt-1 block truncate text-xs",
+                                isSelected ? "text-bg/60" : "text-muted",
+                              )}
+                            >
+                              {department.area}
+                            </span>
                           </span>
-                          <span className="text-pretty text-sm text-ink/90">
-                            {item}
+                          <span className="text-xs tabular-nums opacity-45">
+                            {String(index + 1).padStart(2, "0")}
                           </span>
-                        </li>
-                      ))}
-                    </ul>
+                        </button>
+                      );
+                    })}
                   </div>
 
-                  {/* Council role note — replaces the old CTA button */}
-                  <div className="flex items-start gap-4 rounded-2xl bg-ink/[0.04] p-6 sm:p-8">
-                    <ArrowRight
-                      className="mt-1 h-4 w-4 shrink-0 text-ink"
-                      aria-hidden
+                  {selected && (
+                    <SpotlightDepartmentDetail
+                      department={selected.department}
+                      grievanceRecommended={Boolean(recommendation)}
                     />
-                    <p className="text-pretty text-sm leading-relaxed text-ink/85">
-                      <span className="font-medium text-ink">
-                        How the Council helps —{" "}
-                      </span>
-                      {c.councilRole}
+                  )}
+                </div>
+              ) : (
+                <div className="grid gap-6 p-6 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8">
+                  <div>
+                    <h2 className="text-2xl font-semibold">
+                      Try the main words.
+                    </h2>
+                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                      Search for a topic such as hostel, MyCAMU, placement,
+                      startup, exchange, health, sports, sustainability, AI, or
+                      library. Small spelling mistakes are okay.
                     </p>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => updateQuery("")}
+                    className="min-h-11 rounded-full bg-ink px-5 text-sm font-semibold text-bg"
+                  >
+                    Show examples
+                  </button>
                 </div>
-              </article>
-            );
-          })}
+              )}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* ── Grievance — the lane the Council DOES own ── */}
-      <section
-        id="grievance"
-        className="container mt-40 mb-24 sm:mt-44"
-      >
-        <div className="mb-12 flex items-center gap-4">
-          <span className="font-mono text-xs text-subtle">
-            04 / {String(channels.length + 1).padStart(2, "0")}
-          </span>
-          <span className="h-px flex-1 max-w-32 bg-line/20" />
-          <span className="kicker">Run by the Council directly</span>
-        </div>
-        <div className="grid gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-5">
-            <div className="grid h-14 w-14 place-items-center rounded-2xl border border-line/15 bg-bg/60">
-              <ShieldAlert className="h-6 w-6 text-ink" aria-hidden />
-            </div>
-            <h2
-              data-split
-              className="display mt-8 text-6xl leading-none sm:text-7xl"
-            >
-              Grievance.
-            </h2>
-            <p className="mt-8 max-w-md text-pretty text-muted">
-              For sensitive concerns — discrimination, harassment, misconduct,
-              or anything that needs the grievance committee&apos;s attention.
-              This is the one channel the Council operates end-to-end. Anonymous
-              submissions are accepted and treated with the same care.
-            </p>
-            <ul className="mt-12 space-y-4 text-sm text-muted">
-              <li className="flex gap-3">
-                <span className="font-mono text-subtle">01</span>
-                Reviewed within 72 hours by the grievance committee.
-              </li>
-              <li className="flex gap-3">
-                <span className="font-mono text-subtle">02</span>
-                You stay informed at every step — unless you choose to stay anonymous.
-              </li>
-              <li className="flex gap-3">
-                <span className="font-mono text-subtle">03</span>
-                Outcome is documented and shared with you confidentially.
-              </li>
-            </ul>
-          </div>
-          <div className="lg:col-span-7">
-            <GrievanceForm
-              categories={grievanceCategories}
-              fallbackTo={grievanceMailTo}
-            />
-          </div>
-        </div>
-      </section>
+      <GrievanceSection
+        id="grievance-form"
+        title="Some concerns should skip the search."
+        categories={grievanceCategories}
+        fallbackTo={grievanceMailTo}
+      />
     </div>
+  );
+}
+
+function SpotlightDepartmentDetail({
+  department,
+  grievanceRecommended,
+}: {
+  department: SupportDepartment;
+  grievanceRecommended: boolean;
+}) {
+  const Icon = DEPARTMENT_ICONS[department.icon];
+  const articleRef = React.useRef<HTMLElement>(null);
+
+  React.useEffect(() => {
+    articleRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [department.id]);
+
+  return (
+    <article
+      ref={articleRef}
+      className="max-h-[600px] min-h-0 overflow-y-auto overscroll-contain p-6 pb-10 sm:p-8 sm:pb-12 lg:h-full lg:max-h-none [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-line/20 hover:[&::-webkit-scrollbar-thumb]:bg-line/40"
+    >
+      <div className="flex items-start justify-between gap-6">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-accent">{department.area}</p>
+          <h2 className="mt-2 text-balance font-display text-4xl leading-[0.95] sm:text-5xl">
+            {department.name}
+          </h2>
+          {department.shortName && (
+            <p className="mt-2 text-sm text-muted">
+              Also known as {department.shortName}
+            </p>
+          )}
+        </div>
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-accent text-accent-ink">
+          <Icon className="h-5 w-5" aria-hidden />
+        </span>
+      </div>
+
+      <p className="mt-6 text-sm leading-relaxed text-muted">
+        {department.overview}
+      </p>
+      <div className="mt-6 rounded-xl bg-bg p-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-subtle">
+          This is the right route when
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-ink/85">
+          {department.reachOutWhen}
+        </p>
+      </div>
+
+      <div className="mt-6">
+        <p className="text-sm font-semibold">What they handle</p>
+        <ul className="mt-4 space-y-3">
+          {department.responsibilities.map((responsibility) => (
+            <li key={responsibility} className="flex gap-3 text-sm text-muted">
+              <Check
+                className="mt-0.5 h-4 w-4 shrink-0 text-accent"
+                aria-hidden
+              />
+              {responsibility}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mt-7 flex flex-wrap gap-2 border-t border-line/10 pt-6">
+        {department.emails?.map((email) => (
+          <a
+            key={email}
+            href={`mailto:${email}`}
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-ink px-4 text-xs font-semibold text-bg"
+          >
+            <Mail className="h-4 w-4 text-accent" aria-hidden />
+            {email}
+          </a>
+        ))}
+        {department.website && (
+          <a
+            href={department.website}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-ink px-4 text-xs font-semibold text-bg"
+          >
+            <ExternalLink className="h-4 w-4 text-accent" aria-hidden />
+            Open official website
+          </a>
+        )}
+        {department.location && (
+          <span className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line/15 px-4 text-xs font-medium text-muted">
+            <MapPin className="h-4 w-4 text-accent" aria-hidden />
+            {department.location}
+          </span>
+        )}
+        {!department.emails && !department.website && !department.location && (
+          <span className="text-xs leading-relaxed text-subtle">
+            The supplied department guide does not list a direct contact for
+            this desk.
+          </span>
+        )}
+      </div>
+
+      <a
+        href="#grievance-form"
+        className={cn(
+          "mt-6 flex min-h-12 items-center justify-between gap-4 rounded-xl px-4 text-sm",
+          grievanceRecommended
+            ? "bg-accent font-semibold text-accent-ink"
+            : "bg-line/[0.06] text-muted hover:text-ink",
+        )}
+      >
+        <span>
+          {grievanceRecommended
+            ? "Fill the grievance form for this issue"
+            : "If this is sensitive or remains unresolved, use the grievance form"}
+        </span>
+        <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+      </a>
+    </article>
+  );
+}
+
+function SearchField({
+  value,
+  onChange,
+  placeholder,
+  className,
+  inputClassName,
+  iconClassName,
+  clearClassName,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  className?: string;
+  inputClassName?: string;
+  iconClassName?: string;
+  clearClassName?: string;
+}) {
+  return (
+    <div className={cn("relative", className)}>
+      <Search
+        className={cn(
+          "pointer-events-none absolute top-1/2 -translate-y-1/2",
+          iconClassName,
+        )}
+        aria-hidden
+      />
+      <label className="sr-only">Describe what you need help with</label>
+      <input
+        type="search"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className={cn(
+          "w-full border border-line/15 text-ink outline-none placeholder:text-subtle focus:border-accent",
+          inputClassName,
+        )}
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className={cn(
+            "absolute right-5 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full text-muted hover:bg-line/10 hover:text-ink",
+            clearClassName,
+          )}
+          aria-label="Clear search"
+        >
+          <X className="h-5 w-5" aria-hidden />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function GrievanceSection({
+  id,
+  title,
+  categories,
+  fallbackTo,
+}: {
+  id: string;
+  title: string;
+  categories: GrievanceCategory[];
+  fallbackTo: string;
+}) {
+  return (
+    <section
+      id={id}
+      className="border-t border-line/10 bg-surface py-20 sm:py-24"
+    >
+      <div className="container grid gap-12 lg:grid-cols-[0.72fr_1.28fr]">
+        <div>
+          <ShieldCheck className="h-9 w-9 text-accent" aria-hidden />
+          <h2 className="mt-7 max-w-xl font-display text-5xl leading-[0.92] sm:text-7xl">
+            {title}
+          </h2>
+          <p className="mt-6 max-w-md text-muted">
+            This form prepares an Outlook message to the configured grievance
+            inbox. You can review it before sending.
+          </p>
+          <a
+            href="#content"
+            className="mt-8 inline-flex min-h-11 items-center gap-3 text-sm font-semibold text-accent"
+          >
+            Back to Search Desk{" "}
+            <ArrowDown className="h-4 w-4 rotate-180" aria-hidden />
+          </a>
+        </div>
+        <GrievanceForm categories={categories} fallbackTo={fallbackTo} />
+      </div>
+    </section>
   );
 }

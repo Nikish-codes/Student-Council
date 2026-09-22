@@ -39,6 +39,7 @@ type HomeLazySectionsProps = {
   upcoming: EventItem[];
   featuredEvent?: EventItem;
   clubs: Club[];
+  allClubCount: number;
 };
 
 export function HomeLazySections({
@@ -46,6 +47,7 @@ export function HomeLazySections({
   upcoming,
   featuredEvent,
   clubs,
+  allClubCount,
 }: HomeLazySectionsProps) {
   const rootRef = React.useRef<HTMLDivElement>(null);
   const [shouldLoad, setShouldLoad] = React.useState(false);
@@ -81,7 +83,7 @@ export function HomeLazySections({
             lines={homepage.manifestoLines}
             footer={homepage.manifestoFooter}
           />
-          <ClubsLogoWall clubs={clubs} />
+          <ClubsLogoWall clubs={clubs} allClubCount={allClubCount} />
           <ClosingCTA data={homepage.closingCta} />
         </>
       ) : (

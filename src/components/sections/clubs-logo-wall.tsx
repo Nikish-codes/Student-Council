@@ -14,7 +14,7 @@ import type { Club } from "@/lib/schemas";
  * (lanczos3 + light sharpening), so the picked image is pixel-crisp at the
  * actual display size; the browser does at most a tiny scale.
  */
-export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
+export function ClubsLogoWall({ clubs, allClubCount }: { clubs: Club[]; allClubCount: number }) {
   const root = React.useRef<HTMLElement>(null);
 
   useGSAP(
@@ -136,13 +136,8 @@ export function ClubsLogoWall({ clubs }: { clubs: Club[] }) {
           </picture>
         </Link>
 
-        <div className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-3 border-t border-line/10 pt-6 text-center">
-          <MiniStat value={clubs.length} label="Clubs" />
-          <MiniStat value={uniqueTagCount(clubs)} label="Tags" />
-          <MiniStat
-            value={clubs.reduce((sum, c) => sum + (c.members ?? 0), 0) || "—"}
-            label="Members"
-          />
+        <div className="mx-auto mt-10 max-w-md border-t border-line/10 pt-6 text-center">
+          <MiniStat value={allClubCount} label="Clubs" />
         </div>
       </div>
     </section>
@@ -160,6 +155,3 @@ function MiniStat({ value, label }: { value: React.ReactNode; label: string }) {
   );
 }
 
-function uniqueTagCount(clubs: Club[]) {
-  return new Set(clubs.flatMap((club) => club.tags)).size;
-}
