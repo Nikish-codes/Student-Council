@@ -5,6 +5,7 @@ import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { contentRevisions } from "@/db/schema";
+import { requireReviewer } from "@/lib/rbac";
 import { reviewRevision } from "@/lib/revisions";
 
 export async function actOnRevision(formData: FormData) {
@@ -16,6 +17,7 @@ export async function actOnRevision(formData: FormData) {
 }
 
 export async function bulkApproveRevisions(formData: FormData) {
+  await requireReviewer();
   const ids = String(formData.get("revisionIds") ?? "")
     .split(",")
     .map((id) => id.trim())
@@ -31,6 +33,7 @@ export async function bulkApproveRevisions(formData: FormData) {
 }
 
 export async function approveAllPending(formData: FormData) {
+  await requireReviewer();
   const clubId = Number(formData.get("clubId")) || undefined;
   const pending = await db.query.contentRevisions.findMany({
     where: and(

@@ -5,7 +5,7 @@ import { Check, Clock3, GitCompareArrows, MessageSquareText, X } from "lucide-re
 import { db } from "@/db/client";
 import { clubs, contentRevisions, events, media, recaps, type RevisionEntityType } from "@/db/schema";
 import { requireReviewer } from "@/lib/rbac";
-import { actOnRevision, bulkApproveRevisions, approveAllPending } from "./actions";
+import { actOnRevision, approveAllPending } from "./actions";
 
 export default async function ApprovalsPage({
   searchParams,
@@ -58,7 +58,10 @@ export default async function ApprovalsPage({
     if (existing) {
       existing.items.push(revision);
     } else {
-      grouped.set(revision.clubId, { name: revision.club.name, items: [revision] });
+      grouped.set(revision.clubId, {
+        name: revision.club?.name ?? `Club #${revision.clubId}`,
+        items: [revision],
+      });
     }
   }
   const sortedGroups = [...grouped.entries()].sort((a, b) => a[1].name.localeCompare(b[1].name));
@@ -87,7 +90,7 @@ export default async function ApprovalsPage({
 
       {/* ── Bulk action toolbar ──────────────────────────────────────────── */}
       {pending.length > 0 ? (
-        <div className="flex flex-wrap gap-2 rounded-2xl bg-surface p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface p-4">
           <form action={approveAllPending}>
             {clubId ? <input type="hidden" name="clubId" value={clubId} /> : null}
             <button type="submit" className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-medium text-white hover:bg-emerald-500">
@@ -98,7 +101,7 @@ export default async function ApprovalsPage({
             </button>
           </form>
           {!clubId && sortedGroups.length > 1 ? (
-            <p className="flex items-center text-xs text-subtle">or filter by club to approve per-club</p>
+            <p className="text-xs text-subtle">Or use the individual &quot;Approve all&quot; buttons per club below</p>
           ) : null}
         </div>
       ) : null}
@@ -108,36 +111,42 @@ export default async function ApprovalsPage({
           <div className="mb-3 flex items-center justify-between"><h2 className="font-semibold">Queue</h2><span className="text-sm text-subtle">{pending.length}</span></div>
           <div className="overflow-hidden rounded-2xl bg-surface">
             {sortedGroups.map(([gClubId, group]) => (
-              <details key={gClubId} open className="group border-b border-line/10 last:border-0">
+              <div key={gClubId} className="border-b border-line/10 last:border-0">
                 {/* Club group header */}
-                <summary className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-sm font-semibold hover:bg-line/5">
-                  <span className="flex items-center gap-2">
-                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-ink/10 text-[10px] font-bold">{group.items.length}</span>
-                    {group.name}
+                <div className="flex items-center justify-between gap-2 border-b border-line/5 bg-surface-2/60 px-4 py-2.5">
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-md bg-ink/10 px-1 text-[10px] font-bold text-ink">
+                      {group.items.length}
+                    </span>
+                    <span className="truncate text-xs font-semibold text-ink">
+                      {group.name}
+                    </span>
                   </span>
                   <form action={approveAllPending}>
                     <input type="hidden" name="clubId" value={gClubId} />
                     <button
                       type="submit"
-                      onClick={(e) => e.stopPropagation()}
                       className="rounded-lg bg-emerald-600/15 px-2.5 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-600/25"
                     >
                       Approve all
                     </button>
                   </form>
-                </summary>
+                </div>
                 {/* Items under this club */}
                 {group.items.map((revision) => (
                   <Link
                     key={revision.id}
                     href={`/management/approvals?${new URLSearchParams({ ...(clubId ? { club: String(clubId) } : {}), ...(entityType ? { type: entityType } : {}), revision: revision.id })}`}
-                    className={`block border-t border-line/5 py-3 pl-8 pr-4 ${selected?.id === revision.id ? "bg-line/8" : "hover:bg-line/5"}`}
+                    className={`block border-b border-line/5 py-3 pl-6 pr-4 last:border-0 ${selected?.id === revision.id ? "bg-line/8" : "hover:bg-line/5"}`}
                   >
-                    <div className="flex items-center justify-between gap-3"><p className="text-sm font-medium capitalize">{revision.entityType.replaceAll("_", " ")}</p><span className="text-xs text-subtle">{age(revision.submittedAt)}</span></div>
-                    <p className="mt-1 text-xs text-subtle">by {revision.author.name}</p>
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-medium capitalize">{revision.entityType.replaceAll("_", " ")}</p>
+                      <span className="text-xs text-subtle">{age(revision.submittedAt)}</span>
+                    </div>
+                    <p className="mt-1 text-xs text-subtle">by {revision.author?.name ?? "Unknown"}</p>
                   </Link>
                 ))}
-              </details>
+              </div>
             ))}
             {!pending.length ? <div className="p-8 text-center"><Check className="mx-auto h-5 w-5 text-emerald-400" /><p className="mt-3 text-sm font-medium">Queue cleared</p></div> : null}
           </div>
@@ -148,7 +157,7 @@ export default async function ApprovalsPage({
             <div className="space-y-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm text-subtle">{selected.club.name}</p>
+                  <p className="text-sm text-subtle">{selected.club?.name ?? "Club"}</p>
                   <h2 className="mt-1 text-2xl font-semibold capitalize">{selected.entityType.replaceAll("_", " ")}</h2>
                   <p className="mt-1 text-xs text-subtle">Base version {selected.baseVersion} · {age(selected.submittedAt)}</p>
                 </div>
@@ -180,7 +189,7 @@ export default async function ApprovalsPage({
         <div className="mt-3 overflow-x-auto rounded-2xl bg-surface">
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead className="text-subtle"><tr><th className="px-4 py-3 font-medium">Club</th><th className="px-4 py-3 font-medium">Type</th><th className="px-4 py-3 font-medium">Author</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 font-medium">Reviewer</th></tr></thead>
-            <tbody>{history.map((revision) => <tr key={revision.id} className="border-t border-line/10"><td className="px-4 py-3">{revision.club.name}</td><td className="px-4 py-3 capitalize text-muted">{revision.entityType.replaceAll("_", " ")}</td><td className="px-4 py-3 text-muted">{revision.author.name}</td><td className="px-4 py-3 capitalize">{revision.status.replaceAll("_", " ")}</td><td className="px-4 py-3 text-muted">{revision.reviewer?.name ?? ""}</td></tr>)}</tbody>
+            <tbody>{history.map((revision) => <tr key={revision.id} className="border-t border-line/10"><td className="px-4 py-3">{revision.club?.name ?? "Unknown"}</td><td className="px-4 py-3 capitalize text-muted">{revision.entityType.replaceAll("_", " ")}</td><td className="px-4 py-3 text-muted">{revision.author?.name ?? "Unknown"}</td><td className="px-4 py-3 capitalize">{revision.status.replaceAll("_", " ")}</td><td className="px-4 py-3 text-muted">{revision.reviewer?.name ?? ""}</td></tr>)}</tbody>
           </table>
         </div>
       </section>
