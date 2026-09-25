@@ -5,7 +5,7 @@ import { Check, Clock3, GitCompareArrows, MessageSquareText, X } from "lucide-re
 import { db } from "@/db/client";
 import { clubs, contentRevisions, events, media, recaps, type RevisionEntityType } from "@/db/schema";
 import { requireReviewer } from "@/lib/rbac";
-import { actOnRevision } from "./actions";
+import { actOnRevision, bulkApproveRevisions, approveAllPending } from "./actions";
 
 export default async function ApprovalsPage({
   searchParams,
@@ -51,6 +51,18 @@ export default async function ApprovalsPage({
     return hours < 24 ? `${hours}h old` : `${Math.floor(hours / 24)}d old`;
   };
 
+  // ── Group pending revisions by club ────────────────────────────────────
+  const grouped = new Map<number, { name: string; items: typeof pending }>();
+  for (const revision of pending) {
+    const existing = grouped.get(revision.clubId);
+    if (existing) {
+      existing.items.push(revision);
+    } else {
+      grouped.set(revision.clubId, { name: revision.club.name, items: [revision] });
+    }
+  }
+  const sortedGroups = [...grouped.entries()].sort((a, b) => a[1].name.localeCompare(b[1].name));
+
   return (
     <div className="space-y-8">
       <header>
@@ -73,20 +85,59 @@ export default async function ApprovalsPage({
         <button className="h-10 rounded-xl bg-ink px-4 text-sm font-medium text-bg" type="submit">Apply filters</button>
       </form>
 
+      {/* ── Bulk action toolbar ──────────────────────────────────────────── */}
+      {pending.length > 0 ? (
+        <div className="flex flex-wrap gap-2 rounded-2xl bg-surface p-4">
+          <form action={approveAllPending}>
+            {clubId ? <input type="hidden" name="clubId" value={clubId} /> : null}
+            <button type="submit" className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-medium text-white hover:bg-emerald-500">
+              <Check className="h-4 w-4" />
+              {clubId
+                ? `Approve all from ${clubRows.find((c) => c.id === clubId)?.name ?? "club"} (${pending.length})`
+                : `Approve all (${pending.length})`}
+            </button>
+          </form>
+          {!clubId && sortedGroups.length > 1 ? (
+            <p className="flex items-center text-xs text-subtle">or filter by club to approve per-club</p>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="grid gap-7 xl:grid-cols-[22rem_minmax(0,1fr)]">
         <aside>
           <div className="mb-3 flex items-center justify-between"><h2 className="font-semibold">Queue</h2><span className="text-sm text-subtle">{pending.length}</span></div>
           <div className="overflow-hidden rounded-2xl bg-surface">
-            {pending.map((revision) => (
-              <Link
-                key={revision.id}
-                href={`/management/approvals?${new URLSearchParams({ ...(clubId ? { club: String(clubId) } : {}), ...(entityType ? { type: entityType } : {}), revision: revision.id })}`}
-                className={`block border-b border-line/10 p-4 last:border-0 ${selected?.id === revision.id ? "bg-line/8" : "hover:bg-line/5"}`}
-              >
-                <div className="flex items-center justify-between gap-3"><p className="text-sm font-medium capitalize">{revision.entityType.replaceAll("_", " ")}</p><span className="text-xs text-subtle">{age(revision.submittedAt)}</span></div>
-                <p className="mt-1 truncate text-sm text-muted">{revision.club.name}</p>
-                <p className="mt-2 text-xs text-subtle">by {revision.author.name}</p>
-              </Link>
+            {sortedGroups.map(([gClubId, group]) => (
+              <details key={gClubId} open className="group border-b border-line/10 last:border-0">
+                {/* Club group header */}
+                <summary className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-sm font-semibold hover:bg-line/5">
+                  <span className="flex items-center gap-2">
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-ink/10 text-[10px] font-bold">{group.items.length}</span>
+                    {group.name}
+                  </span>
+                  <form action={approveAllPending}>
+                    <input type="hidden" name="clubId" value={gClubId} />
+                    <button
+                      type="submit"
+                      onClick={(e) => e.stopPropagation()}
+                      className="rounded-lg bg-emerald-600/15 px-2.5 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-600/25"
+                    >
+                      Approve all
+                    </button>
+                  </form>
+                </summary>
+                {/* Items under this club */}
+                {group.items.map((revision) => (
+                  <Link
+                    key={revision.id}
+                    href={`/management/approvals?${new URLSearchParams({ ...(clubId ? { club: String(clubId) } : {}), ...(entityType ? { type: entityType } : {}), revision: revision.id })}`}
+                    className={`block border-t border-line/5 py-3 pl-8 pr-4 ${selected?.id === revision.id ? "bg-line/8" : "hover:bg-line/5"}`}
+                  >
+                    <div className="flex items-center justify-between gap-3"><p className="text-sm font-medium capitalize">{revision.entityType.replaceAll("_", " ")}</p><span className="text-xs text-subtle">{age(revision.submittedAt)}</span></div>
+                    <p className="mt-1 text-xs text-subtle">by {revision.author.name}</p>
+                  </Link>
+                ))}
+              </details>
             ))}
             {!pending.length ? <div className="p-8 text-center"><Check className="mx-auto h-5 w-5 text-emerald-400" /><p className="mt-3 text-sm font-medium">Queue cleared</p></div> : null}
           </div>

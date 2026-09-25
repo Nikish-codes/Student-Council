@@ -51,3 +51,36 @@ export function hasApprovedFollowupMedia(snapshot: {
 export function isRevisionStale(baseVersion: number, currentVersion: number) {
   return baseVersion !== currentVersion;
 }
+
+/**
+ * Fields that require manual review when changed on a club page.
+ * Everything else is cosmetic and can be auto-approved.
+ */
+export const STRUCTURAL_CLUB_PAGE_FIELDS: ReadonlySet<string> = new Set([
+  "name",
+  "people",
+]);
+
+export type ChangeSeverity = "cosmetic" | "structural";
+
+/**
+ * Compare a proposed club-page snapshot against the current baseline.
+ * Returns `"structural"` if any high-visibility field changed, otherwise `"cosmetic"`.
+ * If the baseline is null (first submission), it's always structural.
+ */
+export function classifyClubPageChangeSeverity(
+  baseline: Record<string, unknown> | null,
+  proposed: Record<string, unknown>,
+): ChangeSeverity {
+  if (!baseline) return "structural";
+  const keys = new Set([...Object.keys(baseline), ...Object.keys(proposed)]);
+  for (const key of keys) {
+    if (
+      JSON.stringify(baseline[key] ?? null) !==
+      JSON.stringify(proposed[key] ?? null)
+    ) {
+      if (STRUCTURAL_CLUB_PAGE_FIELDS.has(key)) return "structural";
+    }
+  }
+  return "cosmetic";
+}

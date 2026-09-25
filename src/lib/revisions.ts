@@ -32,6 +32,7 @@ import { CLUB_GALLERY_UPLOAD_MAX_BYTES } from "@/lib/media-upload-policy";
 import { requireReviewer, requireUser } from "@/lib/rbac";
 import {
   assertRevisionTransition,
+  classifyClubPageChangeSeverity,
   hasApprovedFollowupMedia,
   isRevisionStale,
 } from "@/lib/revision-domain";
@@ -311,6 +312,69 @@ export async function submitRevision(revisionId: string) {
   assertRevisionTransition(revision.status, "submit");
   validateRevisionSnapshot(revision.entityType, revision.snapshot);
   const now = new Date().toISOString();
+
+  // ── Auto-supersede: withdraw any older pending_review revisions for the
+  //    same entity so only the latest submission sits in the queue. ────────
+  const staleRevisions = await db.query.contentRevisions.findMany({
+    where: and(
+      eq(contentRevisions.entityType, revision.entityType),
+      eq(contentRevisions.entityId, revision.entityId),
+      eq(contentRevisions.status, "pending_review"),
+      ne(contentRevisions.id, revision.id),
+    ),
+  });
+  if (staleRevisions.length > 0) {
+    await db
+      .update(contentRevisions)
+      .set({
+        status: "withdrawn",
+        reviewNote: "Superseded by newer submission",
+        updatedAt: now,
+      })
+      .where(
+        and(
+          eq(contentRevisions.entityType, revision.entityType),
+          eq(contentRevisions.entityId, revision.entityId),
+          eq(contentRevisions.status, "pending_review"),
+          ne(contentRevisions.id, revision.id),
+        ),
+      );
+  }
+
+  // ── Auto-approve cosmetic club page changes ────────────────────────────
+  if (revision.entityType === "club_page") {
+    const currentClub = await db.query.clubs.findFirst({
+      where: eq(clubs.id, revision.entityId),
+    });
+    if (currentClub && !isRevisionStale(revision.baseVersion, currentClub.version)) {
+      const baseline: Record<string, unknown> = {
+        name: currentClub.name, blurb: currentClub.blurb, tagline: currentClub.tagline,
+        about: currentClub.about, logoId: currentClub.logoId, coverId: currentClub.coverId,
+        joinUrl: currentClub.joinUrl, members: currentClub.members,
+        foundedYear: currentClub.foundedYear, flagshipEvent: currentClub.flagshipEvent,
+        activities: currentClub.activities, videos: currentClub.videos,
+        gallery: currentClub.gallery, instagramUrl: currentClub.instagramUrl,
+        linkedinUrl: currentClub.linkedinUrl, websiteUrl: currentClub.websiteUrl,
+        contactEmail: currentClub.contactEmail, pageTemplate: currentClub.pageTemplate,
+        pageTheme: currentClub.pageTheme, pageVisibleSections: currentClub.pageVisibleSections,
+        pageSectionHeadings: currentClub.pageSectionHeadings,
+        pageTypography: currentClub.pageTypography,
+      };
+      const severity = classifyClubPageChangeSeverity(baseline, revision.snapshot);
+      if (severity === "cosmetic") {
+        // Submit + auto-approve in one go — never enters the queue.
+        await db
+          .update(contentRevisions)
+          .set({ status: "pending_review", submittedAt: now, updatedAt: now })
+          .where(eq(contentRevisions.id, revision.id));
+        await approveRevisionSnapshot(revision, Number(user.id), "Auto-approved: cosmetic changes only");
+        await revalidateClubPages(revision.clubId);
+        return;
+      }
+    }
+  }
+
+  // ── Normal flow: send to the review queue ──────────────────────────────
   await db.transaction(async (tx) => {
     await tx
       .update(contentRevisions)
@@ -328,6 +392,7 @@ export async function submitRevision(revisionId: string) {
   });
   void notifySubmission(revision.id, revision.entityType, revision.clubId);
 }
+
 
 export async function reviewRevision(input: {
   revisionId: string;
