@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { Picture } from "@/components/ui/picture";
 import { InstagramMark, LinkedInMark } from "@/components/ui/brand-marks";
+import { Marquee } from "@/components/motion/marquee";
 import type { ClubDetail, CouncilMember, EventItem } from "@/lib/schemas";
 import { cn, formatDate, outlookCompose } from "@/lib/utils";
 import { colorContrast } from "@/lib/club-page-theme";
@@ -278,12 +279,37 @@ export function ClubPageRenderer({
   );
 }
 
+function bannerRatio(width?: number, height?: number): number {
+  const DEFAULT = 2.4;
+  const MIN = 1.6;
+  const MAX = 4.2;
+  if (!width || !height) return DEFAULT;
+  return Math.min(MAX, Math.max(MIN, width / height));
+}
+
 function StageWorld({ club, upcoming, past, leads }: WorldProps) {
   // Prefer the dedicated banner. When a club has not supplied one, the first
   // gallery item is its authored highlight and becomes the masthead fallback.
   const hero = club.cover || club.gallery[0]?.url;
+  const coverRatio = bannerRatio(club.coverWidth, club.coverHeight);
   const eventsAreUpcoming = upcoming.length > 0;
   const events = (eventsAreUpcoming ? upcoming : past).slice(0, 3);
+
+  const stats = [
+    club.members != null && { label: "Members", value: club.members },
+    club.foundedYear != null && {
+      label: "Established",
+      value: club.foundedYear,
+    },
+    upcoming.length + past.length > 0 && {
+      label: "Events",
+      value: upcoming.length + past.length,
+    },
+    club.activities.length > 0 && {
+      label: "Activities",
+      value: club.activities.length,
+    },
+  ].filter(Boolean) as Array<{ label: string; value: number }>;
 
   return (
     <main
@@ -293,69 +319,123 @@ function StageWorld({ club, upcoming, past, leads }: WorldProps) {
         color: "var(--club-foreground, #fff5e9)",
       }}
     >
-      <section className="relative min-h-[92svh] overflow-hidden">
+      <section className="relative overflow-hidden">
+        {/* Ambient backlight glow derived from the banner */}
         {hero ? (
-          <Picture
-            src={hero}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            quality={90}
-            className="object-contain object-[center_28%] opacity-65 saturate-125 sm:object-center"
-          />
-        ) : (
-          <StageFallback name={club.name} />
-        )}
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,7,5,.18),rgba(11,7,5,.25)_45%,rgba(11,7,5,.96))]" />
-        <div className="relative z-10 flex min-h-[92svh] flex-col justify-between px-5 pb-16 pt-24 sm:px-10 lg:px-16">
-          <div className="flex items-start justify-between gap-6">
-            <p className="max-w-xs text-xs font-medium uppercase tracking-[0.24em] text-[var(--club-accent)]">
+          <div
+            className="pointer-events-none absolute inset-0 overflow-hidden"
+            aria-hidden
+          >
+            <Picture
+              src={hero}
+              alt=""
+              fill
+              sizes="100vw"
+              quality={40}
+              className="scale-125 object-cover opacity-20 blur-3xl saturate-150"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0b0705]/50 to-[#0b0705]" />
+          </div>
+        ) : null}
+
+        <div className="relative z-10 mx-auto max-w-6xl px-5 pb-14 pt-8 sm:px-10 sm:pb-20 sm:pt-12 lg:px-16">
+          {/* Top Category Kicker */}
+          <div className="flex items-center justify-between gap-4">
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.24em] text-[var(--club-accent)]">
               {club.categoryLabel || club.tags.join(" · ")}
             </p>
-            <LogoSticker club={club} className="rotate-3" />
           </div>
 
-          <div className="max-w-5xl">
-            <h1 className="max-w-4xl break-words font-sans text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold uppercase leading-[0.92] tracking-[-0.03em]">
-              {club.name}
-            </h1>
+          {/* Dedicated Club Banner — framed, full-opacity, pristine & never covered */}
+          {hero ? (
+            <div className="relative mt-4 w-full overflow-hidden rounded-2xl border border-white/15 bg-[#120b08] shadow-[0_20px_50px_rgba(0,0,0,0.8)] sm:mt-6 sm:rounded-3xl">
+              <div
+                className="relative w-full"
+                style={{
+                  aspectRatio: String(coverRatio),
+                  maxHeight: "440px",
+                }}
+              >
+                <Picture
+                  src={hero}
+                  alt={`${club.name} banner`}
+                  fill
+                  priority
+                  sizes="(min-width: 1536px) 1400px, 100vw"
+                  quality={95}
+                  className="object-cover object-center"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 sm:mt-6">
+              <StageFallback name={club.name} />
+            </div>
+          )}
+
+          {/* Club Identity Lockup — Logo sits cleanly with Title, never covering the banner */}
+          <div className="mt-6 sm:mt-8">
+            <div className="flex items-center gap-4 sm:gap-6">
+              <LogoSticker
+                club={club}
+                className="h-16 w-16 shrink-0 rounded-2xl border border-white/20 shadow-xl sm:h-20 sm:w-20 md:h-24 md:w-24"
+              />
+              <div className="min-w-0 flex-1">
+                <h1 className="break-words font-sans text-3xl font-extrabold uppercase leading-[0.92] tracking-[-0.03em] sm:text-5xl lg:text-6xl">
+                  {club.name}
+                </h1>
+                {club.tags.length > 0 ? (
+                  <p className="mt-2 font-mono text-xs uppercase tracking-wider text-[var(--club-accent)] sm:hidden">
+                    {club.tags.join(" · ")}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
             {club.tagline ? (
-              <p className="mt-5 max-w-[60ch] text-pretty text-lg font-medium leading-[1.4] text-[#ffe5d6] sm:text-xl">
+              <p className="mt-4 max-w-[65ch] text-pretty text-base font-medium leading-[1.4] text-[#ffe5d6] sm:text-xl">
                 {club.tagline}
               </p>
             ) : null}
-            <div className="mt-9 flex flex-wrap items-center gap-3">
+
+            <div className="mt-7 flex flex-wrap items-center gap-3 sm:mt-9">
               <JoinLink
                 club={club}
                 label="Join the club"
-                className="bg-[var(--club-accent)] text-[var(--club-accent-ink)] hover:brightness-110"
+                className="min-h-12 rounded-xl bg-[var(--club-accent)] px-6 text-sm font-semibold text-[var(--club-accent-ink)] shadow-lg hover:brightness-110"
               />
               <a
                 href="#stage-story"
-                className="inline-flex min-h-12 items-center gap-2 border border-white/25 px-5 text-sm font-medium text-white transition-colors hover:border-white/60"
+                className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/25 px-5 text-sm font-medium text-white transition-colors hover:border-white/60"
               >
                 Enter the story <ArrowRight className="h-4 w-4" />
               </a>
             </div>
+
             <StageSocialRail club={club} />
           </div>
         </div>
       </section>
 
+      {/* Marquee Ticker */}
       <div className="overflow-hidden border-y border-black/20 bg-[var(--club-accent)] py-3 text-[var(--club-accent-ink)]">
-        <p className="whitespace-nowrap text-center text-xs font-black uppercase tracking-[0.28em] sm:text-sm">
-          {club.tags.join(" / ")} / {club.flagshipEvent || club.name} /{" "}
-          {club.tags.join(" / ")}
-        </p>
+        <Marquee speed={25} className="py-0.5">
+          <span className="whitespace-nowrap font-mono text-xs font-black uppercase tracking-[0.28em] sm:text-sm">
+            {club.tags.join(" / ")} / {club.flagshipEvent || club.name} /{" "}
+            {club.categoryLabel || "Club"} /&nbsp;
+          </span>
+        </Marquee>
       </div>
 
+      {/* Story / About Section */}
       {hasClubSection(club, "about") ? (
         <section
           id="stage-story"
-          className="grid gap-12 px-5 py-20 sm:px-10 lg:grid-cols-12 lg:px-16 lg:py-24"
+          className="mx-auto max-w-6xl grid gap-12 px-5 py-16 sm:px-10 sm:py-20 lg:grid-cols-12 lg:px-16 lg:py-24"
         >
-          <div className="lg:col-span-7">
+          <div
+            className={stats.length > 0 ? "lg:col-span-7" : "lg:col-span-12"}
+          >
             <StageLabel>
               {clubHeading(club, "about", "Why we exist")}
             </StageLabel>
@@ -363,44 +443,65 @@ function StageWorld({ club, upcoming, past, leads }: WorldProps) {
               {club.about || club.blurb}
             </p>
           </div>
-          <dl
-            className="grid grid-cols-2 gap-px self-start lg:col-span-5"
-            style={{
-              backgroundColor:
-                "color-mix(in srgb, var(--club-accent) 25%, transparent)",
-            }}
-          >
-            <StageStat label="Members" value={club.members} />
-            <StageStat label="Established" value={club.foundedYear} />
-            <StageStat label="Events" value={upcoming.length + past.length} />
-            <StageStat label="Activities" value={club.activities.length} />
-          </dl>
+          {stats.length > 0 ? (
+            <dl
+              className={cn(
+                "grid gap-px self-start overflow-hidden rounded-xl lg:col-span-5",
+                stats.length === 1 ? "grid-cols-1" : "grid-cols-2",
+              )}
+              style={{
+                backgroundColor:
+                  "color-mix(in srgb, var(--club-accent) 25%, transparent)",
+              }}
+            >
+              {stats.map((s) => (
+                <div key={s.label} className="bg-[#120b08] p-5 sm:p-6">
+                  <dt className="text-xs uppercase tracking-[0.18em] text-[#b89583]">
+                    {s.label}
+                  </dt>
+                  <dd className="mt-3 text-2xl font-bold text-[#fff5e9] sm:text-3xl">
+                    {s.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          ) : null}
         </section>
       ) : null}
 
+      {/* Activities Section */}
       {club.activities.length > 0 ? (
-        <section className="border-t border-white/10 px-5 py-20 sm:px-10 lg:px-16 lg:py-24">
-          <StageLabel>
-            {clubHeading(club, "activities", "What happens here")}
-          </StageLabel>
-          <ol className="mt-10 divide-y divide-white/12">
-            {club.activities.map((activity, index) => (
-              <li
-                key={`${activity.title}-${index}`}
-                className="grid gap-3 py-8 sm:grid-cols-[5rem_1fr_1fr] sm:items-baseline"
-              >
-                <span className="font-mono text-xs text-[var(--club-accent)]">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <h2 className="break-words text-xl font-bold leading-tight sm:text-2xl">
-                  {activity.title}
-                </h2>
-                <p className="max-w-[65ch] text-base leading-[1.65] text-[#d4b8a8]">
-                  {activity.description}
-                </p>
-              </li>
-            ))}
-          </ol>
+        <section className="border-t border-white/10 px-5 py-16 sm:px-10 sm:py-20 lg:px-16 lg:py-24">
+          <div className="mx-auto max-w-6xl">
+            <StageLabel>
+              {clubHeading(club, "activities", "What happens here")}
+            </StageLabel>
+            <ol className="mt-10 divide-y divide-white/12">
+              {club.activities.map((activity, index) => (
+                <li
+                  key={`${activity.title}-${index}`}
+                  className="grid gap-3 py-8 sm:grid-cols-[5rem_1fr_1fr] sm:items-baseline"
+                >
+                  <span className="font-mono text-xs text-[var(--club-accent)]">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <h2
+                    className={cn(
+                      "break-words text-xl font-bold leading-tight sm:text-2xl",
+                      !activity.description && "sm:col-span-2",
+                    )}
+                  >
+                    {activity.title}
+                  </h2>
+                  {activity.description ? (
+                    <p className="max-w-[65ch] text-base leading-[1.65] text-[#d4b8a8]">
+                      {activity.description}
+                    </p>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          </div>
         </section>
       ) : null}
 
@@ -1045,8 +1146,11 @@ function LogoSticker({
 
 function StageFallback({ name }: { name: string }) {
   return (
-    <div className="absolute inset-0 overflow-hidden bg-[#160a05]" aria-hidden>
-      <span className="absolute -left-10 top-1/2 -translate-y-1/2 whitespace-nowrap font-sans text-[22vw] font-black uppercase leading-none text-[var(--club-accent)] opacity-20">
+    <div
+      className="relative flex aspect-[3/1] min-h-[140px] max-h-[360px] w-full items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#160a05] sm:rounded-3xl"
+      aria-hidden
+    >
+      <span className="whitespace-nowrap font-sans text-[clamp(2.5rem,8vw,6rem)] font-black uppercase leading-none text-[var(--club-accent)] opacity-25">
         {name}
       </span>
       <span className="absolute bottom-[18%] left-[10%] h-px w-4/5 -rotate-6 bg-[var(--club-accent)] opacity-60" />
@@ -1077,27 +1181,29 @@ function StageStat({ label, value }: { label: string; value?: number }) {
 function StageGallery({ club }: { club: ClubDetail }) {
   if (club.gallery.length === 0) return null;
   return (
-    <section className="border-t border-white/10 px-5 py-20 sm:px-10 lg:px-16 lg:py-24">
-      <StageLabel>{clubHeading(club, "gallery", "Seen and heard")}</StageLabel>
-      <div className="mt-10 columns-1 gap-4 sm:columns-2 lg:columns-3">
-        {club.gallery.map((item, index) => (
-          <figure
-            key={`${item.url}-${index}`}
-            className="mb-4 break-inside-avoid"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={item.url}
-              alt={item.caption || ""}
-              className="h-auto w-full"
-            />
-            {item.caption ? (
-              <figcaption className="mt-2 text-xs text-[#b89583]">
-                {item.caption}
-              </figcaption>
-            ) : null}
-          </figure>
-        ))}
+    <section className="border-t border-white/10 px-5 py-16 sm:px-10 sm:py-20 lg:px-16 lg:py-24">
+      <div className="mx-auto max-w-6xl">
+        <StageLabel>{clubHeading(club, "gallery", "Seen and heard")}</StageLabel>
+        <div className="mt-10 columns-1 gap-4 sm:columns-2 lg:columns-3">
+          {club.gallery.map((item, index) => (
+            <figure
+              key={`${item.url}-${index}`}
+              className="mb-4 break-inside-avoid overflow-hidden rounded-xl bg-surface-2"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={item.url}
+                alt={item.caption || ""}
+                className="h-auto w-full object-cover"
+              />
+              {item.caption ? (
+                <figcaption className="p-3 text-xs text-[#b89583]">
+                  {item.caption}
+                </figcaption>
+              ) : null}
+            </figure>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -1112,29 +1218,31 @@ function StagePeople({
 }) {
   if (leads.length === 0) return null;
   return (
-    <section className="border-t border-white/10 px-5 py-20 sm:px-10 lg:px-16 lg:py-24">
-      <StageLabel>{clubHeading(club, "people", "Our members")}</StageLabel>
-      <div className="mt-10 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-        {leads.map((lead) => (
-          <article key={lead.id}>
-            <div className="relative aspect-square overflow-hidden bg-[#120b08]">
-              <Picture
-                src={lead.photo}
-                alt={lead.name}
-                fill
-                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                className="object-contain object-center"
-              />
-            </div>
-            <h3 className="mt-4 break-words text-lg font-bold leading-tight">
-              {lead.name}
-            </h3>
-            <p className="mt-1 text-sm text-[#b89583]">{lead.role}</p>
-            {lead.program ? (
-              <p className="mt-1 text-xs text-[#8e7467]">{lead.program}</p>
-            ) : null}
-          </article>
-        ))}
+    <section className="border-t border-white/10 px-5 py-16 sm:px-10 sm:py-20 lg:px-16 lg:py-24">
+      <div className="mx-auto max-w-6xl">
+        <StageLabel>{clubHeading(club, "people", "Our members")}</StageLabel>
+        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-x-6 sm:gap-y-10">
+          {leads.map((lead) => (
+            <article key={lead.id}>
+              <div className="relative aspect-square overflow-hidden rounded-xl bg-[#120b08]">
+                <Picture
+                  src={lead.photo}
+                  alt={lead.name}
+                  fill
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 50vw"
+                  className="object-contain object-center"
+                />
+              </div>
+              <h3 className="mt-4 break-words text-base sm:text-lg font-bold leading-tight">
+                {lead.name}
+              </h3>
+              <p className="mt-1 text-xs sm:text-sm text-[#b89583]">{lead.role}</p>
+              {lead.program ? (
+                <p className="mt-1 text-[11px] sm:text-xs text-[#8e7467]">{lead.program}</p>
+              ) : null}
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -1151,26 +1259,28 @@ function StageEvents({
 }) {
   if (events.length === 0) return null;
   return (
-    <section className="border-t border-white/10 px-5 py-20 sm:px-10 lg:px-16 lg:py-24">
-      <StageLabel>
-        {clubHeading(club, "events", upcoming ? "On the bill" : "Past shows")}
-      </StageLabel>
-      <div className="mt-10 divide-y divide-white/10 border-y border-white/10">
-        {events.map((event) => (
-          <Link
-            key={event.slug}
-            href={`/events/${event.slug}`}
-            className="grid gap-3 py-7 transition-colors hover:text-[var(--club-accent)] sm:grid-cols-[10rem_1fr_auto] sm:items-center"
-          >
-            <span className="font-mono text-xs text-[#b89583]">
-              {formatDate(event.date)}
-            </span>
-            <span className="break-words text-xl font-bold leading-tight sm:text-2xl">
-              {event.title}
-            </span>
-            <ArrowUpRight className="h-5 w-5" />
-          </Link>
-        ))}
+    <section className="border-t border-white/10 px-5 py-16 sm:px-10 sm:py-20 lg:px-16 lg:py-24">
+      <div className="mx-auto max-w-6xl">
+        <StageLabel>
+          {clubHeading(club, "events", upcoming ? "On the bill" : "Past shows")}
+        </StageLabel>
+        <div className="mt-10 divide-y divide-white/10 border-y border-white/10">
+          {events.map((event) => (
+            <Link
+              key={event.slug}
+              href={`/events/${event.slug}`}
+              className="grid gap-3 py-7 transition-colors hover:text-[var(--club-accent)] sm:grid-cols-[10rem_1fr_auto] sm:items-center"
+            >
+              <span className="font-mono text-xs text-[#b89583]">
+                {formatDate(event.date)}
+              </span>
+              <span className="break-words text-xl font-bold leading-tight sm:text-2xl">
+                {event.title}
+              </span>
+              <ArrowUpRight className="h-5 w-5" />
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -1184,14 +1294,16 @@ function StageClose({ club }: { club: ClubDetail }) {
         borderColor: "color-mix(in srgb, var(--club-accent) 30%, transparent)",
       }}
     >
-      <p className="font-sans text-[clamp(2.25rem,6vw,4.5rem)] font-extrabold uppercase leading-[0.94] tracking-[-0.03em]">
-        Find your place in the sound.
-      </p>
-      <JoinLink
-        club={club}
-        label="Join the club"
-        className="mx-auto mt-10 bg-[var(--club-accent)] text-[var(--club-accent-ink)]"
-      />
+      <div className="mx-auto max-w-4xl">
+        <p className="font-sans text-[clamp(2.25rem,6vw,4.5rem)] font-extrabold uppercase leading-[0.94] tracking-[-0.03em]">
+          Find your place in the sound.
+        </p>
+        <JoinLink
+          club={club}
+          label="Join the club"
+          className="mx-auto mt-8 inline-flex min-h-12 items-center justify-center rounded-xl bg-[var(--club-accent)] px-8 text-sm font-semibold text-[var(--club-accent-ink)] shadow-lg sm:mt-10"
+        />
+      </div>
     </section>
   );
 }
