@@ -421,8 +421,14 @@ function StageWorld({ club, upcoming, past, leads }: WorldProps) {
       <div className="overflow-hidden border-y border-black/20 bg-[var(--club-accent)] py-3 text-[var(--club-accent-ink)]">
         <Marquee speed={25} className="py-0.5">
           <span className="whitespace-nowrap font-mono text-xs font-black uppercase tracking-[0.28em] sm:text-sm">
-            {club.tags.join(" / ")} / {club.flagshipEvent || club.name} /{" "}
-            {club.categoryLabel || "Club"} /&nbsp;
+            {club.pageSectionHeadings?.ticker?.trim() ? (
+              <>{club.pageSectionHeadings.ticker.trim()}&nbsp;·&nbsp;</>
+            ) : (
+              <>
+                {club.tags.join(" / ")} / {club.flagshipEvent || club.name} /{" "}
+                {club.categoryLabel || "Club"} /&nbsp;
+              </>
+            )}
           </span>
         </Marquee>
       </div>
@@ -1287,6 +1293,10 @@ function StageEvents({
 }
 
 function StageClose({ club }: { club: ClubDetail }) {
+  const closeHeading =
+    club.pageSectionHeadings?.close?.trim() ||
+    club.tagline?.trim() ||
+    `Join ${club.name}`;
   return (
     <section
       className="border-t px-5 pb-24 pt-20 text-center sm:px-10 sm:pb-28 sm:pt-24"
@@ -1296,7 +1306,7 @@ function StageClose({ club }: { club: ClubDetail }) {
     >
       <div className="mx-auto max-w-4xl">
         <p className="font-sans text-[clamp(2.25rem,6vw,4.5rem)] font-extrabold uppercase leading-[0.94] tracking-[-0.03em]">
-          Find your place in the sound.
+          {closeHeading}
         </p>
         <JoinLink
           club={club}
@@ -1390,10 +1400,14 @@ function ZineEvents({
 }
 
 function ZineClose({ club }: { club: ClubDetail }) {
+  const closeHeading =
+    club.pageSectionHeadings?.close?.trim() ||
+    club.tagline?.trim() ||
+    "Make the next issue.";
   return (
     <section className="bg-[var(--club-accent)] px-5 pb-36 pt-24 text-center text-[var(--club-accent-ink)] sm:px-10">
       <p className="font-sans text-[clamp(3rem,9vw,6rem)] font-black uppercase leading-[0.85] tracking-[-0.04em]">
-        Make the next issue.
+        {closeHeading}
       </p>
       <JoinLink
         club={club}
@@ -1484,10 +1498,14 @@ function ClubhouseGallery({ club }: { club: ClubDetail }) {
 }
 
 function ClubhouseClose({ club }: { club: ClubDetail }) {
+  const closeHeading =
+    club.pageSectionHeadings?.close?.trim() ||
+    club.tagline?.trim() ||
+    "There’s room for you here.";
   return (
     <section className="bg-[#b9c7ff] px-5 pb-36 pt-24 text-center sm:px-10">
       <p className="mx-auto max-w-4xl font-display text-[clamp(3rem,8vw,6rem)] leading-[0.9] tracking-[-0.04em]">
-        There’s room for you here.
+        {closeHeading}
       </p>
       <JoinLink
         club={club}
@@ -1575,11 +1593,15 @@ function ExhibitionPeople({ leads }: { leads: CouncilMember[] }) {
 }
 
 function ExhibitionClose({ club }: { club: ClubDetail }) {
+  const closeHeading =
+    club.pageSectionHeadings?.close?.trim() ||
+    club.tagline?.trim() ||
+    "Become part of the next work.";
   return (
     <section className="px-5 pb-36 pt-24 sm:px-10 lg:px-16">
       <div className="flex flex-col justify-between gap-10 border-t border-black/20 pt-10 sm:flex-row sm:items-end">
         <p className="max-w-4xl text-5xl font-medium leading-[0.9] tracking-[-0.04em] sm:text-7xl">
-          Become part of the next work.
+          {closeHeading}
         </p>
         <JoinLink
           club={club}
@@ -1673,6 +1695,10 @@ function SignalEvents({
 }
 
 function SignalClose({ club }: { club: ClubDetail }) {
+  const closeHeading =
+    club.pageSectionHeadings?.close?.trim() ||
+    club.tagline?.trim() ||
+    "Your signal belongs here.";
   return (
     <section className="px-5 pb-36 pt-24 sm:px-10 lg:px-16">
       <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#da3217]">
@@ -1680,7 +1706,7 @@ function SignalClose({ club }: { club: ClubDetail }) {
       </p>
       <div className="mt-8 flex flex-col justify-between gap-10 border-t border-black/25 pt-8 sm:flex-row sm:items-end">
         <p className="max-w-4xl font-sans text-[clamp(3rem,8vw,6rem)] font-black uppercase leading-[0.84] tracking-[-0.04em]">
-          Your signal belongs here.
+          {closeHeading}
         </p>
         <JoinLink
           club={club}

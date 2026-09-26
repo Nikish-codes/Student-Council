@@ -155,7 +155,9 @@ export const getCouncilPageMembers = cache(
   async (): Promise<CouncilMember[]> => {
     const members = await getCouncil();
     return members.filter(
-      (member) => member.memberType === "president" || Boolean(member.groupId),
+      (member) =>
+        !member.clubId &&
+        (member.memberType === "president" || Boolean(member.groupId)),
     );
   },
 );
@@ -216,6 +218,7 @@ export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
 
   const byGroup = new Map<string, CouncilMemberWithCoLeads[]>();
   for (const m of members) {
+    if (m.clubId) continue;
     // The president gets the full-width takeover — never a card.
     if (m.memberType === "president") continue;
     // Co-leads WITHOUT a group stay dialog-only (they hang off their lead's
@@ -253,7 +256,7 @@ export const getCouncilSections = cache(async (): Promise<CouncilSection[]> => {
  * still resolves.
  */
 export async function getPresident(): Promise<CouncilMember | undefined> {
-  const all = await getCouncil();
+  const all = (await getCouncil()).filter((m) => !m.clubId);
   return (
     all.find((m) => m.memberType === "president") ??
     all.find((m) => m.isPresident) ??

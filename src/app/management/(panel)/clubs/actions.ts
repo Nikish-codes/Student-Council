@@ -148,6 +148,18 @@ export async function saveClub(id: number | null, fd: FormData) {
     linkedinUrl: s(fd, "linkedinUrl") || null,
     websiteUrl: s(fd, "websiteUrl") || null,
     contactEmail: s(fd, "contactEmail") || null,
+    pageSectionHeadings: (() => {
+      const ticker = s(fd, "tickerText");
+      const close = s(fd, "closeHeading");
+      const headings: Record<string, string> = {
+        ...((existing?.pageSectionHeadings as Record<string, string>) || {}),
+      };
+      if (ticker) headings.ticker = ticker;
+      else delete headings.ticker;
+      if (close) headings.close = close;
+      else delete headings.close;
+      return headings;
+    })(),
   };
 
   let slug: string;
@@ -190,7 +202,7 @@ export async function saveClub(id: number | null, fd: FormData) {
           pageTemplate,
           pageTheme: existing.pageTheme ?? templateTheme,
           pageVisibleSections: existing.pageVisibleSections ?? ["about", "activities", "videos", "events", "gallery", "people"],
-          pageSectionHeadings: existing.pageSectionHeadings ?? {},
+          pageSectionHeadings: base.pageSectionHeadings,
           pageTypography: existing.pageTypography ?? "signal",
         },
       });

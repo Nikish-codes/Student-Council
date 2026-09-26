@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { eq, ne, asc } from "drizzle-orm";
+import { eq, ne, asc, and, isNull } from "drizzle-orm";
 import { db } from "@/db/client";
 import { councilMembers as t, siteSettings } from "@/db/schema";
 import { requireOps, requireRole } from "@/lib/rbac";
@@ -72,11 +72,11 @@ export async function saveCouncil(id: number | null, fd: FormData) {
   }
 
   // Enforce a single president: demote everyone else to a plain member.
-  if (isPresident && savedId) {
+  if (isPresident && savedId && !values.clubId) {
     await db
       .update(t)
       .set({ memberType: "member", isPresident: false })
-      .where(ne(t.id, savedId));
+      .where(and(ne(t.id, savedId), isNull(t.clubId)));
   }
 
   bust();
@@ -114,7 +114,11 @@ export async function saveCouncilGroupPhoto(fd: FormData) {
 
 export async function moveCouncilMember(id: number, dir: "up" | "down") {
   await requireOps();
-  const rows = await db.select().from(t).orderBy(asc(t.sortOrder), asc(t.id));
+  const rows = await db
+    .select()
+    .from(t)
+    .where(isNull(t.clubId))
+    .orderBy(asc(t.sortOrder), asc(t.id));
   const i = rows.findIndex((g) => g.id === id);
   const j = dir === "up" ? i - 1 : i + 1;
   if (i < 0 || j < 0 || j >= rows.length) return;

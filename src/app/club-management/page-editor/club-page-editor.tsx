@@ -393,6 +393,52 @@ export function ClubPageEditor({
                   />
                 </div>
               ))}
+
+              <div className="pt-2 border-t border-line/10 space-y-3">
+                <div className="grid gap-1.5 rounded-xl bg-surface-2 p-3">
+                  <label className="text-xs font-semibold text-ink">
+                    Scrolling marquee ticker
+                  </label>
+                  <p className="text-xs text-muted">
+                    Custom text running across the page banner · defaults to tags and flagship event
+                  </p>
+                  <input
+                    className="rounded-lg border border-line/15 bg-bg px-3 py-2 text-sm outline-none focus:border-line/40"
+                    name="headingTicker"
+                    placeholder="e.g. & Visual Arts / Product Design / Industrial Design / THE BIGGEST AUTO EXPO"
+                    value={headings.ticker ?? ""}
+                    onChange={(event) =>
+                      setHeadings((current) => ({
+                        ...current,
+                        ticker: event.target.value,
+                      }))
+                    }
+                    aria-label="Scrolling ticker text"
+                  />
+                </div>
+
+                <div className="grid gap-1.5 rounded-xl bg-surface-2 p-3">
+                  <label className="text-xs font-semibold text-ink">
+                    Closing call-to-action headline
+                  </label>
+                  <p className="text-xs text-muted">
+                    Headline above the join button · defaults to tagline or &ldquo;Join {name}&rdquo;
+                  </p>
+                  <input
+                    className="rounded-lg border border-line/15 bg-bg px-3 py-2 text-sm outline-none focus:border-line/40"
+                    name="headingClose"
+                    placeholder="e.g. Find your craft. Build what matters."
+                    value={headings.close ?? ""}
+                    onChange={(event) =>
+                      setHeadings((current) => ({
+                        ...current,
+                        close: event.target.value,
+                      }))
+                    }
+                    aria-label="Closing call-to-action headline"
+                  />
+                </div>
+              </div>
             </div>
           </EditorSection>
 

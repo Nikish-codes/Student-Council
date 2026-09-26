@@ -132,7 +132,7 @@ export const clubPageSnapshotSchema = z.object({
       z.enum(["about", "activities", "videos", "events", "gallery", "people"]),
     )
     .min(1),
-  pageSectionHeadings: z.record(z.string(), z.string().max(80)),
+  pageSectionHeadings: z.record(z.string(), z.string().max(200)),
   pageTypography: z.literal("friendly"),
   people: z
     .array(

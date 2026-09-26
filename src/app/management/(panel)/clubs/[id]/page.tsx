@@ -176,6 +176,30 @@ export default async function ClubEditor({
       </Fieldset>
 
       <Fieldset
+        title="Page copy & headlines"
+        hint="Customize the scrolling marquee ticker and closing call-to-action on the club page."
+      >
+        <TextField
+          name="tickerText"
+          label="Scrolling ticker text"
+          hint="Custom marquee text · defaults to club tags and flagship event"
+          maxLength={180}
+          defaultValue={
+            (row?.pageSectionHeadings as Record<string, string> | null)?.ticker ?? ""
+          }
+        />
+        <TextField
+          name="closeHeading"
+          label="Closing section heading"
+          hint="Headline above the join button · defaults to club tagline or 'Join [Club]'"
+          maxLength={120}
+          defaultValue={
+            (row?.pageSectionHeadings as Record<string, string> | null)?.close ?? ""
+          }
+        />
+      </Fieldset>
+
+      <Fieldset
         title="What we run"
         hint="The activities and events this club is known for."
       >

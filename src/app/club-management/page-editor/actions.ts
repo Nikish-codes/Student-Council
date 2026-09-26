@@ -93,6 +93,12 @@ export async function saveClubPageRevision(formData: FormData) {
       gallery: s(formData, "headingGallery") || "Gallery",
       people: s(formData, "headingPeople") || "Our people",
       videos: s(formData, "headingVideos") || "Watch",
+      ...(s(formData, "headingTicker")
+        ? { ticker: s(formData, "headingTicker") }
+        : {}),
+      ...(s(formData, "headingClose")
+        ? { close: s(formData, "headingClose") }
+        : {}),
     },
     pageTypography: "friendly",
     people: parsedExisting?.success ? parsedExisting.data.people : undefined,

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, isNull } from "drizzle-orm";
 import { Rows3 } from "lucide-react";
 import { db } from "@/db/client";
 import {
@@ -19,7 +19,7 @@ import { CouncilTable } from "./council-table";
 export default async function CouncilPage() {
   const user = await requireOps();
   const [rows, groups, settings, media] = await Promise.all([
-    db.select().from(t).orderBy(asc(t.sortOrder)),
+    db.select().from(t).where(isNull(t.clubId)).orderBy(asc(t.sortOrder)),
     db.select({ id: g.id, title: g.title }).from(g),
     db.query.siteSettings.findFirst({ where: eq(siteSettings.id, 1) }),
     mediaOptions(),
