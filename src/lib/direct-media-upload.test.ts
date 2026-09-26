@@ -129,4 +129,45 @@ describe("direct media upload client", () => {
       "too large for this upload route",
     );
   });
+
+  it("transparently falls back to server upload if direct R2 PUT fails (e.g. CORS)", async () => {
+    const file = browserImage();
+    const fetchMock = vi
+      .fn()
+      // 1. prepare
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            key: "test-key-img.webp",
+            uploadUrl: "https://example.r2.cloudflarestorage.com/signed",
+            headers: { "Content-Type": "image/webp" },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      )
+      // 2. direct PUT throws TypeError (e.g. CORS preflight failed)
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      // 3. fallback POST /api/media/upload
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            media: {
+              id: 99,
+              url: "https://cdn.example/media/test-key-img.webp",
+              filename: "test-key-img.webp",
+              mimeType: "image/webp",
+              alt: "club-night.webp",
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const media = await uploadMediaDirect(file);
+    expect(media.id).toBe(99);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls[2][0]).toBe("/api/media/upload");
+  });
 });
+

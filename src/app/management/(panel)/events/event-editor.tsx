@@ -256,11 +256,14 @@ export function EventEditor({
         <div>
           <MediaField
             name="bannerId"
-            label="Banner image"
-            hint="upload or pick"
+            label="Banner / Poster image"
+            hint="Recommended: 4:5 vertical (1080×1350px) or 16:9 (1920×1080px)"
             defaultValue={event?.bannerId ?? null}
             media={media as MediaOption[]}
           />
+          <p className="mt-1.5 text-xs text-subtle">
+            <strong>Recommended size:</strong> <strong>1080 × 1350 px (4:5 vertical poster)</strong> for the best presentation on event cards and detail pages, or <strong>1920 × 1080 px (16:9 landscape)</strong>. The entire image will fit cleanly without being stretched or cut off.
+          </p>
         </div>
 
         <fieldset className="rounded-2xl border border-line/10 p-5">

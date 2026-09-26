@@ -542,14 +542,24 @@ function Slab({ event }: { event: EventItem }) {
       <div className="relative grid grid-cols-12 items-stretch gap-6">
         {/* Poster + date overlay */}
         <div data-slab-date className="col-span-12 sm:col-span-5 lg:col-span-4">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-line/10 bg-surface/40">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-line/10 bg-surface/40 flex items-center justify-center">
+            {/* Ambient background glow */}
+            <Picture
+              src={event.banner}
+              alt=""
+              fill
+              sizes="10vw"
+              fallbackLabel=""
+              className="scale-125 object-cover opacity-25 blur-xl pointer-events-none"
+            />
+            {/* Fitted foreground image */}
             <Picture
               src={event.banner}
               alt={event.title}
               fill
               sizes="(min-width: 1024px) 28vw, (min-width: 640px) 40vw, 90vw"
               fallbackLabel={`${monthShort} · ${dayNum}`}
-              className="object-cover transition-transform duration-700 ease-out group-hover/slab:scale-[1.04]"
+              className="object-contain p-1.5 transition-transform duration-700 ease-out group-hover/slab:scale-[1.04]"
             />
             <div
               aria-hidden

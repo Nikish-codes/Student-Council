@@ -6,6 +6,7 @@ import { db } from "@/db/client";
 import { clubs, contentRevisions, events, media, recaps, type RevisionEntityType } from "@/db/schema";
 import { requireReviewer } from "@/lib/rbac";
 import { actOnRevision, approveAllPending } from "./actions";
+import { ApproveAllButton, ApproveClubButton } from "./approve-buttons";
 
 export default async function ApprovalsPage({
   searchParams,
@@ -93,12 +94,11 @@ export default async function ApprovalsPage({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface p-4">
           <form action={approveAllPending}>
             {clubId ? <input type="hidden" name="clubId" value={clubId} /> : null}
-            <button type="submit" className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-medium text-white hover:bg-emerald-500">
-              <Check className="h-4 w-4" />
-              {clubId
+            <ApproveAllButton
+              label={clubId
                 ? `Approve all from ${clubRows.find((c) => c.id === clubId)?.name ?? "club"} (${pending.length})`
                 : `Approve all (${pending.length})`}
-            </button>
+            />
           </form>
           {!clubId && sortedGroups.length > 1 ? (
             <p className="text-xs text-subtle">Or use the individual &quot;Approve all&quot; buttons per club below</p>
@@ -124,12 +124,7 @@ export default async function ApprovalsPage({
                   </span>
                   <form action={approveAllPending}>
                     <input type="hidden" name="clubId" value={gClubId} />
-                    <button
-                      type="submit"
-                      className="rounded-lg bg-emerald-600/15 px-2.5 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-600/25"
-                    >
-                      Approve all
-                    </button>
+                    <ApproveClubButton />
                   </form>
                 </div>
                 {/* Items under this club */}

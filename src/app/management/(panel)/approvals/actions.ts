@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { contentRevisions } from "@/db/schema";
@@ -12,7 +12,16 @@ export async function actOnRevision(formData: FormData) {
   const revisionId = String(formData.get("revisionId") ?? "");
   const action = String(formData.get("action") ?? "") as "approve" | "request_changes" | "decline";
   const note = String(formData.get("note") ?? "").trim();
-  await reviewRevision({ revisionId, action, note });
+  try {
+    await reviewRevision({ revisionId, action, note });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message === "STALE_REVISION") {
+      console.warn(`[approvals] Revision ${revisionId} is stale (base version moved).`);
+    } else {
+      throw error;
+    }
+  }
   revalidateAll();
 }
 
@@ -45,15 +54,43 @@ export async function approveAllPending(formData: FormData) {
  * queue forever.
  */
 async function approveOrWithdrawStale(ids: string[]) {
+  if (ids.length === 0) return;
   const now = new Date().toISOString();
-  for (const id of ids) {
+
+  // Fetch revisions to group by entity and process newest first
+  const rows = await db.query.contentRevisions.findMany({
+    where: inArray(contentRevisions.id, ids),
+  });
+
+  // Group by entityType:entityId
+  const byEntity = new Map<string, typeof rows>();
+  for (const r of rows) {
+    const key = `${r.entityType}:${r.entityId}`;
+    const list = byEntity.get(key) ?? [];
+    list.push(r);
+    byEntity.set(key, list);
+  }
+
+  for (const [, list] of byEntity) {
+    // Sort newest submitted first
+    list.sort(
+      (a, b) =>
+        new Date(b.submittedAt || b.createdAt).getTime() -
+        new Date(a.submittedAt || a.createdAt).getTime(),
+    );
+
+    const [newest, ...older] = list;
+
+    // Try to approve the newest revision
     try {
-      await reviewRevision({ revisionId: id, action: "approve", note: "Bulk approved" });
+      await reviewRevision({
+        revisionId: newest.id,
+        action: "approve",
+        note: "Bulk approved",
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
       if (message === "STALE_REVISION") {
-        // The base version moved — this revision can never be cleanly applied.
-        // Withdraw it so it doesn't clog the queue.
         await db
           .update(contentRevisions)
           .set({
@@ -61,9 +98,20 @@ async function approveOrWithdrawStale(ids: string[]) {
             reviewNote: "Auto-withdrawn: base version moved since submission",
             updatedAt: now,
           })
-          .where(eq(contentRevisions.id, id));
+          .where(eq(contentRevisions.id, newest.id));
       }
-      // Other errors (NOT_FOUND, already reviewed, etc.) are silently skipped
+    }
+
+    // Older duplicate submissions for the same entity are superseded — withdraw them cleanly
+    for (const oldRev of older) {
+      await db
+        .update(contentRevisions)
+        .set({
+          status: "withdrawn",
+          reviewNote: `Superseded by newer submission (${newest.id.slice(0, 8)})`,
+          updatedAt: now,
+        })
+        .where(eq(contentRevisions.id, oldRev.id));
     }
   }
 }

@@ -166,7 +166,18 @@ export default async function EventDetailPage({
         {/* Poster */}
         <div className="lg:col-span-5">
           <Reveal>
-            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-line/15 bg-surface/40">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-line/15 bg-surface/40 flex items-center justify-center">
+              {/* Ambient backdrop glow so landscape posters have a matching atmospheric background */}
+              <Picture
+                src={event.banner}
+                alt=""
+                fill
+                priority
+                sizes="(min-width: 1024px) 40vw, 100vw"
+                fallbackLabel=""
+                className="scale-125 object-cover opacity-25 blur-2xl pointer-events-none"
+              />
+              {/* Crisp foreground poster fitted completely without cropping or distortion */}
               <Picture
                 src={event.banner}
                 alt={event.title}
@@ -174,11 +185,11 @@ export default async function EventDetailPage({
                 priority
                 sizes="(min-width: 1024px) 40vw, 100vw"
                 fallbackLabel={event.category}
-                className="object-cover"
+                className="object-contain p-2"
               />
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-bg/40 via-transparent to-transparent"
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-bg/30 via-transparent to-transparent"
               />
             </div>
           </Reveal>

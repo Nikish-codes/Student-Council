@@ -91,20 +91,32 @@ export async function uploadMediaDirect(
     headers: Record<string, string>;
   }>(prepareResponse, "Could not prepare the upload");
 
-  let uploadResponse: Response;
+  let directUploadSucceeded = false;
   try {
-    uploadResponse = await fetch(prepared.uploadUrl, {
+    const uploadResponse = await fetch(prepared.uploadUrl, {
       method: "PUT",
       headers: prepared.headers,
       body: file,
     });
+    if (uploadResponse.ok) {
+      directUploadSucceeded = true;
+    }
   } catch {
-    throw new Error(
-      "Could not reach R2. Check the bucket CORS settings and try again.",
-    );
+    // Direct R2 upload failed (e.g. browser CORS preflight blocked).
+    // Seamlessly fall back to server-proxied upload below.
+    directUploadSucceeded = false;
   }
-  if (!uploadResponse.ok) {
-    throw new Error(`R2 rejected the upload (${uploadResponse.status}).`);
+
+  if (!directUploadSucceeded) {
+    try {
+      return await uploadViaServerFallback(file, options);
+    } catch (fallbackError) {
+      throw new Error(
+        fallbackError instanceof Error
+          ? fallbackError.message
+          : "Could not upload to storage. Check network and CORS settings.",
+      );
+    }
   }
 
   const dimensions = await dimensionsPromise;
@@ -124,4 +136,26 @@ export async function uploadMediaDirect(
     "The file reached R2, but the media record could not be saved",
   );
   return completed.media;
+}
+
+/** Fallback that uploads through Next.js server proxy when direct R2 browser PUT is blocked (e.g. CORS). */
+async function uploadViaServerFallback(
+  file: File,
+  options?: { alt?: string; purpose?: MediaUploadPurpose },
+): Promise<UploadedMedia> {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (options?.alt) formData.append("alt", options.alt);
+  if (options?.purpose) formData.append("purpose", options.purpose);
+
+  const response = await fetch("/api/media/upload", {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = await readApiJson<{ media: UploadedMedia }>(
+    response,
+    "Server-proxied upload failed",
+  );
+  return data.media;
 }
