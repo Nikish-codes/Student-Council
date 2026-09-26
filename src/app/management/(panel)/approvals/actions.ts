@@ -13,7 +13,7 @@ export async function actOnRevision(formData: FormData) {
   const action = String(formData.get("action") ?? "") as "approve" | "request_changes" | "decline";
   const note = String(formData.get("note") ?? "").trim();
   try {
-    await reviewRevision({ revisionId, action, note });
+    await reviewRevision({ revisionId, action, note, force: action === "approve" });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
     if (message === "STALE_REVISION") {
@@ -87,6 +87,7 @@ async function approveOrWithdrawStale(ids: string[]) {
         revisionId: newest.id,
         action: "approve",
         note: "Bulk approved",
+        force: true,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "";

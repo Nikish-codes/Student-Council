@@ -294,7 +294,7 @@ export async function saveRevisionDraft(input: {
     assertRevisionTransition(existing.status, "save");
     await db
       .update(contentRevisions)
-      .set({ snapshot, updatedAt: now })
+      .set({ snapshot, baseVersion: input.baseVersion, updatedAt: now })
       .where(eq(contentRevisions.id, existing.id));
     return existing.id;
   }
@@ -370,38 +370,6 @@ export async function submitRevision(revisionId: string) {
       );
   }
 
-  // ── Auto-approve cosmetic club page changes ────────────────────────────
-  if (revision.entityType === "club_page") {
-    const currentClub = await db.query.clubs.findFirst({
-      where: eq(clubs.id, revision.entityId),
-    });
-    if (currentClub && !isRevisionStale(revision.baseVersion, currentClub.version)) {
-      const baseline: Record<string, unknown> = {
-        name: currentClub.name, blurb: currentClub.blurb, tagline: currentClub.tagline,
-        about: currentClub.about, logoId: currentClub.logoId, coverId: currentClub.coverId,
-        joinUrl: currentClub.joinUrl, members: currentClub.members,
-        foundedYear: currentClub.foundedYear, flagshipEvent: currentClub.flagshipEvent,
-        activities: currentClub.activities, videos: currentClub.videos,
-        gallery: currentClub.gallery, instagramUrl: currentClub.instagramUrl,
-        linkedinUrl: currentClub.linkedinUrl, websiteUrl: currentClub.websiteUrl,
-        contactEmail: currentClub.contactEmail, pageTemplate: currentClub.pageTemplate,
-        pageTheme: currentClub.pageTheme, pageVisibleSections: currentClub.pageVisibleSections,
-        pageSectionHeadings: currentClub.pageSectionHeadings,
-        pageTypography: currentClub.pageTypography,
-      };
-      const severity = classifyClubPageChangeSeverity(baseline, revision.snapshot);
-      if (severity === "cosmetic") {
-        // Submit + auto-approve in one go — never enters the queue.
-        await db
-          .update(contentRevisions)
-          .set({ status: "pending_review", submittedAt: now, updatedAt: now })
-          .where(eq(contentRevisions.id, revision.id));
-        await approveRevisionSnapshot(revision, Number(user.id), "Auto-approved: cosmetic changes only");
-        await revalidateClubPages(revision.clubId);
-        return;
-      }
-    }
-  }
 
   // ── Normal flow: send to the review queue ──────────────────────────────
   await db.transaction(async (tx) => {
@@ -427,6 +395,7 @@ export async function reviewRevision(input: {
   revisionId: string;
   action: "approve" | "request_changes" | "decline";
   note?: string;
+  force?: boolean;
 }) {
   const reviewer = await requireReviewer();
   const revision = await db.query.contentRevisions.findFirst({
@@ -444,7 +413,7 @@ export async function reviewRevision(input: {
     throw new Error("REVIEW_NOTE_REQUIRED");
 
   if (input.action === "approve") {
-    await approveRevisionSnapshot(revision, Number(reviewer.id), note || null);
+    await approveRevisionSnapshot(revision, Number(reviewer.id), note || null, input.force);
     if (revision.entityType === "event")
       await onEventPublished(revision.entityId);
     const eventClubIds =
@@ -498,6 +467,7 @@ async function approveRevisionSnapshot(
   revision: typeof contentRevisions.$inferSelect,
   reviewerId: number,
   note: string | null,
+  force = false,
 ) {
   const now = new Date().toISOString();
   const parsed = validateRevisionSnapshot(
@@ -509,7 +479,7 @@ async function approveRevisionSnapshot(
       const current = await tx.query.clubs.findFirst({
         where: eq(clubs.id, revision.entityId),
       });
-      if (!current || isRevisionStale(revision.baseVersion, current.version)) {
+      if (!current || (!force && isRevisionStale(revision.baseVersion, current.version))) {
         throw new Error("STALE_REVISION");
       }
       const snapshot = parsed as ClubPageSnapshot;
@@ -549,7 +519,7 @@ async function approveRevisionSnapshot(
       const current = await tx.query.events.findFirst({
         where: eq(events.id, revision.entityId),
       });
-      if (!current || isRevisionStale(revision.baseVersion, current.version)) {
+      if (!current || (!force && isRevisionStale(revision.baseVersion, current.version))) {
         throw new Error("STALE_REVISION");
       }
       const snapshot = parsed as EventSnapshot;
@@ -588,7 +558,7 @@ async function approveRevisionSnapshot(
       const current = await tx.query.recaps.findFirst({
         where: eq(recaps.id, revision.entityId),
       });
-      if (!current || isRevisionStale(revision.baseVersion, current.version)) {
+      if (!current || (!force && isRevisionStale(revision.baseVersion, current.version))) {
         throw new Error("STALE_REVISION");
       }
       const snapshot = parsed as FollowupSnapshot;

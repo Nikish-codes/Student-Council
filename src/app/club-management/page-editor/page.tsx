@@ -108,7 +108,7 @@ export default async function ClubPageEditorPage({
             }
           : null
       }
-      baseVersion={requested?.baseVersion ?? clubRow.version}
+      baseVersion={clubRow.version}
       saved={query.saved === "1"}
       upcoming={clubEvents.upcoming}
       past={clubEvents.past}

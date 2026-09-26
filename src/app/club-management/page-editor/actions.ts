@@ -8,7 +8,7 @@ import { requireStudioClub } from "@/lib/club-studio";
 import { saveRevisionDraft, submitRevision } from "@/lib/revisions";
 import { clubPageSnapshotSchema } from "@/lib/revisions";
 import { db } from "@/db/client";
-import { contentRevisions } from "@/db/schema";
+import { clubs, contentRevisions } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 
 const s = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim();
@@ -97,12 +97,16 @@ export async function saveClubPageRevision(formData: FormData) {
     pageTypography: "friendly",
     people: parsedExisting?.success ? parsedExisting.data.people : undefined,
   };
+  const liveClub = await db.query.clubs.findFirst({
+    where: eq(clubs.id, active.clubId),
+    columns: { version: true },
+  });
   const revisionId = await saveRevisionDraft({
     revisionId: requestedRevisionId,
     entityType: "club_page",
     entityId: active.clubId,
     clubId: active.clubId,
-    baseVersion: Number(s(formData, "baseVersion")),
+    baseVersion: liveClub?.version ?? Number(s(formData, "baseVersion")),
     snapshot,
   });
   if (s(formData, "intent") === "submit") await submitRevision(revisionId);
