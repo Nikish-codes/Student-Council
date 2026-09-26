@@ -694,6 +694,9 @@ export const siteSettings = sqliteTable("mp_site_settings", {
     .$type<GrievanceCategory[]>()
     .default([]),
   grievanceMailTo: text("grievance_mail_to"),
+  approvalPolicy: text("approval_policy")
+    .$type<"auto_cosmetic" | "auto_all" | "manual_all">()
+    .default("auto_cosmetic"),
   updatedAt,
 });
 

@@ -14,11 +14,15 @@ import { updateUser } from "../actions";
 
 export default async function EditUserPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ error?: string }>;
 }) {
   const { id: idStr } = await params;
   const id = Number(idStr);
+  const query = searchParams ? await searchParams : {};
+  const error = query?.error ? decodeURIComponent(query.error) : null;
   const me = await requireRole("super_admin", "admin");
 
   const [user, clubs] = await Promise.all([
@@ -64,12 +68,18 @@ export default async function EditUserPage({
       title={user.name}
       action={bound}
     >
+      {error ? (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
+          {error}
+        </div>
+      ) : null}
       <TextField name="name" label="Full name" required defaultValue={user.name} />
       <TextField name="email" label="Email" required defaultValue={user.email} />
       <TextField
         name="password"
         label="Reset password"
-        hint="Leave blank to keep the current password. Setting a new one also unlocks the account."
+        minLength={6}
+        hint="Leave blank to keep current password · minimum 6 characters. Setting a new one also unlocks the account."
       />
       {isSelf ? (
         <div>

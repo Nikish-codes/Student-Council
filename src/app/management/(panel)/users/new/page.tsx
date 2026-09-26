@@ -11,7 +11,13 @@ import {
 } from "@/components/management/fields";
 import { createUser } from "../actions";
 
-export default async function NewUserPage() {
+export default async function NewUserPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string }>;
+}) {
+  const query = searchParams ? await searchParams : {};
+  const error = query?.error ? decodeURIComponent(query.error) : null;
   const me = await requireRole("super_admin", "admin");
   const clubs = await db
     .select({ id: clubsT.id, name: clubsT.name })
@@ -28,6 +34,11 @@ export default async function NewUserPage() {
 
   return (
     <EditorShell kicker="New user" title="Invite someone" action={createUser}>
+      {error ? (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
+          {error}
+        </div>
+      ) : null}
       <TextField name="name" label="Full name" required />
       <TextField
         name="email"
@@ -39,7 +50,8 @@ export default async function NewUserPage() {
         name="password"
         label="Temporary password"
         required
-        hint="Share over a secure channel; ask them to change it later"
+        minLength={6}
+        hint="At least 6 characters · share over a secure channel"
       />
       <SelectField
         name="role"

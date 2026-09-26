@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { and, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/db/client";
-import { contentRevisions } from "@/db/schema";
+import { contentRevisions, siteSettings } from "@/db/schema";
 import { requireReviewer } from "@/lib/rbac";
 import { reviewRevision, withdrawRevision } from "@/lib/revisions";
 
@@ -122,4 +122,27 @@ function revalidateAll() {
   revalidatePath("/events");
   revalidatePath("/clubs");
   revalidatePath("/management/approvals");
+}
+
+export async function updateApprovalPolicy(formData: FormData) {
+  await requireReviewer();
+  const policy = String(formData.get("policy") ?? "auto_cosmetic");
+  if (!["auto_cosmetic", "auto_all", "manual_all"].includes(policy)) {
+    throw new Error("Invalid policy");
+  }
+  await db
+    .insert(siteSettings)
+    .values({
+      id: 1,
+      approvalPolicy: policy as "auto_cosmetic" | "auto_all" | "manual_all",
+      updatedAt: new Date().toISOString(),
+    })
+    .onConflictDoUpdate({
+      target: siteSettings.id,
+      set: {
+        approvalPolicy: policy as "auto_cosmetic" | "auto_all" | "manual_all",
+        updatedAt: new Date().toISOString(),
+      },
+    });
+  revalidateAll();
 }

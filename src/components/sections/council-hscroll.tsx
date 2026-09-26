@@ -34,6 +34,17 @@ export function CouncilHScroll({
   cardSize?: CouncilCardSize;
   openMember?: (m: CouncilMemberWithCoLeads) => void;
 }) {
+  // Shuffle members on client mount so each page visit / refresh is completely fair and random
+  const [displayMembers, setDisplayMembers] = React.useState(members);
+  React.useEffect(() => {
+    const array = [...members];
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    setDisplayMembers(array);
+  }, [members]);
+
   const trackRef = React.useRef<HTMLDivElement>(null);
   const rafRef = React.useRef<number | null>(null);
   const lastTsRef = React.useRef(0);
@@ -210,20 +221,20 @@ export function CouncilHScroll({
         )}
         style={{ touchAction: "pan-x pan-y pinch-zoom" }}
       >
-        {[...members, ...members].map((m, i) => (
+        {[...displayMembers, ...displayMembers].map((m, i) => (
           <div
             key={`${m.id}-${i}`}
             data-card
             className={cn(
               "shrink-0 snap-start scroll-ml-5 sm:scroll-ml-0",
-              i >= members.length &&
+              i >= displayMembers.length &&
                 "hidden sm:block [@media(pointer:coarse)]:hidden",
               CARD_WIDTH,
             )}
           >
             <CouncilCard
               member={m}
-              index={i % members.length}
+              index={i % displayMembers.length}
               size={cardSize}
               onOpen={openMember ? () => openMember(m) : undefined}
             />

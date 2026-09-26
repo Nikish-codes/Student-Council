@@ -6,7 +6,13 @@ import { ROLE_LABELS } from "@/lib/roles";
 import { PageHeader } from "@/components/management/page-header";
 import { UsersTable } from "./users-table";
 
-export default async function UsersPage() {
+export default async function UsersPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string }>;
+}) {
+  const query = searchParams ? await searchParams : {};
+  const error = query?.error ? decodeURIComponent(query.error) : null;
   const me = await requireRole("super_admin", "admin");
 
   const [rows, clubs] = await Promise.all([
@@ -43,6 +49,11 @@ export default async function UsersPage() {
         newHref="/management/users/new"
         newLabel="New user"
       />
+      {error ? (
+        <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
+          {error}
+        </div>
+      ) : null}
       <UsersTable rows={tableRows} isAdmin={admin} />
       <p className="mt-4 text-[11px] text-subtle">
         Roles: <strong>Super Admin</strong> has full control. <strong>Admin</strong>{" "}

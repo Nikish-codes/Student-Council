@@ -24,6 +24,7 @@ import {
   media,
   recaps,
   councilMembers,
+  siteSettings,
   type RevisionEntityType,
 } from "@/db/schema";
 import { onEventPublished } from "@/lib/automation/on-publish";
@@ -370,6 +371,69 @@ export async function submitRevision(revisionId: string) {
       );
   }
 
+  // ── Auto-approval based on approval policy ─────────────────────────────
+  const settings = await db.query.siteSettings.findFirst({
+    where: eq(siteSettings.id, 1),
+  });
+  const policy = settings?.approvalPolicy ?? "auto_cosmetic";
+
+  if (policy !== "manual_all" && revision.entityType === "club_page") {
+    const currentClub = await db.query.clubs.findFirst({
+      where: eq(clubs.id, revision.entityId),
+    });
+
+    if (currentClub) {
+      let canAutoApprove = false;
+      if (policy === "auto_all") {
+        canAutoApprove = true;
+      } else if (policy === "auto_cosmetic") {
+        const baseline: Record<string, unknown> = {
+          name: currentClub.name,
+          blurb: currentClub.blurb,
+          tagline: currentClub.tagline,
+          about: currentClub.about,
+          logoId: currentClub.logoId,
+          coverId: currentClub.coverId,
+          joinUrl: currentClub.joinUrl,
+          members: currentClub.members,
+          foundedYear: currentClub.foundedYear,
+          flagshipEvent: currentClub.flagshipEvent,
+          activities: currentClub.activities,
+          videos: currentClub.videos,
+          gallery: currentClub.gallery,
+          instagramUrl: currentClub.instagramUrl,
+          linkedinUrl: currentClub.linkedinUrl,
+          websiteUrl: currentClub.websiteUrl,
+          contactEmail: currentClub.contactEmail,
+          pageTemplate: currentClub.pageTemplate,
+          pageTheme: currentClub.pageTheme,
+          pageVisibleSections: currentClub.pageVisibleSections,
+          pageSectionHeadings: currentClub.pageSectionHeadings,
+          pageTypography: currentClub.pageTypography,
+        };
+        const severity = classifyClubPageChangeSeverity(baseline, revision.snapshot);
+        // Cosmetic changes to an existing published club are auto-approved
+        if (Boolean(currentClub.pageTemplate) && severity === "cosmetic") {
+          canAutoApprove = true;
+        }
+      }
+
+      if (canAutoApprove) {
+        await db
+          .update(contentRevisions)
+          .set({ status: "pending_review", submittedAt: now, updatedAt: now })
+          .where(eq(contentRevisions.id, revision.id));
+        await approveRevisionSnapshot(
+          revision,
+          Number(user.id),
+          "Auto-approved: non-sensitive changes",
+          true,
+        );
+        await revalidateClubPages(revision.clubId);
+        return;
+      }
+    }
+  }
 
   // ── Normal flow: send to the review queue ──────────────────────────────
   await db.transaction(async (tx) => {

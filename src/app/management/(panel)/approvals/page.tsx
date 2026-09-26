@@ -3,9 +3,10 @@ import { and, asc, desc, eq } from "drizzle-orm";
 import { Check, Clock3, GitCompareArrows, MessageSquareText, X } from "lucide-react";
 
 import { db } from "@/db/client";
-import { clubs, contentRevisions, events, media, recaps, type RevisionEntityType } from "@/db/schema";
+import { clubs, contentRevisions, events, media, recaps, siteSettings, type RevisionEntityType } from "@/db/schema";
 import { requireReviewer } from "@/lib/rbac";
-import { actOnRevision, approveAllPending } from "./actions";
+import { cn } from "@/lib/utils";
+import { actOnRevision, approveAllPending, updateApprovalPolicy } from "./actions";
 import { ApproveAllButton, ApproveClubButton } from "./approve-buttons";
 
 export default async function ApprovalsPage({
@@ -19,7 +20,7 @@ export default async function ApprovalsPage({
     ? query.type as RevisionEntityType
     : undefined;
   const clubId = Number(query.club) || undefined;
-  const [pending, history, clubRows, mediaRows] = await Promise.all([
+  const [pending, history, clubRows, mediaRows, settings] = await Promise.all([
     db.query.contentRevisions.findMany({
       where: and(
         eq(contentRevisions.status, "pending_review"),
@@ -40,7 +41,9 @@ export default async function ApprovalsPage({
     }),
     db.select({ id: clubs.id, name: clubs.name }).from(clubs).orderBy(asc(clubs.name)),
     db.select({ id: media.id, url: media.url, alt: media.alt }).from(media),
+    db.query.siteSettings.findFirst({ where: eq(siteSettings.id, 1) }),
   ]);
+  const currentPolicy = settings?.approvalPolicy ?? "auto_cosmetic";
   const selected = query.revision
     ? history.find((revision) => revision.id === query.revision) ?? pending.find((revision) => revision.id === query.revision)
     : pending[0];
@@ -74,6 +77,107 @@ export default async function ApprovalsPage({
         <h1 className="display mt-1 text-4xl">Approvals</h1>
         <p className="mt-2 max-w-[65ch] text-sm leading-6 text-muted">Compare the submitted snapshot with the currently approved version. Approval is blocked if that public version has moved.</p>
       </header>
+
+      {/* ── Approval Policy Configuration ─────────────────────────────────── */}
+      <div className="rounded-2xl border border-line/15 bg-surface-2/40 p-5 sm:p-6">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs uppercase tracking-widest text-accent">Auto-Approval Settings</span>
+              <span className={cn(
+                "rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                currentPolicy === "auto_cosmetic" ? "bg-emerald-500/15 text-emerald-400" :
+                currentPolicy === "auto_all" ? "bg-amber-500/15 text-amber-400" :
+                "bg-blue-500/15 text-blue-400"
+              )}>
+                {currentPolicy === "auto_cosmetic" ? "Smart Auto-Approve Active" :
+                 currentPolicy === "auto_all" ? "All Changes Auto-Approved" :
+                 "Strict Manual Review"}
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-muted">
+              Configure when edits are published immediately versus held for reviewer sign-off.
+            </p>
+          </div>
+        </div>
+
+        <form action={updateApprovalPolicy} className="mt-4 grid gap-3 sm:grid-cols-3">
+          <label className={cn(
+            "relative flex cursor-pointer flex-col justify-between rounded-xl border p-4 transition-all",
+            currentPolicy === "auto_cosmetic" ? "border-accent bg-accent/5 ring-1 ring-accent" : "border-line/15 bg-surface hover:border-line/40"
+          )}>
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-ink">Smart Auto-Approve</span>
+                <input
+                  type="radio"
+                  name="policy"
+                  value="auto_cosmetic"
+                  defaultChecked={currentPolicy === "auto_cosmetic"}
+                  className="accent-accent"
+                />
+              </div>
+              <p className="mt-2 text-xs leading-relaxed text-muted">
+                Images, banners, videos, activities, taglines, and links publish immediately. Only sensitive changes (name & members) require admin review.
+              </p>
+            </div>
+            <span className="mt-3 text-[11px] font-medium text-emerald-400">Recommended</span>
+          </label>
+
+          <label className={cn(
+            "relative flex cursor-pointer flex-col justify-between rounded-xl border p-4 transition-all",
+            currentPolicy === "auto_all" ? "border-accent bg-accent/5 ring-1 ring-accent" : "border-line/15 bg-surface hover:border-line/40"
+          )}>
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-ink">Auto-Approve All</span>
+                <input
+                  type="radio"
+                  name="policy"
+                  value="auto_all"
+                  defaultChecked={currentPolicy === "auto_all"}
+                  className="accent-accent"
+                />
+              </div>
+              <p className="mt-2 text-xs leading-relaxed text-muted">
+                Every club page edit is published immediately with zero queue delay.
+              </p>
+            </div>
+            <span className="mt-3 text-[11px] font-medium text-amber-400">Zero queue wait</span>
+          </label>
+
+          <label className={cn(
+            "relative flex cursor-pointer flex-col justify-between rounded-xl border p-4 transition-all",
+            currentPolicy === "manual_all" ? "border-accent bg-accent/5 ring-1 ring-accent" : "border-line/15 bg-surface hover:border-line/40"
+          )}>
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-ink">Strict Manual Review</span>
+                <input
+                  type="radio"
+                  name="policy"
+                  value="manual_all"
+                  defaultChecked={currentPolicy === "manual_all"}
+                  className="accent-accent"
+                />
+              </div>
+              <p className="mt-2 text-xs leading-relaxed text-muted">
+                Every single edit enters the review queue. Nothing goes live without manual reviewer sign-off.
+              </p>
+            </div>
+            <span className="mt-3 text-[11px] font-medium text-muted">Maximum control</span>
+          </label>
+
+          <div className="sm:col-span-3 flex justify-end">
+            <button
+              type="submit"
+              className="rounded-xl bg-ink px-4 py-2 text-xs font-semibold text-bg transition hover:opacity-90"
+            >
+              Save approval policy
+            </button>
+          </div>
+        </form>
+      </div>
 
       <form className="flex flex-wrap gap-3 rounded-2xl bg-surface p-4" method="get">
         <select name="club" defaultValue={clubId ?? ""} className="h-10 rounded-xl border border-line/15 bg-surface-2 px-3 text-sm outline-none">

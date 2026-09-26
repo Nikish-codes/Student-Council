@@ -30,6 +30,7 @@ export function TextField(props: {
   defaultValue?: string | null;
   required?: boolean;
   maxLength?: number;
+  minLength?: number;
   placeholder?: string;
   value?: string;
   onChange?: (v: string) => void;
