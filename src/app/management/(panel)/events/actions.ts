@@ -28,6 +28,7 @@ import {
   primaryHostingClubId,
   replaceEventHostingClubs,
 } from "@/lib/event-hosts";
+import { isInstagramVideoUrl, isValidVideoUrl } from "@/lib/video";
 import type { EventCategory } from "@/lib/schemas";
 import { resolveEventFeatured } from "@/lib/event-featured";
 import { deleteEventEverywhere } from "@/lib/event-deletion";
@@ -95,7 +96,21 @@ function parse(
     excerpt: s(fd, "excerpt"),
     description: s(fd, "description"),
     bannerId: optNum(fd, "bannerId"),
-    videoUrl: s(fd, "videoUrl") || null,
+    videoUrl: (() => {
+      const v = s(fd, "videoUrl") || null;
+      if (!v) return null;
+      if (isInstagramVideoUrl(v)) {
+        throw new Error(
+          "Instagram links cannot be played in the video player. Please use a YouTube link, Vimeo, or a direct .mp4 video.",
+        );
+      }
+      if (!isValidVideoUrl(v)) {
+        throw new Error(
+          "Please enter a valid YouTube, Vimeo, or direct video (.mp4) URL.",
+        );
+      }
+      return v;
+    })(),
     registrationUrl: s(fd, "registrationUrl") || null,
     attendees: optNum(fd, "attendees"),
     featured: resolveEventFeatured({

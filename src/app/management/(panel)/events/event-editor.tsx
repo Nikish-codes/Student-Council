@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 import type { DbEvent } from "@/db/schema";
 import { Button } from "@/components/ui/button";
 import { MediaField, type MediaOption } from "@/components/management/fields";
+import { isInstagramVideoUrl, isValidVideoUrl } from "@/lib/video";
 import { DeleteEventButton } from "./delete-button";
 
 type Option = {
@@ -123,6 +124,7 @@ export function EventEditor({
 }) {
   const [title, setTitle] = useState(event?.title ?? "");
   const [slug, setSlug] = useState(event?.slug ?? "");
+  const [videoUrl, setVideoUrl] = useState(event?.videoUrl ?? "");
   const [clubSearch, setClubSearch] = useState("");
   const [selectedClubIds, setSelectedClubIds] = useState<number[]>(() => {
     const initial = hostingClubIds ?? (event?.clubId ? [event.clubId] : []);
@@ -340,12 +342,27 @@ export function EventEditor({
 
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
-            {field("Trailer / video URL", "optional")}
+            {field("Trailer / video URL", "YouTube, Vimeo, or .mp4")}
             <input
               name="videoUrl"
-              defaultValue={event?.videoUrl ?? ""}
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=..."
               className={inputCls}
             />
+            {isInstagramVideoUrl(videoUrl) ? (
+              <p className="mt-1.5 text-xs font-medium text-amber-400">
+                ⚠️ Instagram links cannot be played in the video player. Please use a YouTube link, Vimeo, or direct .mp4 video URL.
+              </p>
+            ) : videoUrl.trim() !== "" && !isValidVideoUrl(videoUrl) ? (
+              <p className="mt-1.5 text-xs text-amber-400/90">
+                ⚠️ Only YouTube (regular &amp; Shorts), Vimeo, or direct .mp4 video URLs can be played.
+              </p>
+            ) : (
+              <p className="mt-1.5 text-xs text-subtle">
+                Only YouTube, Vimeo, or direct .mp4 video URLs are supported. Instagram links are not playable.
+              </p>
+            )}
           </div>
           <div>
             {field("External registration URL", "optional")}

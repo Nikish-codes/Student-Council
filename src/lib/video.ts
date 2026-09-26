@@ -97,3 +97,32 @@ export function videoThumb(src?: string): string | undefined {
   // fall back to the club's own cover image instead.
   return embed?.provider === "youtube" ? youtubeThumb(embed.id) : undefined;
 }
+
+/** Returns true if the URL is an Instagram post or reel URL. */
+export function isInstagramVideoUrl(src?: string): boolean {
+  if (!src) return false;
+  try {
+    const url = new URL(src);
+    return (
+      url.hostname.includes("instagram.com") ||
+      url.hostname.includes("instagr.am")
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validates that a URL is playable by our video player:
+ * - YouTube (youtube.com, youtu.be, shorts)
+ * - Vimeo (vimeo.com)
+ * - Direct video file (.mp4, .webm, etc.)
+ *
+ * Instagram URLs explicitly return false.
+ */
+export function isValidVideoUrl(src?: string): boolean {
+  if (!src) return false;
+  if (isInstagramVideoUrl(src)) return false;
+  return Boolean(embedSrc(src) || isDirectVideoUrl(src));
+}
+

@@ -44,11 +44,26 @@ import {
   eventIsHostedByClub,
   replaceEventHostingClubs,
 } from "@/lib/event-hosts";
+import { isInstagramVideoUrl, isValidVideoUrl } from "@/lib/video";
 
 const optionalUrl = z
   .union([z.literal(""), z.string().url()])
   .nullable()
   .optional();
+
+const playableVideoUrl = z
+  .union([z.literal(""), z.string().url()])
+  .nullable()
+  .optional()
+  .refine((url) => !url || !isInstagramVideoUrl(url), {
+    message:
+      "Instagram links cannot be played in the video player. Please use a YouTube link, Vimeo, or a direct .mp4 video.",
+  })
+  .refine((url) => !url || isValidVideoUrl(url), {
+    message:
+      "Please enter a valid YouTube, Vimeo, or direct video (.mp4) URL.",
+  });
+
 const galleryItem = z.object({
   url: z.string().url(),
   caption: z.string().max(160).optional(),
@@ -76,7 +91,21 @@ export const clubPageSnapshotSchema = z.object({
     )
     .max(20),
   videos: z
-    .array(z.object({ url: z.string().url(), title: z.string().optional() }))
+    .array(
+      z.object({
+        url: z
+          .string()
+          .url()
+          .refine((url) => !isInstagramVideoUrl(url), {
+            message:
+              "Instagram links cannot be played in the video player. Please use a YouTube or Vimeo link.",
+          })
+          .refine((url) => isValidVideoUrl(url), {
+            message: "Please enter a valid YouTube or Vimeo video URL.",
+          }),
+        title: z.string().optional(),
+      }),
+    )
     .max(12),
   gallery: z.array(galleryItem).max(40),
   instagramUrl: optionalUrl,
@@ -145,7 +174,7 @@ export const eventSnapshotSchema = z
     excerpt: z.string().min(5).max(240),
     description: z.string().max(20000),
     bannerId: z.number().int().positive().nullable().optional(),
-    videoUrl: optionalUrl,
+    videoUrl: playableVideoUrl,
     registrationUrl: optionalUrl,
     attendees: z.number().int().nonnegative().nullable().optional(),
     featured: z.boolean(),

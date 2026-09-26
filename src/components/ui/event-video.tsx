@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { embedSrc, isDirectVideoUrl } from "@/lib/video";
 
@@ -121,19 +120,6 @@ export function EventVideo({ src, title, poster, variant = "player", autoPlay = 
     );
   }
 
-  return (
-    <a
-      href={src}
-      target="_blank"
-      rel="noreferrer"
-      className={cn(
-        "grid aspect-video min-h-64 w-full place-items-center bg-black/70 p-6 text-center text-sm text-ink transition hover:bg-black/50",
-        className,
-      )}
-    >
-      <span className="inline-flex items-center gap-2 rounded-full border border-line/20 bg-bg/70 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em]">
-        Open event video <ExternalLink className="h-3.5 w-3.5" />
-      </span>
-    </a>
-  );
+  // Unsupported video provider (e.g. Instagram). Do not render an external browser link.
+  return null;
 }

@@ -12,6 +12,7 @@ import {
 import { Picture } from "@/components/ui/picture";
 import { Button } from "@/components/ui/button";
 import { EventVideo } from "@/components/ui/event-video";
+import { isValidVideoUrl } from "@/lib/video";
 import { Magnetic } from "@/components/motion/magnetic";
 import { Reveal } from "@/components/motion/reveal";
 import { getEvent, getEvents } from "@/lib/content";
@@ -224,7 +225,7 @@ export default async function EventDetailPage({
             </div>
           </Reveal>
 
-          {event.videoUrl ? (
+          {event.videoUrl && isValidVideoUrl(event.videoUrl) ? (
             <Reveal delay={0.08}>
               <div className="mt-16">
                 <span className="kicker">Event video</span>

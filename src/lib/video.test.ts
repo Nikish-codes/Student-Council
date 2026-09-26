@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   embedSrc,
   isDirectVideoUrl,
+  isInstagramVideoUrl,
+  isValidVideoUrl,
   videoThumb,
   youtubeThumb,
 } from "./video";
@@ -111,3 +113,46 @@ describe("thumbnails", () => {
     expect(videoThumb("nonsense")).toBeUndefined();
   });
 });
+
+describe("isInstagramVideoUrl", () => {
+  it.each([
+    "https://www.instagram.com/reel/DdGb0dpNBoU/",
+    "https://instagram.com/p/Dbx6unwqnTA/",
+    "https://instagr.am/reel/12345",
+  ])("identifies %s as Instagram", (url) => {
+    expect(isInstagramVideoUrl(url)).toBe(true);
+  });
+
+  it.each([
+    "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "https://vimeo.com/123456789",
+    "https://cdn.example.com/video.mp4",
+    "",
+    undefined,
+  ])("does not identify %s as Instagram", (url) => {
+    expect(isInstagramVideoUrl(url)).toBe(false);
+  });
+});
+
+describe("isValidVideoUrl", () => {
+  it.each([
+    "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "https://youtu.be/dQw4w9WgXcQ",
+    "https://youtube.com/shorts/dQw4w9WgXcQ",
+    "https://vimeo.com/123456789",
+    "https://cdn.example.com/video.mp4",
+  ])("accepts supported video URL: %s", (url) => {
+    expect(isValidVideoUrl(url)).toBe(true);
+  });
+
+  it.each([
+    "https://www.instagram.com/reel/DdGb0dpNBoU/",
+    "https://instagram.com/p/Dbx6unwqnTA/",
+    "https://example.com/not-a-video",
+    "",
+    undefined,
+  ])("rejects unsupported video URL: %s", (url) => {
+    expect(isValidVideoUrl(url)).toBe(false);
+  });
+});
+
