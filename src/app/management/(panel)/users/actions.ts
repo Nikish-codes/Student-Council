@@ -15,6 +15,7 @@ import {
   clubMemberships,
   events,
   ovalMenuDays,
+  attendees,
 } from "@/db/schema";
 import { requireUser, requireRole, ROLES_ALL } from "@/lib/rbac";
 
@@ -24,6 +25,10 @@ const norm = (e: string) => e.toLowerCase();
 function bust() {
   revalidatePath("/management/users");
 }
+
+export type UserActionState = {
+  error?: string;
+};
 
 /**
  * RBAC for user management:
@@ -49,34 +54,37 @@ function canAssignRole(actorRole: UserRole, requestedRole: UserRole): boolean {
   return requestedRole !== "super_admin" && requestedRole !== "food_committee_member";
 }
 
-export async function createUser(fd: FormData) {
+export async function createUser(
+  prevState: UserActionState | undefined,
+  fd: FormData
+): Promise<UserActionState | undefined> {
+  const { actor } = await requireUserManager();
+
+  const name = s(fd, "name");
+  const email = norm(s(fd, "email"));
+  const password = String(fd.get("password") ?? "");
+  const role = s(fd, "role") as UserRole;
+  const clubId = s(fd, "clubId") ? Number(s(fd, "clubId")) : null;
+
+  if (!name || !email || !password) {
+    return { error: "Name, email, and password are required" };
+  }
+  if (!ROLES_ALL.includes(role)) {
+    return { error: "Invalid role selected" };
+  }
+  if (password.length < 6) {
+    return { error: "Password must be at least 6 characters" };
+  }
+  if (!canAssignRole(actor.role, role)) {
+    return { error: "You cannot assign this role" };
+  }
+
+  const exists = await db.query.users.findFirst({ where: eq(t.email, email) });
+  if (exists) {
+    return { error: "A user with this email already exists" };
+  }
+
   try {
-    const { actor } = await requireUserManager();
-
-    const name = s(fd, "name");
-    const email = norm(s(fd, "email"));
-    const password = String(fd.get("password") ?? "");
-    const role = s(fd, "role") as UserRole;
-    const clubId = s(fd, "clubId") ? Number(s(fd, "clubId")) : null;
-
-    if (!name || !email || !password) {
-      redirect(`/management/users/new?error=${encodeURIComponent("Name, email, and password are required")}`);
-    }
-    if (!ROLES_ALL.includes(role)) {
-      redirect(`/management/users/new?error=${encodeURIComponent("Invalid role selected")}`);
-    }
-    if (password.length < 6) {
-      redirect(`/management/users/new?error=${encodeURIComponent("Password must be at least 6 characters")}`);
-    }
-    if (!canAssignRole(actor.role, role)) {
-      redirect(`/management/users/new?error=${encodeURIComponent("You cannot assign this role")}`);
-    }
-
-    const exists = await db.query.users.findFirst({ where: eq(t.email, email) });
-    if (exists) {
-      redirect(`/management/users/new?error=${encodeURIComponent("A user with this email already exists")}`);
-    }
-
     const hash = await bcrypt.hash(password, 10);
     await db.insert(t).values({
       name,
@@ -86,167 +94,191 @@ export async function createUser(fd: FormData) {
       clubId,
     });
   } catch (err: any) {
-    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
     console.error("Failed to create user:", err);
-    redirect(`/management/users/new?error=${encodeURIComponent(err?.message || "Failed to create user")}`);
+    return { error: err?.message || "Failed to create user" };
   }
 
   bust();
   redirect("/management/users");
 }
 
-export async function updateUser(id: number, fd: FormData) {
+export async function updateUser(
+  id: number,
+  prevState: UserActionState | undefined,
+  fd: FormData
+): Promise<UserActionState | undefined> {
+  const { actor } = await requireUserManager();
+  const me = await requireUser();
+
+  const target = await db.query.users.findFirst({ where: eq(t.id, id) });
+  if (!target) {
+    return { error: "User not found" };
+  }
+  if (!canActOn(actor.role, target.role)) {
+    return { error: "You cannot edit this user" };
+  }
+
+  const name = s(fd, "name");
+  const email = norm(s(fd, "email"));
+  const requestedRole = s(fd, "role") as UserRole;
+  const clubId = s(fd, "clubId") ? Number(s(fd, "clubId")) : null;
+  const newPassword = String(fd.get("password") ?? "");
+
+  if (!name || !email) {
+    return { error: "Name and email are required" };
+  }
+  if (!ROLES_ALL.includes(requestedRole)) {
+    return { error: "Invalid role selected" };
+  }
+
+  // Self-protection: cannot demote / change your own role.
+  const isSelf = String(target.id) === me.id;
+  const role = isSelf ? target.role : requestedRole;
+  if (!isSelf && !canAssignRole(actor.role, role)) {
+    return { error: "You cannot assign this role" };
+  }
+
+  // Email uniqueness if changed.
+  if (email !== target.email) {
+    const dupe = await db.query.users.findFirst({ where: eq(t.email, email) });
+    if (dupe && dupe.id !== id) {
+      return { error: "A user with this email already exists" };
+    }
+  }
+
+  const patch: Record<string, unknown> = {
+    name,
+    email,
+    role,
+    clubId,
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (newPassword) {
+    if (newPassword.length < 6) {
+      return { error: "Password must be at least 6 characters" };
+    }
+    patch.password = await bcrypt.hash(newPassword, 10);
+    // Resetting the password also clears any active lockout.
+    patch.failedLoginCount = 0;
+    patch.lockedUntil = null;
+  }
+
+  try {
+    await db.update(t).set(patch).where(eq(t.id, id));
+  } catch (err: any) {
+    console.error("Failed to update user:", err);
+    return { error: err?.message || "Failed to update user" };
+  }
+
+  bust();
+  redirect("/management/users");
+}
+
+export async function deleteUser(id: number): Promise<{ ok: boolean; error?: string }> {
   try {
     const { actor } = await requireUserManager();
     const me = await requireUser();
+    if (String(id) === me.id) {
+      return { ok: false, error: "You cannot delete your own account" };
+    }
 
     const target = await db.query.users.findFirst({ where: eq(t.id, id) });
     if (!target) {
-      redirect(`/management/users?error=${encodeURIComponent("User not found")}`);
+      return { ok: false, error: "User not found" };
     }
     if (!canActOn(actor.role, target.role)) {
-      redirect(`/management/users/${id}?error=${encodeURIComponent("You cannot edit this user")}`);
+      return { ok: false, error: "You cannot delete this user" };
     }
 
-    const name = s(fd, "name");
-    const email = norm(s(fd, "email"));
-    const requestedRole = s(fd, "role") as UserRole;
-    const clubId = s(fd, "clubId") ? Number(s(fd, "clubId")) : null;
-    const newPassword = String(fd.get("password") ?? "");
+    // Cleanly clear or reassign foreign key dependencies before deleting the user
+    await db.transaction(async (tx) => {
+      // 1. Audit logs: set actor to null to keep record history
+      await tx
+        .update(auditLog)
+        .set({ actorUserId: null })
+        .where(eq(auditLog.actorUserId, id));
 
-    if (!name || !email) {
-      redirect(`/management/users/${id}?error=${encodeURIComponent("Name and email are required")}`);
-    }
-    if (!ROLES_ALL.includes(requestedRole)) {
-      redirect(`/management/users/${id}?error=${encodeURIComponent("Invalid role selected")}`);
-    }
+      // 2. Content revisions: clear reviewer and reassign authorship to acting admin
+      await tx
+        .update(contentRevisions)
+        .set({ reviewedByUserId: null })
+        .where(eq(contentRevisions.reviewedByUserId, id));
+      await tx
+        .update(contentRevisions)
+        .set({ authorUserId: Number(actor.id) })
+        .where(eq(contentRevisions.authorUserId, id));
 
-    // Self-protection: cannot demote / change your own role.
-    const isSelf = String(target.id) === me.id;
-    const role = isSelf ? target.role : requestedRole;
-    if (!isSelf && !canAssignRole(actor.role, role)) {
-      redirect(`/management/users/${id}?error=${encodeURIComponent("You cannot assign this role")}`);
-    }
+      // 3. Clubs lead reference
+      await tx
+        .update(clubs)
+        .set({ leadId: null })
+        .where(eq(clubs.leadId, id));
 
-    // Email uniqueness if changed.
-    if (email !== target.email) {
-      const dupe = await db.query.users.findFirst({ where: eq(t.email, email) });
-      if (dupe && dupe.id !== id) {
-        redirect(`/management/users/${id}?error=${encodeURIComponent("A user with this email already exists")}`);
-      }
-    }
+      // 4. Club memberships
+      await tx
+        .delete(clubMemberships)
+        .where(eq(clubMemberships.userId, id));
+      await tx
+        .update(clubMemberships)
+        .set({ invitedByUserId: null })
+        .where(eq(clubMemberships.invitedByUserId, id));
+      await tx
+        .update(clubMemberships)
+        .set({ revokedByUserId: null })
+        .where(eq(clubMemberships.revokedByUserId, id));
 
-    const patch: Record<string, unknown> = {
-      name,
-      email,
-      role,
-      clubId,
-      updatedAt: new Date().toISOString(),
-    };
+      // 5. Events organizer reference
+      await tx
+        .update(events)
+        .set({ organizerId: null })
+        .where(eq(events.organizerId, id));
 
-    if (newPassword) {
-      if (newPassword.length < 6) {
-        redirect(`/management/users/${id}?error=${encodeURIComponent("Password must be at least 6 characters")}`);
-      }
-      patch.password = await bcrypt.hash(newPassword, 10);
-      // Resetting the password also clears any active lockout.
-      patch.failedLoginCount = 0;
-      patch.lockedUntil = null;
-    }
+      // 6. Oval menu days
+      await tx
+        .update(ovalMenuDays)
+        .set({ importedByUserId: null })
+        .where(eq(ovalMenuDays.importedByUserId, id));
+      await tx
+        .update(ovalMenuDays)
+        .set({ approvedByUserId: null })
+        .where(eq(ovalMenuDays.approvedByUserId, id));
 
-    await db.update(t).set(patch).where(eq(t.id, id));
+      // 7. Attendees checked-in by user
+      await tx
+        .update(attendees)
+        .set({ checkedInByUserId: null })
+        .where(eq(attendees.checkedInByUserId, id));
+
+      // 8. Finally delete the user row safely
+      await tx.delete(t).where(eq(t.id, id));
+    });
+
+    bust();
+    return { ok: true };
   } catch (err: any) {
-    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    console.error("Failed to update user:", err);
-    redirect(`/management/users/${id}?error=${encodeURIComponent(err?.message || "Failed to update user")}`);
+    console.error("Failed to delete user:", err);
+    return { ok: false, error: err?.message || "Failed to delete user" };
   }
-
-  bust();
-  redirect("/management/users");
-}
-
-export async function deleteUser(id: number) {
-  const { actor } = await requireUserManager();
-  const me = await requireUser();
-  if (String(id) === me.id) throw new Error("You cannot delete your own account");
-
-  const target = await db.query.users.findFirst({ where: eq(t.id, id) });
-  if (!target) return;
-  if (!canActOn(actor.role, target.role)) {
-    throw new Error("You cannot delete this user");
-  }
-
-  // Cleanly clear or reassign foreign key dependencies before deleting the user
-  await db.transaction(async (tx) => {
-    // 1. Audit logs: set actor to null to keep record history
-    await tx
-      .update(auditLog)
-      .set({ actorUserId: null })
-      .where(eq(auditLog.actorUserId, id));
-
-    // 2. Content revisions: clear reviewer and reassign authorship to acting admin
-    await tx
-      .update(contentRevisions)
-      .set({ reviewedByUserId: null })
-      .where(eq(contentRevisions.reviewedByUserId, id));
-    await tx
-      .update(contentRevisions)
-      .set({ authorUserId: Number(actor.id) })
-      .where(eq(contentRevisions.authorUserId, id));
-
-    // 3. Clubs lead reference
-    await tx
-      .update(clubs)
-      .set({ leadId: null })
-      .where(eq(clubs.leadId, id));
-
-    // 4. Club memberships
-    await tx
-      .delete(clubMemberships)
-      .where(eq(clubMemberships.userId, id));
-    await tx
-      .update(clubMemberships)
-      .set({ invitedByUserId: null })
-      .where(eq(clubMemberships.invitedByUserId, id));
-    await tx
-      .update(clubMemberships)
-      .set({ revokedByUserId: null })
-      .where(eq(clubMemberships.revokedByUserId, id));
-
-    // 5. Events organizer reference
-    await tx
-      .update(events)
-      .set({ organizerId: null })
-      .where(eq(events.organizerId, id));
-
-    // 6. Oval menu days
-    await tx
-      .update(ovalMenuDays)
-      .set({ importedByUserId: null })
-      .where(eq(ovalMenuDays.importedByUserId, id));
-    await tx
-      .update(ovalMenuDays)
-      .set({ approvedByUserId: null })
-      .where(eq(ovalMenuDays.approvedByUserId, id));
-
-    // 7. Finally delete the user row safely
-    await tx.delete(t).where(eq(t.id, id));
-  });
-
-  bust();
 }
 
 /** Clear the lockout + failed-attempt counter without touching the password. */
-export async function unlockUser(id: number) {
-  const { actor } = await requireUserManager();
-  const target = await db.query.users.findFirst({ where: eq(t.id, id) });
-  if (!target) return;
-  if (!canActOn(actor.role, target.role)) {
-    throw new Error("You cannot unlock this user");
+export async function unlockUser(id: number): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const { actor } = await requireUserManager();
+    const target = await db.query.users.findFirst({ where: eq(t.id, id) });
+    if (!target) return { ok: false, error: "User not found" };
+    if (!canActOn(actor.role, target.role)) {
+      return { ok: false, error: "You cannot unlock this user" };
+    }
+    await db
+      .update(t)
+      .set({ failedLoginCount: 0, lockedUntil: null, updatedAt: new Date().toISOString() })
+      .where(eq(t.id, id));
+    bust();
+    return { ok: true };
+  } catch (err: any) {
+    console.error("Failed to unlock user:", err);
+    return { ok: false, error: err?.message || "Failed to unlock user" };
   }
-  await db
-    .update(t)
-    .set({ failedLoginCount: 0, lockedUntil: null, updatedAt: new Date().toISOString() })
-    .where(eq(t.id, id));
-  bust();
 }

@@ -8,7 +8,7 @@ export function DeleteButton({
   label = "Delete",
   confirmText = "Delete this item? This cannot be undone.",
 }: {
-  action: () => Promise<void>;
+  action: () => Promise<void | { ok?: boolean; error?: string }>;
   label?: string;
   confirmText?: string;
 }) {
@@ -18,7 +18,19 @@ export function DeleteButton({
       type="button"
       disabled={pending}
       onClick={() => {
-        if (confirm(confirmText)) start(() => action());
+        if (confirm(confirmText)) {
+          start(async () => {
+            try {
+              const res = await action();
+              if (res && typeof res === "object" && "ok" in res && !res.ok) {
+                alert(res.error || "Failed to delete item");
+              }
+            } catch (err: any) {
+              console.error("Delete action failed:", err);
+              alert(err?.message || "An unexpected error occurred while deleting.");
+            }
+          });
+        }
       }}
       className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs text-subtle transition-colors hover:text-red-400 disabled:opacity-50"
     >

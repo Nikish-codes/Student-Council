@@ -3,21 +3,9 @@ import { db } from "@/db/client";
 import { clubs as clubsT } from "@/db/schema";
 import { requireRole, ROLES_ALL } from "@/lib/rbac";
 import { ROLE_LABELS } from "@/lib/roles";
-import { EditorShell } from "@/components/management/page-header";
-import {
-  TextField,
-  SelectField,
-  SaveBar,
-} from "@/components/management/fields";
-import { createUser } from "../actions";
+import { NewUserForm } from "../user-form";
 
-export default async function NewUserPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ error?: string }>;
-}) {
-  const query = searchParams ? await searchParams : {};
-  const error = query?.error ? decodeURIComponent(query.error) : null;
+export default async function NewUserPage() {
   const me = await requireRole("super_admin", "admin");
   const clubs = await db
     .select({ id: clubsT.id, name: clubsT.name })
@@ -32,43 +20,5 @@ export default async function NewUserPage({
       )
   ).map((r) => ({ value: r, label: ROLE_LABELS[r] }));
 
-  return (
-    <EditorShell kicker="New user" title="Invite someone" action={createUser}>
-      {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
-          {error}
-        </div>
-      ) : null}
-      <TextField name="name" label="Full name" required />
-      <TextField
-        name="email"
-        label="Email"
-        required
-        placeholder="someone@woxsen.edu.in"
-      />
-      <TextField
-        name="password"
-        label="Temporary password"
-        required
-        minLength={6}
-        hint="At least 6 characters · share over a secure channel"
-      />
-      <SelectField
-        name="role"
-        label="Role"
-        options={roles}
-        defaultValue="editor"
-      />
-      <SelectField
-        name="clubId"
-        label="Club (only relevant for Club Leads)"
-        defaultValue=""
-        options={[
-          { value: "", label: "— None —" },
-          ...clubs.map((c) => ({ value: String(c.id), label: c.name })),
-        ]}
-      />
-      <SaveBar label="Create user" />
-    </EditorShell>
-  );
+  return <NewUserForm roles={roles} clubs={clubs} />;
 }

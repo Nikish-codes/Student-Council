@@ -4,25 +4,15 @@ import { db } from "@/db/client";
 import { users as t, clubs as clubsT } from "@/db/schema";
 import { requireRole, ROLES_ALL } from "@/lib/rbac";
 import { ROLE_LABELS } from "@/lib/roles";
-import { EditorShell } from "@/components/management/page-header";
-import {
-  TextField,
-  SelectField,
-  SaveBar,
-} from "@/components/management/fields";
-import { updateUser } from "../actions";
+import { EditUserForm } from "../user-form";
 
 export default async function EditUserPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ error?: string }>;
 }) {
   const { id: idStr } = await params;
   const id = Number(idStr);
-  const query = searchParams ? await searchParams : {};
-  const error = query?.error ? decodeURIComponent(query.error) : null;
   const me = await requireRole("super_admin", "admin");
 
   const [user, clubs] = await Promise.all([
@@ -60,53 +50,19 @@ export default async function EditUserPage({
       )
   ).map((r) => ({ value: r, label: ROLE_LABELS[r] }));
 
-  const bound = updateUser.bind(null, id);
-
   return (
-    <EditorShell
-      kicker={`Edit ${user.email}`}
-      title={user.name}
-      action={bound}
-    >
-      {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
-          {error}
-        </div>
-      ) : null}
-      <TextField name="name" label="Full name" required defaultValue={user.name} />
-      <TextField name="email" label="Email" required defaultValue={user.email} />
-      <TextField
-        name="password"
-        label="Reset password"
-        minLength={6}
-        hint="Leave blank to keep current password · minimum 6 characters. Setting a new one also unlocks the account."
-      />
-      {isSelf ? (
-        <div>
-          <p className="kicker text-subtle">Role</p>
-          <p className="mt-2 text-sm text-muted">
-            {ROLE_LABELS[user.role]} · You cannot change your own role.
-          </p>
-          <input type="hidden" name="role" value={user.role} />
-        </div>
-      ) : (
-        <SelectField
-          name="role"
-          label="Role"
-          defaultValue={user.role}
-          options={assignable}
-        />
-      )}
-      <SelectField
-        name="clubId"
-        label="Club (only relevant for Club Leads)"
-        defaultValue={user.clubId ? String(user.clubId) : ""}
-        options={[
-          { value: "", label: "— None —" },
-          ...clubs.map((c) => ({ value: String(c.id), label: c.name })),
-        ]}
-      />
-      <SaveBar label="Save changes" />
-    </EditorShell>
+    <EditUserForm
+      id={id}
+      user={{
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        clubId: user.clubId,
+      }}
+      roles={assignable}
+      clubs={clubs}
+      isSelf={isSelf}
+      roleLabel={ROLE_LABELS[user.role]}
+    />
   );
 }
