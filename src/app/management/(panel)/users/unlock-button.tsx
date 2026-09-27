@@ -20,9 +20,10 @@ export function UnlockButton({
             if (res && typeof res === "object" && "ok" in res && !res.ok) {
               alert(res.error || "Failed to unlock user");
             }
-          } catch (err: any) {
+          } catch (err: unknown) {
             console.error("Unlock action failed:", err);
-            alert(err?.message || "An unexpected error occurred while unlocking.");
+            const msg = err instanceof Error ? err.message : "An unexpected error occurred while unlocking.";
+            alert(msg);
           }
         })
       }

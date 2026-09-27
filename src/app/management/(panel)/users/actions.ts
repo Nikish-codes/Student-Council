@@ -93,9 +93,10 @@ export async function createUser(
       role,
       clubId,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to create user";
     console.error("Failed to create user:", err);
-    return { error: err?.message || "Failed to create user" };
+    return { error: message };
   }
 
   bust();
@@ -166,9 +167,10 @@ export async function updateUser(
 
   try {
     await db.update(t).set(patch).where(eq(t.id, id));
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to update user";
     console.error("Failed to update user:", err);
-    return { error: err?.message || "Failed to update user" };
+    return { error: message };
   }
 
   bust();
@@ -256,9 +258,10 @@ export async function deleteUser(id: number): Promise<{ ok: boolean; error?: str
 
     bust();
     return { ok: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to delete user";
     console.error("Failed to delete user:", err);
-    return { ok: false, error: err?.message || "Failed to delete user" };
+    return { ok: false, error: message };
   }
 }
 
@@ -277,8 +280,9 @@ export async function unlockUser(id: number): Promise<{ ok: boolean; error?: str
       .where(eq(t.id, id));
     bust();
     return { ok: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to unlock user";
     console.error("Failed to unlock user:", err);
-    return { ok: false, error: err?.message || "Failed to unlock user" };
+    return { ok: false, error: message };
   }
 }

@@ -1172,17 +1172,6 @@ function StageLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function StageStat({ label, value }: { label: string; value?: number }) {
-  if (value == null) return null;
-  return (
-    <div className="bg-[#120b08] p-5 sm:p-6">
-      <dt className="text-xs uppercase tracking-[0.18em] text-[#b89583]">
-        {label}
-      </dt>
-      <dd className="mt-3 text-3xl font-bold text-[#fff5e9]">{value}</dd>
-    </div>
-  );
-}
 
 function StageGallery({ club }: { club: ClubDetail }) {
   if (club.gallery.length === 0) return null;

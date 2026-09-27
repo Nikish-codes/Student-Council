@@ -25,9 +25,10 @@ export function DeleteButton({
               if (res && typeof res === "object" && "ok" in res && !res.ok) {
                 alert(res.error || "Failed to delete item");
               }
-            } catch (err: any) {
+            } catch (err: unknown) {
               console.error("Delete action failed:", err);
-              alert(err?.message || "An unexpected error occurred while deleting.");
+              const msg = err instanceof Error ? err.message : "An unexpected error occurred while deleting.";
+              alert(msg);
             }
           });
         }

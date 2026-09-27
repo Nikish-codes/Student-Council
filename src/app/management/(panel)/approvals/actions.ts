@@ -6,7 +6,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/db/client";
 import { contentRevisions, siteSettings } from "@/db/schema";
 import { requireReviewer } from "@/lib/rbac";
-import { reviewRevision, withdrawRevision } from "@/lib/revisions";
+import { reviewRevision } from "@/lib/revisions";
 
 export async function actOnRevision(formData: FormData) {
   const revisionId = String(formData.get("revisionId") ?? "");

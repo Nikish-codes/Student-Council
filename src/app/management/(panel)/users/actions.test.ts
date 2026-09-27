@@ -38,9 +38,9 @@ vi.mock("@/lib/rbac", () => ({
 }));
 
 describe("user management actions", () => {
-  let db: any;
-  let schema: any;
-  let actions: any;
+  let db: typeof import("@/db/client")["db"];
+  let schema: typeof import("@/db/schema");
+  let actions: typeof import("./actions");
 
   beforeAll(async () => {
     const root = mkdtempSync(join(tmpdir(), "user-actions-"));
@@ -129,9 +129,8 @@ describe("user management actions", () => {
       const created = await db.query.users.findFirst({
         where: eq(schema.users.email, "newstudent@woxsen.edu.in"),
       });
-      expect(created).toBeDefined();
-      expect(created.name).toBe("New Student");
-      expect(created.role).toBe("editor");
+      expect(created?.name).toBe("New Student");
+      expect(created?.role).toBe("editor");
     });
   });
 
@@ -175,7 +174,7 @@ describe("user management actions", () => {
       const auditCheck = await db.query.auditLog.findFirst({
         where: eq(schema.auditLog.id, "audit-1"),
       });
-      expect(auditCheck.actorUserId).toBeNull();
+      expect(auditCheck?.actorUserId).toBeNull();
     });
   });
 });

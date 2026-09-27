@@ -4,11 +4,8 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  TextField,
-  SelectField,
-} from "@/components/management/fields";
-import { createUser, updateUser, type UserActionState } from "./actions";
+import { TextField, SelectField } from "@/components/management/fields";
+import { createUser, updateUser } from "./actions";
 
 function SaveBarWithStatus({
   label = "Save changes",
