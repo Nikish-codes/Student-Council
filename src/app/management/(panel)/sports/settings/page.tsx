@@ -45,6 +45,33 @@ export default async function SportsSettingsPage() {
       </Fieldset>
 
       <Fieldset
+        title="Annual Calendar"
+        hint="Schedule photo or poster shown when visitors click on the Calendar option (/sports/calendar)."
+      >
+        <MediaField
+          name="calendarImageId"
+          label="Calendar schedule photo"
+          hint="high-resolution photo or poster of the sports calendar schedule"
+          defaultValue={config?.calendarImageId ?? null}
+          media={media}
+        />
+        <TextField
+          name="calendarTitle"
+          label="Calendar title"
+          hint="optional headline shown above the calendar photo"
+          maxLength={100}
+          defaultValue={config?.calendarTitle ?? ""}
+        />
+        <TextField
+          name="calendarDescription"
+          label="Calendar description"
+          hint="optional caption or notes below the headline"
+          maxLength={240}
+          defaultValue={config?.calendarDescription ?? ""}
+        />
+      </Fieldset>
+
+      <Fieldset
         title="Gallery"
         hint="Images that scroll in the top marquee on /sports."
       >

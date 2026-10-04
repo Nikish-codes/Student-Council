@@ -11,7 +11,7 @@ import { requireSportsManager } from "@/lib/rbac";
 
 export default async function SportsDashboard() {
   await requireSportsManager();
-  const [tournaments, leagues, matches, teams, people, liveMatches] =
+  const [tournaments, leagues, matches, teams, people, liveMatches, config] =
     await Promise.all([
       db.query.sportsTournaments.findMany({ orderBy: desc(tourT.id) }),
       db.query.sportsLeagues.findMany({ orderBy: desc(leagueT.id) }),
@@ -19,6 +19,7 @@ export default async function SportsDashboard() {
       db.query.sportsTeams.findMany({ orderBy: desc(teamT.id) }),
       db.query.sportsPeople.findMany({ orderBy: desc(peopleT.id) }),
       db.query.sportsMatches.findMany({ where: eq(matchT.status, "live") }),
+      db.query.sportsPageConfig.findFirst(),
     ]);
 
   const stats = [
@@ -42,6 +43,11 @@ export default async function SportsDashboard() {
       label: "People",
       count: people.length,
       href: "/management/sports/people",
+    },
+    {
+      label: "Calendar",
+      count: config?.calendarImageId ? "Ready" : "Not set",
+      href: "/management/sports/calendar",
     },
   ];
 
@@ -75,7 +81,7 @@ export default async function SportsDashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6">
         {stats.map((s) => (
           <a
             key={s.label}

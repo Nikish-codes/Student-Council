@@ -69,6 +69,11 @@ const SHARED_NAV: NavGroup[] = [
         icon: "UserCircle",
       },
       {
+        href: "/management/sports/calendar",
+        label: "Calendar",
+        icon: "Calendar",
+      },
+      {
         href: "/management/sports/settings",
         label: "Sports settings",
         icon: "Settings2",
@@ -170,6 +175,11 @@ const SPORTS_NAV: NavGroup[] = [
         href: "/management/sports/people",
         label: "People",
         icon: "UserCircle",
+      },
+      {
+        href: "/management/sports/calendar",
+        label: "Calendar",
+        icon: "Calendar",
       },
       {
         href: "/management/sports/settings",

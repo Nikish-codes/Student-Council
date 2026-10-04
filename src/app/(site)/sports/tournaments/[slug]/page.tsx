@@ -142,7 +142,10 @@ export default async function TournamentDetail({
         </section>
       )}
 
-      <SportsCompetitionResult result={tournament.result} />
+      <SportsCompetitionResult
+        result={tournament.result}
+        competitionTitle={tournament.title}
+      />
       {/* Matches */}
       <section className="container pb-32">
         <div className="mb-10 border-b border-line/10 pb-10">

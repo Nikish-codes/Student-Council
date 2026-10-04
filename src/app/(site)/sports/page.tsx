@@ -350,16 +350,33 @@ export default async function SportsPage({
           </div>
           <Link
             href="/sports/calendar"
-            className="group relative block overflow-hidden rounded-2xl border border-line/10 bg-surface/40 transition-all duration-500 hover:border-line/30"
+            className="group relative block overflow-hidden rounded-2xl border border-line/10 bg-surface/40 transition-all duration-500 hover:border-line/30 hover:bg-surface/60"
           >
-            <div className="flex items-center justify-between p-8 sm:p-12">
+            {config.calendarImage ? (
+              <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-15 transition-opacity duration-500 group-hover:opacity-25">
+                <Image
+                  src={config.calendarImage}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  className="scale-105 object-cover blur-sm"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-bg via-bg/85 to-transparent" />
+              </div>
+            ) : null}
+            <div className="relative z-10 flex items-center justify-between p-8 sm:p-12">
               <div>
+                {config.calendarImage ? (
+                  <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-xs uppercase tracking-wider text-accent">
+                    <span>📅 Schedule graphic available</span>
+                  </div>
+                ) : null}
                 <h3 className="display text-3xl text-ink sm:text-4xl">
                   {selectedYear}–{selectedYear + 1} Calendar
                 </h3>
-                <p className="mt-3 text-muted">
-                  The full year&rsquo;s sports schedule — every tournament and
-                  league, month by month.
+                <p className="mt-3 max-w-2xl text-muted">
+                  {config.calendarDescription ||
+                    "The full year\u2019s sports schedule — every tournament and league, month by month."}
                 </p>
               </div>
               <span className="display text-5xl text-subtle transition-transform duration-500 group-hover:translate-x-2">

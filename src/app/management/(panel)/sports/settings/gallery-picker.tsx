@@ -11,9 +11,11 @@ type MediaOption = { id: number; url: string; filename?: string | null };
 export function GalleryPicker({
   media,
   selectedIds,
+  name = "galleryImageIds",
 }: {
   media: MediaOption[];
   selectedIds: number[];
+  name?: string;
 }) {
   const [list, setList] = useState<MediaOption[]>(media);
   const [selected, setSelected] = useState<number[]>(selectedIds);
@@ -82,7 +84,7 @@ export function GalleryPicker({
       </div>
       <input
         type="hidden"
-        name="galleryImageIds"
+        name={name}
         value={JSON.stringify(selected)}
         readOnly
       />

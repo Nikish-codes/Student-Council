@@ -18,19 +18,47 @@ function json<T>(fd: FormData, k: string, fallback: T): T {
 
 export async function saveSportsSettings(fd: FormData) {
   await requireSportsManager();
-  const academyLogoId = s(fd, "academyLogoId")
-    ? Number(s(fd, "academyLogoId"))
-    : null;
-  const tagline = s(fd, "tagline");
-  const galleryImageIds = json<number[]>(fd, "galleryImageIds", []);
+  const existing = await db.query.sportsPageConfig.findFirst();
+
+  const academyLogoId = fd.has("academyLogoId")
+    ? s(fd, "academyLogoId")
+      ? Number(s(fd, "academyLogoId"))
+      : null
+    : (existing?.academyLogoId ?? null);
+
+  const tagline = fd.has("tagline")
+    ? s(fd, "tagline")
+    : (existing?.tagline ?? "");
+
+  const galleryImageIds = fd.has("galleryImageIds")
+    ? json<number[]>(fd, "galleryImageIds", [])
+    : Array.isArray(existing?.galleryImageIds)
+      ? existing!.galleryImageIds
+      : [];
+
+  const calendarImageId = fd.has("calendarImageId")
+    ? s(fd, "calendarImageId")
+      ? Number(s(fd, "calendarImageId"))
+      : null
+    : (existing?.calendarImageId ?? null);
+
+  const calendarTitle = fd.has("calendarTitle")
+    ? s(fd, "calendarTitle")
+    : (existing?.calendarTitle ?? "");
+
+  const calendarDescription = fd.has("calendarDescription")
+    ? s(fd, "calendarDescription")
+    : (existing?.calendarDescription ?? "");
 
   // Upsert the single config row (id = 1).
-  const existing = await db.query.sportsPageConfig.findFirst();
   if (existing) {
     await db
       .update(t)
       .set({
         academyLogoId,
+        calendarImageId,
+        calendarTitle,
+        calendarDescription,
         tagline,
         galleryImageIds,
         updatedAt: new Date().toISOString(),
@@ -40,10 +68,21 @@ export async function saveSportsSettings(fd: FormData) {
     await db.insert(t).values({
       id: 1,
       academyLogoId,
+      calendarImageId,
+      calendarTitle,
+      calendarDescription,
       tagline,
       galleryImageIds,
     });
   }
 
-  ["/sports", "/management/sports/settings"].forEach((p) => revalidatePath(p));
+  [
+    "/sports",
+    "/sports/calendar",
+    "/management/sports",
+    "/management/sports/settings",
+    "/management/sports/calendar",
+  ].forEach((p) => revalidatePath(p));
 }
+
+export const saveSportsCalendarSettings = saveSportsSettings;

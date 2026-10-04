@@ -1007,6 +1007,9 @@ export const sportsPeople = sqliteTable(
 export const sportsPageConfig = sqliteTable("mp_sports_page_config", {
   id: integer("id").primaryKey({ autoIncrement: true }), // enforce id = 1
   academyLogoId: integer("academy_logo_id").references(() => media.id),
+  calendarImageId: integer("calendar_image_id").references(() => media.id),
+  calendarTitle: text("calendar_title").default(""),
+  calendarDescription: text("calendar_description").default(""),
   tagline: text("tagline").default(""),
   // Media IDs for the top gallery — resolved to URLs in the content getter.
   galleryImageIds: text("gallery_image_ids", { mode: "json" })
@@ -1293,6 +1296,10 @@ export const sportsPageConfigRelations = relations(
   ({ one }) => ({
     academyLogo: one(media, {
       fields: [sportsPageConfig.academyLogoId],
+      references: [media.id],
+    }),
+    calendarImage: one(media, {
+      fields: [sportsPageConfig.calendarImageId],
       references: [media.id],
     }),
   }),

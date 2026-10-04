@@ -1064,6 +1064,9 @@ export interface SportsPageConfig {
   academyLogo: string;
   tagline: string;
   galleryImages: string[];
+  calendarImage: string;
+  calendarTitle: string;
+  calendarDescription: string;
 }
 
 // ─────────────── mappers ───────────────
@@ -1381,7 +1384,7 @@ export const getSportsPeople = cache(
 export const getSportsPageConfig = cache(
   async (): Promise<SportsPageConfig> => {
     const row = await db.query.sportsPageConfig.findFirst({
-      with: { academyLogo: true },
+      with: { academyLogo: true, calendarImage: true },
     });
     const ids = Array.isArray(row?.galleryImageIds) ? row!.galleryImageIds : [];
     let galleryImages: string[] = [];
@@ -1397,6 +1400,9 @@ export const getSportsPageConfig = cache(
       academyLogo: mediaUrl(row?.academyLogo),
       tagline: asString(row?.tagline),
       galleryImages,
+      calendarImage: mediaUrl(row?.calendarImage),
+      calendarTitle: asString(row?.calendarTitle),
+      calendarDescription: asString(row?.calendarDescription),
     };
   },
 );

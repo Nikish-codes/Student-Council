@@ -50,7 +50,19 @@ async function main() {
       .map((s) => s.trim())
       .filter(Boolean);
     for (const stmt of statements) {
-      await client.execute(stmt);
+      try {
+        await client.execute(stmt);
+      } catch (err: unknown) {
+        const msg = String((err as Error)?.message || "");
+        if (
+          msg.includes("duplicate column name") ||
+          msg.includes("already exists")
+        ) {
+          console.log(`    ⚠ ${msg} (skipping already applied statement)`);
+        } else {
+          throw err;
+        }
+      }
     }
     await client.execute({
       sql: "INSERT INTO mp_migrations (tag) VALUES (?)",
