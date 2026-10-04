@@ -13,10 +13,10 @@ type NavItem = { href: string; label: string; disabled?: boolean };
 const NAV: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/oval", label: "Oval" },
+  { href: "/sports", label: "Sports" },
   { href: "/council", label: "Council" },
   { href: "/events", label: "Events" },
   { href: "/clubs", label: "Clubs" },
-  { href: "/sports", label: "Sports" },
   { href: "/support", label: "Support" },
 ];
 

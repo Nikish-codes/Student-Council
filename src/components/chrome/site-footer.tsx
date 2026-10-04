@@ -6,6 +6,8 @@ const FOOTER_NAV = [
     title: "Explore",
     items: [
       { href: "/", label: "Home" },
+      { href: "/oval", label: "Oval" },
+      { href: "/sports", label: "Sports" },
       { href: "/council", label: "Council" },
       { href: "/events", label: "Events" },
       { href: "/clubs", label: "Clubs" },

@@ -53,16 +53,25 @@ export default async function LeaguesPage() {
                       href={`/sports/leagues/${l.slug}`}
                       className="group relative block overflow-hidden rounded-2xl border border-line/10 bg-surface/40 transition-all duration-500 hover:border-line/30"
                     >
-                      <div className="relative aspect-[16/10] overflow-hidden">
+                      <div className="relative aspect-[16/10] overflow-hidden flex items-center justify-center">
+                        {/* Ambient backdrop glow */}
+                        <Picture
+                          src={l.banner}
+                          alt=""
+                          fill
+                          sizes="10vw"
+                          fallbackLabel=""
+                          className="scale-125 object-cover opacity-25 blur-xl pointer-events-none"
+                        />
                         <Picture
                           src={l.banner}
                           alt={l.title}
                           fill
                           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                           fallbackLabel={SPORT_LABELS[l.sport as SportType] ?? l.sport}
-                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                          className="object-contain p-1.5 transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                         />
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/60 to-transparent" />
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-transparent" />
                         <div className="absolute bottom-4 left-4 right-4">
                           <span className="kicker text-accent">
                             {SPORT_LABELS[l.sport as SportType] ?? l.sport}

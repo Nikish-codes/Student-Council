@@ -211,7 +211,16 @@ export default async function SportsPage({
                   href={`/sports/tournaments/${t.slug}`}
                   className="group relative block overflow-hidden rounded-2xl border border-line/10 bg-surface/40 transition-all duration-500 hover:border-line/30"
                 >
-                  <div className="relative aspect-[16/10] overflow-hidden">
+                  <div className="relative aspect-[16/10] overflow-hidden flex items-center justify-center">
+                    {/* Ambient backdrop glow */}
+                    <Picture
+                      src={t.banner}
+                      alt=""
+                      fill
+                      sizes="10vw"
+                      fallbackLabel=""
+                      className="scale-125 object-cover opacity-25 blur-xl pointer-events-none"
+                    />
                     <Picture
                       src={t.banner}
                       alt={t.title}
@@ -220,9 +229,9 @@ export default async function SportsPage({
                       fallbackLabel={
                         SPORT_LABELS[t.sport as SportType] ?? t.sport
                       }
-                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                      className="object-contain p-1.5 transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                     />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/60 to-transparent" />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-transparent" />
                     <div className="absolute bottom-4 left-4 right-4">
                       <span className="kicker text-accent">
                         {SPORT_LABELS[t.sport as SportType] ?? t.sport}
@@ -281,7 +290,16 @@ export default async function SportsPage({
                   href={`/sports/leagues/${l.slug}`}
                   className="group relative block overflow-hidden rounded-2xl border border-line/10 bg-surface/40 transition-all duration-500 hover:border-line/30"
                 >
-                  <div className="relative aspect-[16/10] overflow-hidden">
+                  <div className="relative aspect-[16/10] overflow-hidden flex items-center justify-center">
+                    {/* Ambient backdrop glow */}
+                    <Picture
+                      src={l.banner}
+                      alt=""
+                      fill
+                      sizes="10vw"
+                      fallbackLabel=""
+                      className="scale-125 object-cover opacity-25 blur-xl pointer-events-none"
+                    />
                     <Picture
                       src={l.banner}
                       alt={l.title}
@@ -290,9 +308,9 @@ export default async function SportsPage({
                       fallbackLabel={
                         SPORT_LABELS[l.sport as SportType] ?? l.sport
                       }
-                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                      className="object-contain p-1.5 transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                     />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/60 to-transparent" />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-transparent" />
                     <div className="absolute bottom-4 left-4 right-4">
                       <span className="kicker text-accent">
                         {SPORT_LABELS[l.sport as SportType] ?? l.sport}
@@ -365,12 +383,20 @@ export default async function SportsPage({
                   className="group rounded-2xl border border-line/10 bg-surface/40 p-6 transition-all duration-500 hover:border-line/30"
                 >
                   {p.photo && (
-                    <div className="relative mb-4 aspect-square overflow-hidden rounded-xl border border-line/10">
+                    <div className="relative mb-4 aspect-square overflow-hidden rounded-xl border border-line/10 bg-surface-2 flex items-center justify-center">
+                      <Image
+                        src={p.photo}
+                        alt=""
+                        fill
+                        aria-hidden
+                        className="scale-125 object-cover opacity-20 blur-xl pointer-events-none"
+                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                      />
                       <Image
                         src={p.photo}
                         alt={p.name}
                         fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                        className="object-contain p-2 transition-transform duration-700 group-hover:scale-[1.04]"
                         sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
                       />
                     </div>
@@ -413,12 +439,20 @@ export default async function SportsPage({
                   className="group rounded-2xl border border-line/10 bg-surface/40 p-6 transition-all duration-500 hover:border-line/30"
                 >
                   {p.photo && (
-                    <div className="relative mb-4 aspect-square overflow-hidden rounded-xl border border-line/10">
+                    <div className="relative mb-4 aspect-square overflow-hidden rounded-xl border border-line/10 bg-surface-2 flex items-center justify-center">
+                      <Image
+                        src={p.photo}
+                        alt=""
+                        fill
+                        aria-hidden
+                        className="scale-125 object-cover opacity-20 blur-xl pointer-events-none"
+                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                      />
                       <Image
                         src={p.photo}
                         alt={p.name}
                         fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                        className="object-contain p-2 transition-transform duration-700 group-hover:scale-[1.04]"
                         sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
                       />
                     </div>

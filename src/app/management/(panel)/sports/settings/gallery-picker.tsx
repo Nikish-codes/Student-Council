@@ -162,7 +162,7 @@ export function GalleryPicker({
               src={m.url}
               alt=""
               fill
-              className="object-cover"
+              className="object-contain p-1"
               sizes="120px"
             />
             {selected.includes(m.id) && (

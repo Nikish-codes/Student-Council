@@ -55,7 +55,15 @@ export default async function TournamentDetail({
   return (
     <div>
       {/* Banner */}
-      <section className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
+      <section className="relative h-[50vh] min-h-[400px] w-full overflow-hidden flex items-center justify-center bg-surface/30">
+        <Picture
+          src={tournament.banner}
+          alt=""
+          fill
+          sizes="100vw"
+          className="scale-125 object-cover opacity-25 blur-2xl pointer-events-none"
+          priority
+        />
         <Picture
           src={tournament.banner}
           alt={tournament.title}
@@ -64,10 +72,10 @@ export default async function TournamentDetail({
           fallbackLabel={
             SPORT_LABELS[tournament.sport as SportType] ?? tournament.sport
           }
-          className="object-cover"
+          className="object-contain p-4 sm:p-8"
           priority
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg via-bg/30 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg via-bg/40 to-transparent" />
       </section>
 
       {/* Header */}
