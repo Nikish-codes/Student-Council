@@ -52,6 +52,16 @@ export default async function TournamentDetail({
   const finished = matches.filter((m) => m.status === "finished");
   const cancelled = matches.filter((m) => m.status === "cancelled");
 
+  const finishedByRound = finished.reduce<Record<string, typeof finished>>(
+    (acc, match) => {
+      const roundKey = match.round || "Other";
+      if (!acc[roundKey]) acc[roundKey] = [];
+      acc[roundKey].push(match);
+      return acc;
+    },
+    {}
+  );
+
   return (
     <div>
       {/* Banner */}
@@ -166,12 +176,38 @@ export default async function TournamentDetail({
 
         {finished.length > 0 && (
           <div className="mb-12">
-            <span className="kicker mb-4 block text-subtle">Results</span>
-            <div className="grid gap-5 2xl:grid-cols-2">
-              {finished.map((m) => (
-                <SportsMatchCard key={m.id} match={m} />
-              ))}
-            </div>
+            <span className="kicker mb-6 block text-subtle">Results</span>
+            {Object.keys(finishedByRound).length === 1 &&
+            Object.keys(finishedByRound)[0] === "Other" ? (
+              <div className="grid gap-5 2xl:grid-cols-2">
+                {finished.map((m) => (
+                  <SportsMatchCard key={m.id} match={m} />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-10">
+                {Object.entries(finishedByRound).map(
+                  ([roundName, roundMatches]) => (
+                    <div key={roundName}>
+                      <div className="mb-4 flex items-center justify-between border-b border-line/10 pb-2">
+                        <h3 className="font-mono text-xs font-semibold uppercase tracking-wider text-ink sm:text-sm">
+                          {roundName}
+                        </h3>
+                        <span className="font-mono text-[11px] text-subtle">
+                          {roundMatches.length}{" "}
+                          {roundMatches.length === 1 ? "match" : "matches"}
+                        </span>
+                      </div>
+                      <div className="grid gap-5 2xl:grid-cols-2">
+                        {roundMatches.map((m) => (
+                          <SportsMatchCard key={m.id} match={m} />
+                        ))}
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            )}
           </div>
         )}
 

@@ -25,39 +25,37 @@ export function SportsMatchCard({ match }: { match: SportsMatch }) {
 
   return (
     <article
-      className={`overflow-hidden rounded-2xl border bg-surface/40 ${
+      className={`overflow-hidden rounded-xl border bg-surface/40 transition-colors ${
         match.status === "live" ? "border-accent/50" : "border-line/10"
       }`}
     >
-      <header className="flex items-start justify-between gap-5 border-b border-line/10 px-5 py-4 sm:px-7 sm:py-5">
+      <header className="flex items-center justify-between gap-4 border-b border-line/10 px-4 py-2.5 sm:px-5 sm:py-3">
         <div className="min-w-0">
-          <p className="font-mono text-xs uppercase tracking-[0.12em] text-muted">
+          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
             {SPORT_LABELS[match.sport]}
+            {match.competitionTitle && (
+              <span className="text-subtle">
+                {" "}
+                ·{" "}
+                {match.competitionHref ? (
+                  <Link
+                    href={match.competitionHref}
+                    className="hover:text-ink underline decoration-line/30 underline-offset-2 transition-colors"
+                  >
+                    {match.competitionTitle}
+                  </Link>
+                ) : (
+                  match.competitionTitle
+                )}
+              </span>
+            )}
           </p>
-          {match.competitionTitle ? (
-            match.competitionHref ? (
-              <Link
-                href={match.competitionHref}
-                className="mt-1 block truncate text-sm font-medium text-ink underline decoration-line/30 underline-offset-4 transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:text-base"
-              >
-                {match.competitionTitle}
-              </Link>
-            ) : (
-              <p className="mt-1 truncate text-sm font-medium text-muted sm:text-base">
-                {match.competitionTitle}
-              </p>
-            )
-          ) : (
-            <p className="mt-1 text-sm font-medium text-muted sm:text-base">
-              Friendly match
-            </p>
-          )}
         </div>
         <span
-          className={`inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 font-mono text-xs uppercase tracking-[0.12em] ${
+          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] ${
             match.status === "live"
-              ? "bg-accent/10 text-accent"
-              : "bg-surface-2 text-muted"
+              ? "bg-accent/10 text-accent font-semibold"
+              : "bg-surface-2 text-subtle"
           }`}
         >
           {match.status === "live" ? (
@@ -70,86 +68,90 @@ export function SportsMatchCard({ match }: { match: SportsMatch }) {
         </span>
       </header>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_4.75rem_minmax(0,1fr)] items-center gap-3 px-5 py-8 sm:grid-cols-[minmax(0,1fr)_8rem_minmax(0,1fr)] sm:gap-6 sm:px-8 sm:py-10">
-        <TeamIdentity name={teamAName} logo={match.teamALogo} />
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 px-4 py-4 sm:gap-6 sm:px-6 sm:py-5">
+        <TeamIdentity name={teamAName} logo={match.teamALogo} align="left" />
 
-        <div className="text-center">
+        <div className="px-3 text-center sm:px-5">
           {match.round ? (
-            <p className="mb-3 line-clamp-2 text-xs font-medium uppercase tracking-[0.08em] text-muted sm:text-sm">
+            <span className="mb-1 inline-block rounded-md bg-surface-2 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-muted sm:text-xs">
               {match.round}
-            </p>
+            </span>
           ) : null}
           {hasScore ? (
             <p
-              className="font-mono text-4xl font-semibold leading-none tracking-tightest tabular-nums text-ink sm:text-5xl"
+              className="font-mono text-2xl font-bold leading-none tracking-tight tabular-nums text-ink sm:text-3xl"
               aria-label={`${teamAName} ${match.scoreA ?? 0}, ${teamBName} ${match.scoreB ?? 0}`}
             >
               <span aria-hidden="true">
                 {match.scoreA ?? 0}
-                <span className="mx-1 text-subtle sm:mx-2">:</span>
+                <span className="mx-1 text-subtle sm:mx-1.5">:</span>
                 {match.scoreB ?? 0}
               </span>
             </p>
           ) : (
-            <p className="font-mono text-sm font-semibold uppercase tracking-[0.12em] text-subtle sm:text-base">
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-subtle sm:text-sm">
               vs
             </p>
           )}
         </div>
 
-        <TeamIdentity name={teamBName} logo={match.teamBLogo} />
+        <TeamIdentity name={teamBName} logo={match.teamBLogo} align="right" />
       </div>
 
       {match.status === "finished" &&
         (match.postMatch.winnerName || match.postMatch.winnerTitle) && (
-          <div className="border-t border-line/10 px-5 py-4 text-sm sm:px-7">
+          <div className="border-t border-line/10 bg-surface-2/30 px-4 py-2 text-xs sm:px-5 sm:py-2.5">
             {match.postMatch.winnerName && (
-              <p className="font-medium text-accent">
+              <span className="font-medium text-accent">
                 Winner: {match.postMatch.winnerName}
-              </p>
+                {match.postMatch.winnerTitle && " · "}
+              </span>
             )}
             {match.postMatch.winnerTitle && (
-              <p className="mt-1 text-muted">{match.postMatch.winnerTitle}</p>
+              <span className="text-muted font-mono text-[11px]">
+                {match.postMatch.winnerTitle}
+              </span>
             )}
           </div>
         )}
-      <footer className="grid bg-surface-2/60 sm:grid-cols-2">
-        <div className="px-5 py-4 sm:px-7 sm:py-5">
-          <p className="font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-subtle">
-            Match date
-          </p>
-          <p className="mt-1 text-sm font-medium text-muted sm:text-base">
-            <time dateTime={match.matchDate}>
-              {formatSportsMatchDate(match.matchDate)}
-            </time>
-            {matchTime ? <span> · {matchTime}</span> : null}
-          </p>
-        </div>
-        <div className="border-t border-line/10 px-5 py-4 sm:border-l sm:border-t-0 sm:px-7 sm:py-5">
-          <p className="font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-subtle">
-            Venue
-          </p>
-          <p className="mt-1 truncate text-sm font-medium text-muted sm:text-base">
-            {match.venue || "To be announced"}
-          </p>
-        </div>
+
+      <footer className="flex items-center justify-between border-t border-line/10 bg-surface-2/40 px-4 py-2 text-[11px] font-mono uppercase tracking-[0.1em] text-subtle sm:px-5">
+        <span>
+          <time dateTime={match.matchDate}>
+            {formatSportsMatchDate(match.matchDate)}
+          </time>
+          {matchTime ? ` · ${matchTime}` : ""}
+        </span>
+        <span>{match.venue || "Sportx"}</span>
       </footer>
     </article>
   );
 }
 
-function TeamIdentity({ name, logo }: { name: string; logo: string }) {
+function TeamIdentity({
+  name,
+  logo,
+  align = "left",
+}: {
+  name: string;
+  logo: string;
+  align?: "left" | "right";
+}) {
   const isUnconfirmed = name === "Participant to be confirmed";
   return (
-    <div className="flex min-w-0 flex-col items-center gap-3 sm:gap-4">
-      <div className="relative grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-2xl bg-surface-2 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-subtle sm:h-16 sm:w-16">
+    <div
+      className={`flex min-w-0 items-center gap-2.5 sm:gap-3 ${
+        align === "right" ? "flex-row-reverse text-right" : "flex-row text-left"
+      }`}
+    >
+      <div className="relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-surface-2 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-subtle sm:h-11 sm:w-11">
         {logo ? (
           <Image
             src={logo}
             alt=""
             fill
-            sizes="64px"
-            className="object-contain p-2"
+            sizes="48px"
+            className="object-contain p-1.5"
           />
         ) : (
           <span aria-hidden="true">
@@ -157,7 +159,7 @@ function TeamIdentity({ name, logo }: { name: string; logo: string }) {
           </span>
         )}
       </div>
-      <p className="line-clamp-3 min-w-0 max-w-48 text-center text-sm font-semibold leading-snug text-ink sm:text-lg">
+      <p className="line-clamp-2 min-w-0 text-xs font-semibold leading-snug text-ink sm:text-sm">
         {name}
       </p>
     </div>
