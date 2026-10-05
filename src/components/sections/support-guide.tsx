@@ -192,7 +192,7 @@ export function SupportGuide({
               )}
 
               {results.length > 0 ? (
-                <div className="flex flex-col lg:flex-row lg:h-[min(620px,calc(100vh-14rem))]">
+                <div className="flex flex-col lg:flex-row lg:h-[min(620px,calc(100vh_-_14rem))]">
                   <div
                     className="max-h-60 min-h-0 shrink-0 overflow-y-auto  border-b border-line/10 p-2 lg:h-full lg:max-h-none lg:w-[36%] lg:border-b-0 lg:border-r [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-line/20 hover:[&::-webkit-scrollbar-thumb]:bg-line/40"
                     role="listbox"
