@@ -5,7 +5,6 @@ import {
   getClubs,
   getCouncilPageMembers,
   getEvent,
-  getEvents,
   getHomepageConfig,
   getSiteSettings,
   getUpcomingEvents,
@@ -18,11 +17,10 @@ import { isEventPast } from "@/lib/event-status";
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [upcoming, allClubs, allEvents, council, homepage, settings] =
+  const [upcoming, allClubs, council, homepage, settings] =
     await Promise.all([
       getUpcomingEvents(8),
       getClubs(),
-      getEvents(),
       getCouncilPageMembers(),
       getHomepageConfig(),
       getSiteSettings(),
@@ -45,20 +43,16 @@ export default async function HomePage() {
       ? configuredFeaturedEvent
       : upcoming.find((event) => event.featured);
 
-  const clubMembers = allClubs.reduce((sum, c) => sum + (c.members ?? 0), 0);
   const impactNumbers = [
     { value: allClubs.length, label: "Student-run clubs" },
     {
-      value: clubMembers || 4200,
+      value: 5000,
       suffix: "+",
-      displayValue:
-        clubMembers >= 1000
-          ? `${Math.round(clubMembers / 100) / 10}K+`
-          : undefined,
+      displayValue: "5K+",
       label: "Active students",
     },
     { value: council.length || 8, label: "Council members" },
-    { value: allEvents.length, suffix: "+", label: "Events this year" },
+    { value: 100, suffix: "+", label: "Events this year" },
   ];
 
   return (
