@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { siteSettings as t } from "@/db/schema";
-import { requireRole } from "@/lib/rbac";
+import { OPS_ROLES, requireRole } from "@/lib/rbac";
 import { EditorShell } from "@/components/management/page-header";
 import { TextField, SelectField, RepeaterField, SaveBar } from "@/components/management/fields";
 import { saveSettings } from "./actions";
@@ -12,7 +12,7 @@ const TIMEZONES = [
 ];
 
 export default async function SettingsPage() {
-  await requireRole("super_admin", "admin");
+  await requireRole(...OPS_ROLES);
   const row = await db.query.siteSettings.findFirst({ where: eq(t.id, 1) });
   const campus = row?.campus ?? { name: "", coordinates: "", timezone: "Asia/Kolkata", timezoneAbbr: "IST" };
 

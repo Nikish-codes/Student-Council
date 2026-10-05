@@ -494,7 +494,7 @@ export function RepeaterField<T extends Record<string, string | number>>({
 
   const renderInput = (c: RepeaterCol, i: number) => {
     const common = {
-      value: String(rows[i][c.name] ?? ""),
+      value: String(rows[i]?.[c.name] ?? ""),
       onChange: (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
       ) => update(i, c.name, e.target.value),

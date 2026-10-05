@@ -116,7 +116,9 @@ export const clubPageSnapshotSchema = z.object({
     .union([z.literal(""), z.string().email()])
     .nullable()
     .optional(),
-  pageTemplate: z.literal("stage"),
+  pageTemplate: z
+    .enum(["stage", "zine", "clubhouse"])
+    .default("stage"),
   pageTheme: z
     .object({
       background: z.string().regex(/^#[0-9a-f]{6}$/i),
@@ -134,7 +136,9 @@ export const clubPageSnapshotSchema = z.object({
     )
     .min(1),
   pageSectionHeadings: z.record(z.string(), z.string().max(200)),
-  pageTypography: z.literal("friendly"),
+  pageTypography: z
+    .enum(["signal", "editorial", "friendly"])
+    .default("friendly"),
   people: z
     .array(
       z.object({
@@ -413,7 +417,7 @@ export async function submitRevision(revisionId: string) {
         };
         const severity = classifyClubPageChangeSeverity(baseline, revision.snapshot);
         // Cosmetic changes to an existing published club are auto-approved
-        if (Boolean(currentClub.pageTemplate) && severity === "cosmetic") {
+        if (severity === "cosmetic") {
           canAutoApprove = true;
         }
       }

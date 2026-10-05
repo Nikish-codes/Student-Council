@@ -170,12 +170,12 @@ export async function saveClub(id: number | null, fd: FormData) {
         ? await uniqueSlug("clubs", requested, id)
         : existing.slug;
     if (!canPublish(user.role)) {
-      const pageTemplate = existing.pageTemplate ?? "stage";
-      const templateTheme = pageTemplate === "zine"
-        ? { background: "#f1ead8", foreground: "#17130f", accent: "#d93818", logoTreatment: "natural" as const }
-        : pageTemplate === "clubhouse"
-          ? { background: "#efffd8", foreground: "#17301e", accent: "#a92f18", logoTreatment: "natural" as const }
-          : { background: "#0b0705", foreground: "#fff5e9", accent: "#ff5a1f", logoTreatment: "natural" as const };
+      const templateTheme = {
+        background: "#0b0705",
+        foreground: "#fff5e9",
+        accent: normalizeAccent(base.accentColor) ?? existing.pageTheme?.accent ?? "#ff5a1f",
+        logoTreatment: "natural" as const,
+      };
       const revisionId = await saveRevisionDraft({
         entityType: "club_page",
         entityId: id,
@@ -199,11 +199,11 @@ export async function saveClub(id: number | null, fd: FormData) {
           linkedinUrl: base.linkedinUrl,
           websiteUrl: base.websiteUrl,
           contactEmail: base.contactEmail,
-          pageTemplate,
-          pageTheme: existing.pageTheme ?? templateTheme,
+          pageTemplate: "stage",
+          pageTheme: templateTheme,
           pageVisibleSections: existing.pageVisibleSections ?? ["about", "activities", "videos", "events", "gallery", "people"],
           pageSectionHeadings: base.pageSectionHeadings,
-          pageTypography: existing.pageTypography ?? "signal",
+          pageTypography: "friendly",
         },
       });
       await submitRevision(revisionId);
@@ -212,6 +212,14 @@ export async function saveClub(id: number | null, fd: FormData) {
         .update(t)
         .set({
           ...base,
+          pageTemplate: existing.pageTemplate ?? "stage",
+          pageTypography: existing.pageTypography ?? "friendly",
+          pageTheme: existing.pageTheme ?? {
+            background: "#0b0705",
+            foreground: "#fff5e9",
+            accent: normalizeAccent(base.accentColor) ?? "#ff5a1f",
+            logoTreatment: "natural" as const,
+          },
           slug,
           version: existing.version + 1,
           updatedAt: new Date().toISOString(),

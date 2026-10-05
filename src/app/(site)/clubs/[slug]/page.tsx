@@ -22,6 +22,7 @@ import { embedSrc } from "@/lib/video";
 import { getClub, getClubEvents, getClubLeads, getClubs } from "@/lib/content";
 import type { ClubDetail, CouncilMember, EventItem } from "@/lib/schemas";
 import { cn, formatDate, outlookCompose } from "@/lib/utils";
+import { Marquee } from "@/components/motion/marquee";
 import { ClubPageRenderer } from "@/components/clubs/club-page-renderer";
 
 // ISR: the page shows upcoming-vs-past event timing, which ages.
@@ -192,6 +193,22 @@ export default async function ClubDetailPage({
           </dl>
         </Reveal>
       </header>
+
+      {/* ─── Scrolling Marquee Ticker ─── */}
+      <div className="mt-14 overflow-hidden border-y border-line/10 bg-surface-2 py-3 text-ink">
+        <Marquee speed={25} className="py-0.5">
+          <span className="whitespace-nowrap font-mono text-xs font-black uppercase tracking-[0.28em] text-ink sm:text-sm">
+            {club.pageSectionHeadings?.ticker?.trim() ? (
+              <>{club.pageSectionHeadings.ticker.trim()}&nbsp;·&nbsp;</>
+            ) : (
+              <>
+                {club.tags.join(" / ")} / {club.flagshipEvent || club.name} /{" "}
+                {club.categoryLabel || "Club"} /&nbsp;
+              </>
+            )}
+          </span>
+        </Marquee>
+      </div>
 
       {/* ─── Cover ─── */}
       {/* Framed at the image's OWN ratio, not a fixed viewport height. A club
