@@ -192,7 +192,7 @@ export function SupportGuide({
               )}
 
               {results.length > 0 ? (
-                <div className="grid lg:h-[620px] lg:max-h-[calc(100vh-14rem)] lg:grid-cols-[0.72fr_1.28fr]">
+                <div className="grid lg:h-[620px] lg:max-h-[calc(100vh-14rem)] lg:grid-cols-[0.72fr_1.28fr] lg:grid-rows-[minmax(0,1fr)]">
                   <div
                     className="max-h-60 min-h-0 overflow-y-auto overscroll-contain border-b border-line/10 p-2 lg:h-full lg:max-h-none lg:border-b-0 lg:border-r [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-line/20 hover:[&::-webkit-scrollbar-thumb]:bg-line/40"
                     role="listbox"
