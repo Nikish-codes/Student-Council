@@ -192,9 +192,9 @@ export function SupportGuide({
               )}
 
               {results.length > 0 ? (
-                <div className="flex flex-col lg:h-[620px] lg:max-h-[calc(100vh-14rem)] lg:flex-row">
+                <div className="flex flex-col lg:flex-row lg:h-[min(620px,calc(100vh-14rem))]">
                   <div
-                    className="max-h-60 min-h-0 shrink-0 overflow-y-auto overscroll-contain border-b border-line/10 p-2 lg:h-full lg:max-h-none lg:w-[36%] lg:border-b-0 lg:border-r [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-line/20 hover:[&::-webkit-scrollbar-thumb]:bg-line/40"
+                    className="max-h-60 min-h-0 shrink-0 overflow-y-auto  border-b border-line/10 p-2 lg:h-full lg:max-h-none lg:w-[36%] lg:border-b-0 lg:border-r [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-line/20 hover:[&::-webkit-scrollbar-thumb]:bg-line/40"
                     role="listbox"
                     aria-label="Matching departments"
                   >
@@ -312,7 +312,7 @@ function SpotlightDepartmentDetail({
   return (
     <article
       ref={articleRef}
-      className="max-h-[600px] min-h-0 flex-1 overflow-y-auto overscroll-contain p-6 pb-10 sm:p-8 sm:pb-12 lg:h-full lg:max-h-none [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-line/20 hover:[&::-webkit-scrollbar-thumb]:bg-line/40"
+      className="max-h-[600px] min-h-0 lg:flex-1 overflow-y-auto  p-6 pb-10 sm:p-8 sm:pb-12 lg:h-full lg:max-h-none [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-line/20 hover:[&::-webkit-scrollbar-thumb]:bg-line/40"
     >
       <div className="flex items-start justify-between gap-6">
         <div className="min-w-0">
