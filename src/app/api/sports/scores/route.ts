@@ -16,6 +16,7 @@ export async function GET() {
         scoreA: true,
         scoreB: true,
         postMatch: true,
+        events: true,
       },
     });
     return NextResponse.json(rows);

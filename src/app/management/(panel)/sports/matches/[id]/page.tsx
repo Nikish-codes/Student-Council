@@ -191,12 +191,14 @@ export default async function MatchEditor({
           maxLength={500}
           defaultValue={row?.postMatch?.winnerTitle}
         />
-        <input
-          type="hidden"
-          name="events"
-          value={JSON.stringify((row?.events as SportMatchEvent[]) ?? [])}
-          readOnly
-        />
+        {!showCockpit && (
+          <input
+            type="hidden"
+            name="events"
+            value={JSON.stringify((row?.events as SportMatchEvent[]) ?? [])}
+            readOnly
+          />
+        )}
         <input
           type="hidden"
           name="postMatch"

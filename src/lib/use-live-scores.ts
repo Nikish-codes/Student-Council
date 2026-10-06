@@ -9,6 +9,7 @@ export type LiveScoreUpdate = {
   scoreA: number | null;
   scoreB: number | null;
   postMatch: SportsMatch["postMatch"];
+  events?: SportsMatch["events"];
 };
 
 let cachedScores: LiveScoreUpdate[] | null = null;
@@ -56,7 +57,8 @@ export function useLiveMatch(initialMatch: SportsMatch): SportsMatch {
             prev.status === update.status &&
             prev.scoreA === update.scoreA &&
             prev.scoreB === update.scoreB &&
-            JSON.stringify(prev.postMatch) === JSON.stringify(update.postMatch)
+            JSON.stringify(prev.postMatch) === JSON.stringify(update.postMatch) &&
+            JSON.stringify(prev.events) === JSON.stringify(update.events)
           ) {
             return prev;
           }
@@ -66,6 +68,7 @@ export function useLiveMatch(initialMatch: SportsMatch): SportsMatch {
             scoreA: update.scoreA ?? undefined,
             scoreB: update.scoreB ?? undefined,
             postMatch: update.postMatch,
+            events: (update.events as any) ?? prev.events,
           };
         });
       }
