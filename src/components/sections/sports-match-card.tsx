@@ -39,8 +39,6 @@ export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch })
           : "border-line/10 bg-surface/40 hover:border-line/20 hover:bg-surface/60"
       )}
     >
-      <Link href={`/sports/matches/${match.id}`} className="absolute inset-0 z-0" aria-label={`View match details for ${teamAName} vs ${teamBName}`} />
-      
       {/* Hero Banner at the top of the card */}
       {match.bannerImage && (
         <div className="relative w-full h-48 sm:h-56 shrink-0 bg-surface-2 border-b border-line/5 overflow-hidden">
@@ -63,9 +61,9 @@ export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch })
       )}
 
       {/* Content Area Below Banner */}
-      <div className="relative z-10 flex flex-col flex-1">
+      <div className="flex flex-col flex-1">
         {/* Header */}
-        <header className="relative flex items-center justify-between gap-4 border-b border-line/5 px-4 py-3 sm:px-5">
+        <header className="flex items-center justify-between gap-4 border-b border-line/5 px-4 py-3 sm:px-5">
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
             <span className={isLive ? "text-ink font-semibold" : ""}>
@@ -179,6 +177,7 @@ export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch })
         <span className="truncate pl-2 text-right">{match.venue || "TBA"}</span>
       </footer>
       </div>
+      <Link href={`/sports/matches/${match.id}`} className="absolute inset-0 z-10" aria-label={`View match details for ${teamAName} vs ${teamBName}`} />
     </article>
   );
 }
