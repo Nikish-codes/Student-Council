@@ -1332,7 +1332,7 @@ export const getSportsMatches = cache(
         tournament: true,
         league: true,
       },
-      orderBy: [asc(sportsMatchesT.matchDate), asc(sportsMatchesT.id)],
+      orderBy: [desc(sportsMatchesT.matchDate), desc(sportsMatchesT.id)],
     });
     let matches = rows
       .filter(
