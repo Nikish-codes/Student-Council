@@ -41,16 +41,23 @@ export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch })
     >
       {/* Hero Banner at the top of the card */}
       {match.bannerImage && (
-        <div className="relative w-full h-48 sm:h-56 shrink-0 bg-surface-2 border-b border-line/5 overflow-hidden">
+        <div className="relative w-full h-44 sm:h-56 shrink-0 bg-surface-2/60 border-b border-line/5 overflow-hidden flex items-center justify-center">
           <Image
             src={match.bannerImage}
             alt=""
             fill
-            className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+            className="scale-125 object-cover opacity-25 blur-lg pointer-events-none"
+            sizes="100px"
+          />
+          <Image
+            src={match.bannerImage}
+            alt=""
+            fill
+            className="object-contain p-1 transition-transform duration-700 group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, 600px"
           />
           {isLive && (
-            <div className="absolute top-4 right-4 z-10">
+            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10">
               <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent/90 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-bg shadow-sm backdrop-blur-md">
                 <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-bg motion-safe:animate-pulse" />
                 Live Now
@@ -109,12 +116,12 @@ export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch })
       </header>
 
       {/* Score & Teams Area */}
-      <div className="relative flex-1 grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-5 sm:gap-6 sm:px-6 sm:py-6">
+      <div className="relative flex-1 grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 py-4 sm:gap-6 sm:px-6 sm:py-6">
         <TeamIdentity name={teamAName} logo={match.teamALogo} align="left" isLive={isLive} />
 
-        <div className="flex flex-col items-center justify-center px-2 sm:px-4 text-center">
+        <div className="flex flex-col items-center justify-center px-1 sm:px-4 text-center">
           {match.round && (
-            <span className="mb-2 rounded bg-line/5 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-subtle">
+            <span className="mb-1.5 sm:mb-2 rounded bg-line/5 px-1.5 py-0.5 sm:px-2 font-mono text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.1em] text-subtle">
               {match.round}
             </span>
           )}
@@ -123,13 +130,13 @@ export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch })
             <p
               className={cn(
                 "font-mono tabular-nums leading-none tracking-tighter",
-                isLive ? "text-3xl sm:text-4xl text-ink font-black" : "text-2xl sm:text-3xl text-ink font-bold"
+                isLive ? "text-2xl sm:text-4xl text-ink font-black" : "text-xl sm:text-3xl text-ink font-bold"
               )}
               aria-label={`${teamAName} ${match.scoreA ?? 0}, ${teamBName} ${match.scoreB ?? 0}`}
             >
               <span aria-hidden="true" className="flex items-center">
                 <span>{match.scoreA ?? 0}</span>
-                <span className="mx-2 text-line/40 font-normal sm:mx-3">:</span>
+                <span className="mx-1.5 sm:mx-3 text-line/40 font-normal">:</span>
                 <span>{match.scoreB ?? 0}</span>
               </span>
             </p>
@@ -197,14 +204,16 @@ function TeamIdentity({
   return (
     <div
       className={cn(
-        "flex min-w-0 items-center gap-2.5 sm:gap-3",
-        align === "right" ? "flex-row-reverse text-right" : "flex-row text-left"
+        "flex min-w-0 flex-col items-center text-center sm:gap-3",
+        align === "right" ? "sm:flex-row-reverse sm:text-right" : "sm:flex-row sm:text-left"
       )}
     >
       <div
         className={cn(
           "relative grid shrink-0 place-items-center overflow-hidden rounded-xl bg-surface-2 font-mono text-[10px] font-bold uppercase tracking-[0.08em]",
-          isLive ? "h-14 w-14 sm:h-16 sm:w-16 shadow-sm bg-surface" : "h-10 w-10 sm:h-12 sm:w-12 text-subtle"
+          isLive
+            ? "h-10 w-10 sm:h-14 sm:w-14 shadow-sm bg-surface"
+            : "h-9 w-9 sm:h-11 sm:w-11 text-subtle"
         )}
       >
         {logo ? (
@@ -213,7 +222,7 @@ function TeamIdentity({
             alt=""
             fill
             sizes="64px"
-            className={cn("object-contain", isLive ? "p-1.5" : "p-2")}
+            className={cn("object-contain", isLive ? "p-1 sm:p-1.5" : "p-1.5 sm:p-2")}
           />
         ) : (
           <span aria-hidden="true">
@@ -223,9 +232,13 @@ function TeamIdentity({
       </div>
       <p
         className={cn(
-          "line-clamp-2 min-w-0 leading-tight",
-          isLive ? "text-sm sm:text-base font-bold text-ink" : "text-xs sm:text-sm font-semibold text-ink/90"
+          "mt-1.5 sm:mt-0 line-clamp-2 min-w-0 leading-tight break-words text-center",
+          align === "right" ? "sm:text-right" : "sm:text-left",
+          isLive
+            ? "text-xs sm:text-base font-bold text-ink"
+            : "text-[11px] sm:text-sm font-semibold text-ink/90"
         )}
+        title={name}
       >
         {name}
       </p>
