@@ -13,6 +13,7 @@ import {
   getSportsPeople,
   type SportsMatch,
 } from "@/lib/content";
+import { AutoRefresh } from "@/components/ui/auto-refresh";
 import { getSportsMatchYear } from "@/lib/sports-match";
 import {
   SPORT_LABELS,
@@ -80,6 +81,7 @@ export default async function SportsPage({
 
   return (
     <div>
+      {liveMatches.length > 0 && <AutoRefresh intervalMs={10000} />}
       {/* ─── Top gallery + academy logo ─── */}
       <section className="relative pt-20 sm:pt-24">
         {config.academyLogo ? (

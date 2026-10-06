@@ -59,7 +59,7 @@ export default async function MatchEditor({
       .from(leagueT)
       .orderBy(desc(leagueT.year)),
     db
-      .select({ id: mediaT.id, url: mediaT.url, category: mediaT.category })
+      .select({ id: mediaT.id, url: mediaT.url, filename: mediaT.filename })
       .from(mediaT)
       .orderBy(desc(mediaT.createdAt)),
   ]);
