@@ -9,7 +9,6 @@ import {
   getSportsTournaments,
   getSportsMatches,
 } from "@/lib/content";
-import { AutoRefresh } from "@/components/ui/auto-refresh";
 import {
   SPORT_LABELS,
   SPORT_DIVISION_LABELS,
@@ -65,7 +64,6 @@ export default async function TournamentDetail({
 
   return (
     <div>
-      {live.length > 0 && <AutoRefresh intervalMs={10000} />}
       {/* Banner */}
       <section className="relative h-[50vh] min-h-[400px] w-full overflow-hidden flex items-center justify-center bg-surface/30">
         <Picture

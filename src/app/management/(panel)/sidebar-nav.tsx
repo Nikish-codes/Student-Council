@@ -82,7 +82,7 @@ export function SidebarNav({
       >
         {/* Brand */}
         <div className="flex items-center justify-between px-5 pt-5">
-          <Link
+          <Link prefetch={false}
             href="/management"
             onClick={close}
             className="kicker text-ink"
@@ -110,7 +110,7 @@ export function SidebarNav({
                   const active = isActive(item.href);
                   const Icon = ICONS[item.icon];
                   return (
-                    <Link
+                    <Link prefetch={false}
                       key={item.href}
                       href={item.href}
                       onClick={close}

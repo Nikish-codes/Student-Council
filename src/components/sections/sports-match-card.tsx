@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import type { SportsMatch } from "@/lib/content";
@@ -6,7 +8,7 @@ import {
   formatSportsMatchTime,
 } from "@/lib/sports-match";
 import { SPORT_LABELS } from "@/lib/schemas";
-
+import { useLiveMatch } from "@/lib/use-live-scores";
 import { cn } from "@/lib/utils";
 
 const STATUS_LABELS: Record<SportsMatch["status"], string> = {
@@ -16,7 +18,9 @@ const STATUS_LABELS: Record<SportsMatch["status"], string> = {
   cancelled: "Cancelled",
 };
 
-export function SportsMatchCard({ match }: { match: SportsMatch }) {
+export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch }) {
+  const match = useLiveMatch(initialMatch);
+  
   const matchTime = formatSportsMatchTime(match.matchDate);
   const hasScore =
     (match.status === "live" || match.status === "finished") &&
