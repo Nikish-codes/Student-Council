@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { SportsMatchCard } from "@/components/sections/sports-match-card";
 import { getSportsMatches } from "@/lib/content";
 import { ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const revalidate = 60;
 
@@ -57,7 +58,28 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
         </div>
 
         {/* Live Feed / Post Match Info */}
-        <div className="mt-12 space-y-12">
+        <div className="mt-12 space-y-8">
+          {match.events && match.events.length > 0 && (
+            <div className="rounded-2xl border border-line/10 bg-surface/40 p-6 sm:p-8">
+              <h2 className="display text-2xl text-ink mb-6">Match Events Timeline</h2>
+              <div className="divide-y divide-line/10">
+                {match.events.map((ev, i) => (
+                  <div key={i} className="flex items-center gap-4 py-3.5 text-sm">
+                    <span className="font-mono text-xs font-semibold tabular-nums text-accent bg-accent/10 px-2.5 py-1 rounded-full border border-accent/20">
+                      {ev.time}
+                    </span>
+                    <span className={cn("h-2.5 w-2.5 rounded-full shrink-0", ev.team === "a" ? "bg-sky-400" : "bg-rose-400")} />
+                    <span className="font-semibold text-ink capitalize">{ev.type}</span>
+                    {ev.description && <span className="text-subtle truncate">· {ev.description}</span>}
+                    <span className="ml-auto font-mono text-xs text-muted shrink-0">
+                      {ev.team === "a" ? (match.teamAName || "Side A") : (match.teamBName || "Side B")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {isLive ? (
             <div className="rounded-2xl border border-accent/20 bg-accent/5 p-8 text-center">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-accent/10 mb-4">
