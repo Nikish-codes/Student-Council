@@ -1034,6 +1034,7 @@ export interface SportsMatch {
   teamBName: string;
   teamALogo: string;
   teamBLogo: string;
+  bannerImage: string;
   competitionTitle: string;
   competitionHref: string | undefined;
   competitionYear: number | undefined;
@@ -1161,6 +1162,7 @@ function mapMatch(d: {
   round: string | null;
   teamAId: number | null;
   teamBId: number | null;
+  bannerImage?: { url?: string | null } | null;
   teamA?: { name: string; logo?: { url?: string | null } | null } | null;
   teamB?: { name: string; logo?: { url?: string | null } | null } | null;
   tournament?: {
@@ -1200,6 +1202,7 @@ function mapMatch(d: {
     teamBName: d.participantBName || d.teamB?.name || "",
     teamALogo: mediaUrl(d.teamA?.logo),
     teamBLogo: mediaUrl(d.teamB?.logo),
+    bannerImage: mediaUrl(d.bannerImage),
     competitionTitle: competition?.title ?? "",
     competitionHref: publishedTournament
       ? `/sports/tournaments/${publishedTournament.slug}`
@@ -1325,6 +1328,7 @@ export const getSportsMatches = cache(
       with: {
         teamA: { with: { logo: true } },
         teamB: { with: { logo: true } },
+        bannerImage: true,
         tournament: true,
         league: true,
       },
@@ -1355,6 +1359,7 @@ export const getSportsMatch = cache(
       with: {
         teamA: { with: { logo: true } },
         teamB: { with: { logo: true } },
+        bannerImage: true,
         tournament: true,
         league: true,
       },

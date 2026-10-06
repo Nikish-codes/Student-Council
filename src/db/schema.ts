@@ -939,6 +939,7 @@ export const sportsMatches = sqliteTable(
       () => sportsTournaments.id,
     ),
     leagueId: integer("league_id").references(() => sportsLeagues.id),
+    bannerImageId: integer("banner_image_id").references(() => media.id),
     sport: text("sport").$type<SportType>().notNull(),
     round: text("round"), // "Group A", "Quarterfinal", "Matchday 3", …
     participantType: text("participant_type")
@@ -1284,6 +1285,10 @@ export const sportsMatchesRelations = relations(sportsMatches, ({ one }) => ({
     relationName: "matchTeamB",
     fields: [sportsMatches.teamBId],
     references: [sportsTeams.id],
+  }),
+  bannerImage: one(media, {
+    fields: [sportsMatches.bannerImageId],
+    references: [media.id],
   }),
 }));
 

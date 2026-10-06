@@ -110,6 +110,7 @@ export async function saveMatch(id: number | null, fd: FormData) {
     status,
     scoreA: score("scoreA"),
     scoreB: score("scoreB"),
+    bannerImageId: optNum(fd, "bannerImageId"),
     events: json<SportMatchEvent[]>(fd, "events", []),
     postMatch: {
       ...json<SportPostMatch>(fd, "postMatch", {}),

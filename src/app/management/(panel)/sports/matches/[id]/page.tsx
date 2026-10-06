@@ -17,11 +17,13 @@ import {
   SelectField,
   DateTimeField,
   SaveBar,
+  MediaField,
 } from "@/components/management/fields";
 import { SPORT_TYPE_OPTIONS } from "@/lib/sports-options";
 import { MatchCockpit } from "./match-cockpit";
 import { CompetitionFields, TeamFields } from "./match-fields";
 import { saveMatch } from "../actions";
+import { media as mediaT } from "@/db/schema";
 
 export default async function MatchEditor({
   params,
@@ -37,7 +39,7 @@ export default async function MatchEditor({
   const preset = (key: string) =>
     isNew && typeof query[key] === "string" ? (query[key] as string) : "";
 
-  const [row, teams, tournaments, leagues] = await Promise.all([
+  const [row, teams, tournaments, leagues, media] = await Promise.all([
     isNew
       ? null
       : db.query.sportsMatches.findFirst({
@@ -56,6 +58,10 @@ export default async function MatchEditor({
       .select({ id: leagueT.id, title: leagueT.title })
       .from(leagueT)
       .orderBy(desc(leagueT.year)),
+    db
+      .select({ id: mediaT.id, url: mediaT.url, category: mediaT.category })
+      .from(mediaT)
+      .orderBy(desc(mediaT.createdAt)),
   ]);
   if (!isNew && !row) notFound();
   const action = saveMatch.bind(null, isNew ? null : Number(id));
@@ -126,6 +132,13 @@ export default async function MatchEditor({
           />
           <TextField name="venue" label="Venue" defaultValue={row?.venue} />
         </div>
+        <MediaField
+          name="bannerImageId"
+          label="Match Banner / Thumbnail"
+          hint="Optional. Shown on the live match card as a small visual."
+          defaultValue={row?.bannerImageId ?? null}
+          media={media}
+        />
       </Fieldset>
 
       <Fieldset title="Participants" hint="Teams or individual players.">
