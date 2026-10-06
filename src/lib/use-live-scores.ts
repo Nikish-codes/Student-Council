@@ -68,7 +68,7 @@ export function useLiveMatch(initialMatch: SportsMatch): SportsMatch {
             scoreA: update.scoreA ?? undefined,
             scoreB: update.scoreB ?? undefined,
             postMatch: update.postMatch,
-            events: (update.events as any) ?? prev.events,
+            events: update.events ?? prev.events,
           };
         });
       }

@@ -191,17 +191,17 @@ export default async function SportsPage({
                 <Link
                   key={l.id}
                   href={`/sports/leagues/${l.slug}`}
-                  className="group relative block overflow-hidden rounded-2xl border border-line/10 bg-surface/40 transition-all duration-500 hover:border-line/30 hover:bg-surface/60"
+                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-line/10 bg-surface/40 transition-all duration-500 hover:border-line/30 hover:bg-surface/60"
                 >
-                  <div className="relative aspect-[16/10] overflow-hidden flex items-center justify-center">
-                    {/* Ambient backdrop glow */}
+                  <div className="relative aspect-[16/11] sm:aspect-[16/10] w-full overflow-hidden flex items-center justify-center bg-surface-2/60 border-b border-line/5">
+                    {/* Ambient backdrop glow for 9:16 portrait posters */}
                     <Picture
                       src={l.banner}
                       alt=""
                       fill
                       sizes="10vw"
                       fallbackLabel=""
-                      className="scale-125 object-cover opacity-25 blur-xl pointer-events-none"
+                      className="scale-125 object-cover opacity-30 blur-xl pointer-events-none"
                     />
                     <Picture
                       src={l.banner}
@@ -211,35 +211,36 @@ export default async function SportsPage({
                       fallbackLabel={
                         SPORT_LABELS[l.sport as SportType] ?? l.sport
                       }
-                      className="object-contain p-1.5 transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                      className="object-contain p-2 transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                     />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/40 to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <span className="kicker text-accent">
-                        {SPORT_LABELS[l.sport as SportType] ?? l.sport}
-                        {l.division !== "open" &&
-                          ` · ${SPORT_DIVISION_LABELS[l.division]}`}
-                      </span>
-                      <h3 className="display mt-1.5 text-2xl text-ink">
-                        {l.title}
-                      </h3>
-                      {l.result?.winnerName && (
-                        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-mono text-emerald-300">
-                          <span>🏆</span>
-                          <span className="uppercase tracking-[0.1em]">
-                            Champion: {l.result.winnerName}
-                          </span>
-                        </div>
-                      )}
-                    </div>
                   </div>
-                  <div className="flex items-center justify-between px-4 py-3 font-mono text-xs uppercase tracking-[0.16em] text-subtle">
-                    <span>{l.venue ? `${l.venue} · ${l.year}` : l.year}</span>
-                    <span className="text-muted transition-colors group-hover:text-accent">
-                      {l.standings.length > 0
-                        ? `${l.standings.length} teams · View details →`
-                        : "View details →"}
+
+                  <div className="flex flex-1 flex-col p-5">
+                    <span className="kicker text-accent">
+                      {SPORT_LABELS[l.sport as SportType] ?? l.sport}
+                      {l.division !== "open" &&
+                        ` · ${SPORT_DIVISION_LABELS[l.division]}`}
                     </span>
+                    <h3 className="display mt-1.5 text-2xl text-ink group-hover:text-accent transition-colors">
+                      {l.title}
+                    </h3>
+                    {l.result?.winnerName && (
+                      <div className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-mono text-emerald-300">
+                        <span>🏆</span>
+                        <span className="uppercase tracking-[0.1em]">
+                          Champion: {l.result.winnerName}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="mt-auto pt-4 flex items-center justify-between border-t border-line/5 font-mono text-xs uppercase tracking-[0.16em] text-subtle">
+                      <span>{l.venue ? `${l.venue} · ${l.year}` : l.year}</span>
+                      <span className="text-muted transition-colors group-hover:text-accent">
+                        {l.standings.length > 0
+                          ? `${l.standings.length} teams · View details →`
+                          : "View details →"}
+                      </span>
+                    </div>
                   </div>
                 </Link>
               ))}
@@ -275,17 +276,17 @@ export default async function SportsPage({
                 <Link
                   key={t.id}
                   href={`/sports/tournaments/${t.slug}`}
-                  className="group relative block overflow-hidden rounded-2xl border border-line/10 bg-surface/40 transition-all duration-500 hover:border-line/30 hover:bg-surface/60"
+                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-line/10 bg-surface/40 transition-all duration-500 hover:border-line/30 hover:bg-surface/60"
                 >
-                  <div className="relative aspect-[16/10] overflow-hidden flex items-center justify-center">
-                    {/* Ambient backdrop glow */}
+                  <div className="relative aspect-[16/11] sm:aspect-[16/10] w-full overflow-hidden flex items-center justify-center bg-surface-2/60 border-b border-line/5">
+                    {/* Ambient backdrop glow for 9:16 portrait posters */}
                     <Picture
                       src={t.banner}
                       alt=""
                       fill
                       sizes="10vw"
                       fallbackLabel=""
-                      className="scale-125 object-cover opacity-25 blur-xl pointer-events-none"
+                      className="scale-125 object-cover opacity-30 blur-xl pointer-events-none"
                     />
                     <Picture
                       src={t.banner}
@@ -295,40 +296,41 @@ export default async function SportsPage({
                       fallbackLabel={
                         SPORT_LABELS[t.sport as SportType] ?? t.sport
                       }
-                      className="object-contain p-1.5 transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                      className="object-contain p-2 transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                     />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/40 to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <span className="kicker text-accent">
-                        {SPORT_LABELS[t.sport as SportType] ?? t.sport}
-                        {t.division !== "open" &&
-                          ` · ${SPORT_DIVISION_LABELS[t.division]}`}
-                      </span>
-                      <h3 className="display mt-1.5 text-2xl text-ink">
-                        {t.title}
-                      </h3>
-                      {t.result?.winnerName && (
-                        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-mono text-emerald-300">
-                          <span>🏆</span>
-                          <span className="uppercase tracking-[0.1em]">
-                            Champion: {t.result.winnerName}
-                          </span>
-                        </div>
-                      )}
-                    </div>
                   </div>
-                  <div className="flex items-center justify-between px-4 py-3 font-mono text-xs uppercase tracking-[0.16em] text-subtle">
-                    <span>
-                      {t.startDate
-                        ? new Date(t.startDate).toLocaleDateString("en-IN", {
-                            day: "2-digit",
-                            month: "short",
-                          })
-                        : t.year}
+
+                  <div className="flex flex-1 flex-col p-5">
+                    <span className="kicker text-accent">
+                      {SPORT_LABELS[t.sport as SportType] ?? t.sport}
+                      {t.division !== "open" &&
+                        ` · ${SPORT_DIVISION_LABELS[t.division]}`}
                     </span>
-                    <span className="text-muted transition-colors group-hover:text-accent">
-                      View details →
-                    </span>
+                    <h3 className="display mt-1.5 text-2xl text-ink group-hover:text-accent transition-colors">
+                      {t.title}
+                    </h3>
+                    {t.result?.winnerName && (
+                      <div className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-mono text-emerald-300">
+                        <span>🏆</span>
+                        <span className="uppercase tracking-[0.1em]">
+                          Champion: {t.result.winnerName}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="mt-auto pt-4 flex items-center justify-between border-t border-line/5 font-mono text-xs uppercase tracking-[0.16em] text-subtle">
+                      <span>
+                        {t.startDate
+                          ? new Date(t.startDate).toLocaleDateString("en-IN", {
+                              day: "2-digit",
+                              month: "short",
+                            })
+                          : t.year}
+                      </span>
+                      <span className="text-muted transition-colors group-hover:text-accent">
+                        View details →
+                      </span>
+                    </div>
                   </div>
                 </Link>
               ))}

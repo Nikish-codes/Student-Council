@@ -51,17 +51,17 @@ export default async function TournamentsPage() {
                     <Link
                       key={t.id}
                       href={`/sports/tournaments/${t.slug}`}
-                      className="group relative block overflow-hidden rounded-2xl border border-line/10 bg-surface/40 transition-all duration-500 hover:border-line/30"
+                      className="group relative flex flex-col overflow-hidden rounded-2xl border border-line/10 bg-surface/40 transition-all duration-500 hover:border-line/30 hover:bg-surface/60"
                     >
-                      <div className="relative aspect-[16/10] overflow-hidden flex items-center justify-center">
-                        {/* Ambient backdrop glow */}
+                      <div className="relative aspect-[16/11] sm:aspect-[16/10] w-full overflow-hidden flex items-center justify-center bg-surface-2/60 border-b border-line/5">
+                        {/* Ambient backdrop glow for 9:16 portrait posters */}
                         <Picture
                           src={t.banner}
                           alt=""
                           fill
                           sizes="10vw"
                           fallbackLabel=""
-                          className="scale-125 object-cover opacity-25 blur-xl pointer-events-none"
+                          className="scale-125 object-cover opacity-30 blur-xl pointer-events-none"
                         />
                         <Picture
                           src={t.banner}
@@ -69,23 +69,23 @@ export default async function TournamentsPage() {
                           fill
                           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                           fallbackLabel={SPORT_LABELS[t.sport as SportType] ?? t.sport}
-                          className="object-contain p-1.5 transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                          className="object-contain p-2 transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                         />
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg/80 via-transparent to-transparent" />
-                        <div className="absolute bottom-4 left-4 right-4">
-                          <span className="kicker text-accent">
-                            {SPORT_LABELS[t.sport as SportType] ?? t.sport}
-                            {t.division !== "open" &&
-                              ` · ${SPORT_DIVISION_LABELS[t.division]}`}
-                          </span>
-                          <h3 className="display mt-2 text-2xl text-ink">
-                            {t.title}
-                          </h3>
-                        </div>
                       </div>
-                      {t.excerpt && (
-                        <p className="px-4 py-3 text-sm text-muted">{t.excerpt}</p>
-                      )}
+
+                      <div className="flex flex-1 flex-col p-5">
+                        <span className="kicker text-accent">
+                          {SPORT_LABELS[t.sport as SportType] ?? t.sport}
+                          {t.division !== "open" &&
+                            ` · ${SPORT_DIVISION_LABELS[t.division]}`}
+                        </span>
+                        <h3 className="display mt-1.5 text-2xl text-ink group-hover:text-accent transition-colors">
+                          {t.title}
+                        </h3>
+                        {t.excerpt && (
+                          <p className="mt-2 text-sm text-muted line-clamp-2">{t.excerpt}</p>
+                        )}
+                      </div>
                     </Link>
                   ))}
                 </div>

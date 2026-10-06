@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Picture } from "@/components/ui/picture";
 import { SportsMatchCard } from "@/components/sections/sports-match-card";
 import { getSportsMatches } from "@/lib/content";
 import { ArrowLeft } from "lucide-react";

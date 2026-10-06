@@ -20,7 +20,7 @@ export async function GET() {
       },
     });
     return NextResponse.json(rows);
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Failed to fetch scores" }, { status: 500 });
   }
 }
