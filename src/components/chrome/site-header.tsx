@@ -11,13 +11,13 @@ import { Button } from "@/components/ui/button";
 type NavItem = { href: string; label: string; disabled?: boolean };
 
 const NAV: NavItem[] = [
-  { href: "/", label: "Home" },
-  { href: "/oval", label: "Oval" },
+  { href: "/", label: "Home", disabled: true },
+  { href: "/oval", label: "Oval", disabled: true },
   { href: "/sports", label: "Sports" },
-  { href: "/council", label: "Council" },
-  { href: "/events", label: "Events" },
-  { href: "/clubs", label: "Clubs" },
-  { href: "/support", label: "Support" },
+  { href: "/council", label: "Council", disabled: true },
+  { href: "/events", label: "Events", disabled: true },
+  { href: "/clubs", label: "Clubs", disabled: true },
+  { href: "/support", label: "Support", disabled: true },
 ];
 
 export function SiteHeader() {
@@ -95,8 +95,8 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden md:block">
-          <Button asChild size="sm" variant="outline">
-            <Link href="/support#grievance-form">Raise a concern</Link>
+          <Button size="sm" variant="outline" disabled className="cursor-not-allowed opacity-40">
+            Raise a concern
           </Button>
         </div>
 
@@ -149,8 +149,8 @@ export function SiteHeader() {
                 )}
               </nav>
               <div className="mt-6 border-t border-line/10 pt-6">
-                <Button asChild size="md" className="w-full">
-                  <Link href="/support#grievance-form">Raise a concern</Link>
+                <Button size="md" className="w-full opacity-40 cursor-not-allowed" disabled>
+                  Raise a concern
                 </Button>
               </div>
             </Dialog.Content>

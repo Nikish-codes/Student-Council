@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db/client";
-import { sportsMatches } from "@/db/schema";
-import { inArray, eq, or } from "drizzle-orm";
 
 export const revalidate = 5; // Edge cache for 5 seconds
 

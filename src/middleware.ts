@@ -86,6 +86,13 @@ export default auth((req) => {
   // Panels and the teaser page itself are always reachable.
   if (isPanel || pathname === "/coming-soon") return NextResponse.next();
 
+  // Redirect root to /sports during soft launch.
+  if (pathname === "/") {
+    const url = req.nextUrl.clone();
+    url.pathname = "/sports";
+    return NextResponse.redirect(url);
+  }
+
   // 2) Coming-soon gate for the public surface.
   if (!GATE_ON) return NextResponse.next();
 
@@ -115,7 +122,10 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  // Everyone else visiting the domain → the teaser.
+  // /sports is always open — it's the only live section during soft launch.
+  if (pathname.startsWith("/sports")) return NextResponse.next();
+
+  // Everyone else visiting any other page → the teaser.
   const url = req.nextUrl.clone();
   url.pathname = "/coming-soon";
   return NextResponse.rewrite(url);

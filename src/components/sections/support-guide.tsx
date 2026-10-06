@@ -198,6 +198,7 @@ export function SupportGuide({
                     role="listbox"
                     aria-label="Matching departments"
                     data-lenis-prevent
+                  >
                     {results.map((result, index) => {
                       const department = result.department;
                       const Icon = DEPARTMENT_ICONS[department.icon];
