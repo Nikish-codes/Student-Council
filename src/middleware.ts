@@ -132,7 +132,7 @@ export default auth((req) => {
 });
 
 export const config = {
-  // Run on every page route. Skip API routes, Next internals, and any request
-  // for a file with an extension (favicon.ico, /icon.png, /brand/*.png, …).
-  matcher: ["/((?!api|_next/static|_next/image|.*\\.).*)"],
+  // Run on every page route. Skip API routes, Next internals (starting with _),
+  // and any request for a file with an extension (favicon.ico, /icon.png, etc).
+  matcher: ["/((?!api|_|.*\\.).*)"],
 };

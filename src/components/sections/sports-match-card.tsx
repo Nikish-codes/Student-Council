@@ -41,23 +41,31 @@ export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch })
     >
       <Link href={`/sports/matches/${match.id}`} className="absolute inset-0 z-0" aria-label={`View match details for ${teamAName} vs ${teamBName}`} />
       
-      {/* Banner background for live matches */}
-      {match.bannerImage && isLive && (
-        <div className="absolute inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none transition-opacity duration-500 group-hover:opacity-60">
+      {/* Hero Banner at the top of the card */}
+      {match.bannerImage && (
+        <div className="relative w-full h-48 sm:h-56 shrink-0 bg-surface-2 border-b border-line/5 overflow-hidden">
           <Image
             src={match.bannerImage}
             alt=""
             fill
-            className="object-cover object-center"
+            className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, 600px"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/80 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-bg via-transparent to-bg" />
+          {isLive && (
+            <div className="absolute top-4 right-4 z-10">
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent/90 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-bg shadow-sm backdrop-blur-md">
+                <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-bg motion-safe:animate-pulse" />
+                Live Now
+              </span>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Header */}
-      <header className="relative z-10 flex items-center justify-between gap-4 border-b border-line/5 px-4 py-3 sm:px-5">
+      {/* Content Area Below Banner */}
+      <div className="relative z-10 flex flex-col flex-1">
+        {/* Header */}
+        <header className="relative flex items-center justify-between gap-4 border-b border-line/5 px-4 py-3 sm:px-5">
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
             <span className={isLive ? "text-ink font-semibold" : ""}>
@@ -170,6 +178,7 @@ export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch })
         </span>
         <span className="truncate pl-2 text-right">{match.venue || "TBA"}</span>
       </footer>
+      </div>
     </article>
   );
 }
