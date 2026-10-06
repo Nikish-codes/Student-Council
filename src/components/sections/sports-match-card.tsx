@@ -33,28 +33,31 @@ export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch })
   return (
     <article
       className={cn(
-        "relative flex flex-col overflow-hidden rounded-2xl border transition-all",
+        "group relative flex flex-col overflow-hidden rounded-2xl border transition-all",
         isLive
-          ? "border-accent/30 bg-surface shadow-[0_0_24px_-12px_rgba(var(--color-accent),0.2)]"
+          ? "border-accent/30 bg-surface shadow-[0_0_32px_-12px_rgba(var(--color-accent),0.25)] hover:border-accent/60 hover:shadow-[0_0_40px_-12px_rgba(var(--color-accent),0.4)]"
           : "border-line/10 bg-surface/40 hover:border-line/20 hover:bg-surface/60"
       )}
     >
+      <Link href={`/sports/matches/${match.id}`} className="absolute inset-0 z-0" aria-label={`View match details for ${teamAName} vs ${teamBName}`} />
+      
       {/* Banner background for live matches */}
       {match.bannerImage && isLive && (
-        <div className="absolute inset-x-0 top-0 h-32 w-full opacity-20 pointer-events-none">
+        <div className="absolute inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none transition-opacity duration-500 group-hover:opacity-60">
           <Image
             src={match.bannerImage}
             alt=""
             fill
-            className="object-cover"
-            sizes="(max-width: 640px) 100vw, 400px"
+            className="object-cover object-center"
+            sizes="(max-width: 640px) 100vw, 600px"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-surface/50 to-surface" />
+          <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-bg via-transparent to-bg" />
         </div>
       )}
 
       {/* Header */}
-      <header className="relative flex items-center justify-between gap-4 border-b border-line/5 px-4 py-3 sm:px-5">
+      <header className="relative z-10 flex items-center justify-between gap-4 border-b border-line/5 px-4 py-3 sm:px-5">
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
             <span className={isLive ? "text-ink font-semibold" : ""}>
@@ -63,7 +66,7 @@ export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch })
             {match.competitionTitle && (
               <>
                 <span className="text-line/30">/</span>
-                <span className="truncate text-subtle">
+                <span className="truncate text-subtle relative z-20">
                   {match.competitionHref ? (
                     <Link
                       href={match.competitionHref}
