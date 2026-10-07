@@ -1,0 +1,245 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e47]:
+    - banner [ref=e48]:
+      - combobox "Active club" [ref=e50]:
+        - option "E2E Makers" [selected]
+        - option "E2E Culture"
+      - generic [ref=e51]: President
+      - link "View public page" [ref=e52] [cursor=pointer]:
+        - /url: /clubs/e2e-makers
+    - complementary [ref=e53]:
+      - link "Club Studio" [ref=e55] [cursor=pointer]:
+        - /url: /club-management?club=1
+      - navigation "Club Studio" [ref=e56]:
+        - link "Dashboard" [ref=e57] [cursor=pointer]:
+          - /url: /club-management?club=1
+        - link "Page" [ref=e61] [cursor=pointer]:
+          - /url: /club-management/page-editor?club=1
+        - link "Team" [ref=e66] [cursor=pointer]:
+          - /url: /club-management/team?club=1
+        - link "Events" [ref=e72] [cursor=pointer]:
+          - /url: /club-management/events?club=1
+        - link "Registrations" [ref=e75] [cursor=pointer]:
+          - /url: /club-management/registrations?club=1
+        - link "Follow-up" [ref=e79] [cursor=pointer]:
+          - /url: /club-management/follow-up?club=1
+      - generic [ref=e85]:
+        - paragraph [ref=e86]: Priya President
+        - button "Sign out" [ref=e87] [cursor=pointer]
+    - main [ref=e91]:
+      - generic [ref=e138]:
+        - generic [ref=e139]:
+          - generic [ref=e140]:
+            - paragraph [ref=e141]: Public page
+            - heading "Page editor" [level=1] [ref=e142]
+            - paragraph [ref=e143]: Your draft is private. Submitting freezes this version for review while the approved page stays live.
+          - generic [ref=e144]:
+            - button "Save draft" [ref=e145] [cursor=pointer]
+            - button "Submit for review" [ref=e146] [cursor=pointer]
+        - generic [ref=e147]:
+          - generic [ref=e148]:
+            - generic [ref=e149]:
+              - heading "Choose a template" [level=2] [ref=e150]
+              - paragraph [ref=e151]: Structure stays consistent inside each template.
+              - generic [ref=e153]:
+                - button "Stage Cinematic and performance-led" [pressed] [ref=e154] [cursor=pointer]:
+                  - generic [ref=e155]: Stage
+                  - generic [ref=e156]: Cinematic and performance-led
+                - button "Zine Editorial and archive-driven" [ref=e157] [cursor=pointer]:
+                  - generic [ref=e158]: Zine
+                  - generic [ref=e159]: Editorial and archive-driven
+                - button "Clubhouse Welcoming and people-first" [ref=e160] [cursor=pointer]:
+                  - generic [ref=e161]: Clubhouse
+                  - generic [ref=e162]: Welcoming and people-first
+            - generic [ref=e163]:
+              - heading "Identity" [level=2] [ref=e164]
+              - paragraph [ref=e165]: The public name, introduction, and primary action.
+              - generic [ref=e166]:
+                - generic [ref=e167]:
+                  - text: Club name
+                  - textbox "Club name" [ref=e168]: E2E Makers
+                - generic [ref=e169]:
+                  - text: TaglineUp to 180 characters
+                  - textbox "TaglineUp to 180 characters" [ref=e170]: Create, gather, publish.
+                - generic [ref=e171]:
+                  - text: Short introduction
+                  - textbox "Short introduction" [ref=e172]: A browser-test club for the complete Club Studio workflow.
+                - generic [ref=e173]:
+                  - text: About
+                  - textbox "About" [ref=e174]: This local fixture exercises Club Studio without touching production data.
+                - generic [ref=e175]:
+                  - generic [ref=e176]:
+                    - generic [ref=e177]: Logo
+                    - generic [ref=e180]:
+                      - generic [ref=e181]: none
+                      - generic [ref=e183]:
+                        - generic [ref=e184] [cursor=pointer]: Upload
+                        - button "Choose existing" [ref=e188] [cursor=pointer]
+                        - button "Paste URL" [ref=e189] [cursor=pointer]
+                  - generic [ref=e190]:
+                    - generic [ref=e191]: Cover image
+                    - generic [ref=e194]:
+                      - generic [ref=e195]: none
+                      - generic [ref=e197]:
+                        - generic [ref=e198] [cursor=pointer]: Upload
+                        - button "Choose existing" [ref=e202] [cursor=pointer]
+                        - button "Paste URL" [ref=e203] [cursor=pointer]
+                - generic [ref=e204]:
+                  - text: Join link
+                  - textbox "Join link" [ref=e205]
+            - generic [ref=e206]:
+              - heading "Color and type" [level=2] [ref=e207]
+              - paragraph [ref=e208]: Curated combinations keep text readable on every template.
+              - generic [ref=e209]:
+                - generic [ref=e210]:
+                  - button "stage" [ref=e211] [cursor=pointer]
+                  - button "zine" [ref=e213] [cursor=pointer]
+                  - button "clubhouse" [ref=e215] [cursor=pointer]
+                - generic [ref=e217]:
+                  - generic [ref=e218]:
+                    - text: Typography
+                    - combobox "Typography" [ref=e219]:
+                      - option "Signal"
+                      - option "Editorial"
+                      - option "Friendly" [selected]
+                  - generic [ref=e220]:
+                    - text: Logo treatment
+                    - combobox "Logo treatment" [ref=e221]:
+                      - option "Natural" [selected]
+                      - option "Badge"
+                      - option "Monochrome"
+            - generic [ref=e222]:
+              - heading "Sections" [level=2] [ref=e223]
+              - paragraph [ref=e224]: Choose what appears, then write the heading visitors see.
+              - generic [ref=e226]:
+                - generic [ref=e227]:
+                  - generic [ref=e228]:
+                    - checkbox "About" [checked] [ref=e229]
+                    - text: About
+                  - textbox "About section heading" [ref=e230]: Why we gather
+                - generic [ref=e231]:
+                  - generic [ref=e232]:
+                    - checkbox "Activities" [checked] [ref=e233]
+                    - text: Activities
+                  - textbox "Activities section heading" [ref=e234]: Activities
+                - generic [ref=e235]:
+                  - generic [ref=e236]:
+                    - checkbox "Videos" [ref=e237]
+                    - text: Videos
+                  - textbox "Videos section heading" [ref=e238]: Videos
+                - generic [ref=e239]:
+                  - generic [ref=e240]:
+                    - checkbox "Events" [checked] [ref=e241]
+                    - text: Events
+                  - textbox "Events section heading" [ref=e242]: Events
+                - generic [ref=e243]:
+                  - generic [ref=e244]:
+                    - checkbox "Gallery" [ref=e245]
+                    - text: Gallery
+                  - textbox "Gallery section heading" [ref=e246]: Gallery
+                - generic [ref=e247]:
+                  - generic [ref=e248]:
+                    - checkbox "People" [checked] [ref=e249]
+                    - text: People
+                  - textbox "People section heading" [ref=e250]: People
+            - generic [ref=e251]:
+              - heading "Content" [level=2] [ref=e252]
+              - paragraph [ref=e253]: "Use one activity per line: title, a vertical bar, then its description."
+              - generic [ref=e254]:
+                - generic [ref=e255]:
+                  - text: Activities
+                  - textbox "Activities" [ref=e256]: Weekly lab | Hands-on collaboration
+                - generic [ref=e257]:
+                  - text: Video linksOne YouTube or Vimeo URL per line
+                  - textbox "Video linksOne YouTube or Vimeo URL per line" [ref=e258]
+                - generic [ref=e259]:
+                  - generic [ref=e260]:
+                    - generic [ref=e261]:
+                      - paragraph [ref=e262]: Gallery photos
+                      - paragraph [ref=e263]:
+                        - text: Photo 1 is always the full-width highlight. Size changes width only; photos keep their complete original frame. Keep every image under
+                        - strong [ref=e264]: 4 MB
+                        - text: .
+                    - button "Add photos" [ref=e265] [cursor=pointer]
+                  - paragraph [ref=e270]
+                  - button "Choose gallery photos Multiple images are okay · max 4 MB each" [ref=e271] [cursor=pointer]:
+                    - generic [ref=e276]: Choose gallery photos
+                    - generic [ref=e277]: Multiple images are okay · max 4 MB each
+                  - paragraph [ref=e278]: 0 photos · each under 4 MB
+                - generic [ref=e279]:
+                  - generic [ref=e280]:
+                    - text: Member count
+                    - spinbutton "Member count" [ref=e281]
+                  - generic [ref=e282]:
+                    - text: Founded year
+                    - spinbutton "Founded year" [ref=e283]
+                - generic [ref=e284]:
+                  - text: Flagship event
+                  - textbox "Flagship event" [ref=e285]
+                - generic [ref=e286]:
+                  - generic [ref=e287]:
+                    - text: Instagram
+                    - textbox "Instagram" [ref=e288]
+                  - generic [ref=e289]:
+                    - text: LinkedIn
+                    - textbox "LinkedIn" [ref=e290]
+                  - generic [ref=e291]:
+                    - text: Website
+                    - textbox "Website" [ref=e292]
+                  - generic [ref=e293]:
+                    - text: Contact email
+                    - textbox "Contact email" [ref=e294]
+          - complementary [ref=e295]:
+            - generic [ref=e296]:
+              - paragraph [ref=e297]: Live preview
+              - generic [ref=e298]:
+                - button "Desktop preview" [pressed] [ref=e299] [cursor=pointer]
+                - button "Mobile preview" [ref=e302] [cursor=pointer]
+            - main [ref=e309]:
+              - generic [ref=e310]:
+                - generic [ref=e311]: E2E Makers
+                - generic [ref=e316]:
+                  - generic [ref=e317]:
+                    - paragraph
+                    - img "E2E Makers logo" [ref=e319]:
+                      - generic [ref=e321]: Image
+                  - generic [ref=e322]:
+                    - paragraph [ref=e323]: Woxsen University
+                    - heading "E2E Makers" [level=1] [ref=e325]
+                    - paragraph [ref=e326]: Create, gather, publish.
+                    - generic [ref=e327]:
+                      - generic [ref=e328]: Recruitment updates soon
+                      - link "Enter the story" [ref=e329] [cursor=pointer]:
+                        - /url: "#stage-story"
+              - paragraph [ref=e333]: / Distortion /
+              - generic [ref=e334]:
+                - generic [ref=e335]:
+                  - paragraph [ref=e336]: Why we gather
+                  - paragraph [ref=e337]: This local fixture exercises Club Studio without touching production data.
+                - generic [ref=e338]:
+                  - generic [ref=e339]:
+                    - term [ref=e340]: Events
+                    - definition [ref=e341]: "1"
+                  - generic [ref=e342]:
+                    - term [ref=e343]: Activities
+                    - definition [ref=e344]: "1"
+              - generic [ref=e345]:
+                - paragraph [ref=e346]: What happens here
+                - list [ref=e347]:
+                  - listitem [ref=e348]:
+                    - generic [ref=e349]: "01"
+                    - heading "Weekly lab" [level=2] [ref=e350]
+                    - paragraph [ref=e351]: Hands-on collaboration
+              - generic [ref=e352]:
+                - paragraph [ref=e353]: On the bill
+                - link "10 Oct 2030 Approved E2E Event" [ref=e355] [cursor=pointer]:
+                  - /url: /events/e2e-approved-event
+                  - generic [ref=e356]: 10 Oct 2030
+                  - generic [ref=e357]: Approved E2E Event
+              - generic [ref=e361]:
+                - paragraph [ref=e362]: Find your place in the sound.
+                - generic [ref=e363]: Recruitment updates soon
+  - button "Switch to light mode" [ref=e29] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e42] [cursor=pointer]
+  - alert [ref=e46]: Woxsen Student Council

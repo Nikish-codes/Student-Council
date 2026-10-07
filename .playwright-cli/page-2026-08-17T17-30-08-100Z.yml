@@ -1,0 +1,148 @@
+- generic [ref=e1]:
+  - generic [ref=e14]:
+    - banner [ref=e15]:
+      - generic [ref=e16]:
+        - link "Woxsen Student Council home" [ref=e17] [cursor=pointer]:
+          - /url: /
+        - navigation [ref=e19]:
+          - link "Home" [ref=e20] [cursor=pointer]:
+            - /url: /
+          - link "Oval" [ref=e21] [cursor=pointer]:
+            - /url: /oval
+          - link "Council" [ref=e23] [cursor=pointer]:
+            - /url: /council
+          - link "Events" [ref=e24] [cursor=pointer]:
+            - /url: /events
+          - link "Clubs" [ref=e25] [cursor=pointer]:
+            - /url: /clubs
+          - link "Sports" [ref=e26] [cursor=pointer]:
+            - /url: /sports
+          - link "Support" [ref=e27] [cursor=pointer]:
+            - /url: /support
+        - link "Raise a concern" [ref=e29] [cursor=pointer]:
+          - /url: /support#grievance-form
+    - main [ref=e30]:
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]:
+              - generic [ref=e41]: Oval mess
+              - generic [ref=e42]: ·
+              - generic [ref=e43]: Today's menu
+            - heading "Monday, 17 August" [level=1] [ref=e44]
+            - paragraph [ref=e45]: Breakfast, lunch, and dinner for this service day. The public page changes automatically at 4:00 AM.
+          - generic [ref=e46]:
+            - paragraph [ref=e47]: Three services
+            - paragraph [ref=e48]: One verified daily menu
+        - generic [ref=e49]:
+          - generic [ref=e50]: Diet markers
+          - generic [ref=e51]:
+            - generic [ref=e52]: V
+            - generic [ref=e53]: Vegetarian
+          - generic [ref=e54]:
+            - generic [ref=e55]: E
+            - generic [ref=e56]: Contains egg
+          - generic [ref=e57]:
+            - generic [ref=e58]: NV
+            - generic [ref=e59]: Non-vegetarian
+          - generic [ref=e60]: Only today's approved menu is public
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - article [ref=e64]:
+              - generic [ref=e68]:
+                - heading "Breakfast" [level=2] [ref=e69]
+                - paragraph [ref=e70]: 7:00–9:45 AM
+                - generic [ref=e74]: Service completed
+              - list [ref=e76]:
+                - listitem [ref=e77]:
+                  - generic [ref=e78]: Eggs
+                  - generic [ref=e79]:
+                    - generic [ref=e80]: Vegetarian
+                    - text: Boiled eggs
+            - article [ref=e84]:
+              - generic [ref=e88]:
+                - heading "Lunch" [level=2] [ref=e89]
+                - paragraph [ref=e90]: 12:00–2:45 PM
+                - generic [ref=e94]: Service completed
+              - list [ref=e96]:
+                - listitem [ref=e97]:
+                  - generic [ref=e98]: Veg 1 · dry
+                  - generic [ref=e99]:
+                    - generic [ref=e100]: Vegetarian
+                    - text: Subzi Kolhapuri
+            - article [ref=e104]:
+              - generic [ref=e108]:
+                - heading "Dinner" [level=2] [ref=e109]
+                - paragraph [ref=e110]: 7:00–9:45 PM
+                - generic [ref=e114]: Service completed
+              - list [ref=e116]:
+                - listitem [ref=e117]:
+                  - generic [ref=e118]: Veg 2
+                  - generic [ref=e119]:
+                    - generic [ref=e120]: Vegetarian
+                    - text: Paneer butter masala
+          - paragraph [ref=e124]: Approved menu · Last updated 17 Aug 2026, 6:44 pm
+    - contentinfo [ref=e125]:
+      - generic [ref=e126]:
+        - generic [ref=e127]:
+          - generic [ref=e128]: Woxsen University
+          - generic [ref=e131]:
+            - generic [ref=e132]:
+              - text: Explore
+              - list [ref=e133]:
+                - listitem [ref=e134]:
+                  - link "Home" [ref=e135] [cursor=pointer]:
+                    - /url: /
+                - listitem [ref=e136]:
+                  - link "Council" [ref=e137] [cursor=pointer]:
+                    - /url: /council
+                - listitem [ref=e138]:
+                  - link "Events" [ref=e139] [cursor=pointer]:
+                    - /url: /events
+                - listitem [ref=e140]:
+                  - link "Clubs" [ref=e141] [cursor=pointer]:
+                    - /url: /clubs
+                - listitem [ref=e142]:
+                  - link "Support" [ref=e143] [cursor=pointer]:
+                    - /url: /support
+            - generic [ref=e144]:
+              - text: Support
+              - list [ref=e145]:
+                - listitem [ref=e146]:
+                  - link "Gateway" [ref=e147] [cursor=pointer]:
+                    - /url: /support#gateway
+                - listitem [ref=e148]:
+                  - link "Bridge" [ref=e149] [cursor=pointer]:
+                    - /url: /support#bridge
+                - listitem [ref=e150]:
+                  - link "Career Connect" [ref=e151] [cursor=pointer]:
+                    - /url: /support#career-connect
+                - listitem [ref=e152]:
+                  - link "Grievance" [ref=e153] [cursor=pointer]:
+                    - /url: /support#grievance-form
+            - generic [ref=e154]:
+              - text: Connect
+              - list [ref=e155]:
+                - listitem [ref=e156]:
+                  - link "woxsen.edu.in" [ref=e157] [cursor=pointer]:
+                    - /url: https://woxsen.edu.in
+                - listitem [ref=e158]:
+                  - link "council@woxsen.edu.in" [ref=e159] [cursor=pointer]:
+                    - /url: mailto:council@woxsen.edu.in
+                - listitem [ref=e160]:
+                  - link "Instagram" [ref=e161] [cursor=pointer]:
+                    - /url: https://instagram.com/woxsenuniversity
+                - listitem [ref=e162]:
+                  - link "LinkedIn" [ref=e163] [cursor=pointer]:
+                    - /url: https://linkedin.com/school/woxsen-university
+        - generic [ref=e164]:
+          - generic [ref=e165]: © 2026 Woxsen Student Council
+          - generic [ref=e166]:
+            - text: v1.0 · Hyderabad, IN · Designed and built by
+            - button "Nikish" [active] [ref=e167] [cursor=pointer]
+            - button "Hide Manya" [ref=e186] [cursor=pointer]:
+              - generic [ref=e187]: Manya
+  - button "Switch to light mode" [ref=e168] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e181] [cursor=pointer]
+  - alert [ref=e185]

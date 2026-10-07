@@ -1,0 +1,241 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e14]:
+    - complementary [ref=f3e15]:
+      - link "WSC · Management" [ref=f3e17] [cursor=pointer]:
+        - /url: /management
+      - navigation [ref=f3e18]:
+        - generic [ref=f3e19]:
+          - paragraph [ref=f3e20]: Overview
+          - generic [ref=f3e21]:
+            - link "Dashboard" [ref=f3e22] [cursor=pointer]:
+              - /url: /management
+            - link "Event Ops" [ref=f3e28] [cursor=pointer]:
+              - /url: /eventmanagement
+        - generic [ref=f3e34]:
+          - paragraph [ref=f3e35]: Content
+          - generic [ref=f3e36]:
+            - link "Events" [ref=f3e37] [cursor=pointer]:
+              - /url: /management/events
+            - link "Recaps" [ref=f3e40] [cursor=pointer]:
+              - /url: /management/recaps
+            - link "Announcements" [ref=f3e43] [cursor=pointer]:
+              - /url: /management/announcements
+            - link "Highlights" [ref=f3e47] [cursor=pointer]:
+              - /url: /management/highlights
+        - generic [ref=f3e51]:
+          - paragraph [ref=f3e52]: Organisation
+          - generic [ref=f3e53]:
+            - link "Clubs" [ref=f3e54] [cursor=pointer]:
+              - /url: /management/clubs
+            - link "Club categories" [ref=f3e59] [cursor=pointer]:
+              - /url: /management/clubs/categories
+            - link "Council" [ref=f3e64] [cursor=pointer]:
+              - /url: /management/council
+            - link "Council sections" [ref=f3e70] [cursor=pointer]:
+              - /url: /management/council/groups
+            - link "FAQs" [ref=f3e73] [cursor=pointer]:
+              - /url: /management/faqs
+            - link "Support" [ref=f3e77] [cursor=pointer]:
+              - /url: /management/support
+        - generic [ref=f3e85]:
+          - paragraph [ref=f3e86]: Sports
+          - generic [ref=f3e87]:
+            - link "Dashboard" [ref=f3e88] [cursor=pointer]:
+              - /url: /management/sports
+            - link "Tournaments" [ref=f3e95] [cursor=pointer]:
+              - /url: /management/sports/tournaments
+            - link "Leagues" [ref=f3e102] [cursor=pointer]:
+              - /url: /management/sports/leagues
+            - link "Matches" [ref=f3e105] [cursor=pointer]:
+              - /url: /management/sports/matches
+            - link "Teams" [ref=f3e108] [cursor=pointer]:
+              - /url: /management/sports/teams
+            - link "People" [ref=f3e111] [cursor=pointer]:
+              - /url: /management/sports/people
+            - link "Sports settings" [ref=f3e116] [cursor=pointer]:
+              - /url: /management/sports/settings
+        - generic [ref=f3e120]:
+          - paragraph [ref=f3e121]: Media
+          - link "Media library" [ref=f3e123] [cursor=pointer]:
+            - /url: /management/media
+        - generic [ref=f3e128]:
+          - paragraph [ref=f3e129]: Dining
+          - link "Oval menu" [ref=f3e131] [cursor=pointer]:
+            - /url: /management/oval
+        - generic [ref=f3e137]:
+          - paragraph [ref=f3e138]: Homepage
+          - generic [ref=f3e139]:
+            - link "Vault" [ref=f3e140] [cursor=pointer]:
+              - /url: /management/vault
+            - link "Homepage composer" [ref=f3e143] [cursor=pointer]:
+              - /url: /management/homepage
+        - generic [ref=f3e147]:
+          - paragraph [ref=f3e148]: Admin
+          - generic [ref=f3e149]:
+            - link "Users" [ref=f3e150] [cursor=pointer]:
+              - /url: /management/users
+            - link "Settings" [ref=f3e163] [cursor=pointer]:
+              - /url: /management/settings
+      - generic [ref=f3e168]:
+        - generic [ref=f3e169]:
+          - paragraph [ref=f3e170]: Super Admin
+          - paragraph [ref=f3e171]: Super Admin
+        - button [ref=f3e172] [cursor=pointer]
+    - main [ref=f3e176]:
+      - generic [ref=f3e402]:
+        - generic [ref=f3e403]:
+          - generic [ref=f3e404]:
+            - paragraph [ref=f3e405]: Dining · Oval
+            - heading "Weekly menu desk" [level=1] [ref=f3e406]
+            - paragraph [ref=f3e407]: Week of 17 August 2026
+          - link "View public menu" [ref=f3e408] [cursor=pointer]:
+            - /url: /oval
+        - navigation "Choose menu week" [ref=f3e413]:
+          - link "Previous week" [ref=f3e414] [cursor=pointer]:
+            - /url: /management/oval?week=2026-08-10
+          - link "Current week" [ref=f3e417] [cursor=pointer]:
+            - /url: /management/oval?week=2026-08-17
+          - link "Next week" [ref=f3e418] [cursor=pointer]:
+            - /url: /management/oval?week=2026-08-24
+        - generic [ref=f3e421]:
+          - generic [ref=f3e422]:
+            - generic [ref=f3e423]:
+              - paragraph [ref=f3e424]: Import the whole week
+              - heading "Source to structured menu" [level=2] [ref=f3e425]
+              - paragraph [ref=f3e426]: Spreadsheets are read cell by cell. Images and PDFs receive two OCR passes. Extraction creates an editable draft and never publishes it.
+            - generic [ref=f3e428]:
+              - generic [ref=f3e436]:
+                - paragraph [ref=f3e437]: Drop the committee sheet here
+                - paragraph [ref=f3e438]: PNG, JPEG, WebP, PDF, XLS, XLSX, CSV or TSV · up to 15 MB
+              - generic [ref=f3e439]:
+                - generic [ref=f3e440] [cursor=pointer]:
+                  - text: Choose file
+                  - button "Choose file" [ref=f3e444]
+                - button "Extract seven days" [disabled] [ref=f3e445]
+          - generic "Week days" [ref=f3e452]:
+            - button "Current 17 Aug Draft" [pressed] [ref=f3e453] [cursor=pointer]:
+              - generic [ref=f3e454]: Current
+              - generic [ref=f3e456]: 17 Aug
+              - generic [ref=f3e457]: Draft
+            - button "Next day 18 Aug Draft" [ref=f3e458] [cursor=pointer]:
+              - generic [ref=f3e459]: Next day
+              - generic [ref=f3e461]: 18 Aug
+              - generic [ref=f3e462]: Draft
+            - button "Wednesday 19 Aug Draft" [ref=f3e463] [cursor=pointer]:
+              - generic [ref=f3e464]: Wednesday
+              - generic [ref=f3e466]: 19 Aug
+              - generic [ref=f3e467]: Draft
+            - button "Thursday 20 Aug Draft" [ref=f3e468] [cursor=pointer]:
+              - generic [ref=f3e469]: Thursday
+              - generic [ref=f3e471]: 20 Aug
+              - generic [ref=f3e472]: Draft
+            - button "Friday 21 Aug Draft" [ref=f3e473] [cursor=pointer]:
+              - generic [ref=f3e474]: Friday
+              - generic [ref=f3e476]: 21 Aug
+              - generic [ref=f3e477]: Draft
+            - button "Saturday 22 Aug Draft" [ref=f3e478] [cursor=pointer]:
+              - generic [ref=f3e479]: Saturday
+              - generic [ref=f3e481]: 22 Aug
+              - generic [ref=f3e482]: Draft
+            - button "Sunday 23 Aug Draft" [ref=f3e483] [cursor=pointer]:
+              - generic [ref=f3e484]: Sunday
+              - generic [ref=f3e486]: 23 Aug
+              - generic [ref=f3e487]: Draft
+          - generic [ref=f3e488]:
+            - generic [ref=f3e489]:
+              - generic [ref=f3e490]:
+                - generic [ref=f3e491]:
+                  - paragraph [ref=f3e492]: Editing
+                  - heading "Monday, 17 August" [level=2] [ref=f3e493]
+                - generic [ref=f3e494]: Draft
+              - generic [ref=f3e497]:
+                - generic [ref=f3e498]:
+                  - generic [ref=f3e499]:
+                    - heading "Breakfast" [level=3] [ref=f3e500]
+                    - paragraph [ref=f3e501]: 7:00–9:45 AM
+                  - button "Add dish" [ref=f3e502] [cursor=pointer]
+                - generic [ref=f3e505]:
+                  - generic [ref=f3e506]:
+                    - generic [ref=f3e507]: Category
+                    - textbox "Breakfast category" [ref=f3e508]: Eggs
+                  - generic [ref=f3e509]:
+                    - generic [ref=f3e510]: Dish
+                    - textbox "Breakfast dish" [ref=f3e511]: Boiled eggs
+                  - generic [ref=f3e512]:
+                    - button "V Vegetarian" [pressed] [ref=f3e513] [cursor=pointer]:
+                      - generic [ref=f3e514]: V
+                      - text: Vegetarian
+                    - button "E Contains egg" [ref=f3e515] [cursor=pointer]:
+                      - generic [ref=f3e516]: E
+                      - text: Contains egg
+                    - button "NV Non-vegetarian" [ref=f3e517] [cursor=pointer]:
+                      - generic [ref=f3e518]: NV
+                      - text: Non-vegetarian
+                    - generic [ref=f3e519]: OCR 100%
+                    - button "Remove Boiled eggs" [ref=f3e520] [cursor=pointer]
+              - generic [ref=f3e524]:
+                - generic [ref=f3e525]:
+                  - generic [ref=f3e526]:
+                    - heading "Lunch" [level=3] [ref=f3e527]
+                    - paragraph [ref=f3e528]: 12:00–2:45 PM
+                  - button "Add dish" [ref=f3e529] [cursor=pointer]
+                - generic [ref=f3e532]:
+                  - generic [ref=f3e533]:
+                    - generic [ref=f3e534]: Category
+                    - textbox "Lunch category" [ref=f3e535]: Veg 1 · dry
+                  - generic [ref=f3e536]:
+                    - generic [ref=f3e537]: Dish
+                    - textbox "Lunch dish" [ref=f3e538]: Subzi Kolhapuri
+                  - generic [ref=f3e539]:
+                    - button "V Vegetarian" [pressed] [ref=f3e540] [cursor=pointer]:
+                      - generic [ref=f3e541]: V
+                      - text: Vegetarian
+                    - button "E Contains egg" [ref=f3e542] [cursor=pointer]:
+                      - generic [ref=f3e543]: E
+                      - text: Contains egg
+                    - button "NV Non-vegetarian" [ref=f3e544] [cursor=pointer]:
+                      - generic [ref=f3e545]: NV
+                      - text: Non-vegetarian
+                    - generic [ref=f3e546]: OCR 100%
+                    - button "Remove Subzi Kolhapuri" [ref=f3e547] [cursor=pointer]
+              - generic [ref=f3e551]:
+                - generic [ref=f3e552]:
+                  - generic [ref=f3e553]:
+                    - heading "Dinner" [level=3] [ref=f3e554]
+                    - paragraph [ref=f3e555]: 7:00–9:45 PM
+                  - button "Add dish" [ref=f3e556] [cursor=pointer]
+                - generic [ref=f3e559]:
+                  - generic [ref=f3e560]:
+                    - generic [ref=f3e561]: Category
+                    - textbox "Dinner category" [ref=f3e562]: Veg 2
+                  - generic [ref=f3e563]:
+                    - generic [ref=f3e564]: Dish
+                    - textbox "Dinner dish" [ref=f3e565]: Paneer curry
+                  - generic [ref=f3e566]:
+                    - button "V Vegetarian" [pressed] [ref=f3e567] [cursor=pointer]:
+                      - generic [ref=f3e568]: V
+                      - text: Vegetarian
+                    - button "E Contains egg" [ref=f3e569] [cursor=pointer]:
+                      - generic [ref=f3e570]: E
+                      - text: Contains egg
+                    - button "NV Non-vegetarian" [ref=f3e571] [cursor=pointer]:
+                      - generic [ref=f3e572]: NV
+                      - text: Non-vegetarian
+                    - generic [ref=f3e573]: OCR 100%
+                    - button "Remove Paneer curry" [ref=f3e574] [cursor=pointer]
+            - complementary [ref=f3e578]:
+              - generic [ref=f3e579]:
+                - paragraph [ref=f3e580]: Review status
+                - paragraph [ref=f3e581]: "0"
+                - paragraph [ref=f3e582]: uncertain cells remaining
+                - generic [ref=f3e583]:
+                  - paragraph [ref=f3e584]: 1 breakfast entries
+                  - paragraph [ref=f3e585]: 1 lunch entries
+                  - paragraph [ref=f3e586]: 1 dinner entries
+              - button "Save whole week" [ref=f3e588] [cursor=pointer]
+              - button "Approve this day" [ref=f3e594] [cursor=pointer]
+              - paragraph [ref=f3e597]: Approved days become public automatically at 4:00 AM on their service date. Other days remain private.
+  - button "Switch to light mode" [ref=f3e324] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f3e357] [cursor=pointer]
+  - alert [ref=f3e361]

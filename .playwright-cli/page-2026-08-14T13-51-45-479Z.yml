@@ -1,0 +1,1444 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e3]:
+    - img [ref=f2e5]:
+      - generic [ref=f2e7]: WOXSEN UNIVERSITY · STUDENT COUNCIL · SESSION 2026/27 · EMPOWERING STUDENT VOICES ·
+    - generic [ref=f2e11]:
+      - generic [ref=f2e12]: Woxsen Student Council
+      - generic [ref=f2e13]: Loading session 2026/27
+  - generic [ref=f2e14]:
+    - banner [ref=f2e15]:
+      - generic [ref=f2e16]:
+        - link "Woxsen Student Council home" [ref=f2e17] [cursor=pointer]:
+          - /url: /
+        - button "Open menu" [ref=f2e19] [cursor=pointer]
+    - main [ref=f2e21]:
+      - generic [ref=f2e22]:
+        - generic [ref=f2e24]:
+          - generic [ref=f2e25]: Session 2026/27 · 64 members
+          - heading "The faces behind the work." [level=1] [ref=f2e28]:
+            - generic [ref=f2e29]: The faces
+            - generic [ref=f2e30]: behind the work.
+          - paragraph [ref=f2e31]: 64 students. One council. One job — to make sure every voice on this campus is heard, every event runs well, and every concern reaches the right desk.
+        - region "Council group portrait" [ref=f2e32]:
+          - figure "Woxsen Student Council Hyderabad · 2026/27" [ref=f2e34]:
+            - generic [ref=f2e35]:
+              - img "Woxsen Student Council 2026/27 group portrait" [ref=f2e36]
+              - generic:
+                - generic: Session 2026/27
+                - generic: 64 voices
+            - generic [ref=f2e37]:
+              - generic [ref=f2e38]: Woxsen Student Council
+              - generic [ref=f2e39]: Hyderabad · 2026/27
+        - generic [ref=f2e41]:
+          - generic [ref=f2e42]:
+            - generic: President.
+            - generic [ref=f2e43]:
+              - generic [ref=f2e44]:
+                - generic [ref=f2e45]: Message from the President
+                - blockquote [ref=f2e48]: “This tenure we invite students to provoke thought, spark conversations, and leaves us learning something unexpected. We are focused on radical Optimism, richer youth culture, more student led events, and a stronger bridge between you and the administration.”
+                - generic [ref=f2e49]:
+                  - generic [ref=f2e50]:
+                    - paragraph [ref=f2e51]: Mir Inayat Ali Khan
+                    - paragraph [ref=f2e52]: President
+                    - paragraph [ref=f2e53]: B. Des (Hons.) CD
+                  - generic [ref=f2e54]:
+                    - link "Email Mir Inayat Ali Khan on Outlook" [ref=f2e55] [cursor=pointer]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=president.council%40woxsen.edu.in
+                    - link "Mir Inayat Ali Khan on LinkedIn" [ref=f2e59] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/inayat-ali-khan-b21b97221/
+              - img "Mir Inayat Ali Khan" [ref=f2e64]
+          - generic [ref=f2e66]:
+            - heading "The Board" [level=2] [ref=f2e69]
+            - generic [ref=f2e70]:
+              - heading "Vice Presidents" [level=3] [ref=f2e73]
+              - generic [ref=f2e74]:
+                - article [ref=f2e75] [cursor=pointer]:
+                  - button "Read more about Tanusri SP" [ref=f2e76]
+                  - generic:
+                    - img "Tanusri SP"
+                  - generic:
+                    - generic: Vice President - Club Ecosystem & Growth
+                    - blockquote: "“Relationship status : It's complicated .. in a relationship with 30 clubs :(”"
+                    - generic:
+                      - generic:
+                        - paragraph: Tanusri SP
+                        - paragraph: BA (Hons.)
+                      - link "Email Tanusri SP on Outlook" [ref=f2e79]:
+                        - /url: https://outlook.office.com/mail/deeplink/compose?to=tanusri.sp_2029%40woxsen.edu.in
+                - article [ref=f2e83] [cursor=pointer]:
+                  - button "Read more about Vineeth Emmanuel Pilli" [ref=f2e84]
+                  - generic:
+                    - img "Vineeth Emmanuel Pilli"
+                  - generic:
+                    - generic: Vice President - Fiscal & Administrative Strategy
+                    - blockquote: “More than events and activities, the Student Council is about people. We're here to make sure every student feels heard, involved, and valued.”
+                    - generic:
+                      - generic:
+                        - paragraph: Vineeth Emmanuel Pilli
+                        - paragraph: B. Tech CSE (AIML)
+                      - generic [ref=f2e86]:
+                        - link "Email Vineeth Emmanuel Pilli on Outlook" [ref=f2e87]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=Vineeth_Emmanuel_2029%40woxsen.edu.in
+                        - link "Vineeth Emmanuel Pilli on LinkedIn" [ref=f2e91]:
+                          - /url: https://www.linkedin.com/in/vineethpilli/
+                - article [ref=f2e94] [cursor=pointer]:
+                  - button "Read more about Sharanya Reddy Kalva" [ref=f2e95]
+                  - generic:
+                    - img "Sharanya Reddy Kalva"
+                  - generic:
+                    - generic: Vice President - Experience Design & Community Standards
+                    - blockquote: “College is easier when you know someone has your back. No concern is too small, no voice goes unheard. If something's on your mind, don't hesitate to reach out. I'm here to listen, support, and act. Consider it handled.”
+                    - generic:
+                      - generic:
+                        - paragraph: Sharanya Reddy Kalva
+                        - paragraph: BBA Hons. (ECDM)
+                      - link "Email Sharanya Reddy Kalva on Outlook" [ref=f2e98]:
+                        - /url: https://outlook.office.com/mail/deeplink/compose?to=sharanya.kalva_2028%40woxsen.edu.in
+            - generic [ref=f2e102]:
+              - heading "Secretaries & Treasurers" [level=3] [ref=f2e105]
+              - generic [ref=f2e106]:
+                - article [ref=f2e107] [cursor=pointer]:
+                  - button "Read more about Ammar Bin Mohammeed Bawazeer" [ref=f2e108]
+                  - generic:
+                    - img "Ammar Bin Mohammeed Bawazeer"
+                  - generic:
+                    - generic: General Secretary
+                    - blockquote: “Minutes, motions and follow-ups — the paperwork that stops promises from evaporating.”
+                    - generic:
+                      - generic:
+                        - paragraph: Ammar Bin Mohammeed Bawazeer
+                        - paragraph: BBA(DSAI) 2nd year
+                      - link "Email Ammar Bin Mohammeed Bawazeer on Outlook" [ref=f2e111]:
+                        - /url: https://outlook.office.com/mail/deeplink/compose?to=ammarbin.bawazeer_2028%40woxsen.edu.in
+                - article [ref=f2e115] [cursor=pointer]:
+                  - button "Read more about Swaathi U" [ref=f2e116]
+                  - generic:
+                    - img "Swaathi U"
+                  - generic:
+                    - generic: General Secretary
+                    - blockquote: “If i were to make something average , i don’t make it at all.”
+                    - generic:
+                      - generic:
+                        - paragraph: Swaathi U
+                        - paragraph: BBA (E-commerce &Digital Marketing)-2nd Year
+                      - link "Email Swaathi U on Outlook" [ref=f2e119]:
+                        - /url: https://outlook.office.com/mail/deeplink/compose?to=swaathi.u_2028%40woxsen.edu.in
+                - article [ref=f2e123] [cursor=pointer]:
+                  - button "Read more about Sharanya Burugupalli" [ref=f2e124]
+                  - generic:
+                    - img "Sharanya Burugupalli"
+                  - generic:
+                    - generic: Treasurer
+                    - blockquote: “Every rupee the Council spends should trace back to a student who benefited from it.”
+                    - generic:
+                      - generic:
+                        - paragraph: Sharanya Burugupalli
+                        - paragraph: BBA Hons. AI & DS - 1st year
+                      - link "Email Sharanya Burugupalli on Outlook" [ref=f2e127]:
+                        - /url: https://outlook.office.com/mail/deeplink/compose?to=sharanya.burugupalli_2029%40woxsen.edu.in
+                - article [ref=f2e131] [cursor=pointer]:
+                  - button "Read more about Shamitha Kona" [ref=f2e132]
+                  - generic:
+                    - img "Shamitha Kona":
+                      - generic: SK
+                  - generic:
+                    - generic: Treasurer
+                    - blockquote: “A budget is just a plan with numbers attached — and plans should be public.”
+                    - generic:
+                      - generic:
+                        - paragraph: Shamitha Kona
+                        - paragraph: MBA FS - 1st Year
+                      - link "Email Shamitha Kona on Outlook" [ref=f2e135]:
+                        - /url: https://outlook.office.com/mail/deeplink/compose?to=shamitha.k_2027%40woxsen.edu.in
+          - generic [ref=f2e140]:
+            - heading "Core Team" [level=2] [ref=f2e143]
+            - generic [ref=f2e144]:
+              - heading "Leads" [level=3] [ref=f2e147]
+              - generic [ref=f2e148]:
+                - article [ref=f2e149] [cursor=pointer]:
+                  - button "Read more about Snehith Pravil Balagam" [ref=f2e150]
+                  - generic:
+                    - img "Snehith Pravil Balagam"
+                  - generic:
+                    - generic: Student Welfare Lead
+                    - blockquote: “Anger is a choice”
+                    - generic:
+                      - generic:
+                        - paragraph: Snehith Pravil Balagam
+                        - paragraph: MBA (Gen.)
+                      - generic [ref=f2e152]:
+                        - link "Email Snehith Pravil Balagam on Outlook" [ref=f2e153]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=snehith.b_2027%40woxsen.edu.in
+                        - link "Snehith Pravil Balagam on LinkedIn" [ref=f2e157]:
+                          - /url: https://www.linkedin.com/in/snehithpravil17
+                - article [ref=f2e160] [cursor=pointer]:
+                  - button "Read more about Baddam Sathyapal Reddy" [ref=f2e161]
+                  - generic:
+                    - img "Baddam Sathyapal Reddy"
+                  - generic:
+                    - generic: Operations Lead
+                    - blockquote: “Everything that looks effortless on the day took a month of unglamorous planning.”
+                    - generic:
+                      - generic:
+                        - paragraph: Baddam Sathyapal Reddy
+                        - paragraph: BBA Hons. (DS & AI)
+                      - generic [ref=f2e163]:
+                        - link "Email Baddam Sathyapal Reddy on Outlook" [ref=f2e164]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=sathyapal.reddy_2028%40woxsen.edu.in
+                        - link "Baddam Sathyapal Reddy on LinkedIn" [ref=f2e168]:
+                          - /url: https://www.linkedin.com/in/baddam-sathyapal-reddy-31b255313/
+                - article [ref=f2e171] [cursor=pointer]:
+                  - button "Read more about Mohammed Danish Khairati" [ref=f2e172]
+                  - generic:
+                    - img "Mohammed Danish Khairati"
+                  - generic:
+                    - generic: Facilities Lead
+                    - blockquote: “Hostels, classrooms, mess halls - the things you only notice once they're broken.”
+                    - generic:
+                      - generic:
+                        - paragraph: Mohammed Danish Khairati
+                        - paragraph: B. Tech CSE (AIML)
+                      - generic [ref=f2e174]:
+                        - link "Email Mohammed Danish Khairati on Outlook" [ref=f2e175]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=danishkhairati.mohammed_2028%40woxsen.edu.in
+                        - link "Mohammed Danish Khairati on LinkedIn" [ref=f2e179]:
+                          - /url: https://www.linkedin.com/in/mohammed-danish-khairati-109549317
+                - article [ref=f2e182] [cursor=pointer]:
+                  - button "Read more about Snigdha Roy" [ref=f2e183]
+                  - generic:
+                    - img "Snigdha Roy"
+                  - generic:
+                    - generic: Cultural Lead
+                    - blockquote: “I sometimes wish, I was a fish ( no stress only blub blub )”
+                    - generic:
+                      - generic:
+                        - paragraph: Snigdha Roy
+                        - paragraph: B. Tech CSE
+                      - generic [ref=f2e185]:
+                        - link "Email Snigdha Roy on Outlook" [ref=f2e186]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=snigdha.roy_2027%40woxsen.edu.in
+                        - link "Snigdha Roy on LinkedIn" [ref=f2e190]:
+                          - /url: https://www.linkedin.com/in/snigdha-royy
+                - article [ref=f2e193] [cursor=pointer]:
+                  - button "Read more about Sri Vandita Ventrapati" [ref=f2e194]
+                  - generic:
+                    - img "Sri Vandita Ventrapati"
+                  - generic:
+                    - generic: PR & Media Lead
+                    - blockquote: “If the Council does good work and nobody hears about it, half the job is undone.”
+                    - generic:
+                      - generic:
+                        - paragraph: Sri Vandita Ventrapati
+                        - paragraph: BA LLB (Hons.)
+                      - generic [ref=f2e196]:
+                        - link "Email Sri Vandita Ventrapati on Outlook" [ref=f2e197]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=srivandita.ventrapati_2029%40woxsen.edu.in
+                        - link "Sri Vandita Ventrapati on LinkedIn" [ref=f2e201]:
+                          - /url: https://www.linkedin.com/in/srivandita-ventrapati
+                - article [ref=f2e204] [cursor=pointer]:
+                  - button "Read more about Sai Santhosh Naidu" [ref=f2e205]
+                  - generic:
+                    - img "Sai Santhosh Naidu"
+                  - generic:
+                    - generic: Sports Lead
+                    - blockquote: “The arena belongs to whoever shows up, not just the people already on a team.”
+                    - generic:
+                      - generic:
+                        - paragraph: Sai Santhosh Naidu
+                        - paragraph: B. Tech CSE
+                      - generic [ref=f2e207]:
+                        - link "Email Sai Santhosh Naidu on Outlook" [ref=f2e208]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=malyala.santhosh_2028%40woxsen.edu.in
+                        - link "Sai Santhosh Naidu on LinkedIn" [ref=f2e212]:
+                          - /url: https://www.linkedin.com/in/sai-santhosh-malyala-589583339
+                - article [ref=f2e215] [cursor=pointer]:
+                  - button "Read more about Aysha Shanza" [ref=f2e216]
+                  - generic:
+                    - img "Aysha Shanza"
+                  - generic:
+                    - generic: Alumni Relations Lead
+                    - blockquote: “The people who left still have doors worth opening for the people still here.”
+                    - generic:
+                      - generic:
+                        - paragraph: Aysha Shanza
+                        - paragraph: BA LLB (Hons.)
+                      - generic [ref=f2e218]:
+                        - link "Email Aysha Shanza on Outlook" [ref=f2e219]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=aysha.shanza_2030%40woxsen.edu.in
+                        - link "Aysha Shanza on LinkedIn" [ref=f2e223]:
+                          - /url: https://www.linkedin.com/in/28aysha
+                - article [ref=f2e226] [cursor=pointer]:
+                  - button "Read more about Nikish Bishnoi" [ref=f2e227]
+                  - generic:
+                    - img "Nikish Bishnoi"
+                  - generic:
+                    - generic: Tech Lead
+                    - blockquote: “Every tool the Council runs on should be fast, open, and built by students.”
+                    - generic:
+                      - generic:
+                        - paragraph: Nikish Bishnoi
+                        - paragraph: B. Tech CSE (AIML)
+                      - generic [ref=f2e229]:
+                        - link "Email Nikish Bishnoi on Outlook" [ref=f2e230]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=nikish.bishnoi_2029%40woxsen.edu.in
+                        - link "Nikish Bishnoi on LinkedIn" [ref=f2e234]:
+                          - /url: https://www.linkedin.com/in/nikishdhirani/
+                - article [ref=f2e237] [cursor=pointer]:
+                  - button "Read more about Ritesh Ravva" [ref=f2e238]
+                  - generic:
+                    - img "Ritesh Ravva"
+                  - generic:
+                    - generic: Production Lead
+                    - blockquote: “67 67 67 67 67 67”
+                    - generic:
+                      - generic:
+                        - paragraph: Ritesh Ravva
+                        - paragraph: BBA
+                      - link "Email Ritesh Ravva on Outlook" [ref=f2e241]:
+                        - /url: https://outlook.office.com/mail/deeplink/compose?to=ritesh.ravva_2028%40woxsen.edu.in
+                - article [ref=f2e245] [cursor=pointer]:
+                  - button "Read more about Rahulnag Kasturi" [ref=f2e246]
+                  - generic:
+                    - img "Rahulnag Kasturi"
+                  - generic:
+                    - generic: Design Lead
+                    - blockquote: “How the Council looks is how seriously people take what it has to say.”
+                    - generic:
+                      - generic:
+                        - paragraph: Rahulnag Kasturi
+                        - paragraph: B. Des (Hons.) CD
+                      - generic [ref=f2e248]:
+                        - link "Email Rahulnag Kasturi on Outlook" [ref=f2e249]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=rahulnag.kasturi_2027%40woxsen.edu.in
+                        - link "Rahulnag Kasturi on LinkedIn" [ref=f2e253]:
+                          - /url: https://www.linkedin.com/in/rahulnagkasturi
+                - article [ref=f2e256] [cursor=pointer]:
+                  - button "Read more about Amin Soudagar" [ref=f2e257]
+                  - generic:
+                    - img "Amin Soudagar"
+                  - generic:
+                    - generic: Entrepreneurship Lead
+                    - blockquote: “Good ideas on this campus shouldn't die waiting for permission.”
+                    - generic:
+                      - generic:
+                        - paragraph: Amin Soudagar
+                        - paragraph: B. Tech CSE
+                      - generic [ref=f2e259]:
+                        - link "Email Amin Soudagar on Outlook" [ref=f2e260]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=amin.s_2027%40woxsen.edu.in
+                        - link "Amin Soudagar on LinkedIn" [ref=f2e264]:
+                          - /url: https://www.linkedin.com/in/amin-soudagar
+                - article [ref=f2e267] [cursor=pointer]:
+                  - button "Read more about Tanuj Reddy Rallagudem" [ref=f2e268]
+                  - generic:
+                    - img "Tanuj Reddy Rallagudem":
+                      - generic: TR
+                  - generic:
+                    - generic: Outreach Lead
+                    - blockquote: “A council that only talks to people who already talk to it isn't representing much.”
+                    - generic:
+                      - generic:
+                        - paragraph: Tanuj Reddy Rallagudem
+                        - paragraph: BBA Hons. (Gen.)
+                      - generic [ref=f2e270]:
+                        - link "Email Tanuj Reddy Rallagudem on Outlook" [ref=f2e271]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=tanuj.r_2028%40woxsen.edu.in
+                        - link "Tanuj Reddy Rallagudem on LinkedIn" [ref=f2e275]:
+                          - /url: https://www.linkedin.com/in/tanuj-reddy-rallagudem-6a8309361
+            - generic [ref=f2e278]:
+              - heading "Co-Leads" [level=3] [ref=f2e281]
+              - generic [ref=f2e282]:
+                - article [ref=f2e283] [cursor=pointer]:
+                  - button "Read more about Saharsh Kodati" [ref=f2e284]
+                  - generic:
+                    - img "Saharsh Kodati":
+                      - generic: SK
+                  - generic:
+                    - generic: Operations Co Lead
+                    - blockquote: “Half of operations is the second pair of hands nobody sees.”
+                    - generic:
+                      - generic:
+                        - paragraph: Saharsh Kodati
+                        - paragraph: B. Tech CSE (AIML)
+                      - generic [ref=f2e286]:
+                        - link "Email Saharsh Kodati on Outlook" [ref=f2e287]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=saharsh.kodati_2029%40woxsen.edu.in
+                        - link "Saharsh Kodati on LinkedIn" [ref=f2e291]:
+                          - /url: https://www.linkedin.com/in/saharsh-kodati-248173382
+                - article [ref=f2e294] [cursor=pointer]:
+                  - button "Read more about Gande Sharanya" [ref=f2e295]
+                  - generic:
+                    - img "Gande Sharanya":
+                      - generic: GS
+                  - generic:
+                    - generic: Sports Co Lead
+                    - blockquote: “Fixtures, kit and courts — someone has to chase all three at once.”
+                    - generic:
+                      - generic:
+                        - paragraph: Gande Sharanya
+                        - paragraph: BBA (DS & AI)
+                      - link "Email Gande Sharanya on Outlook" [ref=f2e298]:
+                        - /url: https://outlook.office.com/mail/deeplink/compose?to=sharanya.g_2029%40woxsen.edu.in
+                - article [ref=f2e302] [cursor=pointer]:
+                  - button "Read more about Arnav Reddy" [ref=f2e303]
+                  - generic:
+                    - img "Arnav Reddy":
+                      - generic: AR
+                  - generic:
+                    - generic: Sports Co Lead
+                    - blockquote: “Turnout is the whole game. My job is making sure people actually show up.”
+                    - generic:
+                      - generic:
+                        - paragraph: Arnav Reddy
+                        - paragraph: B. Sc (Hons.)
+                      - generic [ref=f2e305]:
+                        - link "Email Arnav Reddy on Outlook" [ref=f2e306]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=arnav.reddy_2028%40woxsen.edu.in
+                        - link "Arnav Reddy on LinkedIn" [ref=f2e310]:
+                          - /url: https://www.linkedin.com/in/arnav-reddy-936b13286
+                - article [ref=f2e313] [cursor=pointer]:
+                  - button "Read more about Parnika Podili" [ref=f2e314]
+                  - generic:
+                    - img "Parnika Podili":
+                      - generic: PP
+                  - generic:
+                    - generic: Student Welfare Co Lead
+                    - blockquote: “The second name on the list, so there's always somebody free to answer.”
+                    - generic:
+                      - generic:
+                        - paragraph: Parnika Podili
+                        - paragraph: B. Tech CSE (AIML)
+                      - generic [ref=f2e316]:
+                        - link "Email Parnika Podili on Outlook" [ref=f2e317]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=parnika.p_2029%40woxsen.edu.in
+                        - link "Parnika Podili on LinkedIn" [ref=f2e321]:
+                          - /url: https://www.linkedin.com/in/parnika-podili
+                - article [ref=f2e324] [cursor=pointer]:
+                  - button "Read more about Sai Rohith Chowdary Virigineni" [ref=f2e325]
+                  - generic:
+                    - img "Sai Rohith Chowdary Virigineni":
+                      - generic: SR
+                  - generic:
+                    - generic: Student Welfare Co Lead
+                    - blockquote: “Welfare work is mostly listening. Two of us means twice the listening.”
+                    - generic:
+                      - generic:
+                        - paragraph: Sai Rohith Chowdary Virigineni
+                        - paragraph: M.Des Product Design Innovation - 1st Year
+                      - link "Email Sai Rohith Chowdary Virigineni on Outlook" [ref=f2e328]:
+                        - /url: https://outlook.office.com/mail/deeplink/compose?to=sairohith.v_2028%40woxsen.edu.in
+                - article [ref=f2e332] [cursor=pointer]:
+                  - button "Read more about Aryan Joseph Maria Florence" [ref=f2e333]
+                  - generic:
+                    - img "Aryan Joseph Maria Florence":
+                      - generic: AJ
+                  - generic:
+                    - generic: Facilities Co Lead
+                    - blockquote: “Walking the buildings and writing down what's broken before someone complains.”
+                    - generic:
+                      - generic:
+                        - paragraph: Aryan Joseph Maria Florence
+                        - paragraph: BBA Hons. (DS & AI)
+                      - generic [ref=f2e335]:
+                        - link "Email Aryan Joseph Maria Florence on Outlook" [ref=f2e336]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=aryanjoseph.florence_2028%40woxsen.edu.in
+                        - link "Aryan Joseph Maria Florence on LinkedIn" [ref=f2e340]:
+                          - /url: https://www.linkedin.com/in/mariaflorencearyan/
+                - article [ref=f2e343] [cursor=pointer]:
+                  - button "Read more about Siddharth Choudhary" [ref=f2e344]
+                  - generic:
+                    - img "Siddharth Choudhary":
+                      - generic: SC
+                  - generic:
+                    - generic: Entrepreneurship Co Lead
+                    - blockquote: “Founders need a sounding board more than they need a stage.”
+                    - generic:
+                      - generic:
+                        - paragraph: Siddharth Choudhary
+                        - paragraph: B. Tech CSE (AIML)
+                      - generic [ref=f2e346]:
+                        - link "Email Siddharth Choudhary on Outlook" [ref=f2e347]:
+                          - /url: https://outlook.office.com/mail/deeplink/compose?to=siddarth.choudhary_2028%40woxsen.edu.in
+                        - link "Siddharth Choudhary on LinkedIn" [ref=f2e351]:
+                          - /url: https://www.linkedin.com/in/siddarthchoudhary45/
+                - article [ref=f2e354] [cursor=pointer]:
+                  - button "Read more about Abdul Khwaja Moinuddin" [ref=f2e355]
+                  - generic:
+                    - img "Abdul Khwaja Moinuddin":
+                      - generic: AK
+                  - generic:
+                    - generic: Production Co Lead
+                    - blockquote: “Backstage runs on redundancy. I'm the redundancy.”
+                    - generic:
+                      - generic:
+                        - paragraph: Abdul Khwaja Moinuddin
+                        - paragraph: BBA
+                      - link "Email Abdul Khwaja Moinuddin on Outlook" [ref=f2e358]:
+                        - /url: https://outlook.office.com/mail/deeplink/compose?to=khwajamoinuddin.abdul_2029%40woxsen.edu.in
+          - generic [ref=f2e363]:
+            - heading "School Representatives" [level=2] [ref=f2e366]
+            - generic [ref=f2e367]:
+              - article [ref=f2e368] [cursor=pointer]:
+                - button "Read more about Venkata Sai Jahnavi Nerella" [ref=f2e369]
+                - generic:
+                  - img "Venkata Sai Jahnavi Nerella"
+                - generic:
+                  - generic: SR SOAP
+                  - blockquote: “Studio hours are long. Someone should be making sure they're worth it.”
+                  - generic:
+                    - generic:
+                      - paragraph: Venkata Sai Jahnavi Nerella
+                      - paragraph: B.Arch - 3rd year
+                    - link "Email Venkata Sai Jahnavi Nerella on Outlook" [ref=f2e372]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=venkatasai.nerella_2028%40woxsen.edu.in
+              - article [ref=f2e376] [cursor=pointer]:
+                - button "Read more about Urvi Ray" [ref=f2e377]
+                - generic:
+                  - img "Urvi Ray"
+                - generic:
+                  - generic: SR SOAD
+                  - blockquote: “Design students need space, materials and time. I'm here to argue for all three.”
+                  - generic:
+                    - generic:
+                      - paragraph: Urvi Ray
+                      - paragraph: B.Des(Hons) Industrial Design 2nd year
+                    - link "Email Urvi Ray on Outlook" [ref=f2e380]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=urvi.ray_2028%40woxsen.edu.in
+              - article [ref=f2e384] [cursor=pointer]:
+                - button "Read more about Harshith Chakravarthy" [ref=f2e385]
+                - generic:
+                  - img "Harshith Chakravarthy"
+                - generic:
+                  - generic: SR SOB UG
+                  - blockquote: “Undergrad business is the biggest cohort here. It shouldn't be the least heard.”
+                  - generic:
+                    - generic:
+                      - paragraph: Harshith Chakravarthy
+                      - paragraph: BBA DSAI 2nd Year
+                    - link "Email Harshith Chakravarthy on Outlook" [ref=f2e388]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=harshith.mashetty_2028%40woxsen.edu.in
+              - article [ref=f2e392] [cursor=pointer]:
+                - button "Read more about Mahika Tripathi" [ref=f2e393]
+                - generic:
+                  - img "Mahika Tripathi"
+                - generic:
+                  - generic: SR SOB PG
+                  - blockquote: “Postgrad life runs on a different clock, and the Council should keep up with it.”
+                  - generic:
+                    - generic:
+                      - paragraph: Mahika Tripathi
+                      - paragraph: MBA - 1st year
+                    - link "Email Mahika Tripathi on Outlook" [ref=f2e396]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=mahika.tripathi_2027%40woxsen.edu.in
+              - article [ref=f2e400] [cursor=pointer]:
+                - button "Read more about Badiga Dhriti" [ref=f2e401]
+                - generic:
+                  - img "Badiga Dhriti"
+                - generic:
+                  - generic: SR SOL
+                  - blockquote: “Law students read the fine print for a living. We should hold the Council to it too.”
+                  - generic:
+                    - generic:
+                      - paragraph: Badiga Dhriti
+                      - paragraph: BBA LL.B (Hons.) - 3rd Year
+                    - link "Email Badiga Dhriti on Outlook" [ref=f2e404]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=badiga.dhriti_2028%40woxsen.edu.in
+              - article [ref=f2e408] [cursor=pointer]:
+                - button "Read more about Gurbani Aulakh" [ref=f2e409]
+                - generic:
+                  - img "Gurbani Aulakh"
+                - generic:
+                  - generic: SR SOLH
+                  - blockquote: “The humanities ask the questions the rest of campus is too busy to.”
+                  - generic:
+                    - generic:
+                      - paragraph: Gurbani Aulakh
+                      - paragraph: BA-Hons; 2nd year
+                    - link "Email Gurbani Aulakh on Outlook" [ref=f2e412]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=gurbani.aulakh_2028%40woxsen.edu.in
+              - article [ref=f2e416] [cursor=pointer]:
+                - button "Read more about Reetika Malempati" [ref=f2e417]
+                - generic:
+                  - img "Reetika Malempati"
+                - generic:
+                  - generic: SR SOS
+                  - blockquote: “Lab access, equipment and time — the things science students actually need.”
+                  - generic:
+                    - generic:
+                      - paragraph: Reetika Malempati
+                      - paragraph: BSC Hons - 2nd Year
+                    - link "Email Reetika Malempati on Outlook" [ref=f2e420]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=reetika.malempati_2028%40woxsen.edu.in
+              - article [ref=f2e424] [cursor=pointer]:
+                - button "Read more about Sai Teja Gaddam" [ref=f2e425]
+                - generic:
+                  - img "Sai Teja Gaddam"
+                - generic:
+                  - generic: SR SOT
+                  - blockquote: “Tech students build half of what this campus runs on. Let's back them properly.”
+                  - generic:
+                    - generic:
+                      - paragraph: Sai Teja Gaddam
+                      - paragraph: Btech - (CSE AI&ML) - 3rd Year
+                    - link "Email Sai Teja Gaddam on Outlook" [ref=f2e428]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=gadddam.teja_2028%40woxsen.edu.in
+          - generic [ref=f2e433]:
+            - heading "Club Presidents" [level=2] [ref=f2e436]
+            - generic [ref=f2e438]:
+              - article [ref=f2e440] [cursor=pointer]:
+                - button "Read more about V. Jahnavi" [ref=f2e441]
+                - generic:
+                  - img "V. Jahnavi":
+                    - generic: VJ
+                - generic:
+                  - generic: Aesthetrix Club President
+                  - blockquote: “A club for people who notice how things look, and want to make them look better.”
+                  - generic:
+                    - generic:
+                      - paragraph: V. Jahnavi
+                      - paragraph: B.Arch - 3rd Year
+                    - link "Email V. Jahnavi on Outlook" [ref=f2e444]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=jahnavi.v_2028%40woxsen.edu.in
+              - article [ref=f2e449] [cursor=pointer]:
+                - button "Read more about Guru Charan Pujala" [ref=f2e450]
+                - generic:
+                  - img "Guru Charan Pujala":
+                    - generic: GC
+                - generic:
+                  - generic: Animal Welfare Club President
+                  - blockquote: “The campus isn't only ours. The animals on it deserve someone in their corner.”
+                  - generic:
+                    - generic:
+                      - paragraph: Guru Charan Pujala
+                      - paragraph: BTech AI ML - 2nd year
+                    - link "Email Guru Charan Pujala on Outlook" [ref=f2e453]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=gurucharan.pujala_2028%40woxsen.edu.in
+              - article [ref=f2e458] [cursor=pointer]:
+                - button "Read more about Ayyapusetty Sai Samvidha" [ref=f2e459]
+                - generic:
+                  - img "Ayyapusetty Sai Samvidha":
+                    - generic: AS
+                - generic:
+                  - generic: Communication Design Club President
+                  - blockquote: “Every poster, every title card, every logo on campus started as a rough sketch.”
+                  - generic:
+                    - generic:
+                      - paragraph: Ayyapusetty Sai Samvidha
+                      - paragraph: Bdes communication design - 2nd Year
+                    - link "Email Ayyapusetty Sai Samvidha on Outlook" [ref=f2e462]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=saisamvidha.ayyapusetty_2028%40woxsen.edu.in
+              - article [ref=f2e467] [cursor=pointer]:
+                - button "Read more about Rana Shrika" [ref=f2e468]
+                - generic:
+                  - img "Rana Shrika":
+                    - generic: RS
+                - generic:
+                  - generic: Distortion Club President
+                  - blockquote: “Loud, strange and unapologetic — there should be room on campus for that.”
+                  - generic:
+                    - generic:
+                      - paragraph: Rana Shrika
+                      - paragraph: Btech AIML- 2nd Year
+                    - link "Email Rana Shrika on Outlook" [ref=f2e471]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=rana.shrika_2028%40woxsen.edu.in
+              - article [ref=f2e476] [cursor=pointer]:
+                - button "Read more about Poti Reddy Neeraj Reddy" [ref=f2e477]
+                - generic:
+                  - img "Poti Reddy Neeraj Reddy":
+                    - generic: PR
+                - generic:
+                  - generic: DrishyaKala - The Film Club President
+                  - blockquote: “Everyone has a film in them. We hand out the camera and the deadline.”
+                  - generic:
+                    - generic:
+                      - paragraph: Poti Reddy Neeraj Reddy
+                      - paragraph: BTech CSE – 2nd Year
+                    - link "Email Poti Reddy Neeraj Reddy on Outlook" [ref=f2e480]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=neeraj.reddy_2028%40woxsen.edu.in
+              - article [ref=f2e485] [cursor=pointer]:
+                - button "Read more about Ajitesh Patel" [ref=f2e486]
+                - generic:
+                  - img "Ajitesh Patel":
+                    - generic: AP
+                - generic:
+                  - generic: FinWiz Club President
+                  - blockquote: “Markets, models and money — demystified for anyone willing to sit down and learn.”
+                  - generic:
+                    - generic:
+                      - paragraph: Ajitesh Patel
+                      - paragraph: MBA (FS) - 1st Year
+                    - link "Email Ajitesh Patel on Outlook" [ref=f2e489]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=ajitesh.patel_2027%40woxsen.edu.in
+              - article [ref=f2e494] [cursor=pointer]:
+                - button "Read more about Diya Shree P" [ref=f2e495]
+                - generic:
+                  - img "Diya Shree P":
+                    - generic: DS
+                - generic:
+                  - generic: Fashion Design Club President
+                  - blockquote: “What you wear is the first thing you ever say. We take that seriously.”
+                  - generic:
+                    - generic:
+                      - paragraph: Diya Shree P
+                      - paragraph: BDes Communication Design - 1st Year
+                    - link "Email Diya Shree P on Outlook" [ref=f2e498]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=diyashree.p_2029%40woxsen.edu.in
+              - article [ref=f2e503] [cursor=pointer]:
+                - button "Read more about Sai Shree Reddy Mamindla" [ref=f2e504]
+                - generic:
+                  - img "Sai Shree Reddy Mamindla":
+                    - generic: SS
+                - generic:
+                  - generic: Genesis Club President
+                  - blockquote: “Every big thing on this campus started as somebody's half-formed idea.”
+                  - generic:
+                    - generic:
+                      - paragraph: Sai Shree Reddy Mamindla
+                      - paragraph: BA (Hons.) Psychology 2nd year
+                    - link "Email Sai Shree Reddy Mamindla on Outlook" [ref=f2e507]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=saishree.reddy_2029%40woxsen.edu.in
+              - article [ref=f2e512] [cursor=pointer]:
+                - button "Read more about Rashi Sharma" [ref=f2e513]
+                - generic:
+                  - img "Rashi Sharma":
+                    - generic: RS
+                - generic:
+                  - generic: Global Sustainability Club President
+                  - blockquote: “Small campus habits scale. That's the entire point of starting here.”
+                  - generic:
+                    - generic:
+                      - paragraph: Rashi Sharma
+                      - paragraph: BBA - 1st year
+                    - link "Email Rashi Sharma on Outlook" [ref=f2e516]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=rashi.sharma_2028%40woxsen.edu.in
+              - article [ref=f2e521] [cursor=pointer]:
+                - button "Read more about Derick Donbosco Joseph" [ref=f2e522]
+                - generic:
+                  - img "Derick Donbosco Joseph":
+                    - generic: DD
+                - generic:
+                  - generic: Ideate Club President
+                  - blockquote: “Bring the rough idea. We'll help you find out whether it survives contact.”
+                  - generic:
+                    - generic:
+                      - paragraph: Derick Donbosco Joseph
+                      - paragraph: BDesign INDUSTRIAL DESIGN - 2nd Year
+                    - link "Email Derick Donbosco Joseph on Outlook" [ref=f2e525]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=derick.joseph_2028%40woxsen.edu.in
+              - article [ref=f2e530] [cursor=pointer]:
+                - button "Read more about Kaushika Reddy Chintala" [ref=f2e531]
+                - generic:
+                  - img "Kaushika Reddy Chintala":
+                    - generic: KR
+                - generic:
+                  - generic: JanSpandan Club President
+                  - blockquote: “Service isn't a line on a CV. It's turning up when it's inconvenient.”
+                  - generic:
+                    - generic:
+                      - paragraph: Kaushika Reddy Chintala
+                      - paragraph: MBA (General)- 1st Year
+                    - link "Email Kaushika Reddy Chintala on Outlook" [ref=f2e534]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=kaushika.reddy_2027%40woxsen.edu.in
+              - article [ref=f2e539] [cursor=pointer]:
+                - button "Read more about Banreddy Rahul Reddy" [ref=f2e540]
+                - generic:
+                  - img "Banreddy Rahul Reddy":
+                    - generic: BR
+                - generic:
+                  - generic: Jashn Club President
+                  - blockquote: “Celebration takes more planning than anyone watching ever realises.”
+                  - generic:
+                    - generic:
+                      - paragraph: Banreddy Rahul Reddy
+                      - paragraph: BTech CSE-AIML - 3rd Year
+                    - link "Email Banreddy Rahul Reddy on Outlook" [ref=f2e543]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=rahul.reddy_2027%40woxsen.edu.in
+              - article [ref=f2e548] [cursor=pointer]:
+                - button "Read more about Abhinaya Shree" [ref=f2e549]
+                - generic:
+                  - img "Abhinaya Shree":
+                    - generic: AS
+                - generic:
+                  - generic: Just Naach Club President
+                  - blockquote: “You don't need training to dance with us. You need to show up twice.”
+                  - generic:
+                    - generic:
+                      - paragraph: Abhinaya Shree
+                      - paragraph: BBA (digital marketing and e-commerce) 2nd year
+                    - link "Email Abhinaya Shree on Outlook" [ref=f2e552]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=abhinaya.shree_2028%40woxen.edu.in
+              - article [ref=f2e557] [cursor=pointer]:
+                - button "Read more about Kiyara Kamalesh" [ref=f2e558]
+                - generic:
+                  - img "Kiyara Kamalesh":
+                    - generic: KK
+                - generic:
+                  - generic: Law Club President
+                  - blockquote: “Moots, debates and the fine print — practice for the rooms that matter later.”
+                  - generic:
+                    - generic:
+                      - paragraph: Kiyara Kamalesh
+                      - paragraph: BBA LLB (Hons.) - 2nd Year
+                    - link "Email Kiyara Kamalesh on Outlook" [ref=f2e561]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=kiyara.kamalesh_2029%40woxsen.edu.in
+              - article [ref=f2e566] [cursor=pointer]:
+                - button "Read more about Yamin Aung" [ref=f2e567]
+                - generic:
+                  - img "Yamin Aung":
+                    - generic: YA
+                - generic:
+                  - generic: Marketing Director's Club President
+                  - blockquote: “Every product needs a story, and every story needs someone to tell it well.”
+                  - generic:
+                    - generic:
+                      - paragraph: Yamin Aung
+                      - paragraph: BBA (General) - 2nd Year
+                    - link "Email Yamin Aung on Outlook" [ref=f2e570]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=yamin.aung_2028%40woxsen.edu.in
+              - article [ref=f2e575] [cursor=pointer]:
+                - button "Read more about Maitreyi Jagannathan" [ref=f2e576]
+                - generic:
+                  - img "Maitreyi Jagannathan":
+                    - generic: MJ
+                - generic:
+                  - generic: Rotaract Club President
+                  - blockquote: “Service above self, run by students who'd rather do than discuss.”
+                  - generic:
+                    - generic:
+                      - paragraph: Maitreyi Jagannathan
+                      - paragraph: BBA - 2nd Year
+                    - link "Email Maitreyi Jagannathan on Outlook" [ref=f2e579]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=maitreyi.jagannathan_2028%40woxsen.edu.in
+              - article [ref=f2e584] [cursor=pointer]:
+                - button "Read more about Thakur Sampreet Singh" [ref=f2e585]
+                - generic:
+                  - img "Thakur Sampreet Singh":
+                    - generic: TS
+                - generic:
+                  - generic: Spectrum Club President
+                  - blockquote: “A place to be yourself on a campus that's still learning what that takes.”
+                  - generic:
+                    - generic:
+                      - paragraph: Thakur Sampreet Singh
+                      - paragraph: Bsc(Hons)- 2nd Year
+                    - link "Email Thakur Sampreet Singh on Outlook" [ref=f2e588]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=thakur.singh_2028%40woxsen.edu.in
+              - article [ref=f2e593] [cursor=pointer]:
+                - button "Read more about Samuel Ashray Ballem" [ref=f2e594]
+                - generic:
+                  - img "Samuel Ashray Ballem":
+                    - generic: SA
+                - generic:
+                  - generic: Tantra Club President
+                  - blockquote: “Tradition, performance and craft — carried forward by the people who love it.”
+                  - generic:
+                    - generic:
+                      - paragraph: Samuel Ashray Ballem
+                      - paragraph: BBA Hons ( 1st Year )
+                    - link "Email Samuel Ashray Ballem on Outlook" [ref=f2e597]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=samuelashray.ballem_2029%40woxsen.edu.in
+              - article [ref=f2e602] [cursor=pointer]:
+                - button "Read more about Vennela Linga" [ref=f2e603]
+                - generic:
+                  - img "Vennela Linga":
+                    - generic: VL
+                - generic:
+                  - generic: Tech Club President
+                  - blockquote: “Build things, break things, and show the campus what students can ship.”
+                  - generic:
+                    - generic:
+                      - paragraph: Vennela Linga
+                      - paragraph: Btech aiml 2 nd year
+                    - link "Email Vennela Linga on Outlook" [ref=f2e606]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=vennela.linga_2028%40woxsen.edu.in
+              - article [ref=f2e611] [cursor=pointer]:
+                - button "Read more about Manikeshwar Reddy" [ref=f2e612]
+                - generic:
+                  - img "Manikeshwar Reddy":
+                    - generic: MR
+                - generic:
+                  - generic: Utopia Esports Club President
+                  - blockquote: “Competitive gaming deserves the same seriousness as any other sport here.”
+                  - generic:
+                    - generic:
+                      - paragraph: Manikeshwar Reddy
+                      - paragraph: B.Tech AIML - 3rd year)
+                    - link "Email Manikeshwar Reddy on Outlook" [ref=f2e615]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=manikeshwar.reddy_2027%40woxsen.edu.in
+              - article [ref=f2e620] [cursor=pointer]:
+                - button "Read more about Gayathri" [ref=f2e621]
+                - generic:
+                  - img "Gayathri":
+                    - generic: G
+                - generic:
+                  - generic: Interior Design Club President
+                  - blockquote: “Space changes how people behave in it. That's a superpower worth learning.”
+                  - generic:
+                    - generic:
+                      - paragraph: Gayathri
+                      - paragraph: Interior design 2nd year
+                    - link "Email Gayathri on Outlook" [ref=f2e624]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=gayathri.bachina_2028%40woxsen.edu.in
+              - article [ref=f2e629] [cursor=pointer]:
+                - button "Read more about Naidu Yesaswini" [ref=f2e630]
+                - generic:
+                  - img "Naidu Yesaswini":
+                    - generic: NY
+                - generic:
+                  - generic: Paparazzi Club President
+                  - blockquote: “Somebody has to be there with a lens when the moment actually happens.”
+                  - generic:
+                    - generic:
+                      - paragraph: Naidu Yesaswini
+                      - paragraph: BBA 2nd year
+                    - link "Email Naidu Yesaswini on Outlook" [ref=f2e633]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=yesaswini.naidu_2028%40woxsen.edu.in
+              - article [ref=f2e638] [cursor=pointer]:
+                - button "Read more about Mohammed Mustafa" [ref=f2e639]
+                - generic:
+                  - img "Mohammed Mustafa":
+                    - generic: MM
+                - generic:
+                  - generic: Debate Club President
+                  - blockquote: “Argue well, lose gracefully, and change your mind when the evidence says so.”
+                  - generic:
+                    - generic:
+                      - paragraph: Mohammed Mustafa
+                      - paragraph: B.A LL.B (Hons.) Year 2
+                    - link "Email Mohammed Mustafa on Outlook" [ref=f2e642]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=mohammed.mustafa_2029%40woxsen.edu.in
+              - article [ref=f2e647] [cursor=pointer]:
+                - button "Read more about Nainitha Vanga" [ref=f2e648]
+                - generic:
+                  - img "Nainitha Vanga":
+                    - generic: NV
+                - generic:
+                  - generic: Literature Club President
+                  - blockquote: “Books, arguments about books, and the people who can't stop writing.”
+                  - generic:
+                    - generic:
+                      - paragraph: Nainitha Vanga
+                      - paragraph: BBA AI&DS - 2nd year
+                    - link "Email Nainitha Vanga on Outlook" [ref=f2e651]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=nainitha.vanga_2028%40woxsen.edu.in
+              - article [ref=f2e656] [cursor=pointer]:
+                - button "Read more about Cheeti Navya Sri" [ref=f2e657]
+                - generic:
+                  - img "Cheeti Navya Sri":
+                    - generic: CN
+                - generic:
+                  - generic: Skribble Club
+                  - blockquote: “Sketchbooks open, no talent threshold, no grading — just drawing together.”
+                  - generic:
+                    - generic:
+                      - paragraph: Cheeti Navya Sri
+                      - paragraph: BArch - 3rd Year
+                    - link "Email Cheeti Navya Sri on Outlook" [ref=f2e660]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=navya.sri_2028%40woxsen.edu.in
+              - article [ref=f2e665] [cursor=pointer]:
+                - button "Read more about Jyothirlatha Vasa" [ref=f2e666]
+                - generic:
+                  - img "Jyothirlatha Vasa":
+                    - generic: JV
+                - generic:
+                  - generic: Crowdcore Club
+                  - blockquote: “Nothing on this campus happens without a crowd. We're the ones who gather it.”
+                  - generic:
+                    - generic:
+                      - paragraph: Jyothirlatha Vasa
+                      - paragraph: MBA-BA(Tigers) - 1st Year
+                    - link "Email Jyothirlatha Vasa on Outlook" [ref=f2e669]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=jyothirlatha.v_2027%40woxsen.edu.in
+              - article [ref=f2e674] [cursor=pointer]:
+                - button "Read more about Niharika Medapati" [ref=f2e675]
+                - generic:
+                  - img "Niharika Medapati":
+                    - generic: NM
+                - generic:
+                  - generic: Humanique Club
+                  - blockquote: “People first — the club for anyone interested in what makes us tick.”
+                  - generic:
+                    - generic:
+                      - paragraph: Niharika Medapati
+                      - paragraph: Btech (Data Science)
+                    - link "Email Niharika Medapati on Outlook" [ref=f2e678]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=niharika.medapati_2028%40woxsen.edu.in
+              - article [ref=f2e683] [cursor=pointer]:
+                - button "Read more about Nimisha Suman" [ref=f2e684]
+                - generic:
+                  - img "Nimisha Suman":
+                    - generic: NS
+                - generic:
+                  - generic: Nexus Club
+                  - blockquote: “The connective tissue between disciplines that don't usually talk to each other.”
+                  - generic:
+                    - generic:
+                      - paragraph: Nimisha Suman
+                      - paragraph: MBA-GM
+                    - link "Email Nimisha Suman on Outlook" [ref=f2e687]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=nimisha.suman_2027%40woxsen.edu.in
+              - article [ref=f2e692] [cursor=pointer]:
+                - button "Read more about V. Jahnavi" [ref=f2e693]
+                - generic:
+                  - img "V. Jahnavi":
+                    - generic: VJ
+                - generic:
+                  - generic: Aesthetrix Club President
+                  - blockquote: “A club for people who notice how things look, and want to make them look better.”
+                  - generic:
+                    - generic:
+                      - paragraph: V. Jahnavi
+                      - paragraph: B.Arch - 3rd Year
+                    - link "Email V. Jahnavi on Outlook" [ref=f2e696]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=jahnavi.v_2028%40woxsen.edu.in
+              - article [ref=f2e701] [cursor=pointer]:
+                - button "Read more about Guru Charan Pujala" [ref=f2e702]
+                - generic:
+                  - img "Guru Charan Pujala":
+                    - generic: GC
+                - generic:
+                  - generic: Animal Welfare Club President
+                  - blockquote: “The campus isn't only ours. The animals on it deserve someone in their corner.”
+                  - generic:
+                    - generic:
+                      - paragraph: Guru Charan Pujala
+                      - paragraph: BTech AI ML - 2nd year
+                    - link "Email Guru Charan Pujala on Outlook" [ref=f2e705]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=gurucharan.pujala_2028%40woxsen.edu.in
+              - article [ref=f2e710] [cursor=pointer]:
+                - button "Read more about Ayyapusetty Sai Samvidha" [ref=f2e711]
+                - generic:
+                  - img "Ayyapusetty Sai Samvidha":
+                    - generic: AS
+                - generic:
+                  - generic: Communication Design Club President
+                  - blockquote: “Every poster, every title card, every logo on campus started as a rough sketch.”
+                  - generic:
+                    - generic:
+                      - paragraph: Ayyapusetty Sai Samvidha
+                      - paragraph: Bdes communication design - 2nd Year
+                    - link "Email Ayyapusetty Sai Samvidha on Outlook" [ref=f2e714]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=saisamvidha.ayyapusetty_2028%40woxsen.edu.in
+              - article [ref=f2e719] [cursor=pointer]:
+                - button "Read more about Rana Shrika" [ref=f2e720]
+                - generic:
+                  - img "Rana Shrika":
+                    - generic: RS
+                - generic:
+                  - generic: Distortion Club President
+                  - blockquote: “Loud, strange and unapologetic — there should be room on campus for that.”
+                  - generic:
+                    - generic:
+                      - paragraph: Rana Shrika
+                      - paragraph: Btech AIML- 2nd Year
+                    - link "Email Rana Shrika on Outlook" [ref=f2e723]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=rana.shrika_2028%40woxsen.edu.in
+              - article [ref=f2e728] [cursor=pointer]:
+                - button "Read more about Poti Reddy Neeraj Reddy" [ref=f2e729]
+                - generic:
+                  - img "Poti Reddy Neeraj Reddy":
+                    - generic: PR
+                - generic:
+                  - generic: DrishyaKala - The Film Club President
+                  - blockquote: “Everyone has a film in them. We hand out the camera and the deadline.”
+                  - generic:
+                    - generic:
+                      - paragraph: Poti Reddy Neeraj Reddy
+                      - paragraph: BTech CSE – 2nd Year
+                    - link "Email Poti Reddy Neeraj Reddy on Outlook" [ref=f2e732]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=neeraj.reddy_2028%40woxsen.edu.in
+              - article [ref=f2e737] [cursor=pointer]:
+                - button "Read more about Ajitesh Patel" [ref=f2e738]
+                - generic:
+                  - img "Ajitesh Patel":
+                    - generic: AP
+                - generic:
+                  - generic: FinWiz Club President
+                  - blockquote: “Markets, models and money — demystified for anyone willing to sit down and learn.”
+                  - generic:
+                    - generic:
+                      - paragraph: Ajitesh Patel
+                      - paragraph: MBA (FS) - 1st Year
+                    - link "Email Ajitesh Patel on Outlook" [ref=f2e741]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=ajitesh.patel_2027%40woxsen.edu.in
+              - article [ref=f2e746] [cursor=pointer]:
+                - button "Read more about Diya Shree P" [ref=f2e747]
+                - generic:
+                  - img "Diya Shree P":
+                    - generic: DS
+                - generic:
+                  - generic: Fashion Design Club President
+                  - blockquote: “What you wear is the first thing you ever say. We take that seriously.”
+                  - generic:
+                    - generic:
+                      - paragraph: Diya Shree P
+                      - paragraph: BDes Communication Design - 1st Year
+                    - link "Email Diya Shree P on Outlook" [ref=f2e750]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=diyashree.p_2029%40woxsen.edu.in
+              - article [ref=f2e755] [cursor=pointer]:
+                - button "Read more about Sai Shree Reddy Mamindla" [ref=f2e756]
+                - generic:
+                  - img "Sai Shree Reddy Mamindla":
+                    - generic: SS
+                - generic:
+                  - generic: Genesis Club President
+                  - blockquote: “Every big thing on this campus started as somebody's half-formed idea.”
+                  - generic:
+                    - generic:
+                      - paragraph: Sai Shree Reddy Mamindla
+                      - paragraph: BA (Hons.) Psychology 2nd year
+                    - link "Email Sai Shree Reddy Mamindla on Outlook" [ref=f2e759]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=saishree.reddy_2029%40woxsen.edu.in
+              - article [ref=f2e764] [cursor=pointer]:
+                - button "Read more about Rashi Sharma" [ref=f2e765]
+                - generic:
+                  - img "Rashi Sharma":
+                    - generic: RS
+                - generic:
+                  - generic: Global Sustainability Club President
+                  - blockquote: “Small campus habits scale. That's the entire point of starting here.”
+                  - generic:
+                    - generic:
+                      - paragraph: Rashi Sharma
+                      - paragraph: BBA - 1st year
+                    - link "Email Rashi Sharma on Outlook" [ref=f2e768]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=rashi.sharma_2028%40woxsen.edu.in
+              - article [ref=f2e773] [cursor=pointer]:
+                - button "Read more about Derick Donbosco Joseph" [ref=f2e774]
+                - generic:
+                  - img "Derick Donbosco Joseph":
+                    - generic: DD
+                - generic:
+                  - generic: Ideate Club President
+                  - blockquote: “Bring the rough idea. We'll help you find out whether it survives contact.”
+                  - generic:
+                    - generic:
+                      - paragraph: Derick Donbosco Joseph
+                      - paragraph: BDesign INDUSTRIAL DESIGN - 2nd Year
+                    - link "Email Derick Donbosco Joseph on Outlook" [ref=f2e777]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=derick.joseph_2028%40woxsen.edu.in
+              - article [ref=f2e782] [cursor=pointer]:
+                - button "Read more about Kaushika Reddy Chintala" [ref=f2e783]
+                - generic:
+                  - img "Kaushika Reddy Chintala":
+                    - generic: KR
+                - generic:
+                  - generic: JanSpandan Club President
+                  - blockquote: “Service isn't a line on a CV. It's turning up when it's inconvenient.”
+                  - generic:
+                    - generic:
+                      - paragraph: Kaushika Reddy Chintala
+                      - paragraph: MBA (General)- 1st Year
+                    - link "Email Kaushika Reddy Chintala on Outlook" [ref=f2e786]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=kaushika.reddy_2027%40woxsen.edu.in
+              - article [ref=f2e791] [cursor=pointer]:
+                - button "Read more about Banreddy Rahul Reddy" [ref=f2e792]
+                - generic:
+                  - img "Banreddy Rahul Reddy":
+                    - generic: BR
+                - generic:
+                  - generic: Jashn Club President
+                  - blockquote: “Celebration takes more planning than anyone watching ever realises.”
+                  - generic:
+                    - generic:
+                      - paragraph: Banreddy Rahul Reddy
+                      - paragraph: BTech CSE-AIML - 3rd Year
+                    - link "Email Banreddy Rahul Reddy on Outlook" [ref=f2e795]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=rahul.reddy_2027%40woxsen.edu.in
+              - article [ref=f2e800] [cursor=pointer]:
+                - button "Read more about Abhinaya Shree" [ref=f2e801]
+                - generic:
+                  - img "Abhinaya Shree":
+                    - generic: AS
+                - generic:
+                  - generic: Just Naach Club President
+                  - blockquote: “You don't need training to dance with us. You need to show up twice.”
+                  - generic:
+                    - generic:
+                      - paragraph: Abhinaya Shree
+                      - paragraph: BBA (digital marketing and e-commerce) 2nd year
+                    - link "Email Abhinaya Shree on Outlook" [ref=f2e804]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=abhinaya.shree_2028%40woxen.edu.in
+              - article [ref=f2e809] [cursor=pointer]:
+                - button "Read more about Kiyara Kamalesh" [ref=f2e810]
+                - generic:
+                  - img "Kiyara Kamalesh":
+                    - generic: KK
+                - generic:
+                  - generic: Law Club President
+                  - blockquote: “Moots, debates and the fine print — practice for the rooms that matter later.”
+                  - generic:
+                    - generic:
+                      - paragraph: Kiyara Kamalesh
+                      - paragraph: BBA LLB (Hons.) - 2nd Year
+                    - link "Email Kiyara Kamalesh on Outlook" [ref=f2e813]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=kiyara.kamalesh_2029%40woxsen.edu.in
+              - article [ref=f2e818] [cursor=pointer]:
+                - button "Read more about Yamin Aung" [ref=f2e819]
+                - generic:
+                  - img "Yamin Aung":
+                    - generic: YA
+                - generic:
+                  - generic: Marketing Director's Club President
+                  - blockquote: “Every product needs a story, and every story needs someone to tell it well.”
+                  - generic:
+                    - generic:
+                      - paragraph: Yamin Aung
+                      - paragraph: BBA (General) - 2nd Year
+                    - link "Email Yamin Aung on Outlook" [ref=f2e822]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=yamin.aung_2028%40woxsen.edu.in
+              - article [ref=f2e827] [cursor=pointer]:
+                - button "Read more about Maitreyi Jagannathan" [ref=f2e828]
+                - generic:
+                  - img "Maitreyi Jagannathan":
+                    - generic: MJ
+                - generic:
+                  - generic: Rotaract Club President
+                  - blockquote: “Service above self, run by students who'd rather do than discuss.”
+                  - generic:
+                    - generic:
+                      - paragraph: Maitreyi Jagannathan
+                      - paragraph: BBA - 2nd Year
+                    - link "Email Maitreyi Jagannathan on Outlook" [ref=f2e831]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=maitreyi.jagannathan_2028%40woxsen.edu.in
+              - article [ref=f2e836] [cursor=pointer]:
+                - button "Read more about Thakur Sampreet Singh" [ref=f2e837]
+                - generic:
+                  - img "Thakur Sampreet Singh":
+                    - generic: TS
+                - generic:
+                  - generic: Spectrum Club President
+                  - blockquote: “A place to be yourself on a campus that's still learning what that takes.”
+                  - generic:
+                    - generic:
+                      - paragraph: Thakur Sampreet Singh
+                      - paragraph: Bsc(Hons)- 2nd Year
+                    - link "Email Thakur Sampreet Singh on Outlook" [ref=f2e840]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=thakur.singh_2028%40woxsen.edu.in
+              - article [ref=f2e845] [cursor=pointer]:
+                - button "Read more about Samuel Ashray Ballem" [ref=f2e846]
+                - generic:
+                  - img "Samuel Ashray Ballem":
+                    - generic: SA
+                - generic:
+                  - generic: Tantra Club President
+                  - blockquote: “Tradition, performance and craft — carried forward by the people who love it.”
+                  - generic:
+                    - generic:
+                      - paragraph: Samuel Ashray Ballem
+                      - paragraph: BBA Hons ( 1st Year )
+                    - link "Email Samuel Ashray Ballem on Outlook" [ref=f2e849]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=samuelashray.ballem_2029%40woxsen.edu.in
+              - article [ref=f2e854] [cursor=pointer]:
+                - button "Read more about Vennela Linga" [ref=f2e855]
+                - generic:
+                  - img "Vennela Linga":
+                    - generic: VL
+                - generic:
+                  - generic: Tech Club President
+                  - blockquote: “Build things, break things, and show the campus what students can ship.”
+                  - generic:
+                    - generic:
+                      - paragraph: Vennela Linga
+                      - paragraph: Btech aiml 2 nd year
+                    - link "Email Vennela Linga on Outlook" [ref=f2e858]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=vennela.linga_2028%40woxsen.edu.in
+              - article [ref=f2e863] [cursor=pointer]:
+                - button "Read more about Manikeshwar Reddy" [ref=f2e864]
+                - generic:
+                  - img "Manikeshwar Reddy":
+                    - generic: MR
+                - generic:
+                  - generic: Utopia Esports Club President
+                  - blockquote: “Competitive gaming deserves the same seriousness as any other sport here.”
+                  - generic:
+                    - generic:
+                      - paragraph: Manikeshwar Reddy
+                      - paragraph: B.Tech AIML - 3rd year)
+                    - link "Email Manikeshwar Reddy on Outlook" [ref=f2e867]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=manikeshwar.reddy_2027%40woxsen.edu.in
+              - article [ref=f2e872] [cursor=pointer]:
+                - button "Read more about Gayathri" [ref=f2e873]
+                - generic:
+                  - img "Gayathri":
+                    - generic: G
+                - generic:
+                  - generic: Interior Design Club President
+                  - blockquote: “Space changes how people behave in it. That's a superpower worth learning.”
+                  - generic:
+                    - generic:
+                      - paragraph: Gayathri
+                      - paragraph: Interior design 2nd year
+                    - link "Email Gayathri on Outlook" [ref=f2e876]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=gayathri.bachina_2028%40woxsen.edu.in
+              - article [ref=f2e881] [cursor=pointer]:
+                - button "Read more about Naidu Yesaswini" [ref=f2e882]
+                - generic:
+                  - img "Naidu Yesaswini":
+                    - generic: NY
+                - generic:
+                  - generic: Paparazzi Club President
+                  - blockquote: “Somebody has to be there with a lens when the moment actually happens.”
+                  - generic:
+                    - generic:
+                      - paragraph: Naidu Yesaswini
+                      - paragraph: BBA 2nd year
+                    - link "Email Naidu Yesaswini on Outlook" [ref=f2e885]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=yesaswini.naidu_2028%40woxsen.edu.in
+              - article [ref=f2e890] [cursor=pointer]:
+                - button "Read more about Mohammed Mustafa" [ref=f2e891]
+                - generic:
+                  - img "Mohammed Mustafa":
+                    - generic: MM
+                - generic:
+                  - generic: Debate Club President
+                  - blockquote: “Argue well, lose gracefully, and change your mind when the evidence says so.”
+                  - generic:
+                    - generic:
+                      - paragraph: Mohammed Mustafa
+                      - paragraph: B.A LL.B (Hons.) Year 2
+                    - link "Email Mohammed Mustafa on Outlook" [ref=f2e894]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=mohammed.mustafa_2029%40woxsen.edu.in
+              - article [ref=f2e899] [cursor=pointer]:
+                - button "Read more about Nainitha Vanga" [ref=f2e900]
+                - generic:
+                  - img "Nainitha Vanga":
+                    - generic: NV
+                - generic:
+                  - generic: Literature Club President
+                  - blockquote: “Books, arguments about books, and the people who can't stop writing.”
+                  - generic:
+                    - generic:
+                      - paragraph: Nainitha Vanga
+                      - paragraph: BBA AI&DS - 2nd year
+                    - link "Email Nainitha Vanga on Outlook" [ref=f2e903]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=nainitha.vanga_2028%40woxsen.edu.in
+              - article [ref=f2e908] [cursor=pointer]:
+                - button "Read more about Cheeti Navya Sri" [ref=f2e909]
+                - generic:
+                  - img "Cheeti Navya Sri":
+                    - generic: CN
+                - generic:
+                  - generic: Skribble Club
+                  - blockquote: “Sketchbooks open, no talent threshold, no grading — just drawing together.”
+                  - generic:
+                    - generic:
+                      - paragraph: Cheeti Navya Sri
+                      - paragraph: BArch - 3rd Year
+                    - link "Email Cheeti Navya Sri on Outlook" [ref=f2e912]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=navya.sri_2028%40woxsen.edu.in
+              - article [ref=f2e917] [cursor=pointer]:
+                - button "Read more about Jyothirlatha Vasa" [ref=f2e918]
+                - generic:
+                  - img "Jyothirlatha Vasa":
+                    - generic: JV
+                - generic:
+                  - generic: Crowdcore Club
+                  - blockquote: “Nothing on this campus happens without a crowd. We're the ones who gather it.”
+                  - generic:
+                    - generic:
+                      - paragraph: Jyothirlatha Vasa
+                      - paragraph: MBA-BA(Tigers) - 1st Year
+                    - link "Email Jyothirlatha Vasa on Outlook" [ref=f2e921]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=jyothirlatha.v_2027%40woxsen.edu.in
+              - article [ref=f2e926] [cursor=pointer]:
+                - button "Read more about Niharika Medapati" [ref=f2e927]
+                - generic:
+                  - img "Niharika Medapati":
+                    - generic: NM
+                - generic:
+                  - generic: Humanique Club
+                  - blockquote: “People first — the club for anyone interested in what makes us tick.”
+                  - generic:
+                    - generic:
+                      - paragraph: Niharika Medapati
+                      - paragraph: Btech (Data Science)
+                    - link "Email Niharika Medapati on Outlook" [ref=f2e930]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=niharika.medapati_2028%40woxsen.edu.in
+              - article [ref=f2e935] [cursor=pointer]:
+                - button "Read more about Nimisha Suman" [ref=f2e936]
+                - generic:
+                  - img "Nimisha Suman":
+                    - generic: NS
+                - generic:
+                  - generic: Nexus Club
+                  - blockquote: “The connective tissue between disciplines that don't usually talk to each other.”
+                  - generic:
+                    - generic:
+                      - paragraph: Nimisha Suman
+                      - paragraph: MBA-GM
+                    - link "Email Nimisha Suman on Outlook" [ref=f2e939]:
+                      - /url: https://outlook.office.com/mail/deeplink/compose?to=nimisha.suman_2027%40woxsen.edu.in
+        - generic [ref=f2e943]:
+          - generic [ref=f2e945]:
+            - text: Constitution
+            - heading "How the Council works." [level=2] [ref=f2e946]
+          - generic [ref=f2e947]:
+            - heading [level=3] [ref=f2e949]:
+              - button "What is the Student Council?" [ref=f2e950] [cursor=pointer]
+            - heading [level=3] [ref=f2e955]:
+              - button "What does the Student Council do?" [ref=f2e956] [cursor=pointer]
+            - heading [level=3] [ref=f2e961]:
+              - button "How are Student Council members selected?" [ref=f2e962] [cursor=pointer]
+            - heading [level=3] [ref=f2e967]:
+              - button "Can I raise concerns or suggestions to the Student Council?" [ref=f2e968] [cursor=pointer]
+            - heading [level=3] [ref=f2e973]:
+              - button "How can I become a Student Council member?" [ref=f2e974] [cursor=pointer]
+    - contentinfo [ref=f2e978]:
+      - generic [ref=f2e979]:
+        - generic [ref=f2e980]:
+          - generic [ref=f2e981]: Woxsen University
+          - generic [ref=f2e984]:
+            - generic [ref=f2e985]:
+              - text: Explore
+              - list [ref=f2e986]:
+                - listitem [ref=f2e987]:
+                  - link "Home" [ref=f2e988] [cursor=pointer]:
+                    - /url: /
+                - listitem [ref=f2e989]:
+                  - link "Council" [ref=f2e990] [cursor=pointer]:
+                    - /url: /council
+                - listitem [ref=f2e991]:
+                  - link "Events" [ref=f2e992] [cursor=pointer]:
+                    - /url: /events
+                - listitem [ref=f2e993]:
+                  - link "Clubs" [ref=f2e994] [cursor=pointer]:
+                    - /url: /clubs
+                - listitem [ref=f2e995]:
+                  - link "Support" [ref=f2e996] [cursor=pointer]:
+                    - /url: /support
+            - generic [ref=f2e997]:
+              - text: Support
+              - list [ref=f2e998]:
+                - listitem [ref=f2e999]:
+                  - link "Gateway" [ref=f2e1000] [cursor=pointer]:
+                    - /url: /support#gateway
+                - listitem [ref=f2e1001]:
+                  - link "Bridge" [ref=f2e1002] [cursor=pointer]:
+                    - /url: /support#bridge
+                - listitem [ref=f2e1003]:
+                  - link "Career Connect" [ref=f2e1004] [cursor=pointer]:
+                    - /url: /support#career-connect
+                - listitem [ref=f2e1005]:
+                  - link "Grievance" [ref=f2e1006] [cursor=pointer]:
+                    - /url: /support#grievance-form
+            - generic [ref=f2e1007]:
+              - text: Connect
+              - list [ref=f2e1008]:
+                - listitem [ref=f2e1009]:
+                  - link "woxsen.edu.in" [ref=f2e1010] [cursor=pointer]:
+                    - /url: https://woxsen.edu.in
+                - listitem [ref=f2e1011]:
+                  - link "council@woxsen.edu.in" [ref=f2e1012] [cursor=pointer]:
+                    - /url: mailto:council@woxsen.edu.in
+                - listitem [ref=f2e1013]:
+                  - link "Instagram" [ref=f2e1014] [cursor=pointer]:
+                    - /url: https://instagram.com/woxsenuniversity
+                - listitem [ref=f2e1015]:
+                  - link "LinkedIn" [ref=f2e1016] [cursor=pointer]:
+                    - /url: https://linkedin.com/school/woxsen-university
+        - generic [ref=f2e1017]:
+          - generic [ref=f2e1018]: © 2026 Woxsen Student Council
+          - generic [ref=f2e1019]: v1.0 · Hyderabad, IN · Designed and built by Nikish
+  - button "Switch to light mode" [ref=f2e1020] [cursor=pointer]
+  - region "Notifications alt+T"

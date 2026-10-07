@@ -1,0 +1,63 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e46]:
+    - complementary [ref=e47]:
+      - link "WSC · Management" [ref=e49] [cursor=pointer]:
+        - /url: /management
+      - navigation [ref=e50]:
+        - generic [ref=e51]:
+          - paragraph [ref=e52]: Review
+          - link "Approvals" [ref=e54] [cursor=pointer]:
+            - /url: /management/approvals
+        - generic [ref=e59]:
+          - paragraph [ref=e60]: Operations
+          - generic [ref=e61]:
+            - link "Dashboard" [ref=e62] [cursor=pointer]:
+              - /url: /management
+            - link "Event Ops" [ref=e68] [cursor=pointer]:
+              - /url: /eventmanagement
+            - link "Events" [ref=e74] [cursor=pointer]:
+              - /url: /management/events
+            - link "Recaps" [ref=e77] [cursor=pointer]:
+              - /url: /management/recaps
+            - link "Clubs" [ref=e80] [cursor=pointer]:
+              - /url: /management/clubs
+            - link "Media library" [ref=e85] [cursor=pointer]:
+              - /url: /management/media
+      - generic [ref=e91]:
+        - generic [ref=e92]:
+          - paragraph [ref=e93]: Olivia Operations
+          - paragraph [ref=e94]: Operations
+        - button [ref=e95] [cursor=pointer]
+    - main [ref=e99]:
+      - generic [ref=e101]:
+        - generic [ref=e102]:
+          - generic [ref=e103]:
+            - paragraph [ref=e104]: Welcome back
+            - heading "Olivia" [level=1] [ref=e105]
+          - link "New event" [ref=e106] [cursor=pointer]:
+            - /url: /management/events/new
+        - generic [ref=e108]:
+          - generic [ref=e109]:
+            - paragraph [ref=e112]: "1"
+            - paragraph [ref=e113]: Events
+          - generic [ref=e114]:
+            - paragraph [ref=e118]: "1"
+            - paragraph [ref=e119]: Published
+          - generic [ref=e120]:
+            - paragraph [ref=e124]: "0"
+            - paragraph [ref=e125]: Awaiting review
+          - generic [ref=e126]:
+            - paragraph [ref=e130]: "0"
+            - paragraph [ref=e131]: Announcements
+        - generic [ref=e132]:
+          - heading "Quick actions" [level=2] [ref=e133]
+          - generic [ref=e134]:
+            - link "Manage events" [ref=e135] [cursor=pointer]:
+              - /url: /management/events
+            - link "Add an event" [ref=e136] [cursor=pointer]:
+              - /url: /management/events/new
+          - paragraph [ref=e137]: Publishing an event automatically posts an announcement, creates a recap draft, refreshes the site, and (if configured) pings Discord.
+  - button "Switch to light mode" [ref=e29] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e42] [cursor=pointer]
+  - alert [ref=e36]: Woxsen Student Council

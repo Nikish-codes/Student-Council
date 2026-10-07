@@ -1,0 +1,20 @@
+- generic [active]:
+  - generic [ref=e2]:
+    - img [ref=e4]:
+      - generic [ref=e6]: WOXSEN UNIVERSITY · STUDENT COUNCIL · SESSION 2026/27 · EMPOWERING STUDENT VOICES ·
+    - generic [ref=e10]:
+      - generic [ref=e11]: Woxsen Student Council
+      - generic [ref=e12]: Loading session 2026/27
+  - main [ref=e13]:
+    - generic [ref=e16]:
+      - img "Woxsen Student Council" [ref=e17]
+      - paragraph [ref=e18]: Woxsen Student Council
+      - heading "Coming Soon" [level=1] [ref=e19]:
+        - generic [ref=e20]: Coming
+        - generic [ref=e21]: Soon
+      - paragraph [ref=e22]: A new home for every event, every club, every student voice — we're putting the finishing touches on something worth the wait.
+      - generic [ref=e23]: Launching soon · stay tuned
+    - link "Team? Sign in →" [ref=e26] [cursor=pointer]:
+      - /url: /management/login
+  - button "Switch to light mode" [ref=e27] [cursor=pointer]
+  - region "Notifications alt+T"

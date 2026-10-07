@@ -1,0 +1,123 @@
+- generic [active] [ref=f7e1]:
+  - generic [ref=f7e3]:
+    - img [ref=f7e5]:
+      - generic [ref=f7e7]: WOXSEN UNIVERSITY · STUDENT COUNCIL · SESSION 2026/27 · EMPOWERING STUDENT VOICES ·
+    - generic [ref=f7e11]:
+      - generic [ref=f7e12]: Woxsen Student Council
+      - generic [ref=f7e13]: Loading session 2026/27
+  - generic [ref=f7e14]:
+    - complementary [ref=f7e15]:
+      - link "WSC · Management" [ref=f7e17] [cursor=pointer]:
+        - /url: /management
+      - navigation [ref=f7e18]:
+        - generic [ref=f7e19]:
+          - paragraph [ref=f7e20]: Overview
+          - generic [ref=f7e21]:
+            - link "Dashboard" [ref=f7e22] [cursor=pointer]:
+              - /url: /management
+            - link "Event Ops" [ref=f7e28] [cursor=pointer]:
+              - /url: /eventmanagement
+        - generic [ref=f7e34]:
+          - paragraph [ref=f7e35]: Content
+          - generic [ref=f7e36]:
+            - link "Events" [ref=f7e37] [cursor=pointer]:
+              - /url: /management/events
+            - link "Recaps" [ref=f7e40] [cursor=pointer]:
+              - /url: /management/recaps
+            - link "Announcements" [ref=f7e43] [cursor=pointer]:
+              - /url: /management/announcements
+            - link "Highlights" [ref=f7e47] [cursor=pointer]:
+              - /url: /management/highlights
+        - generic [ref=f7e51]:
+          - paragraph [ref=f7e52]: Organisation
+          - generic [ref=f7e53]:
+            - link "Clubs" [ref=f7e54] [cursor=pointer]:
+              - /url: /management/clubs
+            - link "Club categories" [ref=f7e59] [cursor=pointer]:
+              - /url: /management/clubs/categories
+            - link "Council" [ref=f7e64] [cursor=pointer]:
+              - /url: /management/council
+            - link "Council sections" [ref=f7e70] [cursor=pointer]:
+              - /url: /management/council/groups
+            - link "FAQs" [ref=f7e73] [cursor=pointer]:
+              - /url: /management/faqs
+            - link "Support" [ref=f7e77] [cursor=pointer]:
+              - /url: /management/support
+        - generic [ref=f7e85]:
+          - paragraph [ref=f7e86]: Sports
+          - generic [ref=f7e87]:
+            - link "Dashboard" [ref=f7e88] [cursor=pointer]:
+              - /url: /management/sports
+            - link "Tournaments" [ref=f7e95] [cursor=pointer]:
+              - /url: /management/sports/tournaments
+            - link "Leagues" [ref=f7e102] [cursor=pointer]:
+              - /url: /management/sports/leagues
+            - link "Matches" [ref=f7e105] [cursor=pointer]:
+              - /url: /management/sports/matches
+            - link "Teams" [ref=f7e108] [cursor=pointer]:
+              - /url: /management/sports/teams
+            - link "People" [ref=f7e111] [cursor=pointer]:
+              - /url: /management/sports/people
+            - link "Sports settings" [ref=f7e116] [cursor=pointer]:
+              - /url: /management/sports/settings
+        - generic [ref=f7e120]:
+          - paragraph [ref=f7e121]: Media
+          - link "Media library" [ref=f7e123] [cursor=pointer]:
+            - /url: /management/media
+        - generic [ref=f7e128]:
+          - paragraph [ref=f7e129]: Dining
+          - link "Oval menu" [ref=f7e131] [cursor=pointer]:
+            - /url: /management/oval
+        - generic [ref=f7e137]:
+          - paragraph [ref=f7e138]: Homepage
+          - generic [ref=f7e139]:
+            - link "Vault" [ref=f7e140] [cursor=pointer]:
+              - /url: /management/vault
+            - link "Homepage composer" [ref=f7e143] [cursor=pointer]:
+              - /url: /management/homepage
+        - generic [ref=f7e147]:
+          - paragraph [ref=f7e148]: Admin
+          - generic [ref=f7e149]:
+            - link "Users" [ref=f7e150] [cursor=pointer]:
+              - /url: /management/users
+            - link "Settings" [ref=f7e163] [cursor=pointer]:
+              - /url: /management/settings
+      - generic [ref=f7e168]:
+        - generic [ref=f7e169]:
+          - paragraph [ref=f7e170]: Super Admin
+          - paragraph [ref=f7e171]: Super Admin
+        - button [ref=f7e172] [cursor=pointer]
+    - main [ref=f7e176]:
+      - generic [ref=f7e178]:
+        - generic [ref=f7e179]:
+          - paragraph [ref=f7e180]: New user
+          - heading "Invite someone" [level=1] [ref=f7e181]
+        - generic [ref=f7e182]:
+          - generic [ref=f7e183]:
+            - generic [ref=f7e184]: Full name
+            - textbox [ref=f7e186]
+          - generic [ref=f7e187]:
+            - generic [ref=f7e188]: Email
+            - textbox "someone@woxsen.edu.in" [ref=f7e190]
+          - generic [ref=f7e191]:
+            - generic [ref=f7e192]:
+              - generic [ref=f7e193]: Temporary password
+              - generic [ref=f7e194]: Share over a secure channel; ask them to change it later
+            - textbox [ref=f7e195]
+          - generic [ref=f7e196]:
+            - generic [ref=f7e197]: Role
+            - combobox [ref=f7e199]:
+              - option "Super Admin"
+              - option "Admin"
+              - option "Food Committee Member"
+              - option "Council Member"
+              - option "Club President / Lead"
+              - option "Editor" [selected]
+              - option "Viewer"
+          - generic [ref=f7e200]:
+            - generic [ref=f7e201]: Club (only relevant for Club Leads)
+            - combobox [ref=f7e203]:
+              - option "— None —" [selected]
+          - button "Create user" [ref=f7e205] [cursor=pointer]
+  - button "Switch to light mode" [ref=f7e206] [cursor=pointer]
+  - region "Notifications alt+T"

@@ -1,0 +1,71 @@
+- generic [ref=e1]:
+  - generic [ref=e46]:
+    - complementary [ref=e47]:
+      - link "WSC · Management" [ref=e49] [cursor=pointer]:
+        - /url: /management
+      - navigation [ref=e50]:
+        - generic [ref=e51]:
+          - paragraph [ref=e52]: Review
+          - link "Approvals" [active] [ref=e54] [cursor=pointer]:
+            - /url: /management/approvals
+        - generic [ref=e59]:
+          - paragraph [ref=e60]: Operations
+          - generic [ref=e61]:
+            - link "Dashboard" [ref=e62] [cursor=pointer]:
+              - /url: /management
+            - link "Event Ops" [ref=e68] [cursor=pointer]:
+              - /url: /eventmanagement
+            - link "Events" [ref=e74] [cursor=pointer]:
+              - /url: /management/events
+            - link "Recaps" [ref=e77] [cursor=pointer]:
+              - /url: /management/recaps
+            - link "Clubs" [ref=e80] [cursor=pointer]:
+              - /url: /management/clubs
+            - link "Media library" [ref=e85] [cursor=pointer]:
+              - /url: /management/media
+      - generic [ref=e91]:
+        - generic [ref=e92]:
+          - paragraph [ref=e93]: Olivia Operations
+          - paragraph [ref=e94]: Operations
+        - button [ref=e95] [cursor=pointer]
+    - main [ref=e99]:
+      - generic [ref=e138]:
+        - generic [ref=e139]:
+          - paragraph [ref=e140]: Publication control
+          - heading "Approvals" [level=1] [ref=e141]
+          - paragraph [ref=e142]: Compare the submitted snapshot with the currently approved version. Approval is blocked if that public version has moved.
+        - generic [ref=e143]:
+          - combobox [ref=e144]:
+            - option "All clubs" [selected]
+            - option "E2E Culture"
+            - option "E2E Makers"
+          - combobox [ref=e145]:
+            - option "All content" [selected]
+            - option "Club pages"
+            - option "Events"
+            - option "Post-event media"
+          - button "Apply filters" [ref=e146] [cursor=pointer]
+        - generic [ref=e147]:
+          - complementary [ref=e148]:
+            - generic [ref=e149]:
+              - heading "Queue" [level=2] [ref=e150]
+              - generic [ref=e151]: "0"
+            - paragraph [ref=e156]: Queue cleared
+          - generic [ref=e159]:
+            - heading "Select a submission" [level=2] [ref=e167]
+            - paragraph [ref=e168]: Choose an item from the queue to compare versions.
+        - generic [ref=e169]:
+          - heading "History" [level=2] [ref=e170]
+          - table [ref=e172]:
+            - rowgroup [ref=e173]:
+              - row [ref=e174]:
+                - columnheader "Club" [ref=e175]
+                - columnheader "Type" [ref=e176]
+                - columnheader "Author" [ref=e177]
+                - columnheader "Status" [ref=e178]
+                - columnheader "Reviewer" [ref=e179]
+            - rowgroup
+  - button "Switch to light mode" [ref=e29] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e42] [cursor=pointer]
+  - alert [ref=e36]: Woxsen Student Council

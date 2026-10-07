@@ -1,0 +1,245 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e3]:
+    - img [ref=f5e5]:
+      - generic [ref=f5e7]: WOXSEN UNIVERSITY · STUDENT COUNCIL · SESSION 2026/27 · EMPOWERING STUDENT VOICES ·
+    - generic [ref=f5e11]:
+      - generic [ref=f5e12]: Woxsen Student Council
+      - generic [ref=f5e13]: Loading session 2026/27
+  - generic [ref=f5e14]:
+    - complementary [ref=f5e15]:
+      - link "WSC · Management" [ref=f5e17] [cursor=pointer]:
+        - /url: /management
+      - navigation [ref=f5e18]:
+        - generic [ref=f5e19]:
+          - paragraph [ref=f5e20]: Overview
+          - generic [ref=f5e21]:
+            - link "Dashboard" [ref=f5e22] [cursor=pointer]:
+              - /url: /management
+            - link "Event Ops" [ref=f5e28] [cursor=pointer]:
+              - /url: /eventmanagement
+        - generic [ref=f5e34]:
+          - paragraph [ref=f5e35]: Content
+          - generic [ref=f5e36]:
+            - link "Events" [ref=f5e37] [cursor=pointer]:
+              - /url: /management/events
+            - link "Recaps" [ref=f5e40] [cursor=pointer]:
+              - /url: /management/recaps
+            - link "Announcements" [ref=f5e43] [cursor=pointer]:
+              - /url: /management/announcements
+            - link "Highlights" [ref=f5e47] [cursor=pointer]:
+              - /url: /management/highlights
+        - generic [ref=f5e51]:
+          - paragraph [ref=f5e52]: Organisation
+          - generic [ref=f5e53]:
+            - link "Clubs" [ref=f5e54] [cursor=pointer]:
+              - /url: /management/clubs
+            - link "Club categories" [ref=f5e59] [cursor=pointer]:
+              - /url: /management/clubs/categories
+            - link "Council" [ref=f5e64] [cursor=pointer]:
+              - /url: /management/council
+            - link "Council sections" [ref=f5e70] [cursor=pointer]:
+              - /url: /management/council/groups
+            - link "FAQs" [ref=f5e73] [cursor=pointer]:
+              - /url: /management/faqs
+            - link "Support" [ref=f5e77] [cursor=pointer]:
+              - /url: /management/support
+        - generic [ref=f5e85]:
+          - paragraph [ref=f5e86]: Sports
+          - generic [ref=f5e87]:
+            - link "Dashboard" [ref=f5e88] [cursor=pointer]:
+              - /url: /management/sports
+            - link "Tournaments" [ref=f5e95] [cursor=pointer]:
+              - /url: /management/sports/tournaments
+            - link "Leagues" [ref=f5e102] [cursor=pointer]:
+              - /url: /management/sports/leagues
+            - link "Matches" [ref=f5e105] [cursor=pointer]:
+              - /url: /management/sports/matches
+            - link "Teams" [ref=f5e108] [cursor=pointer]:
+              - /url: /management/sports/teams
+            - link "People" [ref=f5e111] [cursor=pointer]:
+              - /url: /management/sports/people
+            - link "Sports settings" [ref=f5e116] [cursor=pointer]:
+              - /url: /management/sports/settings
+        - generic [ref=f5e120]:
+          - paragraph [ref=f5e121]: Media
+          - link "Media library" [ref=f5e123] [cursor=pointer]:
+            - /url: /management/media
+        - generic [ref=f5e128]:
+          - paragraph [ref=f5e129]: Dining
+          - link "Oval menu" [ref=f5e131] [cursor=pointer]:
+            - /url: /management/oval
+        - generic [ref=f5e137]:
+          - paragraph [ref=f5e138]: Homepage
+          - generic [ref=f5e139]:
+            - link "Vault" [ref=f5e140] [cursor=pointer]:
+              - /url: /management/vault
+            - link "Homepage composer" [ref=f5e143] [cursor=pointer]:
+              - /url: /management/homepage
+        - generic [ref=f5e147]:
+          - paragraph [ref=f5e148]: Admin
+          - generic [ref=f5e149]:
+            - link "Users" [ref=f5e150] [cursor=pointer]:
+              - /url: /management/users
+            - link "Settings" [ref=f5e163] [cursor=pointer]:
+              - /url: /management/settings
+      - generic [ref=f5e168]:
+        - generic [ref=f5e169]:
+          - paragraph [ref=f5e170]: Super Admin
+          - paragraph [ref=f5e171]: Super Admin
+        - button [ref=f5e172] [cursor=pointer]
+    - main [ref=f5e176]:
+      - generic [ref=f5e178]:
+        - generic [ref=f5e179]:
+          - generic [ref=f5e180]:
+            - paragraph [ref=f5e181]: Dining · Oval
+            - heading "Weekly menu desk" [level=1] [ref=f5e182]
+            - paragraph [ref=f5e183]: Week of 17 August 2026
+          - link "View public menu" [ref=f5e184] [cursor=pointer]:
+            - /url: /oval
+        - navigation "Choose menu week" [ref=f5e189]:
+          - link "Previous week" [ref=f5e190] [cursor=pointer]:
+            - /url: /management/oval?week=2026-08-10
+          - link "Current week" [ref=f5e193] [cursor=pointer]:
+            - /url: /management/oval?week=2026-08-17
+          - link "Next week" [ref=f5e194] [cursor=pointer]:
+            - /url: /management/oval?week=2026-08-24
+        - generic [ref=f5e197]:
+          - generic [ref=f5e198]:
+            - generic [ref=f5e199]:
+              - paragraph [ref=f5e200]: Import the whole week
+              - heading "Source to structured menu" [level=2] [ref=f5e201]
+              - paragraph [ref=f5e202]: Spreadsheets are read cell by cell. Images and PDFs receive two OCR passes. Extraction creates an editable draft and never publishes it.
+            - generic [ref=f5e204]:
+              - generic [ref=f5e212]:
+                - paragraph [ref=f5e213]: Drop the committee sheet here
+                - paragraph [ref=f5e214]: PNG, JPEG, WebP, PDF, XLS, XLSX, CSV or TSV · up to 15 MB
+              - generic [ref=f5e215]:
+                - generic [ref=f5e216] [cursor=pointer]:
+                  - text: Choose file
+                  - button "Choose file" [ref=f5e220]
+                - button "Extract seven days" [disabled] [ref=f5e221]
+          - generic "Week days" [ref=f5e228]:
+            - button "Current 17 Aug Approved" [pressed] [ref=f5e229] [cursor=pointer]:
+              - generic [ref=f5e230]: Current
+              - generic [ref=f5e232]: 17 Aug
+              - generic [ref=f5e233]: Approved
+            - button "Next day 18 Aug Draft" [ref=f5e234] [cursor=pointer]:
+              - generic [ref=f5e235]: Next day
+              - generic [ref=f5e237]: 18 Aug
+              - generic [ref=f5e238]: Draft
+            - button "Wednesday 19 Aug Draft" [ref=f5e239] [cursor=pointer]:
+              - generic [ref=f5e240]: Wednesday
+              - generic [ref=f5e242]: 19 Aug
+              - generic [ref=f5e243]: Draft
+            - button "Thursday 20 Aug Draft" [ref=f5e244] [cursor=pointer]:
+              - generic [ref=f5e245]: Thursday
+              - generic [ref=f5e247]: 20 Aug
+              - generic [ref=f5e248]: Draft
+            - button "Friday 21 Aug Draft" [ref=f5e249] [cursor=pointer]:
+              - generic [ref=f5e250]: Friday
+              - generic [ref=f5e252]: 21 Aug
+              - generic [ref=f5e253]: Draft
+            - button "Saturday 22 Aug Draft" [ref=f5e254] [cursor=pointer]:
+              - generic [ref=f5e255]: Saturday
+              - generic [ref=f5e257]: 22 Aug
+              - generic [ref=f5e258]: Draft
+            - button "Sunday 23 Aug Draft" [ref=f5e259] [cursor=pointer]:
+              - generic [ref=f5e260]: Sunday
+              - generic [ref=f5e262]: 23 Aug
+              - generic [ref=f5e263]: Draft
+          - generic [ref=f5e264]:
+            - generic [ref=f5e265]:
+              - generic [ref=f5e266]:
+                - generic [ref=f5e267]:
+                  - paragraph [ref=f5e268]: Editing
+                  - heading "Monday, 17 August" [level=2] [ref=f5e269]
+                - generic [ref=f5e270]: Approved
+              - generic [ref=f5e274]:
+                - generic [ref=f5e275]:
+                  - generic [ref=f5e276]:
+                    - heading "Breakfast" [level=3] [ref=f5e277]
+                    - paragraph [ref=f5e278]: 7:00–9:45 AM
+                  - button "Add dish" [ref=f5e279] [cursor=pointer]
+                - generic [ref=f5e282]:
+                  - generic [ref=f5e283]:
+                    - generic [ref=f5e284]: Category
+                    - textbox "Breakfast category" [ref=f5e285]: Eggs
+                  - generic [ref=f5e286]:
+                    - generic [ref=f5e287]: Dish
+                    - textbox "Breakfast dish" [ref=f5e288]: Boiled eggs
+                  - generic [ref=f5e289]:
+                    - button "V Vegetarian" [pressed] [ref=f5e290] [cursor=pointer]:
+                      - generic [ref=f5e291]: V
+                      - text: Vegetarian
+                    - button "E Contains egg" [ref=f5e292] [cursor=pointer]:
+                      - generic [ref=f5e293]: E
+                      - text: Contains egg
+                    - button "NV Non-vegetarian" [ref=f5e294] [cursor=pointer]:
+                      - generic [ref=f5e295]: NV
+                      - text: Non-vegetarian
+                    - generic [ref=f5e296]: OCR 100%
+                    - button "Remove Boiled eggs" [ref=f5e297] [cursor=pointer]
+              - generic [ref=f5e301]:
+                - generic [ref=f5e302]:
+                  - generic [ref=f5e303]:
+                    - heading "Lunch" [level=3] [ref=f5e304]
+                    - paragraph [ref=f5e305]: 12:00–2:45 PM
+                  - button "Add dish" [ref=f5e306] [cursor=pointer]
+                - generic [ref=f5e309]:
+                  - generic [ref=f5e310]:
+                    - generic [ref=f5e311]: Category
+                    - textbox "Lunch category" [ref=f5e312]: Veg 1 · dry
+                  - generic [ref=f5e313]:
+                    - generic [ref=f5e314]: Dish
+                    - textbox "Lunch dish" [ref=f5e315]: Subzi Kolhapuri
+                  - generic [ref=f5e316]:
+                    - button "V Vegetarian" [pressed] [ref=f5e317] [cursor=pointer]:
+                      - generic [ref=f5e318]: V
+                      - text: Vegetarian
+                    - button "E Contains egg" [ref=f5e319] [cursor=pointer]:
+                      - generic [ref=f5e320]: E
+                      - text: Contains egg
+                    - button "NV Non-vegetarian" [ref=f5e321] [cursor=pointer]:
+                      - generic [ref=f5e322]: NV
+                      - text: Non-vegetarian
+                    - generic [ref=f5e323]: OCR 100%
+                    - button "Remove Subzi Kolhapuri" [ref=f5e324] [cursor=pointer]
+              - generic [ref=f5e328]:
+                - generic [ref=f5e329]:
+                  - generic [ref=f5e330]:
+                    - heading "Dinner" [level=3] [ref=f5e331]
+                    - paragraph [ref=f5e332]: 7:00–9:45 PM
+                  - button "Add dish" [ref=f5e333] [cursor=pointer]
+                - generic [ref=f5e336]:
+                  - generic [ref=f5e337]:
+                    - generic [ref=f5e338]: Category
+                    - textbox "Dinner category" [ref=f5e339]: Veg 2
+                  - generic [ref=f5e340]:
+                    - generic [ref=f5e341]: Dish
+                    - textbox "Dinner dish" [ref=f5e342]: Paneer curry
+                  - generic [ref=f5e343]:
+                    - button "V Vegetarian" [pressed] [ref=f5e344] [cursor=pointer]:
+                      - generic [ref=f5e345]: V
+                      - text: Vegetarian
+                    - button "E Contains egg" [ref=f5e346] [cursor=pointer]:
+                      - generic [ref=f5e347]: E
+                      - text: Contains egg
+                    - button "NV Non-vegetarian" [ref=f5e348] [cursor=pointer]:
+                      - generic [ref=f5e349]: NV
+                      - text: Non-vegetarian
+                    - generic [ref=f5e350]: OCR 100%
+                    - button "Remove Paneer curry" [ref=f5e351] [cursor=pointer]
+            - complementary [ref=f5e355]:
+              - generic [ref=f5e356]:
+                - paragraph [ref=f5e357]: Review status
+                - paragraph [ref=f5e358]: "0"
+                - paragraph [ref=f5e359]: uncertain cells remaining
+                - generic [ref=f5e360]:
+                  - paragraph [ref=f5e361]: 1 breakfast entries
+                  - paragraph [ref=f5e362]: 1 lunch entries
+                  - paragraph [ref=f5e363]: 1 dinner entries
+              - button "Save whole week" [ref=f5e365] [cursor=pointer]
+              - button "Return day to draft" [ref=f5e371] [cursor=pointer]
+              - paragraph [ref=f5e372]: Approved days become public automatically at 4:00 AM on their service date. Other days remain private.
+  - button "Switch to light mode" [ref=f5e373] [cursor=pointer]
+  - region "Notifications alt+T"

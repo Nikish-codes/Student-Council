@@ -21,14 +21,14 @@ A full-screen, optimized scoreboard display designed for large screens at the fo
 
 ### Access the Big Screen Display
 
-Add `?display=true` to any match URL:
+Use the dedicated `/display/matches/[id]` route:
 
 ```
 Normal view:
 https://www.woxsenstudentcouncil.in/sports/matches/26
 
 Big screen view:
-https://www.woxsenstudentcouncil.in/sports/matches/26?display=true
+https://www.woxsenstudentcouncil.in/display/matches/26
 ```
 
 ### Setup at the Ground
@@ -113,7 +113,7 @@ The display includes multiple fallback mechanisms:
 
 **Display looks wrong?**
 - Press F11 for fullscreen
-- Make sure URL has `?display=true`
+- Make sure you're using `/display/matches/[id]` URL (not `/sports/matches/[id]`)
 - Clear browser cache and reload
 - Check screen resolution (minimum 1280×720)
 
@@ -158,10 +158,13 @@ Match 26 (normal):
 https://www.woxsenstudentcouncil.in/sports/matches/26
 
 Match 26 (big screen):
-https://www.woxsenstudentcouncil.in/sports/matches/26?display=true
+https://www.woxsenstudentcouncil.in/display/matches/26
 
 Match 25 (big screen):
-https://www.woxsenstudentcouncil.in/sports/matches/25?display=true
+https://www.woxsenstudentcouncil.in/display/matches/25
+
+Local development:
+http://localhost:3000/display/matches/26
 ```
 
 ## Best Practices

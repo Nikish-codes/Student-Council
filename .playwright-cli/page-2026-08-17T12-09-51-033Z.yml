@@ -1,0 +1,331 @@
+- generic [ref=e1]:
+  - generic [ref=e14]:
+    - banner [ref=e15]:
+      - generic [ref=e16]:
+        - link "Woxsen Student Council home" [ref=e17] [cursor=pointer]:
+          - /url: /
+        - navigation [ref=e19]:
+          - link "Home" [ref=e20] [cursor=pointer]:
+            - /url: /
+          - link "Council" [ref=e21] [cursor=pointer]:
+            - /url: /council
+          - link "Events" [ref=e22] [cursor=pointer]:
+            - /url: /events
+          - link "Clubs" [ref=e23] [cursor=pointer]:
+            - /url: /clubs
+          - link "Sports" [ref=e24] [cursor=pointer]:
+            - /url: /sports
+          - link "Support" [ref=e25] [cursor=pointer]:
+            - /url: /support
+        - link "Raise a concern" [ref=e27] [cursor=pointer]:
+          - /url: /support#grievance-form
+    - main [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - generic [ref=e33]:
+              - paragraph [ref=e34]: Temporary concept studio
+              - heading "Five ways to read Oval." [level=1] [ref=e35]
+            - generic [ref=e36]: Every option uses the supplied 10–16 August sheet. Food and times are illustrative until the committee verifies them.
+          - tablist "Choose a menu concept" [ref=e37]:
+            - tab "Option 1 Dayboard One meal leads" [ref=e38] [cursor=pointer]:
+              - generic [ref=e39]: Option 1
+              - generic [ref=e40]: Dayboard
+              - generic [ref=e41]: One meal leads
+            - tab "Option 2 Three trays Everything at once" [ref=e42] [cursor=pointer]:
+              - generic [ref=e43]: Option 2
+              - generic [ref=e44]: Three trays
+              - generic [ref=e45]: Everything at once
+            - tab "Option 3 Service line Time-led" [active] [selected] [ref=e46] [cursor=pointer]:
+              - generic [ref=e47]: Option 3
+              - generic [ref=e48]: Service line
+              - generic [ref=e49]: Time-led
+            - tab "Option 4 Menu ledger Category-led" [ref=e50] [cursor=pointer]:
+              - generic [ref=e51]: Option 4
+              - generic [ref=e52]: Menu ledger
+              - generic [ref=e53]: Category-led
+            - tab "Option 5 Week strip Plan ahead" [ref=e54] [cursor=pointer]:
+              - generic [ref=e55]: Option 5
+              - generic [ref=e56]: Week strip
+              - generic [ref=e57]: Plan ahead
+        - generic [ref=e58]:
+          - generic [ref=e59]:
+            - generic [ref=e60]:
+              - generic [ref=e61]:
+                - generic [ref=e67]: Oval mess
+                - generic [ref=e68]: ·
+                - generic [ref=e69]: Archived sample
+              - heading "Monday, 10 Aug" [level=2] [ref=e70]
+              - paragraph [ref=e71]: Breakfast, lunch, and dinner—with the category detail from the committee sheet preserved instead of flattened into one long list.
+            - generic "Menu day" [ref=e72]:
+              - button "Previous day" [ref=e73] [cursor=pointer]
+              - generic [ref=e76]:
+                - button "Mon" [pressed] [ref=e77] [cursor=pointer]
+                - button "Tue" [ref=e78] [cursor=pointer]
+                - button "Wed" [ref=e79] [cursor=pointer]
+                - button "Thu" [ref=e80] [cursor=pointer]
+                - button "Fri" [ref=e81] [cursor=pointer]
+                - button "Sat" [ref=e82] [cursor=pointer]
+                - button "Sun" [ref=e83] [cursor=pointer]
+              - button "Next day" [ref=e84] [cursor=pointer]
+          - generic [ref=e87]:
+            - generic [ref=e88]: Diet markers
+            - generic "Vegetarian" [ref=e89]: V
+            - generic "Contains egg" [ref=e92]: E
+            - generic "Non-vegetarian" [ref=e95]: NV
+            - generic [ref=e98]: Demo data—not today's live menu
+          - generic [ref=e565]:
+            - article [ref=e567]:
+              - generic [ref=e568]: "1"
+              - generic [ref=e569]:
+                - heading "Breakfast" [level=3] [ref=e570]
+                - paragraph [ref=e571]: 7:30–9:30 AM
+              - generic [ref=e575]:
+                - generic [ref=e576]:
+                  - generic [ref=e577]: Eggs
+                  - generic [ref=e578]:
+                    - generic "Contains egg" [ref=e580]
+                    - text: Boiled eggs
+                - generic [ref=e583]:
+                  - generic [ref=e584]: Bread
+                  - generic [ref=e585]:
+                    - generic "Vegetarian" [ref=e587]
+                    - text: Bread with butter / jam
+                - generic [ref=e590]:
+                  - generic [ref=e591]: Cereals & sprouts
+                  - generic [ref=e592]:
+                    - generic "Vegetarian" [ref=e594]
+                    - text: Corn flakes, sprouts
+                - generic [ref=e597]:
+                  - generic [ref=e598]: Breakfast item
+                  - generic [ref=e599]:
+                    - generic "Vegetarian" [ref=e601]
+                    - text: Vada / veg upma
+                - generic [ref=e604]:
+                  - generic [ref=e605]: Accompaniment
+                  - generic [ref=e606]:
+                    - generic "Vegetarian" [ref=e608]
+                    - text: Chutney / sambhar
+                - generic [ref=e611]:
+                  - generic [ref=e612]: Detox water
+                  - generic [ref=e613]:
+                    - generic "Vegetarian" [ref=e615]
+                    - text: Orange & lemon
+                - generic [ref=e618]:
+                  - generic [ref=e619]: Hot beverage
+                  - generic [ref=e620]:
+                    - generic "Vegetarian" [ref=e622]
+                    - text: Tea / coffee / milk
+            - article [ref=e625]:
+              - generic [ref=e626]: "2"
+              - generic [ref=e627]:
+                - heading "Lunch" [level=3] [ref=e628]
+                - paragraph [ref=e629]: 12:30–2:30 PM
+                - generic [ref=e633]: Next service
+              - generic [ref=e634]:
+                - generic [ref=e635]:
+                  - generic [ref=e636]: Cold beverage
+                  - generic [ref=e637]:
+                    - generic "Vegetarian" [ref=e639]
+                    - text: Sweet lassi
+                - generic [ref=e642]:
+                  - generic [ref=e643]: Salad
+                  - generic [ref=e644]:
+                    - generic "Vegetarian" [ref=e646]
+                    - text: Fresh green salad
+                - generic [ref=e649]:
+                  - generic [ref=e650]: Veg 1 · dry
+                  - generic [ref=e651]:
+                    - generic "Vegetarian" [ref=e653]
+                    - text: Subzi Kolhapuri
+                - generic [ref=e656]:
+                  - generic [ref=e657]: Veg 2 · gravy
+                  - generic [ref=e658]:
+                    - generic "Contains egg" [ref=e660]
+                    - text: Masala egg bhurji
+                - generic [ref=e663]:
+                  - generic [ref=e664]: Lentil
+                  - generic [ref=e665]:
+                    - generic "Vegetarian" [ref=e667]
+                    - text: Gongura pappu
+                - generic [ref=e670]:
+                  - generic [ref=e671]: Rice 1
+                  - generic [ref=e672]:
+                    - generic "Vegetarian" [ref=e674]
+                    - text: Bagara chawal
+                - generic [ref=e677]:
+                  - generic [ref=e678]: Rice 2
+                  - generic [ref=e679]:
+                    - generic "Vegetarian" [ref=e681]
+                    - text: Steamed rice
+                - generic [ref=e684]:
+                  - generic [ref=e685]: Accompaniment
+                  - generic [ref=e686]:
+                    - generic "Vegetarian" [ref=e688]
+                    - text: Curd / pickle / sambhar / tomato chutney
+                - generic [ref=e691]:
+                  - generic [ref=e692]: Dessert
+                  - generic [ref=e693]:
+                    - generic "Vegetarian" [ref=e695]
+                    - text: Badam phirni
+                - generic [ref=e698]:
+                  - generic [ref=e699]: Indian bread
+                  - generic [ref=e700]:
+                    - generic "Vegetarian" [ref=e702]
+                    - text: Chapati
+                - generic [ref=e705]:
+                  - generic [ref=e706]: Jain · vegetable
+                  - generic [ref=e707]:
+                    - generic "Vegetarian" [ref=e709]
+                    - text: Parwal ki bhaji
+                - generic [ref=e712]:
+                  - generic [ref=e713]: Jain · lentil
+                  - generic [ref=e714]:
+                    - generic "Vegetarian" [ref=e716]
+                    - text: Gongura pappu
+            - article [ref=e719]:
+              - generic [ref=e720]: "3"
+              - generic [ref=e721]:
+                - heading "Dinner" [level=3] [ref=e722]
+                - paragraph [ref=e723]: 7:30–9:30 PM
+              - generic [ref=e727]:
+                - generic [ref=e728]:
+                  - generic [ref=e729]: Salad
+                  - generic [ref=e730]:
+                    - generic "Vegetarian" [ref=e732]
+                    - text: Laccha mix salad
+                - generic [ref=e735]:
+                  - generic [ref=e736]: Veg 1
+                  - generic [ref=e737]:
+                    - generic "Vegetarian" [ref=e739]
+                    - text: Aloo capsicum dry
+                - generic [ref=e742]:
+                  - generic [ref=e743]: Veg 2
+                  - generic [ref=e744]:
+                    - generic "Vegetarian" [ref=e746]
+                    - text: Chole curry with kulcha
+                - generic [ref=e749]:
+                  - generic [ref=e750]: Lentil
+                  - generic [ref=e751]:
+                    - generic "Vegetarian" [ref=e753]
+                    - text: Kaddu ka dalcha
+                - generic [ref=e756]:
+                  - generic [ref=e757]: Accompaniment
+                  - generic [ref=e758]:
+                    - generic "Vegetarian" [ref=e760]
+                    - text: Curd / pickle / rasam
+                - generic [ref=e763]:
+                  - generic [ref=e764]: Rice 2
+                  - generic [ref=e765]:
+                    - generic "Vegetarian" [ref=e767]
+                    - text: Steamed rice
+                - generic [ref=e770]:
+                  - generic [ref=e771]: Hot beverage / fruit
+                  - generic [ref=e772]:
+                    - generic "Vegetarian" [ref=e774]
+                    - text: Hot milk / banana
+                - generic [ref=e777]:
+                  - generic [ref=e778]: Jain · vegetable
+                  - generic [ref=e779]:
+                    - generic "Vegetarian" [ref=e781]
+                    - text: Chole curry
+                - generic [ref=e784]:
+                  - generic [ref=e785]: Jain · lentil
+                  - generic [ref=e786]:
+                    - generic "Vegetarian" [ref=e788]
+                    - text: Kaddu ka dalcha
+        - generic [ref=e227]:
+          - generic [ref=e228]:
+            - paragraph [ref=e229]: Committee workflow prototype
+            - heading "OCR that asks before it speaks." [level=2] [ref=e230]
+            - paragraph [ref=e231]: The source sheet is preserved, every extracted cell stays editable, and low-confidence values cannot quietly become a live menu.
+          - generic [ref=e232]:
+            - generic [ref=e233]:
+              - generic [ref=e234]:
+                - paragraph [ref=e240]: Upload
+                - paragraph [ref=e241]: Image, PDF, or spreadsheet
+              - generic [ref=e242]:
+                - paragraph [ref=e248]: Extract
+                - paragraph [ref=e249]: 7 days · 3 meals · categories
+              - generic [ref=e250]:
+                - paragraph [ref=e254]: Review
+                - paragraph [ref=e255]: 3 uncertain cells flagged
+              - generic [ref=e256]:
+                - paragraph [ref=e260]: Approve
+                - paragraph [ref=e261]: Current, next day, or week
+            - generic [ref=e262]:
+              - generic [ref=e263]:
+                - generic [ref=e264]:
+                  - heading "Tuesday · 11 August" [level=3] [ref=e268]
+                  - paragraph [ref=e269]: Next day · 28 extracted entries · Needs approval
+                - button "Approve next day" [ref=e270] [cursor=pointer]
+              - generic [ref=e273]:
+                - generic [ref=e274]:
+                  - paragraph [ref=e275]: Current day
+                  - paragraph [ref=e276]: Live · editable
+                - generic [ref=e277]:
+                  - paragraph [ref=e278]: Next day
+                  - paragraph [ref=e279]: Awaiting approval
+                - generic [ref=e280]:
+                  - paragraph [ref=e281]: Whole week
+                  - paragraph [ref=e282]: 6 of 7 reviewed
+    - contentinfo [ref=e283]:
+      - generic [ref=e284]:
+        - generic [ref=e285]:
+          - generic [ref=e286]: Woxsen University
+          - generic [ref=e289]:
+            - generic [ref=e290]:
+              - text: Explore
+              - list [ref=e291]:
+                - listitem [ref=e292]:
+                  - link "Home" [ref=e293] [cursor=pointer]:
+                    - /url: /
+                - listitem [ref=e294]:
+                  - link "Council" [ref=e295] [cursor=pointer]:
+                    - /url: /council
+                - listitem [ref=e296]:
+                  - link "Events" [ref=e297] [cursor=pointer]:
+                    - /url: /events
+                - listitem [ref=e298]:
+                  - link "Clubs" [ref=e299] [cursor=pointer]:
+                    - /url: /clubs
+                - listitem [ref=e300]:
+                  - link "Support" [ref=e301] [cursor=pointer]:
+                    - /url: /support
+            - generic [ref=e302]:
+              - text: Support
+              - list [ref=e303]:
+                - listitem [ref=e304]:
+                  - link "Gateway" [ref=e305] [cursor=pointer]:
+                    - /url: /support#gateway
+                - listitem [ref=e306]:
+                  - link "Bridge" [ref=e307] [cursor=pointer]:
+                    - /url: /support#bridge
+                - listitem [ref=e308]:
+                  - link "Career Connect" [ref=e309] [cursor=pointer]:
+                    - /url: /support#career-connect
+                - listitem [ref=e310]:
+                  - link "Grievance" [ref=e311] [cursor=pointer]:
+                    - /url: /support#grievance-form
+            - generic [ref=e312]:
+              - text: Connect
+              - list [ref=e313]:
+                - listitem [ref=e314]:
+                  - link "woxsen.edu.in" [ref=e315] [cursor=pointer]:
+                    - /url: https://woxsen.edu.in
+                - listitem [ref=e316]:
+                  - link "council@woxsen.edu.in" [ref=e317] [cursor=pointer]:
+                    - /url: mailto:council@woxsen.edu.in
+                - listitem [ref=e318]:
+                  - link "Instagram" [ref=e319] [cursor=pointer]:
+                    - /url: https://instagram.com/woxsenuniversity
+                - listitem [ref=e320]:
+                  - link "LinkedIn" [ref=e321] [cursor=pointer]:
+                    - /url: https://linkedin.com/school/woxsen-university
+        - generic [ref=e322]:
+          - generic [ref=e323]: © 2026 Woxsen Student Council
+          - generic [ref=e324]: v1.0 · Hyderabad, IN · Designed and built by Nikish
+  - button "Switch to light mode" [ref=e325] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e559] [cursor=pointer]
+  - alert [ref=e563]

@@ -1,0 +1,16 @@
+[    4278ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25581
+[    4547ms] [LOG] %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit @ https://va.vercel-scripts.com/v1/script.debug.js:0
+[    4547ms] [LOG] %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {route: /management/login, path: /management/login} @ https://va.vercel-scripts.com/v1/script.debug.js:0
+[    4548ms] [LOG] %c[Vercel Web Analytics]%c [view] http://127.0.0.1:3033/management/login color: rgb(120, 120, 120) color: inherit {o: http://127.0.0.1:3033/management/login, sv: 0.1.3, sdkn: @vercel/analytics/next, sdkv: 2.0.1, ts: 1787141288808} /_vercel/insights/view @ https://va.vercel-scripts.com/v1/script.debug.js:0
+[   90724ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[   91647ms] [LOG] [Fast Refresh] done in 923ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[   91727ms] [LOG] %c[Vercel Web Analytics]%c [view] http://127.0.0.1:3033/club-management color: rgb(120, 120, 120) color: inherit {o: http://127.0.0.1:3033/club-management, sv: 0.1.3, sdkn: @vercel/analytics/next, sdkv: 2.0.1, ts: 1787141375985} /_vercel/insights/view @ https://va.vercel-scripts.com/v1/script.debug.js:0
+[  105096ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[  106081ms] [LOG] [Fast Refresh] done in 984ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[  106209ms] [LOG] %c[Vercel Web Analytics]%c [view] http://127.0.0.1:3033/club-management/page-editor?club=1 color: rgb(120, 120, 120) color: inherit {o: http://127.0.0.1:3033/club-management/page-editor?club=1, sv: 0.1.3, sdkn: @vercel/analytics/next, sdkv: 2.0.1, ts: 1787141390468} /_vercel/insights/view @ https://va.vercel-scripts.com/v1/script.debug.js:0
+[  413755ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[  414213ms] [LOG] [Fast Refresh] done in 457ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[  495015ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[  495446ms] [LOG] [Fast Refresh] done in 432ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[  581891ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[  582092ms] [LOG] [Fast Refresh] done in 202ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/report-hmr-latency.js:13

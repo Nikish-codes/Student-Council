@@ -1,0 +1,176 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e14]:
+    - button "Open navigation" [ref=f5e15] [cursor=pointer]
+    - complementary [ref=f5e17]:
+      - generic [ref=f5e18]:
+        - link "WSC · Management" [ref=f5e19] [cursor=pointer]:
+          - /url: /management
+        - button "Close navigation" [ref=f5e20] [cursor=pointer]
+      - navigation [ref=f5e24]:
+        - generic [ref=f5e25]:
+          - paragraph [ref=f5e26]: Dining
+          - link "Oval menu" [ref=f5e28] [cursor=pointer]:
+            - /url: /management/oval
+      - generic [ref=f5e35]:
+        - generic [ref=f5e36]:
+          - paragraph [ref=f5e37]: Food Committee QA
+          - paragraph [ref=f5e38]: Food Committee Member
+        - button [ref=f5e39] [cursor=pointer]
+    - main [ref=f5e43]:
+      - generic [ref=f5e243]:
+        - generic [ref=f5e244]:
+          - generic [ref=f5e245]:
+            - paragraph [ref=f5e246]: Dining · Oval
+            - heading "Weekly menu desk" [level=1] [ref=f5e247]
+            - paragraph [ref=f5e248]: Week of 17 August 2026
+          - link "View public menu" [ref=f5e249] [cursor=pointer]:
+            - /url: /oval
+        - navigation "Choose menu week" [ref=f5e254]:
+          - link "Previous week" [ref=f5e255] [cursor=pointer]:
+            - /url: /management/oval?week=2026-08-10
+          - link "Current week" [ref=f5e258] [cursor=pointer]:
+            - /url: /management/oval?week=2026-08-17
+          - link "Next week" [ref=f5e259] [cursor=pointer]:
+            - /url: /management/oval?week=2026-08-24
+        - generic [ref=f5e262]:
+          - generic [ref=f5e263]:
+            - generic [ref=f5e264]:
+              - paragraph [ref=f5e265]: Import the whole week
+              - heading "Source to structured menu" [level=2] [ref=f5e266]
+              - paragraph [ref=f5e267]: Spreadsheets are read cell by cell. Images and PDFs receive two OCR passes. Extraction creates an editable draft and never publishes it.
+            - generic [ref=f5e269]:
+              - generic [ref=f5e277]:
+                - paragraph [ref=f5e278]: Drop the committee sheet here
+                - paragraph [ref=f5e279]: PNG, JPEG, WebP, PDF, XLS, XLSX, CSV or TSV · up to 15 MB
+              - generic [ref=f5e280]:
+                - generic [ref=f5e281] [cursor=pointer]:
+                  - text: Choose file
+                  - button "Choose file" [ref=f5e285]
+                - button "Extract seven days" [disabled] [ref=f5e286]
+          - generic "Week days" [ref=f5e293]:
+            - button "Current 17 Aug Approved" [pressed] [ref=f5e294] [cursor=pointer]:
+              - generic [ref=f5e295]: Current
+              - generic [ref=f5e297]: 17 Aug
+              - generic [ref=f5e298]: Approved
+            - button "Next day 18 Aug Draft" [ref=f5e299] [cursor=pointer]:
+              - generic [ref=f5e300]: Next day
+              - generic [ref=f5e302]: 18 Aug
+              - generic [ref=f5e303]: Draft
+            - button "Wednesday 19 Aug Draft" [ref=f5e304] [cursor=pointer]:
+              - generic [ref=f5e305]: Wednesday
+              - generic [ref=f5e307]: 19 Aug
+              - generic [ref=f5e308]: Draft
+            - button "Thursday 20 Aug Draft" [ref=f5e309] [cursor=pointer]:
+              - generic [ref=f5e310]: Thursday
+              - generic [ref=f5e312]: 20 Aug
+              - generic [ref=f5e313]: Draft
+            - button "Friday 21 Aug Draft" [ref=f5e314] [cursor=pointer]:
+              - generic [ref=f5e315]: Friday
+              - generic [ref=f5e317]: 21 Aug
+              - generic [ref=f5e318]: Draft
+            - button "Saturday 22 Aug Draft" [ref=f5e319] [cursor=pointer]:
+              - generic [ref=f5e320]: Saturday
+              - generic [ref=f5e322]: 22 Aug
+              - generic [ref=f5e323]: Draft
+            - button "Sunday 23 Aug Draft" [ref=f5e324] [cursor=pointer]:
+              - generic [ref=f5e325]: Sunday
+              - generic [ref=f5e327]: 23 Aug
+              - generic [ref=f5e328]: Draft
+          - generic [ref=f5e329]:
+            - generic [ref=f5e330]:
+              - generic [ref=f5e331]:
+                - generic [ref=f5e332]:
+                  - paragraph [ref=f5e333]: Editing
+                  - heading "Monday, 17 August" [level=2] [ref=f5e334]
+                - generic [ref=f5e335]: Approved
+              - generic [ref=f5e339]:
+                - generic [ref=f5e340]:
+                  - generic [ref=f5e341]:
+                    - heading "Breakfast" [level=3] [ref=f5e342]
+                    - paragraph [ref=f5e343]: 7:00–9:45 AM
+                  - button "Add dish" [ref=f5e344] [cursor=pointer]
+                - generic [ref=f5e347]:
+                  - generic [ref=f5e348]:
+                    - generic [ref=f5e349]: Category
+                    - textbox "Breakfast category" [ref=f5e350]: Eggs
+                  - generic [ref=f5e351]:
+                    - generic [ref=f5e352]: Dish
+                    - textbox "Breakfast dish" [ref=f5e353]: Boiled eggs
+                  - generic [ref=f5e354]:
+                    - button "V Vegetarian" [pressed] [ref=f5e355] [cursor=pointer]:
+                      - generic [ref=f5e356]: V
+                      - text: Vegetarian
+                    - button "E Contains egg" [ref=f5e357] [cursor=pointer]:
+                      - generic [ref=f5e358]: E
+                      - text: Contains egg
+                    - button "NV Non-vegetarian" [ref=f5e359] [cursor=pointer]:
+                      - generic [ref=f5e360]: NV
+                      - text: Non-vegetarian
+                    - generic [ref=f5e361]: OCR 100%
+                    - button "Remove Boiled eggs" [ref=f5e362] [cursor=pointer]
+              - generic [ref=f5e366]:
+                - generic [ref=f5e367]:
+                  - generic [ref=f5e368]:
+                    - heading "Lunch" [level=3] [ref=f5e369]
+                    - paragraph [ref=f5e370]: 12:00–2:45 PM
+                  - button "Add dish" [ref=f5e371] [cursor=pointer]
+                - generic [ref=f5e374]:
+                  - generic [ref=f5e375]:
+                    - generic [ref=f5e376]: Category
+                    - textbox "Lunch category" [ref=f5e377]: Veg 1 · dry
+                  - generic [ref=f5e378]:
+                    - generic [ref=f5e379]: Dish
+                    - textbox "Lunch dish" [ref=f5e380]: Subzi Kolhapuri
+                  - generic [ref=f5e381]:
+                    - button "V Vegetarian" [pressed] [ref=f5e382] [cursor=pointer]:
+                      - generic [ref=f5e383]: V
+                      - text: Vegetarian
+                    - button "E Contains egg" [ref=f5e384] [cursor=pointer]:
+                      - generic [ref=f5e385]: E
+                      - text: Contains egg
+                    - button "NV Non-vegetarian" [ref=f5e386] [cursor=pointer]:
+                      - generic [ref=f5e387]: NV
+                      - text: Non-vegetarian
+                    - generic [ref=f5e388]: OCR 100%
+                    - button "Remove Subzi Kolhapuri" [ref=f5e389] [cursor=pointer]
+              - generic [ref=f5e393]:
+                - generic [ref=f5e394]:
+                  - generic [ref=f5e395]:
+                    - heading "Dinner" [level=3] [ref=f5e396]
+                    - paragraph [ref=f5e397]: 7:00–9:45 PM
+                  - button "Add dish" [ref=f5e398] [cursor=pointer]
+                - generic [ref=f5e401]:
+                  - generic [ref=f5e402]:
+                    - generic [ref=f5e403]: Category
+                    - textbox "Dinner category" [ref=f5e404]: Veg 2
+                  - generic [ref=f5e405]:
+                    - generic [ref=f5e406]: Dish
+                    - textbox "Dinner dish" [ref=f5e407]: Paneer butter masala
+                  - generic [ref=f5e408]:
+                    - button "V Vegetarian" [pressed] [ref=f5e409] [cursor=pointer]:
+                      - generic [ref=f5e410]: V
+                      - text: Vegetarian
+                    - button "E Contains egg" [ref=f5e411] [cursor=pointer]:
+                      - generic [ref=f5e412]: E
+                      - text: Contains egg
+                    - button "NV Non-vegetarian" [ref=f5e413] [cursor=pointer]:
+                      - generic [ref=f5e414]: NV
+                      - text: Non-vegetarian
+                    - generic [ref=f5e415]: OCR 100%
+                    - button "Remove Paneer butter masala" [ref=f5e416] [cursor=pointer]
+            - complementary [ref=f5e420]:
+              - generic [ref=f5e421]:
+                - paragraph [ref=f5e422]: Review status
+                - paragraph [ref=f5e423]: "0"
+                - paragraph [ref=f5e424]: uncertain cells remaining
+                - generic [ref=f5e425]:
+                  - paragraph [ref=f5e426]: 1 breakfast entries
+                  - paragraph [ref=f5e427]: 1 lunch entries
+                  - paragraph [ref=f5e428]: 1 dinner entries
+              - button "Save whole week" [ref=f5e430] [cursor=pointer]
+              - button "Return day to draft" [ref=f5e436] [cursor=pointer]
+              - paragraph [ref=f5e437]: Approved days become public automatically at 4:00 AM on their service date. Other days remain private.
+  - button "Switch to light mode" [ref=f5e241] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f5e449] [cursor=pointer]
+  - alert [ref=f5e453]: Weekly menu desk

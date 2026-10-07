@@ -1,0 +1,120 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e46]:
+    - complementary [ref=e47]:
+      - link "WSC · Management" [ref=e49] [cursor=pointer]:
+        - /url: /management
+      - navigation [ref=e50]:
+        - generic [ref=e51]:
+          - paragraph [ref=e52]: Review
+          - link "Approvals" [ref=e54] [cursor=pointer]:
+            - /url: /management/approvals
+        - generic [ref=e59]:
+          - paragraph [ref=e60]: Overview
+          - generic [ref=e61]:
+            - link "Dashboard" [ref=e62] [cursor=pointer]:
+              - /url: /management
+            - link "Event Ops" [ref=e68] [cursor=pointer]:
+              - /url: /eventmanagement
+        - generic [ref=e74]:
+          - paragraph [ref=e75]: Content
+          - generic [ref=e76]:
+            - link "Events" [ref=e77] [cursor=pointer]:
+              - /url: /management/events
+            - link "Recaps" [ref=e80] [cursor=pointer]:
+              - /url: /management/recaps
+            - link "Announcements" [ref=e83] [cursor=pointer]:
+              - /url: /management/announcements
+            - link "Highlights" [ref=e87] [cursor=pointer]:
+              - /url: /management/highlights
+        - generic [ref=e91]:
+          - paragraph [ref=e92]: Organisation
+          - generic [ref=e93]:
+            - link "Clubs" [ref=e94] [cursor=pointer]:
+              - /url: /management/clubs
+            - link "Club categories" [ref=e99] [cursor=pointer]:
+              - /url: /management/clubs/categories
+            - link "Council" [ref=e104] [cursor=pointer]:
+              - /url: /management/council
+            - link "Council sections" [ref=e110] [cursor=pointer]:
+              - /url: /management/council/groups
+            - link "FAQs" [ref=e113] [cursor=pointer]:
+              - /url: /management/faqs
+            - link "Support" [ref=e117] [cursor=pointer]:
+              - /url: /management/support
+        - generic [ref=e125]:
+          - paragraph [ref=e126]: Sports
+          - generic [ref=e127]:
+            - link "Dashboard" [ref=e128] [cursor=pointer]:
+              - /url: /management/sports
+            - link "Tournaments" [ref=e135] [cursor=pointer]:
+              - /url: /management/sports/tournaments
+            - link "Leagues" [ref=e142] [cursor=pointer]:
+              - /url: /management/sports/leagues
+            - link "Matches" [ref=e145] [cursor=pointer]:
+              - /url: /management/sports/matches
+            - link "Teams" [ref=e148] [cursor=pointer]:
+              - /url: /management/sports/teams
+            - link "People" [ref=e151] [cursor=pointer]:
+              - /url: /management/sports/people
+            - link "Sports settings" [ref=e156] [cursor=pointer]:
+              - /url: /management/sports/settings
+        - generic [ref=e160]:
+          - paragraph [ref=e161]: Media
+          - link "Media library" [ref=e163] [cursor=pointer]:
+            - /url: /management/media
+        - generic [ref=e168]:
+          - paragraph [ref=e169]: Dining
+          - link "Oval menu" [ref=e171] [cursor=pointer]:
+            - /url: /management/oval
+        - generic [ref=e177]:
+          - paragraph [ref=e178]: Homepage
+          - generic [ref=e179]:
+            - link "Vault" [ref=e180] [cursor=pointer]:
+              - /url: /management/vault
+            - link "Homepage composer" [ref=e183] [cursor=pointer]:
+              - /url: /management/homepage
+        - generic [ref=e187]:
+          - paragraph [ref=e188]: Admin
+          - generic [ref=e189]:
+            - link "Users" [ref=e190] [cursor=pointer]:
+              - /url: /management/users
+            - link "Settings" [ref=e203] [cursor=pointer]:
+              - /url: /management/settings
+      - generic [ref=e208]:
+        - generic [ref=e209]:
+          - paragraph [ref=e210]: Sam Super Admin
+          - paragraph [ref=e211]: Super Admin
+        - button [ref=e212] [cursor=pointer]
+    - main [ref=e216]:
+      - generic [ref=e218]:
+        - generic [ref=e219]:
+          - generic [ref=e220]:
+            - paragraph [ref=e221]: Welcome back
+            - heading "Sam" [level=1] [ref=e222]
+          - link "New event" [ref=e223] [cursor=pointer]:
+            - /url: /management/events/new
+        - generic [ref=e225]:
+          - generic [ref=e226]:
+            - paragraph [ref=e229]: "1"
+            - paragraph [ref=e230]: Events
+          - generic [ref=e231]:
+            - paragraph [ref=e235]: "1"
+            - paragraph [ref=e236]: Published
+          - generic [ref=e237]:
+            - paragraph [ref=e241]: "0"
+            - paragraph [ref=e242]: Awaiting review
+          - generic [ref=e243]:
+            - paragraph [ref=e247]: "0"
+            - paragraph [ref=e248]: Announcements
+        - generic [ref=e249]:
+          - heading "Quick actions" [level=2] [ref=e250]
+          - generic [ref=e251]:
+            - link "Manage events" [ref=e252] [cursor=pointer]:
+              - /url: /management/events
+            - link "Add an event" [ref=e253] [cursor=pointer]:
+              - /url: /management/events/new
+          - paragraph [ref=e254]: Publishing an event automatically posts an announcement, creates a recap draft, refreshes the site, and (if configured) pings Discord.
+  - button "Switch to light mode" [ref=e29] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e41] [cursor=pointer]
+  - alert [ref=e45]: Woxsen Student Council

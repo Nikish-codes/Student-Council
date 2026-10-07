@@ -1,0 +1,152 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - img [ref=e5]:
+      - generic [ref=e7]: WOXSEN UNIVERSITY · STUDENT COUNCIL · SESSION 2026/27 · EMPOWERING STUDENT VOICES ·
+    - generic [ref=e11]:
+      - generic [ref=e12]: Woxsen Student Council
+      - generic [ref=e13]: Loading session 2026/27
+  - generic [ref=e14]:
+    - banner [ref=e15]:
+      - generic [ref=e16]:
+        - link "Woxsen Student Council home" [ref=e17] [cursor=pointer]:
+          - /url: /
+        - navigation [ref=e19]:
+          - link "Home" [ref=e20] [cursor=pointer]:
+            - /url: /
+          - link "Oval" [ref=e21] [cursor=pointer]:
+            - /url: /oval
+          - link "Council" [ref=e22] [cursor=pointer]:
+            - /url: /council
+          - link "Events" [ref=e23] [cursor=pointer]:
+            - /url: /events
+          - link "Clubs" [ref=e24] [cursor=pointer]:
+            - /url: /clubs
+          - link "Sports" [ref=e26] [cursor=pointer]:
+            - /url: /sports
+          - link "Support" [ref=e27] [cursor=pointer]:
+            - /url: /support
+        - link "Raise a concern" [ref=e29] [cursor=pointer]:
+          - /url: /support#grievance-form
+    - main [ref=e30]:
+      - article [ref=e31]:
+        - link "Clubs / Design & Visual Arts" [ref=e33] [cursor=pointer]:
+          - /url: /clubs
+          - text: Clubs
+          - generic [ref=e36]: / Design & Visual Arts
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - text: Design & Visual Arts
+            - generic [ref=e39]:
+              - heading "Paparazzi (Photography Club)" [level=1] [ref=e40]
+              - img "Paparazzi (Photography Club) logo" [ref=e42]
+            - paragraph [ref=e43]: Creates opportunities for students to express creativity through visual storytelling and the visual archiving of campus life.
+          - generic [ref=e46]:
+            - term [ref=e47]: Members
+            - definition [ref=e48]: "0"
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - generic [ref=e51]:
+              - generic [ref=e52]:
+                - generic [ref=e53]: "01"
+                - heading "About us" [level=2] [ref=e54]
+              - paragraph [ref=e56]: Paparazzi creates opportunities for students to express creativity through visual storytelling and visual archiving of campus life.
+            - generic [ref=e57]:
+              - generic [ref=e58]:
+                - generic [ref=e59]: "02"
+                - heading "Our activities" [level=2] [ref=e60]
+              - generic [ref=e61]:
+                - listitem [ref=e62]:
+                  - generic [ref=e63]: "01"
+                  - heading "Photo of the Year" [level=3] [ref=e64]
+                - listitem [ref=e65]:
+                  - generic [ref=e66]: "02"
+                  - heading "monthly PhotoBuzz competitions" [level=3] [ref=e67]
+                - listitem [ref=e68]:
+                  - generic [ref=e69]: "03"
+                  - heading "Campus Portrait Initiative" [level=3] [ref=e70]
+            - generic [ref=e71]:
+              - generic [ref=e72]:
+                - generic [ref=e73]: "03"
+                - heading "Who runs it" [level=2] [ref=e74]
+              - generic [ref=e76]:
+                - img "Naidu Yesaswini" [ref=e78]:
+                  - generic [ref=e80]: NY
+                - generic [ref=e81]:
+                  - paragraph [ref=e82]: Naidu Yesaswini
+                  - paragraph [ref=e83]: Paparazzi Club President
+                  - paragraph [ref=e84]: BBA 2nd year
+          - complementary [ref=e85]:
+            - generic [ref=e86]:
+              - generic [ref=e87]: Membership
+              - generic [ref=e89]:
+                - generic [ref=e90]: Category
+                - generic [ref=e91]: Design & Visual Arts
+              - generic [ref=e92]:
+                - text: Tags
+                - generic [ref=e93]:
+                  - generic [ref=e94]: Photography
+                  - generic [ref=e95]: Visual Storytelling
+              - link "Join Paparazzi" [ref=e98] [cursor=pointer]:
+                - /url: https://forms.gle/example-paparazzi
+        - link "All clubs" [ref=e103] [cursor=pointer]:
+          - /url: /clubs
+    - contentinfo [ref=e106]:
+      - generic [ref=e107]:
+        - generic [ref=e108]:
+          - generic [ref=e109]: Woxsen University
+          - generic [ref=e112]:
+            - generic [ref=e113]:
+              - text: Explore
+              - list [ref=e114]:
+                - listitem [ref=e115]:
+                  - link "Home" [ref=e116] [cursor=pointer]:
+                    - /url: /
+                - listitem [ref=e117]:
+                  - link "Council" [ref=e118] [cursor=pointer]:
+                    - /url: /council
+                - listitem [ref=e119]:
+                  - link "Events" [ref=e120] [cursor=pointer]:
+                    - /url: /events
+                - listitem [ref=e121]:
+                  - link "Clubs" [ref=e122] [cursor=pointer]:
+                    - /url: /clubs
+                - listitem [ref=e123]:
+                  - link "Support" [ref=e124] [cursor=pointer]:
+                    - /url: /support
+            - generic [ref=e125]:
+              - text: Support
+              - list [ref=e126]:
+                - listitem [ref=e127]:
+                  - link "Gateway" [ref=e128] [cursor=pointer]:
+                    - /url: /support#gateway
+                - listitem [ref=e129]:
+                  - link "Bridge" [ref=e130] [cursor=pointer]:
+                    - /url: /support#bridge
+                - listitem [ref=e131]:
+                  - link "Career Connect" [ref=e132] [cursor=pointer]:
+                    - /url: /support#career-connect
+                - listitem [ref=e133]:
+                  - link "Grievance" [ref=e134] [cursor=pointer]:
+                    - /url: /support#grievance-form
+            - generic [ref=e135]:
+              - text: Connect
+              - list [ref=e136]:
+                - listitem [ref=e137]:
+                  - link "woxsen.edu.in" [ref=e138] [cursor=pointer]:
+                    - /url: https://woxsen.edu.in
+                - listitem [ref=e139]:
+                  - link "council@woxsen.edu.in" [ref=e140] [cursor=pointer]:
+                    - /url: mailto:council@woxsen.edu.in
+                - listitem [ref=e141]:
+                  - link "Instagram" [ref=e142] [cursor=pointer]:
+                    - /url: https://instagram.com/woxsenuniversity
+                - listitem [ref=e143]:
+                  - link "LinkedIn" [ref=e144] [cursor=pointer]:
+                    - /url: https://linkedin.com/school/woxsen-university
+        - generic [ref=e145]:
+          - generic [ref=e146]: © 2026 Woxsen Student Council
+          - generic [ref=e147]:
+            - text: v1.0 · Hyderabad, IN · Designed and built by
+            - button "Nikish" [ref=e148] [cursor=pointer]
+  - button "Switch to light mode" [ref=e149] [cursor=pointer]
+  - region "Notifications alt+T"

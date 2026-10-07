@@ -1,0 +1,12 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - img [ref=e5]:
+      - generic [ref=e7]: WOXSEN UNIVERSITY · STUDENT COUNCIL · SESSION 2026/27 · EMPOWERING STUDENT VOICES ·
+    - generic [ref=e11]:
+      - generic [ref=e12]: Woxsen Student Council
+      - generic [ref=e13]: Loading session 2026/27
+  - generic [ref=e15]:
+    - heading "404" [level=1] [ref=e16]
+    - heading "This page could not be found." [level=2] [ref=e18]
+  - button "Switch to light mode" [ref=e19] [cursor=pointer]
+  - region "Notifications alt+T"

@@ -1,0 +1,23 @@
+- generic [ref=f1e1]:
+  - generic [ref=f1e3]:
+    - img [ref=f1e5]:
+      - generic [ref=f1e7]: WOXSEN UNIVERSITY · STUDENT COUNCIL · SESSION 2026/27 · EMPOWERING STUDENT VOICES ·
+    - generic [ref=f1e11]:
+      - generic [ref=f1e12]: Woxsen Student Council
+      - generic [ref=f1e13]: Loading session 2026/27
+  - main [ref=f1e14]:
+    - generic [ref=f1e15]:
+      - generic [ref=f1e16]:
+        - paragraph [ref=f1e17]: Woxsen Student Council
+        - heading "Management" [level=1] [ref=f1e18]
+        - paragraph [ref=f1e19]: Sign in to manage events, content and more.
+      - generic [ref=f1e21]:
+        - generic [ref=f1e22]:
+          - generic [ref=f1e23]: Email
+          - textbox "Email" [active] [ref=f1e24]
+        - generic [ref=f1e25]:
+          - generic [ref=f1e26]: Password
+          - textbox "Password" [ref=f1e27]
+        - button "Sign in" [ref=f1e28] [cursor=pointer]
+  - button "Switch to light mode" [ref=f1e29] [cursor=pointer]
+  - region "Notifications alt+T"

@@ -1,0 +1,56 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e46]:
+    - banner [ref=e47]:
+      - combobox "Active club" [ref=e49]:
+        - option "E2E Makers" [selected]
+      - generic [ref=e50]: Team member
+      - link "View public page" [ref=e51] [cursor=pointer]:
+        - /url: /clubs/e2e-makers
+    - complementary [ref=e52]:
+      - link "Club Studio" [ref=e54] [cursor=pointer]:
+        - /url: /club-management?club=1
+      - navigation "Club Studio" [ref=e55]:
+        - link "Dashboard" [ref=e56] [cursor=pointer]:
+          - /url: /club-management?club=1
+        - link "Page" [ref=e60] [cursor=pointer]:
+          - /url: /club-management/page-editor?club=1
+      - generic [ref=e65]:
+        - paragraph [ref=e66]: Milan Member
+        - button "Sign out" [ref=e67] [cursor=pointer]
+    - main [ref=e71]:
+      - generic [ref=e73]:
+        - generic [ref=e74]:
+          - paragraph [ref=e75]: E2E Makers
+          - heading "What needs attention" [level=1] [ref=e76]
+          - paragraph [ref=e77]: Draft privately, send complete changes for review, and keep the approved page live until the next version is ready.
+        - region [ref=e78]:
+          - heading "Tasks" [level=2] [ref=e79]
+          - article [ref=e80]:
+            - generic [ref=e81]:
+              - heading "Choose your public page" [level=3] [ref=e82]
+              - paragraph [ref=e83]: Start with Stage, Zine, or Clubhouse. Your current page stays public during review.
+            - link "Open page editor" [ref=e84] [cursor=pointer]:
+              - /url: /club-management/page-editor?club=1
+        - generic [ref=e85]:
+          - generic [ref=e86]:
+            - paragraph [ref=e90]: "0"
+            - paragraph [ref=e91]: Awaiting review
+          - generic [ref=e92]:
+            - paragraph [ref=e95]: "1"
+            - paragraph [ref=e96]: Published events
+          - generic [ref=e97]:
+            - paragraph [ref=e103]: "2"
+            - paragraph [ref=e104]: Active team
+          - generic [ref=e105]:
+            - paragraph [ref=e111]: "0"
+            - paragraph [ref=e112]: Follow-ups
+        - generic [ref=e113]:
+          - generic [ref=e114]:
+            - heading "Recent work" [level=2] [ref=e115]
+            - link "Edit page" [ref=e116] [cursor=pointer]:
+              - /url: /club-management/page-editor?club=1
+          - paragraph [ref=e117]: No drafts or submissions yet.
+  - button "Switch to light mode" [ref=e29] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e42] [cursor=pointer]
+  - alert [ref=e36]: Woxsen Student Council

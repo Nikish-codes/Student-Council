@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SportsMatchCard } from "@/components/sections/sports-match-card";
-import { BigScreenDisplay } from "@/components/sections/big-screen-display";
 import { getSportsMatches } from "@/lib/content";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,24 +25,12 @@ export async function generateStaticParams() {
   return matches.map((m) => ({ id: m.id.toString() }));
 }
 
-export default async function MatchPage({
-  params,
-  searchParams
-}: {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ display?: string }>;
-}) {
+export default async function MatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { display } = await searchParams;
   const matches = await getSportsMatches();
   const match = matches.find((m) => m.id === Number(id));
 
   if (!match) notFound();
-
-  // Big screen display mode for stadium/ground displays
-  if (display === "true") {
-    return <BigScreenDisplay match={match} />;
-  }
 
   const isLive = match.status === "live";
 

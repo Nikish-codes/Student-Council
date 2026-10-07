@@ -1,0 +1,112 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e47]:
+    - complementary [ref=e48]:
+      - link "WSC · Management" [ref=e50] [cursor=pointer]:
+        - /url: /management
+      - navigation [ref=e51]:
+        - generic [ref=e52]:
+          - paragraph [ref=e53]: Overview
+          - generic [ref=e54]:
+            - link "Dashboard" [ref=e55] [cursor=pointer]:
+              - /url: /management
+            - link "Event Ops" [ref=e61] [cursor=pointer]:
+              - /url: /eventmanagement
+        - generic [ref=e67]:
+          - paragraph [ref=e68]: Content
+          - generic [ref=e69]:
+            - link "Events" [ref=e70] [cursor=pointer]:
+              - /url: /management/events
+            - link "Recaps" [ref=e73] [cursor=pointer]:
+              - /url: /management/recaps
+            - link "Announcements" [ref=e76] [cursor=pointer]:
+              - /url: /management/announcements
+            - link "Highlights" [ref=e80] [cursor=pointer]:
+              - /url: /management/highlights
+        - generic [ref=e84]:
+          - paragraph [ref=e85]: Organisation
+          - generic [ref=e86]:
+            - link "Clubs" [ref=e87] [cursor=pointer]:
+              - /url: /management/clubs
+            - link "Club categories" [ref=e92] [cursor=pointer]:
+              - /url: /management/clubs/categories
+            - link "Council" [ref=e97] [cursor=pointer]:
+              - /url: /management/council
+            - link "Council sections" [ref=e103] [cursor=pointer]:
+              - /url: /management/council/groups
+            - link "FAQs" [ref=e106] [cursor=pointer]:
+              - /url: /management/faqs
+            - link "Support" [ref=e110] [cursor=pointer]:
+              - /url: /management/support
+        - generic [ref=e118]:
+          - paragraph [ref=e119]: Sports
+          - generic [ref=e120]:
+            - link "Dashboard" [ref=e121] [cursor=pointer]:
+              - /url: /management/sports
+            - link "Tournaments" [ref=e128] [cursor=pointer]:
+              - /url: /management/sports/tournaments
+            - link "Leagues" [ref=e135] [cursor=pointer]:
+              - /url: /management/sports/leagues
+            - link "Matches" [ref=e138] [cursor=pointer]:
+              - /url: /management/sports/matches
+            - link "Teams" [ref=e141] [cursor=pointer]:
+              - /url: /management/sports/teams
+            - link "People" [ref=e144] [cursor=pointer]:
+              - /url: /management/sports/people
+            - link "Sports settings" [ref=e149] [cursor=pointer]:
+              - /url: /management/sports/settings
+        - generic [ref=e153]:
+          - paragraph [ref=e154]: Media
+          - link "Media library" [ref=e156] [cursor=pointer]:
+            - /url: /management/media
+        - generic [ref=e161]:
+          - paragraph [ref=e162]: Homepage
+          - generic [ref=e163]:
+            - link "Vault" [ref=e164] [cursor=pointer]:
+              - /url: /management/vault
+            - link "Homepage composer" [ref=e167] [cursor=pointer]:
+              - /url: /management/homepage
+        - generic [ref=e171]:
+          - paragraph [ref=e172]: Admin
+          - generic [ref=e173]:
+            - link "Users" [ref=e174] [cursor=pointer]:
+              - /url: /management/users
+            - link "Settings" [ref=e187] [cursor=pointer]:
+              - /url: /management/settings
+      - generic [ref=e192]:
+        - generic [ref=e193]:
+          - paragraph [ref=e194]: Nikish Bishnoi
+          - paragraph [ref=e195]: Super Admin
+        - button [ref=e196] [cursor=pointer]
+    - main [ref=e200]:
+      - generic [ref=e202]:
+        - generic [ref=e203]:
+          - generic [ref=e204]:
+            - paragraph [ref=e205]: Welcome back
+            - heading "Nikish" [level=1] [ref=e206]
+          - link "New event" [ref=e207] [cursor=pointer]:
+            - /url: /management/events/new
+        - generic [ref=e209]:
+          - generic [ref=e210]:
+            - paragraph [ref=e213]: "12"
+            - paragraph [ref=e214]: Events
+          - generic [ref=e215]:
+            - paragraph [ref=e219]: "12"
+            - paragraph [ref=e220]: Published
+          - generic [ref=e221]:
+            - paragraph [ref=e225]: "0"
+            - paragraph [ref=e226]: Awaiting review
+          - generic [ref=e227]:
+            - paragraph [ref=e231]: "13"
+            - paragraph [ref=e232]: Announcements
+        - generic [ref=e233]:
+          - heading "Quick actions" [level=2] [ref=e234]
+          - generic [ref=e235]:
+            - link "Manage events" [ref=e236] [cursor=pointer]:
+              - /url: /management/events
+            - link "Add an event" [ref=e237] [cursor=pointer]:
+              - /url: /management/events/new
+          - paragraph [ref=e238]: Publishing an event automatically posts an announcement, creates a recap draft, refreshes the site, and (if configured) pings Discord.
+  - button "Switch to light mode" [ref=e29] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e42] [cursor=pointer]
+  - alert [ref=e46]: Woxsen Student Council

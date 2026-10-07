@@ -1,0 +1,142 @@
+- generic [active] [ref=f7e1]:
+  - generic [ref=f7e14]:
+    - complementary [ref=f7e15]:
+      - link "WSC · Management" [ref=f7e17] [cursor=pointer]:
+        - /url: /management
+      - navigation [ref=f7e18]:
+        - generic [ref=f7e19]:
+          - paragraph [ref=f7e20]: Overview
+          - generic [ref=f7e21]:
+            - link "Dashboard" [ref=f7e22] [cursor=pointer]:
+              - /url: /management
+            - link "Event Ops" [ref=f7e28] [cursor=pointer]:
+              - /url: /eventmanagement
+        - generic [ref=f7e34]:
+          - paragraph [ref=f7e35]: Content
+          - generic [ref=f7e36]:
+            - link "Events" [ref=f7e37] [cursor=pointer]:
+              - /url: /management/events
+            - link "Recaps" [ref=f7e40] [cursor=pointer]:
+              - /url: /management/recaps
+            - link "Announcements" [ref=f7e43] [cursor=pointer]:
+              - /url: /management/announcements
+            - link "Highlights" [ref=f7e47] [cursor=pointer]:
+              - /url: /management/highlights
+        - generic [ref=f7e51]:
+          - paragraph [ref=f7e52]: Organisation
+          - generic [ref=f7e53]:
+            - link "Clubs" [ref=f7e54] [cursor=pointer]:
+              - /url: /management/clubs
+            - link "Club categories" [ref=f7e59] [cursor=pointer]:
+              - /url: /management/clubs/categories
+            - link "Council" [ref=f7e64] [cursor=pointer]:
+              - /url: /management/council
+            - link "Council sections" [ref=f7e70] [cursor=pointer]:
+              - /url: /management/council/groups
+            - link "FAQs" [ref=f7e73] [cursor=pointer]:
+              - /url: /management/faqs
+            - link "Support" [ref=f7e77] [cursor=pointer]:
+              - /url: /management/support
+        - generic [ref=f7e85]:
+          - paragraph [ref=f7e86]: Sports
+          - generic [ref=f7e87]:
+            - link "Dashboard" [ref=f7e88] [cursor=pointer]:
+              - /url: /management/sports
+            - link "Tournaments" [ref=f7e95] [cursor=pointer]:
+              - /url: /management/sports/tournaments
+            - link "Leagues" [ref=f7e102] [cursor=pointer]:
+              - /url: /management/sports/leagues
+            - link "Matches" [ref=f7e105] [cursor=pointer]:
+              - /url: /management/sports/matches
+            - link "Teams" [ref=f7e108] [cursor=pointer]:
+              - /url: /management/sports/teams
+            - link "People" [ref=f7e111] [cursor=pointer]:
+              - /url: /management/sports/people
+            - link "Sports settings" [ref=f7e116] [cursor=pointer]:
+              - /url: /management/sports/settings
+        - generic [ref=f7e120]:
+          - paragraph [ref=f7e121]: Media
+          - link "Media library" [ref=f7e123] [cursor=pointer]:
+            - /url: /management/media
+        - generic [ref=f7e128]:
+          - paragraph [ref=f7e129]: Dining
+          - link "Oval menu" [ref=f7e131] [cursor=pointer]:
+            - /url: /management/oval
+        - generic [ref=f7e137]:
+          - paragraph [ref=f7e138]: Homepage
+          - generic [ref=f7e139]:
+            - link "Vault" [ref=f7e140] [cursor=pointer]:
+              - /url: /management/vault
+            - link "Homepage composer" [ref=f7e143] [cursor=pointer]:
+              - /url: /management/homepage
+        - generic [ref=f7e147]:
+          - paragraph [ref=f7e148]: Admin
+          - generic [ref=f7e149]:
+            - link "Users" [ref=f7e150] [cursor=pointer]:
+              - /url: /management/users
+            - link "Settings" [ref=f7e163] [cursor=pointer]:
+              - /url: /management/settings
+      - generic [ref=f7e168]:
+        - generic [ref=f7e169]:
+          - paragraph [ref=f7e170]: Super Admin
+          - paragraph [ref=f7e171]: Super Admin
+        - button [ref=f7e172] [cursor=pointer]
+    - main [ref=f7e176]:
+      - generic [ref=f7e224]:
+        - generic [ref=f7e225]:
+          - generic [ref=f7e226]:
+            - paragraph [ref=f7e227]: Users
+            - heading "2 accounts" [level=1] [ref=f7e228]
+          - link "New user" [ref=f7e229] [cursor=pointer]:
+            - /url: /management/users/new
+        - generic [ref=f7e231]:
+          - textbox "Search users…" [ref=f7e234]
+          - table [ref=f7e236]:
+            - rowgroup [ref=f7e237]:
+              - row [ref=f7e238]:
+                - columnheader "Name & email" [ref=f7e239] [cursor=pointer]
+                - columnheader "Role" [ref=f7e244] [cursor=pointer]
+                - columnheader "Club" [ref=f7e249] [cursor=pointer]
+                - columnheader "Status" [ref=f7e254] [cursor=pointer]
+                - columnheader [ref=f7e259]
+            - rowgroup [ref=f7e260]:
+              - row [ref=f7e261]:
+                - cell "Food Committee QA food.qa@local.test" [ref=f7e262]:
+                  - generic [ref=f7e263]:
+                    - link "Food Committee QA" [ref=f7e264] [cursor=pointer]:
+                      - /url: /management/users/2
+                    - generic [ref=f7e265]: food.qa@local.test
+                - cell "Food Committee Member" [ref=f7e266]
+                - cell "—" [ref=f7e267]
+                - cell "Active" [ref=f7e268]
+                - cell [ref=f7e269]:
+                  - button "Delete" [ref=f7e271] [cursor=pointer]
+              - row [ref=f7e275]:
+                - cell "Super Adminyou oval.qa@local.test" [ref=f7e276]:
+                  - generic [ref=f7e277]:
+                    - link "Super Admin" [ref=f7e278] [cursor=pointer]:
+                      - /url: /management/users/1
+                    - text: you
+                    - generic [ref=f7e279]: oval.qa@local.test
+                - cell "Super Admin" [ref=f7e280]
+                - cell "—" [ref=f7e281]
+                - cell "Active" [ref=f7e282]
+                - cell [ref=f7e283]
+        - paragraph [ref=f7e284]:
+          - text: "Roles:"
+          - strong [ref=f7e285]: Super Admin
+          - text: has full control.
+          - strong [ref=f7e286]: Admin
+          - text: manages all content + non-super-admin users.
+          - strong [ref=f7e287]: Council Member
+          - text: ","
+          - strong [ref=f7e288]: Editor
+          - text: can publish.
+          - strong [ref=f7e289]: Club Lead
+          - text: can only edit their own club events.
+          - strong [ref=f7e290]: Viewer
+          - text: has read-only access.
+  - button "Switch to light mode" [ref=f7e206] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f7e219] [cursor=pointer]
+  - alert [ref=f7e223]

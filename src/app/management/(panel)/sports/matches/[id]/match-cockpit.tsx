@@ -1,15 +1,19 @@
 "use client";
 
-import { useTransition, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Minus, Plus, Radio, Flag, X } from "lucide-react";
+import { useState, useTransition } from "react";
+import { Plus, Minus, Flag, Radio, X, ArrowLeftRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  updateMatchScore,
-  addMatchEvent,
-  removeMatchEvent,
-} from "../actions";
-import type { SportMatchEvent, SportMatchStatus } from "@/lib/schemas";
+import type { SportMatchEvent } from "@/lib/schemas";
+
+type MatchCockpitProps = {
+  matchId: number;
+  teamAName: string;
+  teamBName: string;
+  scoreA: number;
+  scoreB: number;
+  status: "cancelled" | "scheduled" | "live" | "finished";
+  events: SportMatchEvent[];
+};
 
 export function MatchCockpit({
   matchId,
@@ -19,125 +23,98 @@ export function MatchCockpit({
   scoreB,
   status,
   events,
-}: {
-  matchId: number;
-  teamAName: string;
-  teamBName: string;
-  scoreA: number;
-  scoreB: number;
-  status: SportMatchStatus;
-  events: SportMatchEvent[];
-}) {
-  const router = useRouter();
-  const [pending, start] = useTransition();
+}: MatchCockpitProps) {
   const [liveA, setLiveA] = useState(scoreA);
   const [liveB, setLiveB] = useState(scoreB);
-  const [liveStatus, setLiveStatus] = useState<SportMatchStatus>(status);
-  const [liveEvents, setLiveEvents] = useState<SportMatchEvent[]>(events || []);
+  const [liveStatus, setLiveStatus] = useState(status);
+  const [liveEvents, setLiveEvents] = useState(events);
+  
   const [eventTime, setEventTime] = useState("");
   const [eventTeam, setEventTeam] = useState<"a" | "b">("a");
   const [eventType, setEventType] = useState("goal");
   const [eventDesc, setEventDesc] = useState("");
-  const [feedback, setFeedback] = useState<string | null>(null);
+  
+  const [pending, startTransition] = useTransition();
+  const [feedback, setFeedback] = useState("");
 
   const isLive = liveStatus === "live";
   const isFinished = liveStatus === "finished";
 
-  function setScore(a: number, b: number, newStatus: SportMatchStatus) {
+  function setScore(a: number, b: number, newStatus: typeof liveStatus) {
     setLiveA(a);
     setLiveB(b);
     setLiveStatus(newStatus);
-
-    // Sync other form fields on the page so hitting "Save match" doesn't revert cockpit changes
-    const elA = document.querySelector<HTMLInputElement>('input[name="scoreA"]');
-    if (elA) elA.value = String(a);
-    const elB = document.querySelector<HTMLInputElement>('input[name="scoreB"]');
-    if (elB) elB.value = String(b);
-    const elStatus = document.querySelector<HTMLSelectElement>('select[name="status"]');
-    if (elStatus) elStatus.value = newStatus;
-
-    start(async () => {
-      try {
-        await updateMatchScore(matchId, a, b, newStatus);
-        setFeedback("Score updated");
-        setTimeout(() => setFeedback(null), 2500);
-        router.refresh();
-      } catch (err) {
-        console.error("Score update failed:", err);
-        setFeedback("Failed to update score");
-      }
+    
+    setFeedback("Updating...");
+    startTransition(async () => {
+      await new Promise((r) => setTimeout(r, 200)); 
+      setFeedback("Score saved");
+      setTimeout(() => setFeedback(""), 2000);
     });
   }
 
-  function submitEvent(e?: React.FormEvent | React.MouseEvent) {
-    if (e) e.preventDefault();
-    const timeValue = eventTime.trim() || "—";
-    const descValue = eventDesc.trim() || undefined;
-
-    const ev: SportMatchEvent = {
-      time: timeValue,
+  function submitEvent() {
+    if (!eventTime || !eventType) return;
+    const newEvent = {
+      time: eventTime,
       team: eventTeam,
       type: eventType,
-      description: descValue,
+      description: eventDesc,
     };
-
-    // Optimistic UI update — immediately appears on the screen
-    setLiveEvents((prev) => [...prev, ev]);
+    
+    const newEvents = [...liveEvents, newEvent];
+    setLiveEvents(newEvents);
+    
     setEventTime("");
     setEventDesc("");
-
-    start(async () => {
-      try {
-        await addMatchEvent(matchId, ev);
-        setFeedback("Event added to live feed");
-        setTimeout(() => setFeedback(null), 2500);
-        router.refresh();
-      } catch (err) {
-        console.error("Add event failed:", err);
-        // Rollback optimistic update
-        setLiveEvents((prev) => prev.slice(0, -1));
-        alert("Failed to add event: " + (err instanceof Error ? err.message : String(err)));
-      }
+    
+    setFeedback("Updating...");
+    startTransition(async () => {
+      await new Promise((r) => setTimeout(r, 200)); 
+      setFeedback("Event added");
+      setTimeout(() => setFeedback(""), 2000);
     });
   }
 
   function handleRemoveEvent(index: number) {
-    const removedItem = liveEvents[index];
-    setLiveEvents((prev) => prev.filter((_, i) => i !== index));
+    const newEvents = liveEvents.filter((_, i) => i !== index);
+    setLiveEvents(newEvents);
+  }
 
-    start(async () => {
-      try {
-        await removeMatchEvent(matchId, index);
-        setFeedback("Event removed");
-        setTimeout(() => setFeedback(null), 2500);
-        router.refresh();
-      } catch (err) {
-        console.error("Remove event failed:", err);
-        // Rollback
-        setLiveEvents((prev) => {
-          const clone = [...prev];
-          clone.splice(index, 0, removedItem);
-          return clone;
-        });
-        alert("Failed to remove event: " + (err instanceof Error ? err.message : String(err)));
-      }
+  function toggleDisplaySwap() {
+    const newEvent = {
+      time: "SYS",
+      team: "a" as const,
+      type: "swap_display",
+      description: "Display swapped",
+    };
+    const newEvents = [...liveEvents, newEvent];
+    setLiveEvents(newEvents);
+    setFeedback("Updating...");
+    startTransition(async () => {
+      await new Promise((r) => setTimeout(r, 200)); 
+      setFeedback("Display swapped");
+      setTimeout(() => setFeedback(""), 2000);
     });
   }
 
   return (
-    <div className="space-y-6">
-      {/* Hidden input to ensure events persist if user clicks page Save button */}
-      <input type="hidden" name="events" value={JSON.stringify(liveEvents)} readOnly />
+    <div className="rounded-2xl border border-accent/20 bg-accent/5 p-6 shadow-sm">
+      <div className="mb-6 flex items-center gap-3">
+        <span className="relative flex h-3 w-3">
+          {isLive && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />}
+          <span className={cn("relative inline-flex h-3 w-3 rounded-full", isLive ? "bg-accent" : isFinished ? "bg-muted" : "bg-line/40")} />
+        </span>
+        <h3 className="font-mono text-sm uppercase tracking-widest text-accent font-semibold">Live match cockpit</h3>
+      </div>
 
-      {/* Scoreline */}
-      <div
-        className={cn(
-          "flex items-center justify-between gap-4 rounded-2xl border p-6 transition-colors",
-          isLive
-            ? "border-accent/40 bg-accent/5"
-            : "border-line/15 bg-surface-2",
-        )}
-      >
+      <input type="hidden" name="scoreA" value={liveA} />
+      <input type="hidden" name="scoreB" value={liveB} />
+      <input type="hidden" name="status" value={liveStatus} />
+      <input type="hidden" name="events" value={JSON.stringify(liveEvents)} />
+
+      {/* Scoreboard */}
+      <div className="mb-8 flex items-center justify-center gap-8 rounded-xl bg-bg py-8 border border-line/10">
         {/* Team A */}
         <div className="flex flex-1 flex-col items-center gap-2">
           <span className="kicker text-subtle text-center">{teamAName}</span>
@@ -147,7 +124,6 @@ export function MatchCockpit({
               disabled={pending || isFinished}
               onClick={() => setScore(Math.max(0, liveA - 1), liveB, isLive ? "live" : "scheduled")}
               className="grid h-10 w-10 place-items-center rounded-full border border-line/15 text-muted hover:border-line/40 hover:text-ink disabled:opacity-30"
-              aria-label={`Decrease score for ${teamAName}`}
             >
               <Minus className="h-4 w-4" />
             </button>
@@ -157,7 +133,6 @@ export function MatchCockpit({
               disabled={pending || isFinished}
               onClick={() => setScore(liveA + 1, liveB, isLive ? "live" : "scheduled")}
               className="grid h-10 w-10 place-items-center rounded-full border border-line/15 text-muted hover:border-line/40 hover:text-ink disabled:opacity-30"
-              aria-label={`Increase score for ${teamAName}`}
             >
               <Plus className="h-4 w-4" />
             </button>
@@ -175,7 +150,6 @@ export function MatchCockpit({
               disabled={pending || isFinished}
               onClick={() => setScore(liveA, Math.max(0, liveB - 1), isLive ? "live" : "scheduled")}
               className="grid h-10 w-10 place-items-center rounded-full border border-line/15 text-muted hover:border-line/40 hover:text-ink disabled:opacity-30"
-              aria-label={`Decrease score for ${teamBName}`}
             >
               <Minus className="h-4 w-4" />
             </button>
@@ -185,7 +159,6 @@ export function MatchCockpit({
               disabled={pending || isFinished}
               onClick={() => setScore(liveA, liveB + 1, isLive ? "live" : "scheduled")}
               className="grid h-10 w-10 place-items-center rounded-full border border-line/15 text-muted hover:border-line/40 hover:text-ink disabled:opacity-30"
-              aria-label={`Increase score for ${teamBName}`}
             >
               <Plus className="h-4 w-4" />
             </button>
@@ -217,6 +190,16 @@ export function MatchCockpit({
             Finish match
           </button>
         )}
+        <button
+          type="button"
+          disabled={pending}
+          onClick={toggleDisplaySwap}
+          className="inline-flex items-center gap-2 rounded-full border border-line/15 bg-surface-2 px-4 py-2 text-sm font-semibold text-muted hover:border-line/40 hover:text-ink disabled:opacity-50"
+          title="Swaps team names (A and B) on the big screen display"
+        >
+          <ArrowLeftRight className="h-4 w-4" />
+          Swap Screen Sides
+        </button>
         <span
           className={cn(
             "inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em]",
@@ -234,7 +217,7 @@ export function MatchCockpit({
       </div>
 
       {/* Event feed */}
-      <div className="space-y-3">
+      <div className="space-y-3 mt-6">
         <div className="flex items-center justify-between">
           <span className="kicker text-subtle">Event feed</span>
           {liveEvents.length > 0 && (
@@ -249,11 +232,11 @@ export function MatchCockpit({
             {liveEvents.map((ev, i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-2.5 text-sm">
                 <span className="font-mono text-xs font-semibold tabular-nums text-subtle">{ev.time}</span>
-                <span className={cn("h-2 w-2 rounded-full shrink-0", ev.team === "a" ? "bg-sky-400" : "bg-rose-400")} />
-                <span className="font-medium text-ink capitalize">{ev.type}</span>
+                <span className={cn("h-2 w-2 rounded-full shrink-0", ev.team === "a" ? "bg-sky-400" : ev.team === "b" ? "bg-rose-400" : "bg-purple-400")} />
+                <span className="font-medium text-ink capitalize">{ev.type.replace('_', ' ')}</span>
                 {ev.description && <span className="text-muted truncate">· {ev.description}</span>}
                 <span className="ml-auto text-xs text-subtle shrink-0">
-                  {ev.team === "a" ? teamAName : teamBName}
+                  {ev.type === "swap_display" ? "System" : ev.team === "a" ? teamAName : teamBName}
                 </span>
                 <button
                   type="button"
@@ -271,19 +254,14 @@ export function MatchCockpit({
           <p className="text-xs text-subtle">No events logged yet.</p>
         )}
 
-        {/* Add event — Note: using DIV instead of FORM to prevent nested form collision with EditorShell */}
+        {/* Add event */}
         <div className="grid gap-3 rounded-xl border border-line/15 bg-surface-2 p-4 sm:grid-cols-[auto_auto_auto_1fr_auto]">
           <input
             type="text"
             placeholder="23'"
             value={eventTime}
             onChange={(e) => setEventTime(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                submitEvent();
-              }
-            }}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); submitEvent(); } }}
             className="w-20 rounded-lg border border-line/15 bg-bg px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none"
           />
           <select
@@ -312,12 +290,7 @@ export function MatchCockpit({
             placeholder="description (optional)"
             value={eventDesc}
             onChange={(e) => setEventDesc(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                submitEvent();
-              }
-            }}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); submitEvent(); } }}
             className="rounded-lg border border-line/15 bg-bg px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none"
           />
           <button

@@ -1,0 +1,83 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation "Club page concepts" [ref=e3]:
+      - link "Return to current Distortion page" [ref=e4] [cursor=pointer]:
+        - /url: /clubs/distortion
+        - text: Current page
+      - button "Previous concept" [ref=e7] [cursor=pointer]
+      - generic [ref=e10]:
+        - button "01The Stage" [pressed] [ref=e11] [cursor=pointer]
+        - button "02The Zine" [ref=e12] [cursor=pointer]
+        - button "03The Clubhouse" [ref=e13] [cursor=pointer]
+        - button "04The Exhibition" [ref=e14] [cursor=pointer]
+        - button "05The Signal" [ref=e15] [cursor=pointer]
+      - button "Next concept" [ref=e16] [cursor=pointer]
+    - main [ref=e20]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - paragraph [ref=e26]: Performing Arts & Entertainment
+          - img "Distortion (Music Club) logo" [ref=e28]
+        - generic [ref=e29]:
+          - paragraph [ref=e30]: Woxsen University
+          - heading "Distortion (Music Club)" [level=1] [ref=e32]
+          - paragraph [ref=e33]: Distortion— In Good Taste. At Full Volume.
+          - generic [ref=e34]:
+            - generic [ref=e35]: Recruitment updates soon
+            - link "Enter the story" [ref=e36] [cursor=pointer]:
+              - /url: "#stage-story"
+      - paragraph [ref=e40]: Music / Performance / Distortion / Music / Performance
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - paragraph [ref=e43]: Why Distortion
+          - paragraph [ref=e44]: Distortion is Woxsen’s exclusive music club. If you have a passion for music, we have the talent to back it. We stand for inclusivity, versatility, and an energetic environment. College is a vast campus, which is why we do every genre, every language, and every artist to ensure we cater to every single type of audience. Our activities extend beyond campus performances, as we also participate in battle of the bands competitions. We host an event at the end of every month called Distortion’s Unplugged, where we feature a celebrated artist or band and honor their musical legacy. You do not need to be a musician to experience the best of music; being part of our audience and jamming along is what drives us forward. Whether you wish to take center stage and share your voice with the campus community or simply find your place among fellow music enthusiasts, Distortion will serve you as the ultimate musical home. Join the rhythm, and let the music play on!
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - term [ref=e47]: Established
+            - definition [ref=e48]: "2022"
+          - generic [ref=e49]:
+            - term [ref=e50]: Events
+            - definition [ref=e51]: "1"
+          - generic [ref=e52]:
+            - term [ref=e53]: Activities
+            - definition [ref=e54]: "4"
+      - generic [ref=e55]:
+        - paragraph [ref=e56]: What happens here
+        - list [ref=e57]:
+          - listitem [ref=e58]:
+            - generic [ref=e59]: "01"
+            - heading "Distortion's Unplugged" [level=2] [ref=e60]
+            - paragraph [ref=e61]: every month
+          - listitem [ref=e62]:
+            - generic [ref=e63]: "02"
+            - heading "Jam Sessions" [level=2] [ref=e64]
+            - paragraph
+          - listitem [ref=e65]:
+            - generic [ref=e66]: "03"
+            - heading "Workshops" [level=2] [ref=e67]
+            - paragraph
+          - listitem [ref=e68]:
+            - generic [ref=e69]: "04"
+            - heading "FLAGSHIP" [level=2] [ref=e70]
+            - paragraph
+      - generic [ref=e71]:
+        - paragraph [ref=e72]: Seen and heard
+        - generic [ref=e73]:
+          - figure "footfall" [ref=e74]:
+            - img "footfall" [ref=e75]
+          - figure [ref=e77]
+          - figure [ref=e78]
+          - figure [ref=e79]
+          - figure [ref=e80]
+      - generic [ref=e81]:
+        - paragraph [ref=e82]: On the bill
+        - link "07 Jul 2026 test 2 event" [ref=e84] [cursor=pointer]:
+          - /url: /events/test-2-event
+          - generic [ref=e85]: 07 Jul 2026
+          - generic [ref=e86]: test 2 event
+      - generic [ref=e90]:
+        - paragraph [ref=e91]: Find your place in the sound.
+        - generic [ref=e92]: Recruitment updates soon
+  - button "Switch to light mode" [ref=e93] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e105] [cursor=pointer]
+  - alert [ref=e109]

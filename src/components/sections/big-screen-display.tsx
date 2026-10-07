@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import type { SportsMatch } from "@/lib/content";
-import { SPORT_LABELS } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 
 type LiveScoreUpdate = {
@@ -15,11 +15,9 @@ type LiveScoreUpdate = {
   events?: SportsMatch["events"];
 };
 
-export function BigScreenDisplay({ match: initialMatch }: { match: SportsMatch }) {
+export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: SportsMatch; academyLogo?: string }) {
   const [match, setMatch] = useState<SportsMatch>(initialMatch);
-  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const [isOnline, setIsOnline] = useState(true);
-  const [fetchError, setFetchError] = useState(false);
+  const router = useRouter();
 
   // Robust score fetching with fallback
   const fetchScores = useCallback(async () => {
@@ -50,17 +48,14 @@ export function BigScreenDisplay({ match: initialMatch }: { match: SportsMatch }
           postMatch: update.postMatch,
           events: update.events ?? prev.events,
         }));
-        setLastUpdate(new Date());
-        setFetchError(false);
       }
 
-      setIsOnline(true);
     } catch (err) {
-      console.error("[Big Screen] Score fetch failed:", err);
-      setFetchError(true);
-      setIsOnline(navigator.onLine);
+      console.error("[Big Screen] Score fetch failed, falling back to page refresh:", err);
+      // Fallback: If the JSON API fails, trigger a Next.js server refresh
+      router.refresh();
     }
-  }, [initialMatch.id]);
+  }, [initialMatch.id, router]);
 
   // Poll every 5 seconds
   useEffect(() => {
@@ -71,21 +66,13 @@ export function BigScreenDisplay({ match: initialMatch }: { match: SportsMatch }
     return () => clearInterval(interval);
   }, [fetchScores]);
 
-  // Monitor online/offline status
+  // Monitor online/offline status for immediate refetch
   useEffect(() => {
     const handleOnline = () => {
-      setIsOnline(true);
       fetchScores(); // Immediate refetch when back online
     };
-    const handleOffline = () => setIsOnline(false);
-
     window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
+    return () => window.removeEventListener("online", handleOnline);
   }, [fetchScores]);
 
   const hasScore =
@@ -93,64 +80,81 @@ export function BigScreenDisplay({ match: initialMatch }: { match: SportsMatch }
     match.scoreA != null &&
     match.scoreB != null;
   const isLive = match.status === "live";
-  const teamAName = match.teamAName || "TBC";
-  const teamBName = match.teamBName || "TBC";
+
+  // Check if sides are swapped (odd number of swap events means swapped)
+  const isSwapped = (match.events?.filter((e) => e.type === "swap_display").length || 0) % 2 !== 0;
+
+  const displayTeamA = isSwapped ? (match.teamBName || "TBC") : (match.teamAName || "TBC");
+  const displayTeamB = isSwapped ? (match.teamAName || "TBC") : (match.teamBName || "TBC");
+  const displayScoreA = isSwapped ? match.scoreB : match.scoreA;
+  const displayScoreB = isSwapped ? match.scoreA : match.scoreB;
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-[#0A0D12] via-[#0F131C] to-[#161D2B] overflow-hidden">
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)`,
-          backgroundSize: '48px 48px'
-        }} />
+    <div className="fixed inset-0 bg-black text-white overflow-hidden font-sans flex flex-col justify-center">
+      {/* Logos at Top Corners */}
+      <div className="absolute top-8 left-12 z-50 flex items-center">
+        <div className="relative h-20 w-40 sm:h-24 sm:w-48 overflow-hidden">
+          <Image
+            src="/brand/sc-white.png"
+            alt="Student Council"
+            fill
+            className="object-contain object-left"
+          />
+        </div>
       </div>
-
-      {/* Connection status indicator */}
-      {(!isOnline || fetchError) && (
-        <div className="absolute top-8 left-8 z-50 flex items-center gap-3 rounded-full bg-red-500/20 backdrop-blur-xl border border-red-500/30 px-6 py-3">
-          <span className="h-3 w-3 rounded-full bg-red-500 animate-pulse" />
-          <span className="font-mono text-sm font-semibold text-red-400 uppercase tracking-wider">
-            {!isOnline ? "Offline" : "Connection Error"}
-          </span>
+      
+      {academyLogo && (
+        <div className="absolute top-8 right-12 z-50 flex items-center">
+          <div className="relative h-20 w-40 sm:h-24 sm:w-48 overflow-hidden">
+            <Image
+              src={academyLogo}
+              alt="Sports Academy"
+              fill
+              className="object-contain object-right"
+            />
+          </div>
         </div>
       )}
 
       {/* Live badge */}
       {isLive && (
-        <div className="absolute top-8 right-8 z-50 flex items-center gap-3 rounded-full bg-accent/20 backdrop-blur-xl border border-accent/40 px-8 py-4 shadow-[0_0_60px_-12px_rgba(238,73,92,0.6)]">
-          <span className="h-4 w-4 rounded-full bg-accent animate-pulse" />
-          <span className="font-mono text-xl font-black text-accent uppercase tracking-[0.2em]">
+        <div className="absolute top-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-full bg-white text-black px-8 py-3">
+          <span className="h-3 w-3 rounded-full bg-black animate-pulse" />
+          <span className="font-mono text-xl font-black uppercase tracking-[0.2em]">
             Live
           </span>
         </div>
       )}
 
-      <div className="relative h-full flex flex-col items-center justify-center px-16 py-12">
-        {/* Competition title */}
-        {match.competitionTitle && (
-          <div className="mb-8">
-            <p className="font-mono text-2xl font-bold uppercase tracking-[0.25em] text-muted/80 text-center">
-              {match.competitionTitle}
-            </p>
-          </div>
-        )}
+      <div className="relative w-full flex flex-col items-center justify-center px-8 md:px-16">
+        {/* WFL Header */}
+        <div className="mb-8 md:mb-16 w-full text-center">
+          <p className="font-mono text-5xl md:text-8xl font-black uppercase tracking-[0.25em] text-white">
+            WFL
+          </p>
+        </div>
 
         {/* Main scoreboard */}
-        <div className="w-full max-w-[1800px] grid grid-cols-[1fr_auto_1fr] items-center gap-12">
+        <div className="w-full flex flex-row items-center justify-between gap-8 max-w-[100vw] overflow-hidden">
           {/* Team A */}
-          <TeamDisplay
-            name={teamAName}
-            logo={match.teamALogo}
-            align="right"
-            isLive={isLive}
-          />
+          <div className="flex-1 min-w-0 flex justify-end text-right px-4">
+            <p
+              className={cn(
+                "font-bold text-white uppercase leading-tight",
+                "text-[8vw] lg:text-[10vw] xl:text-[120px]"
+              )}
+              style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}
+              title={displayTeamA}
+            >
+              {displayTeamA}
+            </p>
+          </div>
 
           {/* Center score/vs */}
-          <div className="flex flex-col items-center justify-center px-20">
+          <div className="flex flex-col items-center justify-center shrink-0">
             {match.round && (
-              <div className="mb-6 rounded-2xl bg-line/10 backdrop-blur-sm border border-line/20 px-8 py-3">
-                <span className="font-mono text-2xl font-bold uppercase tracking-[0.2em] text-subtle">
+              <div className="mb-6 rounded-full bg-black border-2 border-white px-8 py-3 whitespace-nowrap">
+                <span className="font-mono text-xl md:text-3xl font-bold uppercase tracking-[0.2em] text-white">
                   {match.round}
                 </span>
               </div>
@@ -161,152 +165,57 @@ export function BigScreenDisplay({ match: initialMatch }: { match: SportsMatch }
                 <p
                   className={cn(
                     "font-mono tabular-nums leading-none tracking-tighter",
-                    isLive
-                      ? "text-[240px] font-black text-ink drop-shadow-[0_0_40px_rgba(255,255,255,0.3)]"
-                      : "text-[200px] font-bold text-ink/90"
+                    "text-[15vw] lg:text-[240px] font-black text-white whitespace-nowrap"
                   )}
-                  aria-label={`${teamAName} ${match.scoreA ?? 0}, ${teamBName} ${match.scoreB ?? 0}`}
+                  aria-label={`${displayTeamA} ${displayScoreA ?? 0}, ${displayTeamB} ${displayScoreB ?? 0}`}
                 >
                   <span aria-hidden="true" className="flex items-center">
-                    <span className={cn(
-                      "transition-all duration-500",
-                      isLive && "text-accent"
-                    )}>
-                      {match.scoreA ?? 0}
-                    </span>
-                    <span className="mx-12 text-line/40 font-normal">:</span>
-                    <span className={cn(
-                      "transition-all duration-500",
-                      isLive && "text-accent"
-                    )}>
-                      {match.scoreB ?? 0}
-                    </span>
+                    <span>{displayScoreA ?? 0}</span>
+                    <span className="mx-6 lg:mx-10 text-white/50 font-normal pb-4">:</span>
+                    <span>{displayScoreB ?? 0}</span>
                   </span>
                 </p>
               </div>
             ) : (
-              <p className="font-mono text-8xl font-bold uppercase tracking-[0.3em] text-muted/60">
+              <p className="font-mono text-8xl lg:text-[200px] font-bold uppercase tracking-[0.3em] text-white/60">
                 VS
               </p>
             )}
-
-            {/* Sport label */}
-            <div className="mt-10">
-              <span className="font-mono text-3xl font-semibold uppercase tracking-[0.2em] text-muted/70">
-                {SPORT_LABELS[match.sport]}
-              </span>
-            </div>
           </div>
 
           {/* Team B */}
-          <TeamDisplay
-            name={teamBName}
-            logo={match.teamBLogo}
-            align="left"
-            isLive={isLive}
-          />
+          <div className="flex-1 min-w-0 flex justify-start text-left px-4">
+            <p
+              className={cn(
+                "font-bold text-white uppercase leading-tight",
+                "text-[8vw] lg:text-[10vw] xl:text-[120px]"
+              )}
+              style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}
+              title={displayTeamB}
+            >
+              {displayTeamB}
+            </p>
+          </div>
         </div>
 
         {/* Winner banner for finished matches */}
         {match.status === "finished" && match.postMatch.winnerName && (
-          <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-full max-w-4xl">
-            <div className="rounded-3xl bg-gradient-to-r from-accent/20 via-accent/30 to-accent/20 backdrop-blur-xl border border-accent/40 px-16 py-8 text-center shadow-[0_0_80px_-12px_rgba(238,73,92,0.5)]">
-              <p className="font-mono text-3xl font-black uppercase tracking-[0.25em] text-accent mb-2">
+          <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-[90vw] max-w-4xl z-40">
+            <div className="bg-white text-black border-4 border-black px-16 py-8 text-center rounded-3xl">
+              <p className="font-mono text-2xl md:text-4xl font-black uppercase tracking-[0.25em] mb-2">
                 Winner
               </p>
-              <p className="display text-7xl font-bold text-ink">
+              <p className="display text-5xl md:text-7xl font-bold truncate">
                 {match.postMatch.winnerName}
               </p>
               {match.postMatch.winnerTitle && (
-                <p className="mt-4 font-mono text-2xl font-semibold uppercase tracking-[0.15em] text-muted">
+                <p className="mt-4 font-mono text-xl md:text-3xl font-semibold uppercase tracking-[0.15em] text-black/70 truncate">
                   {match.postMatch.winnerTitle}
                 </p>
               )}
             </div>
           </div>
         )}
-
-        {/* Match venue - bottom left */}
-        {match.venue && (
-          <div className="absolute bottom-8 left-8">
-            <p className="font-mono text-xl font-semibold uppercase tracking-[0.15em] text-muted/70">
-              📍 {match.venue}
-            </p>
-          </div>
-        )}
-
-        {/* Last update timestamp - bottom right */}
-        <div className="absolute bottom-8 right-8">
-          <p className="font-mono text-lg font-medium text-muted/50">
-            Updated: {lastUpdate.toLocaleTimeString()}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TeamDisplay({
-  name,
-  logo,
-  align,
-  isLive,
-}: {
-  name: string;
-  logo: string;
-  align: "left" | "right";
-  isLive: boolean;
-}) {
-  const isUnconfirmed = name === "Participant to be confirmed";
-
-  return (
-    <div
-      className={cn(
-        "flex items-center gap-12",
-        align === "right" ? "flex-row-reverse text-right" : "flex-row text-left"
-      )}
-    >
-      {/* Logo */}
-      <div
-        className={cn(
-          "relative grid shrink-0 place-items-center overflow-hidden rounded-3xl bg-surface/60 backdrop-blur-sm border shadow-2xl",
-          isLive
-            ? "h-72 w-72 border-accent/30 shadow-[0_0_80px_-20px_rgba(238,73,92,0.4)]"
-            : "h-64 w-64 border-line/20"
-        )}
-      >
-        {logo ? (
-          <Image
-            src={logo}
-            alt=""
-            fill
-            sizes="300px"
-            className="object-contain p-12"
-            priority
-          />
-        ) : (
-          <span
-            className="font-mono text-9xl font-black uppercase text-subtle/40"
-            aria-hidden="true"
-          >
-            {isUnconfirmed ? "TBC" : name.charAt(0).toUpperCase()}
-          </span>
-        )}
-      </div>
-
-      {/* Team name */}
-      <div className="flex-1 min-w-0">
-        <p
-          className={cn(
-            "display leading-[1.1] break-words",
-            isLive
-              ? "text-[120px] font-black text-ink drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-              : "text-[100px] font-bold text-ink/90"
-          )}
-          title={name}
-        >
-          {name}
-        </p>
       </div>
     </div>
   );
