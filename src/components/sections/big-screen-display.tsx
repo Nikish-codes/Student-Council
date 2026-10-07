@@ -25,7 +25,8 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout
 
-      const response = await fetch("/api/sports/scores", {
+      // Add cache buster ?t=... to force browser to skip local cache and always ask the server
+      const response = await fetch(`/api/sports/scores?t=${Date.now()}`, {
         signal: controller.signal,
         cache: "no-store",
       });
@@ -90,7 +91,7 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
   const displayScoreB = isSwapped ? match.scoreA : match.scoreB;
 
   return (
-    <div className="fixed inset-0 bg-black text-white overflow-hidden font-sans flex flex-col justify-center">
+    <div className="fixed inset-0 bg-black text-white overflow-hidden font-sans flex flex-col justify-center px-4">
       {/* Logos at Top Corners */}
       <div className="absolute top-8 left-12 z-50 flex items-center">
         <div className="relative h-20 w-40 sm:h-24 sm:w-48 overflow-hidden">
@@ -126,22 +127,22 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
         </div>
       )}
 
-      <div className="relative w-full flex flex-col items-center justify-center px-8 md:px-16">
+      <div className="relative w-full flex flex-col items-center justify-center px-2 md:px-8">
         {/* WFL Header */}
-        <div className="mb-8 md:mb-16 w-full text-center">
+        <div className="mb-6 md:mb-10 w-full text-center">
           <p className="font-mono text-5xl md:text-8xl font-black uppercase tracking-[0.25em] text-white">
             WFL
           </p>
         </div>
 
         {/* Main scoreboard */}
-        <div className="w-full flex flex-row items-center justify-between gap-8 max-w-[100vw] overflow-hidden">
+        <div className="w-full flex flex-row items-center justify-between gap-4 md:gap-8 max-w-[100vw]">
           {/* Team A */}
-          <div className="flex-1 min-w-0 flex justify-end text-right px-4">
+          <div className="flex-1 min-w-0 px-2">
             <p
               className={cn(
-                "font-bold text-white uppercase leading-tight",
-                "text-[8vw] lg:text-[10vw] xl:text-[120px]"
+                "font-bold text-white uppercase leading-[1.1] text-right",
+                "text-[7vw] lg:text-[6vw] xl:text-[100px]"
               )}
               style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}
               title={displayTeamA}
@@ -153,7 +154,7 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
           {/* Center score/vs */}
           <div className="flex flex-col items-center justify-center shrink-0">
             {match.round && (
-              <div className="mb-6 rounded-full bg-black border-2 border-white px-8 py-3 whitespace-nowrap">
+              <div className="mb-4 md:mb-8 rounded-full bg-black border-2 border-white px-8 py-3 whitespace-nowrap">
                 <span className="font-mono text-xl md:text-3xl font-bold uppercase tracking-[0.2em] text-white">
                   {match.round}
                 </span>
@@ -165,13 +166,13 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
                 <p
                   className={cn(
                     "font-mono tabular-nums leading-none tracking-tighter",
-                    "text-[15vw] lg:text-[240px] font-black text-white whitespace-nowrap"
+                    "text-[14vw] lg:text-[15vw] xl:text-[200px] font-black text-white whitespace-nowrap"
                   )}
                   aria-label={`${displayTeamA} ${displayScoreA ?? 0}, ${displayTeamB} ${displayScoreB ?? 0}`}
                 >
                   <span aria-hidden="true" className="flex items-center">
                     <span>{displayScoreA ?? 0}</span>
-                    <span className="mx-6 lg:mx-10 text-white/50 font-normal pb-4">:</span>
+                    <span className="mx-4 lg:mx-8 text-white/50 font-normal pb-2 md:pb-4">:</span>
                     <span>{displayScoreB ?? 0}</span>
                   </span>
                 </p>
@@ -184,11 +185,11 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
           </div>
 
           {/* Team B */}
-          <div className="flex-1 min-w-0 flex justify-start text-left px-4">
+          <div className="flex-1 min-w-0 px-2">
             <p
               className={cn(
-                "font-bold text-white uppercase leading-tight",
-                "text-[8vw] lg:text-[10vw] xl:text-[120px]"
+                "font-bold text-white uppercase leading-[1.1] text-left",
+                "text-[7vw] lg:text-[6vw] xl:text-[100px]"
               )}
               style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}
               title={displayTeamB}
