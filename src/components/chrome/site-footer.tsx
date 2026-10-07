@@ -5,22 +5,22 @@ const FOOTER_NAV = [
   {
     title: "Explore",
     items: [
-      { href: "/", label: "Home" },
-      { href: "/oval", label: "Oval" },
+      { href: "/", label: "Home", disabled: true },
+      { href: "/oval", label: "Oval", disabled: true },
       { href: "/sports", label: "Sports" },
-      { href: "/council", label: "Council" },
-      { href: "/events", label: "Events" },
-      { href: "/clubs", label: "Clubs" },
-      { href: "/support", label: "Support" },
+      { href: "/council", label: "Council", disabled: true },
+      { href: "/events", label: "Events", disabled: true },
+      { href: "/clubs", label: "Clubs", disabled: true },
+      { href: "/support", label: "Support", disabled: true },
     ],
   },
   {
     title: "Support",
     items: [
-      { href: "/support#gateway", label: "Gateway" },
-      { href: "/support#bridge", label: "Bridge" },
-      { href: "/support#career-connect", label: "Career Connect" },
-      { href: "/support#grievance-form", label: "Grievance" },
+      { href: "/support#gateway", label: "Gateway", disabled: true },
+      { href: "/support#bridge", label: "Bridge", disabled: true },
+      { href: "/support#career-connect", label: "Career Connect", disabled: true },
+      { href: "/support#grievance-form", label: "Grievance", disabled: true },
     ],
   },
   {
@@ -44,13 +44,6 @@ export function SiteFooter() {
         <div className="grid gap-16 lg:grid-cols-12">
           <div className="relative flex min-h-32 items-center justify-center lg:col-span-5">
             <span className="sr-only">Woxsen University</span>
-            {/* The university wordmark is a two-colour logo in its light-theme
-                form, so unlike the crest it can't be a single masked shape —
-                both variants stay. They are web-sized WebP (896px for a 448px
-                box) instead of the 1200px print PNGs, carry intrinsic
-                dimensions so they reserve their own space, and load lazily:
-                the footer is below the fold on every page, so these bytes have
-                no business competing with the content someone came to read. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/brand/woxsen-university-white.webp"
@@ -81,12 +74,24 @@ export function SiteFooter() {
                 <ul className="mt-5 space-y-3">
                   {col.items.map((item) => (
                     <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        className="prose-link text-sm text-muted transition-colors hover:text-ink"
-                      >
-                        {item.label}
-                      </Link>
+                      {item.disabled ? (
+                        <span
+                          className="prose-link text-sm text-subtle/50 cursor-not-allowed"
+                          title="Coming soon"
+                        >
+                          {item.label}
+                          <span className="ml-1 align-super font-mono text-[9px] uppercase tracking-[0.15em] text-subtle/40">
+                            soon
+                          </span>
+                        </span>
+                      ) : (
+                        <Link
+                          href={item.href}
+                          className="prose-link text-sm text-muted transition-colors hover:text-ink"
+                        >
+                          {item.label}
+                        </Link>
+                      )}
                     </li>
                   ))}
                 </ul>
