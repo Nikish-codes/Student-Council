@@ -21,6 +21,7 @@ import {
 } from "@/components/management/fields";
 import { SPORT_TYPE_OPTIONS } from "@/lib/sports-options";
 import { MatchCockpit } from "./match-cockpit";
+import { TimerCockpit } from "./timer-cockpit";
 import { CompetitionFields, TeamFields } from "./match-fields";
 import { saveMatch } from "../actions";
 import { media as mediaT } from "@/db/schema";
@@ -208,20 +209,32 @@ export default async function MatchEditor({
       </Fieldset>
 
       {showCockpit ? (
-        <Fieldset
-          title="Live scoring"
-          hint="Real-time score + event feed for football."
-        >
-          <MatchCockpit
-            matchId={Number(id)}
-            teamAName={row?.participantAName || row?.teamA?.name || "Side A"}
-            teamBName={row?.participantBName || row?.teamB?.name || "Side B"}
-            scoreA={row?.scoreA ?? 0}
-            scoreB={row?.scoreB ?? 0}
-            status={row?.status ?? "scheduled"}
-            events={(row?.events as SportMatchEvent[]) ?? []}
-          />
-        </Fieldset>
+        <>
+          <Fieldset
+            title="Live scoring"
+            hint="Real-time score + event feed for football."
+          >
+            <MatchCockpit
+              matchId={Number(id)}
+              teamAName={row?.participantAName || row?.teamA?.name || "Side A"}
+              teamBName={row?.participantBName || row?.teamB?.name || "Side B"}
+              scoreA={row?.scoreA ?? 0}
+              scoreB={row?.scoreB ?? 0}
+              status={row?.status ?? "scheduled"}
+              events={(row?.events as SportMatchEvent[]) ?? []}
+            />
+          </Fieldset>
+          
+          <Fieldset
+            title="Live Match Clock"
+            hint="Control the live timer shown on the big screen display."
+          >
+            <TimerCockpit 
+              matchId={Number(id)}
+              initialTimer={row?.postMatch?.timer} 
+            />
+          </Fieldset>
+        </>
       ) : null}
 
       <SaveBar />

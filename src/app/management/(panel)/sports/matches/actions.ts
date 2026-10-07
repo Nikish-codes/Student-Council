@@ -201,3 +201,22 @@ export async function deleteMatch(id: number) {
   await db.delete(t).where(eq(t.id, id));
   bust();
 }
+
+/** Quick timer update — used by the live scoring cockpit. */
+export async function updateMatchTimer(id: number, timer: import("@/lib/schemas").SportMatchTimer) {
+  await requireSportsManager();
+  const existing = await db.query.sportsMatches.findFirst({
+    where: eq(t.id, id),
+    columns: { postMatch: true },
+  });
+  if (!existing) throw new Error("NOT_FOUND");
+  
+  const postMatch = existing.postMatch || {};
+  postMatch.timer = timer;
+
+  await db
+    .update(t)
+    .set({ postMatch, updatedAt: new Date().toISOString() })
+    .where(eq(t.id, id));
+  bust(id);
+}

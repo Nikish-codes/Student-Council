@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Plus, Minus, Flag, Radio, X, ArrowLeftRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SportMatchEvent } from "@/lib/schemas";
+import { updateMatchScore, addMatchEvent, removeMatchEvent } from "../actions";
 
 type MatchCockpitProps = {
   matchId: number;
@@ -41,13 +42,17 @@ export function MatchCockpit({
   const isFinished = liveStatus === "finished";
 
   function setScore(a: number, b: number, newStatus: typeof liveStatus) {
+    if (isNaN(matchId)) {
+        alert("Please save this new match first before using live controls!");
+        return;
+    }
     setLiveA(a);
     setLiveB(b);
     setLiveStatus(newStatus);
     
     setFeedback("Updating...");
     startTransition(async () => {
-      await new Promise((r) => setTimeout(r, 200)); 
+      await updateMatchScore(matchId, a, b, newStatus);
       setFeedback("Score saved");
       setTimeout(() => setFeedback(""), 2000);
     });
@@ -55,6 +60,10 @@ export function MatchCockpit({
 
   function submitEvent() {
     if (!eventTime || !eventType) return;
+    if (isNaN(matchId)) {
+        alert("Please save this new match first before using live controls!");
+        return;
+    }
     const newEvent = {
       time: eventTime,
       team: eventTeam,
@@ -62,37 +71,48 @@ export function MatchCockpit({
       description: eventDesc,
     };
     
-    const newEvents = [...liveEvents, newEvent];
-    setLiveEvents(newEvents);
-    
-    setEventTime("");
-    setEventDesc("");
+    setLiveEvents((prev) => [...prev, newEvent]);
     
     setFeedback("Updating...");
     startTransition(async () => {
-      await new Promise((r) => setTimeout(r, 200)); 
-      setFeedback("Event added");
+      await addMatchEvent(matchId, newEvent);
+      setFeedback("Event saved");
+      setTimeout(() => setFeedback(""), 2000);
+    });
+    
+    setEventTime("");
+    setEventDesc("");
+  }
+
+  function handleRemoveEvent(index: number) {
+    if (isNaN(matchId)) return;
+    const newEvents = liveEvents.filter((_, i) => i !== index);
+    setLiveEvents(newEvents);
+    
+    setFeedback("Updating...");
+    startTransition(async () => {
+      await removeMatchEvent(matchId, index);
+      setFeedback("Event removed");
       setTimeout(() => setFeedback(""), 2000);
     });
   }
 
-  function handleRemoveEvent(index: number) {
-    const newEvents = liveEvents.filter((_, i) => i !== index);
-    setLiveEvents(newEvents);
-  }
-
   function toggleDisplaySwap() {
+    if (isNaN(matchId)) {
+        alert("Please save this new match first before using live controls!");
+        return;
+    }
     const newEvent = {
       time: "SYS",
       team: "a" as const,
       type: "swap_display",
       description: "Display swapped",
     };
-    const newEvents = [...liveEvents, newEvent];
-    setLiveEvents(newEvents);
+    setLiveEvents((prev) => [...prev, newEvent]);
+    
     setFeedback("Updating...");
     startTransition(async () => {
-      await new Promise((r) => setTimeout(r, 200)); 
+      await addMatchEvent(matchId, newEvent);
       setFeedback("Display swapped");
       setTimeout(() => setFeedback(""), 2000);
     });
@@ -103,18 +123,21 @@ export function MatchCockpit({
       <div className="mb-6 flex items-center gap-3">
         <span className="relative flex h-3 w-3">
           {isLive && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />}
-          <span className={cn("relative inline-flex h-3 w-3 rounded-full", isLive ? "bg-accent" : isFinished ? "bg-muted" : "bg-line/40")} />
+          <span className={cn("relative inline-flex h-3 w-3 rounded-full", isLive ? "bg-accent" : "bg-subtle/50")} />
         </span>
-        <h3 className="font-mono text-sm uppercase tracking-widest text-accent font-semibold">Live match cockpit</h3>
+        <h3 className="font-mono text-sm uppercase tracking-widest text-ink font-semibold">
+          Live Match Cockpit
+        </h3>
       </div>
 
-      <input type="hidden" name="scoreA" value={liveA} />
-      <input type="hidden" name="scoreB" value={liveB} />
-      <input type="hidden" name="status" value={liveStatus} />
-      <input type="hidden" name="events" value={JSON.stringify(liveEvents)} />
+      <div className="flex flex-col md:flex-row items-center gap-6 rounded-xl border border-line/10 bg-bg p-8">
+        
+        {/* We use hidden inputs so the overarching form submission saves the final state. */}
+        <input type="hidden" name="scoreA" value={liveA} />
+        <input type="hidden" name="scoreB" value={liveB} />
+        <input type="hidden" name="status" value={liveStatus} />
+        <input type="hidden" name="events" value={JSON.stringify(liveEvents)} />
 
-      {/* Scoreboard */}
-      <div className="mb-8 flex items-center justify-center gap-8 rounded-xl bg-bg py-8 border border-line/10">
         {/* Team A */}
         <div className="flex flex-1 flex-col items-center gap-2">
           <span className="kicker text-subtle text-center">{teamAName}</span>
@@ -167,7 +190,7 @@ export function MatchCockpit({
       </div>
 
       {/* Status controls */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 mt-6">
         {!isLive && !isFinished && (
           <button
             type="button"

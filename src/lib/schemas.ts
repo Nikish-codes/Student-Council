@@ -211,6 +211,15 @@ export type SportPostMatchInterview = z.infer<
   typeof sportPostMatchInterviewSchema
 >;
 
+export const sportMatchTimerSchema = z.object({
+  running: z.boolean(),
+  startTime: z.number().nullable(),
+  elapsedMs: z.number(),
+  matchDuration: z.number().optional(), // total minutes (e.g., 90, 40)
+  stoppageTime: z.number().optional(), // extra minutes (+1, +2)
+});
+export type SportMatchTimer = z.infer<typeof sportMatchTimerSchema>;
+
 export const sportPostMatchSchema = z.object({
   highlights: z.array(sportPostMatchHighlightSchema).optional(),
   interviews: z.array(sportPostMatchInterviewSchema).optional(),
@@ -219,6 +228,7 @@ export const sportPostMatchSchema = z.object({
   winnerPhotoId: z.number().optional(),
   runnerUpName: z.string().optional(),
   runnerUpPhotoId: z.number().optional(),
+  timer: sportMatchTimerSchema.optional(),
 });
 export type SportPostMatch = z.infer<typeof sportPostMatchSchema>;
 

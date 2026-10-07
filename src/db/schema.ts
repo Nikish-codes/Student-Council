@@ -167,6 +167,7 @@ export type SportPostMatch = {
   winnerPhotoId?: number;
   runnerUpName?: string;
   runnerUpPhotoId?: number;
+  timer?: import("@/lib/schemas").SportMatchTimer;
 };
 
 // ───────────────────────────────── Oval menu ─────────────────────────────────
