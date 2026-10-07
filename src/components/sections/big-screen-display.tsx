@@ -115,6 +115,8 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
   const isSwapped = (match.events?.filter((e) => e.type === "swap_display").length || 0) % 2 !== 0;
   const displayTeamA = isSwapped ? (match.teamBName || "TBC") : (match.teamAName || "TBC");
   const displayTeamB = isSwapped ? (match.teamAName || "TBC") : (match.teamBName || "TBC");
+  const displayLogoA = isSwapped ? match.teamBLogo : match.teamALogo;
+  const displayLogoB = isSwapped ? match.teamALogo : match.teamBLogo;
   const displayScoreA = isSwapped ? match.scoreB : match.scoreA;
   const displayScoreB = isSwapped ? match.scoreA : match.scoreB;
 
@@ -165,9 +167,49 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
         </div>
 
         {/* Main scoreboard */}
-        <div className="w-full flex flex-row items-center justify-between gap-4 md:gap-12 max-w-[100vw]">
-          {/* Team A */}
-          <div className="flex-1 min-w-0 px-2 flex justify-end">
+        <div className="w-full grid grid-cols-[1fr_auto_1fr] items-center gap-4 md:gap-12 max-w-[100vw]">
+          {/* Row 1: Logos */}
+          <div className="flex justify-end pb-4 md:pb-8">
+            {displayLogoA && (
+              <div className="relative h-24 w-24 md:h-40 md:w-40 xl:h-56 xl:w-56 shrink-0 overflow-hidden rounded-2xl md:rounded-[2rem] border-2 md:border-4 border-white/10 shadow-2xl bg-white/5">
+                <Image
+                  src={displayLogoA}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 96px, (max-width: 1280px) 160px, 224px"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col items-center justify-center">
+            {/* Round info can go above score */}
+            {match.round && (
+              <div className="mb-4 rounded-full bg-black border-2 border-white px-8 py-2 whitespace-nowrap">
+                <span className="font-mono text-xl md:text-2xl font-bold uppercase tracking-[0.2em] text-white">
+                  {match.round}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-start pb-4 md:pb-8">
+            {displayLogoB && (
+              <div className="relative h-24 w-24 md:h-40 md:w-40 xl:h-56 xl:w-56 shrink-0 overflow-hidden rounded-2xl md:rounded-[2rem] border-2 md:border-4 border-white/10 shadow-2xl bg-white/5">
+                <Image
+                  src={displayLogoB}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 96px, (max-width: 1280px) 160px, 224px"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Row 2: Names and Score */}
+          <div className="flex min-w-0 justify-end items-center">
             <p
               className={cn(
                 "font-bold text-white uppercase leading-[1.1] text-right tracking-tight",
@@ -180,35 +222,19 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
             </p>
           </div>
 
-          {/* Center score */}
           <div className="flex flex-col items-center justify-center shrink-0 min-w-[20vw]">
-            {match.round && (
-              <div className="mb-6 md:mb-10 rounded-full bg-black border-2 border-white px-8 py-2 md:py-3 whitespace-nowrap">
-                <span className="font-mono text-xl md:text-3xl font-bold uppercase tracking-[0.2em] text-white">
-                  {match.round}
+            <p className="font-mono font-black tabular-nums leading-none tracking-tighter text-white text-[12vw] lg:text-[14vw] xl:text-[220px]">
+              <span className="flex items-center">
+                <span>{displayScoreA ?? 0}</span>
+                <span className="mx-4 md:mx-10 text-white/40 font-normal -translate-y-[5%]">
+                  :
                 </span>
-              </div>
-            )}
-
-            <div className="relative">
-              <p
-                className={cn(
-                  "font-mono tabular-nums leading-none tracking-tighter",
-                  "text-[12vw] lg:text-[11vw] xl:text-[220px] font-black text-white whitespace-nowrap"
-                )}
-                aria-label={`${displayTeamA} ${displayScoreA ?? 0}, ${displayTeamB} ${displayScoreB ?? 0}`}
-              >
-                <span aria-hidden="true" className="flex items-center">
-                  <span>{displayScoreA ?? 0}</span>
-                  <span className="mx-6 lg:mx-10 text-white/50 font-normal pb-3 md:pb-6">:</span>
-                  <span>{displayScoreB ?? 0}</span>
-                </span>
-              </p>
-            </div>
+                <span>{displayScoreB ?? 0}</span>
+              </span>
+            </p>
           </div>
 
-          {/* Team B */}
-          <div className="flex-1 min-w-0 px-2 flex justify-start">
+          <div className="flex min-w-0 justify-start items-center">
             <p
               className={cn(
                 "font-bold text-white uppercase leading-[1.1] text-left tracking-tight",
