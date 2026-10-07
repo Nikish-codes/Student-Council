@@ -61,17 +61,13 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
   // Poll every 5 seconds
   useEffect(() => {
     fetchScores(); // Initial fetch
-
     const interval = setInterval(fetchScores, 5000);
-
     return () => clearInterval(interval);
   }, [fetchScores]);
 
   // Monitor online/offline status for immediate refetch
   useEffect(() => {
-    const handleOnline = () => {
-      fetchScores(); // Immediate refetch when back online
-    };
+    const handleOnline = () => fetchScores();
     window.addEventListener("online", handleOnline);
     return () => window.removeEventListener("online", handleOnline);
   }, [fetchScores]);
@@ -93,8 +89,8 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
   return (
     <div className="fixed inset-0 bg-black text-white overflow-hidden font-sans flex flex-col justify-center px-4">
       {/* Logos at Top Corners */}
-      <div className="absolute top-8 left-12 z-50 flex items-center">
-        <div className="relative h-20 w-40 sm:h-24 sm:w-48 overflow-hidden">
+      <div className="absolute top-4 md:top-8 left-4 md:left-12 z-50 flex items-center">
+        <div className="relative h-16 w-32 sm:h-24 sm:w-48 overflow-hidden">
           <Image
             src="/brand/sc-white.png"
             alt="Student Council"
@@ -105,8 +101,8 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
       </div>
       
       {academyLogo && (
-        <div className="absolute top-8 right-12 z-50 flex items-center">
-          <div className="relative h-20 w-40 sm:h-24 sm:w-48 overflow-hidden">
+        <div className="absolute top-4 md:top-8 right-4 md:right-12 z-50 flex items-center">
+          <div className="relative h-16 w-32 sm:h-24 sm:w-48 overflow-hidden">
             <Image
               src={academyLogo}
               alt="Sports Academy"
@@ -117,20 +113,19 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
         </div>
       )}
 
-      {/* Live badge */}
-      {isLive && (
-        <div className="absolute top-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-full bg-white text-black px-8 py-3">
-          <span className="h-3 w-3 rounded-full bg-black animate-pulse" />
-          <span className="font-mono text-xl font-black uppercase tracking-[0.2em]">
-            Live
-          </span>
-        </div>
-      )}
-
       <div className="relative w-full flex flex-col items-center justify-center px-2 md:px-8">
-        {/* WFL Header */}
-        <div className="mb-6 md:mb-10 w-full text-center">
-          <p className="font-mono text-5xl md:text-8xl font-black uppercase tracking-[0.25em] text-white">
+        
+        {/* Header section combining LIVE badge and WFL text to avoid overlapping */}
+        <div className="mb-8 w-full flex flex-col items-center gap-4">
+          {isLive && (
+            <div className="flex items-center gap-3 rounded-full bg-white text-black px-6 py-2">
+              <span className="h-3 w-3 rounded-full bg-black animate-pulse" />
+              <span className="font-mono text-lg font-black uppercase tracking-[0.2em]">
+                Live
+              </span>
+            </div>
+          )}
+          <p className="font-mono text-4xl md:text-6xl xl:text-8xl font-black uppercase tracking-[0.25em] text-white leading-none">
             WFL
           </p>
         </div>
@@ -138,13 +133,13 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
         {/* Main scoreboard */}
         <div className="w-full flex flex-row items-center justify-between gap-4 md:gap-8 max-w-[100vw]">
           {/* Team A */}
-          <div className="flex-1 min-w-0 px-2">
+          <div className="flex-1 min-w-0 px-2 flex justify-end">
             <p
               className={cn(
-                "font-bold text-white uppercase leading-[1.1] text-right",
-                "text-[7vw] lg:text-[6vw] xl:text-[100px]"
+                "font-bold text-white uppercase leading-[1.1] text-right tracking-tight",
+                "text-[5vw] lg:text-[4.5vw] xl:text-[80px]"
               )}
-              style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}
+              style={{ wordBreak: 'keep-all', overflowWrap: 'normal' }}
               title={displayTeamA}
             >
               {displayTeamA}
@@ -154,8 +149,8 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
           {/* Center score/vs */}
           <div className="flex flex-col items-center justify-center shrink-0">
             {match.round && (
-              <div className="mb-4 md:mb-8 rounded-full bg-black border-2 border-white px-8 py-3 whitespace-nowrap">
-                <span className="font-mono text-xl md:text-3xl font-bold uppercase tracking-[0.2em] text-white">
+              <div className="mb-4 md:mb-6 rounded-full bg-black border-2 border-white px-6 py-2 whitespace-nowrap">
+                <span className="font-mono text-lg md:text-2xl font-bold uppercase tracking-[0.2em] text-white">
                   {match.round}
                 </span>
               </div>
@@ -166,7 +161,7 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
                 <p
                   className={cn(
                     "font-mono tabular-nums leading-none tracking-tighter",
-                    "text-[14vw] lg:text-[15vw] xl:text-[200px] font-black text-white whitespace-nowrap"
+                    "text-[10vw] lg:text-[9vw] xl:text-[180px] font-black text-white whitespace-nowrap"
                   )}
                   aria-label={`${displayTeamA} ${displayScoreA ?? 0}, ${displayTeamB} ${displayScoreB ?? 0}`}
                 >
@@ -178,20 +173,20 @@ export function BigScreenDisplay({ match: initialMatch, academyLogo }: { match: 
                 </p>
               </div>
             ) : (
-              <p className="font-mono text-8xl lg:text-[200px] font-bold uppercase tracking-[0.3em] text-white/60">
+              <p className="font-mono text-6xl lg:text-[140px] font-bold uppercase tracking-[0.3em] text-white/60">
                 VS
               </p>
             )}
           </div>
 
           {/* Team B */}
-          <div className="flex-1 min-w-0 px-2">
+          <div className="flex-1 min-w-0 px-2 flex justify-start">
             <p
               className={cn(
-                "font-bold text-white uppercase leading-[1.1] text-left",
-                "text-[7vw] lg:text-[6vw] xl:text-[100px]"
+                "font-bold text-white uppercase leading-[1.1] text-left tracking-tight",
+                "text-[5vw] lg:text-[4.5vw] xl:text-[80px]"
               )}
-              style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}
+              style={{ wordBreak: 'keep-all', overflowWrap: 'normal' }}
               title={displayTeamB}
             >
               {displayTeamB}
