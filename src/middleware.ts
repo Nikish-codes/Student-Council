@@ -115,20 +115,21 @@ export default auth((req) => {
   // B) Unlocked visitors: logged-in team OR holders of a valid preview cookie.
   const hasPreviewCookie =
     !!PREVIEW_KEY && req.cookies.get(PREVIEW_COOKIE)?.value === PREVIEW_KEY;
-  if (isLoggedIn || hasPreviewCookie) return NextResponse.next();
 
-  // B1) Search crawlers see the real site so indexing never stops.
-  if (SEARCH_BOTS.test(req.headers.get("user-agent") ?? "")) {
-    return NextResponse.next();
-  }
+  // B1) Search crawlers see the real site so indexing never stops (but only if unlocked).
+  const isCrawler = SEARCH_BOTS.test(req.headers.get("user-agent") ?? "");
 
   // /sports is always open — it's the only live section during soft launch.
   if (pathname.startsWith("/sports")) return NextResponse.next();
 
-  // Everyone else visiting any other page → the teaser.
+  // For non-sports pages, require authentication or preview access.
+  // Logged-in users, preview cookie holders, or crawlers can access all pages.
+  if (isLoggedIn || hasPreviewCookie || isCrawler) return NextResponse.next();
+
+  // Everyone else visiting any other page → redirect to /sports (the only public page).
   const url = req.nextUrl.clone();
-  url.pathname = "/coming-soon";
-  return NextResponse.rewrite(url);
+  url.pathname = "/sports";
+  return NextResponse.redirect(url);
 });
 
 export const config = {
