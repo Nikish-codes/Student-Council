@@ -139,6 +139,7 @@ export type SportStandingRow = {
 
 /** One timestamped event in a live match feed (goal, card, substitution, …). */
 export type SportMatchEvent = {
+  id?: string;
   time: string; // e.g. "23'" or "Q2 4:30"
   team: "a" | "b";
   type: string; // "goal" | "yellow" | "red" | "sub" | "timeout" | "point" | …
@@ -146,6 +147,9 @@ export type SportMatchEvent = {
   player?: string;
   jersey?: string;
   assist?: string;
+  celebrate?: boolean;
+  style?: "takeover" | "flourish";
+  replay?: boolean;
 };
 
 /** A post-match highlight photo or video thumbnail. */
@@ -162,6 +166,14 @@ export type SportPostMatchInterview = {
 };
 
 /** Post-match content attached to a match (highlights, interviews, winner). */
+export type SportDisplayOverlay = {
+  kind: "none" | "halt" | "message" | "kickoff" | "halftime" | "fulltime";
+  preset?: string;
+  title?: string;
+  subtitle?: string;
+  since?: number;
+};
+
 export type SportPostMatch = {
   highlights?: SportPostMatchHighlight[];
   interviews?: SportPostMatchInterview[];
@@ -171,6 +183,10 @@ export type SportPostMatch = {
   runnerUpName?: string;
   runnerUpPhotoId?: number;
   timer?: import("@/lib/schemas").SportMatchTimer;
+  overlay?: SportDisplayOverlay;
+  goalStyle?: "takeover" | "flourish";
+  teamAColor?: string;
+  teamBColor?: string;
 };
 
 // ───────────────────────────────── Oval menu ─────────────────────────────────

@@ -222,6 +222,9 @@ export default async function MatchEditor({
               scoreB={row?.scoreB ?? 0}
               status={row?.status ?? "scheduled"}
               events={(row?.events as SportMatchEvent[]) ?? []}
+              timer={row?.postMatch?.timer}
+              overlay={row?.postMatch?.overlay}
+              goalStyle={row?.postMatch?.goalStyle}
             />
           </Fieldset>
           

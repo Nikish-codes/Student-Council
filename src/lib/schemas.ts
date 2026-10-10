@@ -186,7 +186,11 @@ export const sportStandingRowSchema = z.object({
 });
 export type SportStandingRow = z.infer<typeof sportStandingRowSchema>;
 
+export const celebrationStyleSchema = z.enum(["takeover", "flourish"]);
+export type CelebrationStyle = z.infer<typeof celebrationStyleSchema>;
+
 export const sportMatchEventSchema = z.object({
+  id: z.string().optional(),
   time: z.string(),
   team: z.enum(["a", "b"]),
   type: z.string(),
@@ -194,6 +198,9 @@ export const sportMatchEventSchema = z.object({
   player: z.string().optional(),
   jersey: z.string().optional(),
   assist: z.string().optional(),
+  celebrate: z.boolean().optional(),
+  style: celebrationStyleSchema.optional(),
+  replay: z.boolean().optional(),
 });
 export type SportMatchEvent = z.infer<typeof sportMatchEventSchema>;
 
@@ -223,6 +230,15 @@ export const sportMatchTimerSchema = z.object({
 });
 export type SportMatchTimer = z.infer<typeof sportMatchTimerSchema>;
 
+export const sportDisplayOverlaySchema = z.object({
+  kind: z.enum(["none", "halt", "message", "kickoff", "halftime", "fulltime"]),
+  preset: z.string().optional(),
+  title: z.string().optional(),
+  subtitle: z.string().optional(),
+  since: z.number().optional(),
+});
+export type SportDisplayOverlay = z.infer<typeof sportDisplayOverlaySchema>;
+
 export const sportPostMatchSchema = z.object({
   highlights: z.array(sportPostMatchHighlightSchema).optional(),
   interviews: z.array(sportPostMatchInterviewSchema).optional(),
@@ -232,6 +248,10 @@ export const sportPostMatchSchema = z.object({
   runnerUpName: z.string().optional(),
   runnerUpPhotoId: z.number().optional(),
   timer: sportMatchTimerSchema.optional(),
+  overlay: sportDisplayOverlaySchema.optional(),
+  goalStyle: celebrationStyleSchema.optional(),
+  teamAColor: z.string().optional(),
+  teamBColor: z.string().optional(),
 });
 export type SportPostMatch = z.infer<typeof sportPostMatchSchema>;
 
