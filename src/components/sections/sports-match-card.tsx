@@ -9,6 +9,7 @@ import {
 } from "@/lib/sports-match";
 import { SPORT_LABELS } from "@/lib/schemas";
 import { useLiveMatch } from "@/lib/use-live-scores";
+import { useMatchClock } from "@/lib/sports-clock";
 import { cn } from "@/lib/utils";
 
 const STATUS_LABELS: Record<SportsMatch["status"], string> = {
@@ -20,6 +21,7 @@ const STATUS_LABELS: Record<SportsMatch["status"], string> = {
 
 export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch }) {
   const match = useLiveMatch(initialMatch);
+  const clock = useMatchClock(match.postMatch?.timer);
   
   const matchTime = formatSportsMatchTime(match.matchDate);
   const hasScore =
@@ -111,7 +113,7 @@ export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch })
               className="h-1.5 w-1.5 rounded-full bg-accent motion-safe:animate-pulse"
             />
           )}
-          {STATUS_LABELS[match.status]}
+          {isLive && clock ? clock.label : STATUS_LABELS[match.status]}
         </span>
       </header>
 
@@ -149,6 +151,17 @@ export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch })
 
         <TeamIdentity name={teamBName} logo={match.teamBLogo} align="right" isLive={isLive} />
       </div>
+
+      {isLive && clock && (
+        <div className="px-4 pb-3 sm:px-6">
+          <div className="h-[2px] w-full overflow-hidden rounded-full bg-line/10">
+            <div
+              className="h-full rounded-full bg-accent transition-[width] duration-1000 ease-linear"
+              style={{ width: `${Math.round(clock.progress * 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Post-match winner details */}
       {match.status === "finished" &&

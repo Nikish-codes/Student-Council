@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { SportsMatchCard } from "@/components/sections/sports-match-card";
+import { SportsLiveScoreboard } from "@/components/sections/sports-live-scoreboard";
+import { SportsMatchTimeline } from "@/components/sections/sports-match-timeline";
 import { getSportsMatches } from "@/lib/content";
 import { ArrowLeft } from "lucide-react";
-import { cn } from "@/lib/utils";
 
-export const revalidate = 60;
+export const revalidate = 10;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -32,8 +32,6 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
 
   if (!match) notFound();
 
-  const isLive = match.status === "live";
-
   return (
     <div className="min-h-screen bg-bg pt-20">
       <div className="container max-w-4xl py-12">
@@ -52,45 +50,13 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
           </h1>
         </div>
 
-        {/* We reuse the newly updated, highly prominent SportsMatchCard! */}
-        <div className="pointer-events-none">
-          <SportsMatchCard match={match} />
-        </div>
+        <SportsLiveScoreboard match={match} />
 
         {/* Live Feed / Post Match Info */}
-        <div className="mt-12 space-y-8">
-          {match.events && match.events.length > 0 && (
-            <div className="rounded-2xl border border-line/10 bg-surface/40 p-6 sm:p-8">
-              <h2 className="display text-2xl text-ink mb-6">Match Events Timeline</h2>
-              <div className="divide-y divide-line/10">
-                {match.events.map((ev, i) => (
-                  <div key={i} className="flex items-center gap-4 py-3.5 text-sm">
-                    <span className="font-mono text-xs font-semibold tabular-nums text-accent bg-accent/10 px-2.5 py-1 rounded-full border border-accent/20">
-                      {ev.time}
-                    </span>
-                    <span className={cn("h-2.5 w-2.5 rounded-full shrink-0", ev.team === "a" ? "bg-sky-400" : "bg-rose-400")} />
-                    <span className="font-semibold text-ink capitalize">{ev.type}</span>
-                    {ev.description && <span className="text-subtle truncate">· {ev.description}</span>}
-                    <span className="ml-auto font-mono text-xs text-muted shrink-0">
-                      {ev.team === "a" ? (match.teamAName || "Side A") : (match.teamBName || "Side B")}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+        <div className="mt-8 space-y-8">
+          <SportsMatchTimeline match={match} />
 
-          {isLive ? (
-            <div className="rounded-2xl border border-accent/20 bg-accent/5 p-8 text-center">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-accent/10 mb-4">
-                <span className="h-3 w-3 rounded-full bg-accent motion-safe:animate-pulse" />
-              </div>
-              <h2 className="display text-2xl text-accent">Live Coverage</h2>
-              <p className="mt-2 text-subtle max-w-md mx-auto">
-                Scores are updating in real-time. Stay tuned for live events and commentary if available.
-              </p>
-            </div>
-          ) : match.status === "scheduled" ? (
+          {match.status === "scheduled" ? (
             <div className="rounded-2xl border border-line/10 bg-surface/30 p-8 text-center">
               <h2 className="display text-2xl text-ink">Upcoming Match</h2>
               <p className="mt-2 text-subtle max-w-md mx-auto">
@@ -111,12 +77,12 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
                 )}
               </div>
             </div>
-          ) : (
+          ) : match.status === "cancelled" ? (
             <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
               <h2 className="display text-2xl text-red-400">Cancelled</h2>
               <p className="mt-2 text-subtle">This match has been cancelled.</p>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

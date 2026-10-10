@@ -191,6 +191,9 @@ export const sportMatchEventSchema = z.object({
   team: z.enum(["a", "b"]),
   type: z.string(),
   description: z.string().optional(),
+  player: z.string().optional(),
+  jersey: z.string().optional(),
+  assist: z.string().optional(),
 });
 export type SportMatchEvent = z.infer<typeof sportMatchEventSchema>;
 
