@@ -27,6 +27,13 @@ const STATUS_CLS: Record<string, string> = {
 export function MatchesTable({ rows }: { rows: MatchRow[] }) {
   const columns: Column<MatchRow>[] = [
     {
+      key: "id",
+      label: "ID",
+      sortable: true,
+      sortValue: (r) => r.id,
+      renderCell: (r) => <span className="font-mono tabular-nums text-subtle">#{r.id}</span>,
+    },
+    {
       key: "match",
       label: "Match",
       sortable: true,
