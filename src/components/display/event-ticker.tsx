@@ -38,7 +38,7 @@ export function EventTicker({
   if (recent.length === 0) return null;
 
   return (
-    <div className="pointer-events-none absolute bottom-7 left-1/2 z-30 w-[min(92vw,1700px)] -translate-x-1/2">
+    <div className="pointer-events-none absolute bottom-[3vh] left-1/2 z-30 w-[min(92vw,1700px)] -translate-x-1/2">
       <div className="flex flex-nowrap items-center justify-center gap-3 overflow-hidden">
         <AnimatePresence initial={false}>
           {recent.map(({ event, key }) => {

@@ -255,9 +255,9 @@ export function MatchDisplay({
         </div>
       ) : null}
 
-      <div className="relative z-20 flex h-full flex-col items-center justify-center px-6 pb-28">
-        <div className="mb-3 flex flex-col items-center gap-3">
-          <p className="font-mono text-[5.5vw] font-extrabold uppercase leading-none tracking-[0.3em] text-white xl:text-[92px]">
+      <div className="relative z-20 flex h-full flex-col items-center justify-center gap-[2vh] overflow-hidden px-6 pb-[13vh]">
+        <div className="flex shrink-0 flex-col items-center gap-2">
+          <p className="font-mono text-[min(4.4vw,7vh)] font-extrabold uppercase leading-none tracking-[0.3em] text-white">
             WFL
           </p>
           <div className="flex items-center gap-4">
@@ -278,7 +278,7 @@ export function MatchDisplay({
           </div>
         </div>
 
-        <div className="grid w-full max-w-[1800px] grid-cols-[1fr_auto_1fr] items-center gap-6 xl:gap-12">
+        <div className="grid w-full max-w-[1800px] shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-6 xl:gap-12">
           {[left, right].map((team, i) => (
             <div
               key={i}
@@ -289,7 +289,7 @@ export function MatchDisplay({
             >
               {team.logo ? (
                 <motion.div
-                  className="relative h-28 w-28 shrink-0 overflow-hidden rounded-[1.75rem] border-4 bg-white/5 xl:h-48 xl:w-48"
+                  className="relative aspect-square w-[min(9vw,15vh)] shrink-0 overflow-hidden rounded-[1.75rem] border-4 bg-white/5"
                   style={{
                     borderColor: `${team.color}66`,
                     boxShadow: `0 0 50px ${team.color}33`,
@@ -311,7 +311,7 @@ export function MatchDisplay({
               ) : null}
               <p
                 className={cn(
-                  "w-full text-[4.6vw] font-extrabold uppercase leading-[1.05] tracking-tight text-white xl:text-[84px]",
+                  "w-full text-[min(4.2vw,6.5vh)] font-extrabold uppercase leading-[1.05] tracking-tight text-white",
                   i === 0 ? "text-right" : "text-left",
                 )}
                 title={team.name}
@@ -321,7 +321,7 @@ export function MatchDisplay({
             </div>
           ))}
 
-          <div className="order-2 flex shrink-0 items-center justify-center font-mono text-[13vw] font-extrabold leading-none tracking-tighter tabular-nums xl:text-[200px]">
+          <div className="order-2 flex shrink-0 items-center justify-center font-mono text-[min(12vw,20vh)] font-extrabold leading-none tracking-tighter tabular-nums">
             <Score value={left.score} color={left.color} />
             <span className="mx-5 font-normal text-white/30 xl:mx-9">:</span>
             <Score value={right.score} color={right.color} />
@@ -329,7 +329,7 @@ export function MatchDisplay({
         </div>
 
         {clock ? (
-          <div className="mt-10 flex flex-col items-center gap-5 xl:mt-14">
+          <div className="flex shrink-0 flex-col items-center gap-4">
             <div className="flex items-center gap-4 rounded-full bg-white px-10 py-3 text-black xl:px-14 xl:py-4">
               {match.postMatch?.timer?.running ? (
                 <span className="relative flex h-4 w-4">
@@ -337,7 +337,7 @@ export function MatchDisplay({
                   <span className="relative inline-flex h-4 w-4 rounded-full bg-red-600" />
                 </span>
               ) : null}
-              <span className="font-mono text-5xl font-extrabold leading-none tracking-tighter tabular-nums xl:text-7xl">
+              <span className="font-mono text-[min(4vw,7vh)] font-extrabold leading-none tracking-tighter tabular-nums">
                 {String(Math.floor(clock.elapsedMs / 60000)).padStart(2, "0")}:
                 {String(Math.floor((clock.elapsedMs % 60000) / 1000)).padStart(
                   2,
