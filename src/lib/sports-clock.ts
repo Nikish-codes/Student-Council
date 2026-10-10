@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { SportMatchTimer } from "@/lib/schemas";
 
 export type MatchClock = {
+  elapsedMs: number;
   minute: number;
   label: string;
   stoppage: number;
@@ -36,6 +37,7 @@ export function readMatchClock(
   const over = minute - regulation;
 
   return {
+    elapsedMs: elapsed,
     minute,
     label: over > 0 ? `${regulation}′+${over}` : `${Math.max(1, minute)}′`,
     stoppage,

@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
   sportsMatches as t,
+  type SportDisplayOverlay,
   type SportMatchEvent,
   type SportPostMatch,
 } from "@/db/schema";
@@ -62,7 +63,13 @@ function bust(matchId?: number) {
   ].forEach((p) => revalidatePath(p));
   revalidatePath("/sports/tournaments/[slug]", "page");
   revalidatePath("/sports/leagues/[slug]", "page");
-  if (matchId) revalidatePath(`/management/sports/matches/${matchId}`);
+  if (matchId) {
+    revalidatePath(`/management/sports/matches/${matchId}`);
+    revalidatePath(`/sports/matches/${matchId}`);
+    revalidatePath(`/display/matches/${matchId}`);
+  }
+  revalidatePath("/sports/matches/[id]", "page");
+  revalidatePath("/display/matches/[id]", "page");
 }
 
 export async function saveMatch(id: number | null, fd: FormData) {
@@ -214,6 +221,149 @@ export async function updateMatchTimer(id: number, timer: import("@/lib/schemas"
   const postMatch = existing.postMatch || {};
   postMatch.timer = timer;
 
+  await db
+    .update(t)
+    .set({ postMatch, updatedAt: new Date().toISOString() })
+    .where(eq(t.id, id));
+  bust(id);
+}
+
+const SCORING_TYPES = new Set(["goal", "own_goal", "penalty_goal"]);
+
+export type MatchEventInput = {
+  type: string;
+  team: "a" | "b";
+  time?: string;
+  player?: string;
+  jersey?: string;
+  assist?: string;
+  description?: string;
+  celebrate?: boolean;
+  style?: "takeover" | "flourish";
+  countsOnScoreboard?: boolean;
+};
+
+function describe(input: MatchEventInput): string | undefined {
+  if (input.description?.trim()) return input.description.trim();
+  const player = input.player?.trim();
+  if (!player) return undefined;
+  return input.jersey?.trim() ? `${player} [${input.jersey.trim()}]` : player;
+}
+
+export async function logMatchEvent(id: number, input: MatchEventInput) {
+  await requireSportsManager();
+  const existing = await db.query.sportsMatches.findFirst({
+    where: eq(t.id, id),
+    columns: { events: true, scoreA: true, scoreB: true },
+  });
+  if (!existing) throw new Error("NOT_FOUND");
+
+  const event: SportMatchEvent = {
+    id: crypto.randomUUID(),
+    time: input.time?.trim() || "",
+    team: input.team,
+    type: input.type,
+    description: describe(input),
+    player: input.player?.trim() || undefined,
+    jersey: input.jersey?.trim() || undefined,
+    assist: input.assist?.trim() || undefined,
+    celebrate: input.celebrate !== false,
+    style: input.style,
+  };
+
+  const events = Array.isArray(existing.events) ? [...existing.events] : [];
+  events.push(event);
+
+  const patch: {
+    events: SportMatchEvent[];
+    scoreA?: number;
+    scoreB?: number;
+    updatedAt: string;
+  } = { events, updatedAt: new Date().toISOString() };
+
+  if (SCORING_TYPES.has(input.type) && input.countsOnScoreboard !== false) {
+    const credited =
+      input.type === "own_goal" ? (input.team === "a" ? "b" : "a") : input.team;
+    if (credited === "a") patch.scoreA = (existing.scoreA ?? 0) + 1;
+    else patch.scoreB = (existing.scoreB ?? 0) + 1;
+  }
+
+  await db.update(t).set(patch).where(eq(t.id, id));
+  bust(id);
+}
+
+export async function replayMatchEvent(id: number, eventId: string) {
+  await requireSportsManager();
+  const existing = await db.query.sportsMatches.findFirst({
+    where: eq(t.id, id),
+    columns: { events: true },
+  });
+  if (!existing) throw new Error("NOT_FOUND");
+  const events = Array.isArray(existing.events) ? [...existing.events] : [];
+  const source = events.find((e) => e.id === eventId);
+  if (!source) return;
+  events.push({
+    ...source,
+    id: crypto.randomUUID(),
+    celebrate: true,
+    replay: true,
+  });
+  await db
+    .update(t)
+    .set({ events, updatedAt: new Date().toISOString() })
+    .where(eq(t.id, id));
+  bust(id);
+}
+
+export async function removeMatchEventById(id: number, eventId: string) {
+  await requireSportsManager();
+  const existing = await db.query.sportsMatches.findFirst({
+    where: eq(t.id, id),
+    columns: { events: true },
+  });
+  if (!existing) throw new Error("NOT_FOUND");
+  const events = Array.isArray(existing.events) ? existing.events : [];
+  await db
+    .update(t)
+    .set({
+      events: events.filter((e) => e.id !== eventId),
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(t.id, id));
+  bust(id);
+}
+
+export async function setMatchOverlay(id: number, overlay: SportDisplayOverlay) {
+  await requireSportsManager();
+  const existing = await db.query.sportsMatches.findFirst({
+    where: eq(t.id, id),
+    columns: { postMatch: true },
+  });
+  if (!existing) throw new Error("NOT_FOUND");
+  const postMatch: SportPostMatch = existing.postMatch || {};
+  postMatch.overlay =
+    overlay.kind === "none"
+      ? { kind: "none" }
+      : { ...overlay, since: overlay.since ?? Date.now() };
+  await db
+    .update(t)
+    .set({ postMatch, updatedAt: new Date().toISOString() })
+    .where(eq(t.id, id));
+  bust(id);
+}
+
+export async function setMatchGoalStyle(
+  id: number,
+  goalStyle: "takeover" | "flourish",
+) {
+  await requireSportsManager();
+  const existing = await db.query.sportsMatches.findFirst({
+    where: eq(t.id, id),
+    columns: { postMatch: true },
+  });
+  if (!existing) throw new Error("NOT_FOUND");
+  const postMatch: SportPostMatch = existing.postMatch || {};
+  postMatch.goalStyle = goalStyle;
   await db
     .update(t)
     .set({ postMatch, updatedAt: new Date().toISOString() })
