@@ -383,7 +383,7 @@ export function MatchDisplay({
         </AnimatePresence>
       </div>
 
-      {match.status !== "finished" ? (
+      {match.status !== "finished" && !match.postMatch?.hideTicker ? (
         <EventTicker
           events={match.events ?? []}
           colorA={colorA}

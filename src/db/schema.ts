@@ -166,12 +166,32 @@ export type SportPostMatchInterview = {
 };
 
 /** Post-match content attached to a match (highlights, interviews, winner). */
+export type SportDisplayFixture = {
+  matchId: number;
+  teamAName: string;
+  teamBName: string;
+  teamALogo?: string;
+  teamBLogo?: string;
+  round?: string;
+  venue?: string;
+  matchDate?: string;
+};
+
 export type SportDisplayOverlay = {
-  kind: "none" | "halt" | "message" | "kickoff" | "halftime" | "fulltime";
+  kind:
+    | "none"
+    | "halt"
+    | "message"
+    | "kickoff"
+    | "halftime"
+    | "fulltime"
+    | "league"
+    | "upcoming";
   preset?: string;
   title?: string;
   subtitle?: string;
   since?: number;
+  fixture?: SportDisplayFixture;
 };
 
 export type SportPostMatch = {
@@ -187,6 +207,7 @@ export type SportPostMatch = {
   goalStyle?: "takeover" | "flourish";
   teamAColor?: string;
   teamBColor?: string;
+  hideTicker?: boolean;
 };
 
 // ───────────────────────────────── Oval menu ─────────────────────────────────
