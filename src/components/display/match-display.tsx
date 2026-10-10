@@ -163,12 +163,12 @@ export function MatchDisplay({
   }, []);
 
   const colorA = useMemo(
-    () => teamColor(match.teamAName, match.postMatch?.teamAColor),
-    [match.teamAName, match.postMatch?.teamAColor],
+    () => teamColor("a", match.postMatch?.teamAColor),
+    [match.postMatch?.teamAColor],
   );
   const colorB = useMemo(
-    () => teamColor(match.teamBName, match.postMatch?.teamBColor),
-    [match.teamBName, match.postMatch?.teamBColor],
+    () => teamColor("b", match.postMatch?.teamBColor),
+    [match.postMatch?.teamBColor],
   );
 
   const swapped =
@@ -219,14 +219,14 @@ export function MatchDisplay({
     <div className="fixed inset-0 select-none overflow-hidden bg-[#05070a] font-sans text-white">
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url(/sports/stadium.webp)", opacity: 0.14 }}
+        style={{ backgroundImage: "url(/sports/stadium.webp)", opacity: 0.16 }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#05070a]/85 via-[#05070a]/55 to-[#05070a]/95" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#05070a]/45 via-transparent to-[#05070a]/65" />
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(5,7,10,0.85) 100%)",
+            "radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(5,7,10,0.62) 100%)",
         }}
       />
 
@@ -257,7 +257,7 @@ export function MatchDisplay({
 
       <div className="relative z-20 flex h-full flex-col items-center justify-center gap-[2vh] overflow-hidden px-6 pb-[13vh]">
         <div className="flex shrink-0 flex-col items-center gap-2">
-          <p className="font-mono text-[min(4.4vw,7vh)] font-extrabold uppercase leading-none tracking-[0.3em] text-white">
+          <p className="font-mono text-[min(5vw,8vh)] font-extrabold uppercase leading-none tracking-[0.3em] text-white">
             WFL
           </p>
           <div className="flex items-center gap-4">
@@ -289,7 +289,7 @@ export function MatchDisplay({
             >
               {team.logo ? (
                 <motion.div
-                  className="relative aspect-square w-[min(9vw,15vh)] shrink-0 overflow-hidden rounded-[1.75rem] border-4 bg-white/5"
+                  className="relative aspect-square w-[min(11vw,19vh)] shrink-0 overflow-hidden rounded-[1.75rem] border-4 bg-white/5"
                   style={{
                     borderColor: `${team.color}66`,
                     boxShadow: `0 0 50px ${team.color}33`,
@@ -311,7 +311,7 @@ export function MatchDisplay({
               ) : null}
               <p
                 className={cn(
-                  "w-full text-[min(4.2vw,6.5vh)] font-extrabold uppercase leading-[1.05] tracking-tight text-white",
+                  "w-full text-[min(4.6vw,8vh)] font-extrabold uppercase leading-[1.05] tracking-tight text-white",
                   i === 0 ? "text-right" : "text-left",
                 )}
                 title={team.name}
@@ -321,7 +321,7 @@ export function MatchDisplay({
             </div>
           ))}
 
-          <div className="order-2 flex shrink-0 items-center justify-center font-mono text-[min(12vw,20vh)] font-extrabold leading-none tracking-tighter tabular-nums">
+          <div className="order-2 flex shrink-0 items-center justify-center font-mono text-[min(13vw,21vh)] font-extrabold leading-none tracking-tighter tabular-nums">
             <Score value={left.score} color={left.color} />
             <span className="mx-5 font-normal text-white/30 xl:mx-9">:</span>
             <Score value={right.score} color={right.color} />
@@ -337,7 +337,7 @@ export function MatchDisplay({
                   <span className="relative inline-flex h-4 w-4 rounded-full bg-red-600" />
                 </span>
               ) : null}
-              <span className="font-mono text-[min(4vw,7vh)] font-extrabold leading-none tracking-tighter tabular-nums">
+              <span className="font-mono text-[min(4.4vw,7.5vh)] font-extrabold leading-none tracking-tighter tabular-nums">
                 {String(Math.floor(clock.elapsedMs / 60000)).padStart(2, "0")}:
                 {String(Math.floor((clock.elapsedMs % 60000) / 1000)).padStart(
                   2,
