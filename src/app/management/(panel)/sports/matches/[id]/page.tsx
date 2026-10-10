@@ -40,30 +40,49 @@ export default async function MatchEditor({
   const preset = (key: string) =>
     isNew && typeof query[key] === "string" ? (query[key] as string) : "";
 
-  const [row, teams, tournaments, leagues, media] = await Promise.all([
-    isNew
-      ? null
-      : db.query.sportsMatches.findFirst({
-          where: eq(t.id, Number(id)),
-          with: { teamA: true, teamB: true },
-        }),
-    db
-      .select({ id: teamsT.id, name: teamsT.name })
-      .from(teamsT)
-      .orderBy(asc(teamsT.name)),
-    db
-      .select({ id: tourT.id, title: tourT.title })
-      .from(tourT)
-      .orderBy(desc(tourT.year)),
-    db
-      .select({ id: leagueT.id, title: leagueT.title })
-      .from(leagueT)
-      .orderBy(desc(leagueT.year)),
-    db
-      .select({ id: mediaT.id, url: mediaT.url, filename: mediaT.filename })
-      .from(mediaT)
-      .orderBy(desc(mediaT.createdAt)),
-  ]);
+  const [row, teams, tournaments, leagues, media, fixtureRows] =
+    await Promise.all([
+      isNew
+        ? null
+        : db.query.sportsMatches.findFirst({
+            where: eq(t.id, Number(id)),
+            with: { teamA: true, teamB: true },
+          }),
+      db
+        .select({ id: teamsT.id, name: teamsT.name })
+        .from(teamsT)
+        .orderBy(asc(teamsT.name)),
+      db
+        .select({ id: tourT.id, title: tourT.title })
+        .from(tourT)
+        .orderBy(desc(tourT.year)),
+      db
+        .select({ id: leagueT.id, title: leagueT.title })
+        .from(leagueT)
+        .orderBy(desc(leagueT.year)),
+      db
+        .select({ id: mediaT.id, url: mediaT.url, filename: mediaT.filename })
+        .from(mediaT)
+        .orderBy(desc(mediaT.createdAt)),
+      db.query.sportsMatches.findMany({
+        with: {
+          teamA: { with: { logo: true } },
+          teamB: { with: { logo: true } },
+        },
+        orderBy: [asc(t.matchDate)],
+      }),
+    ]);
+
+  const fixtures = fixtureRows.map((m) => ({
+    matchId: m.id,
+    teamAName: m.participantAName || m.teamA?.name || "TBC",
+    teamBName: m.participantBName || m.teamB?.name || "TBC",
+    teamALogo: m.teamA?.logo?.url ?? undefined,
+    teamBLogo: m.teamB?.logo?.url ?? undefined,
+    round: m.round ?? undefined,
+    venue: m.venue ?? undefined,
+    matchDate: m.matchDate ?? undefined,
+  }));
   if (!isNew && !row) notFound();
   const action = saveMatch.bind(null, isNew ? null : Number(id));
 
@@ -225,16 +244,18 @@ export default async function MatchEditor({
               timer={row?.postMatch?.timer}
               overlay={row?.postMatch?.overlay}
               goalStyle={row?.postMatch?.goalStyle}
+              hideTicker={row?.postMatch?.hideTicker}
+              fixtures={fixtures}
             />
           </Fieldset>
-          
+
           <Fieldset
             title="Live Match Clock"
             hint="Control the live timer shown on the big screen display."
           >
-            <TimerCockpit 
+            <TimerCockpit
               matchId={Number(id)}
-              initialTimer={row?.postMatch?.timer} 
+              initialTimer={row?.postMatch?.timer}
             />
           </Fieldset>
         </>

@@ -24,17 +24,22 @@ function CardFace({
   color,
   index,
   total,
+  logo,
+  teamName,
 }: {
   color: string;
   index: number;
   total: number;
+  logo?: string;
+  teamName: string;
 }) {
   const offset = total > 1 ? (index === 0 ? -34 : 34) : 0;
   const tilt = total > 1 ? (index === 0 ? -9 : 7) : 0;
+  const showsCrest = index === total - 1;
 
   return (
     <motion.div
-      className="absolute h-[42vh] w-[27vh] rounded-2xl xl:h-[460px] xl:w-[300px]"
+      className="absolute flex h-[42vh] w-[27vh] flex-col items-center justify-start rounded-2xl pt-[3vh] xl:h-[460px] xl:w-[300px]"
       style={{
         background: `linear-gradient(150deg, ${color}, ${color}cc)`,
         boxShadow: `0 0 120px ${color}aa, inset 0 0 60px rgba(0,0,0,0.18)`,
@@ -54,7 +59,34 @@ function CardFace({
         damping: 14,
         delay: 0.1 + index * 0.18,
       }}
-    />
+    >
+      {showsCrest ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.7 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.45, duration: 0.35 }}
+          className="flex w-full flex-col items-center gap-[1.6vh] px-[2vh]"
+        >
+          <div className="relative aspect-square w-[13vh] overflow-hidden rounded-2xl border-[3px] border-black/25 bg-black/20 xl:w-[140px]">
+            {logo ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={logo}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <span className="absolute inset-0 grid place-items-center font-mono text-[5vh] font-extrabold text-black/50">
+                {teamName.charAt(0).toUpperCase()}
+              </span>
+            )}
+          </div>
+          <p className="w-full truncate text-center text-[2.1vh] font-extrabold uppercase tracking-tight text-black/70 xl:text-[22px]">
+            {teamName}
+          </p>
+        </motion.div>
+      ) : null}
+    </motion.div>
   );
 }
 
@@ -91,7 +123,14 @@ function CardStage({ cue }: { cue: CardCue }) {
           style={{ perspective: 1400 }}
         >
           {cfg.colors.map((c, i) => (
-            <CardFace key={i} color={c} index={i} total={cfg.colors.length} />
+            <CardFace
+              key={i}
+              color={c}
+              index={i}
+              total={cfg.colors.length}
+              logo={cue.teamLogo}
+              teamName={cue.teamName}
+            />
           ))}
         </div>
 
@@ -129,31 +168,16 @@ function CardStage({ cue }: { cue: CardCue }) {
           </motion.div>
         ) : null}
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.85 }}
-          className="mt-7 flex items-center gap-4"
-        >
-          {cue.teamLogo ? (
-            <div className="relative h-14 w-14 overflow-hidden rounded-xl border border-white/25">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={cue.teamLogo}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            </div>
-          ) : null}
-          <span className="font-mono text-2xl uppercase tracking-[0.25em] text-white/70 xl:text-3xl">
-            {cue.teamName}
-          </span>
-          {cue.event.time ? (
-            <span className="font-mono text-2xl font-bold text-white/50 xl:text-3xl">
-              {cue.event.time}
-            </span>
-          ) : null}
-        </motion.div>
+        {cue.event.time ? (
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.85 }}
+            className="mt-[2.5vh] font-mono text-[min(2.4vw,4vh)] font-bold tracking-[0.2em] text-white/55"
+          >
+            {cue.event.time}
+          </motion.span>
+        ) : null}
       </motion.div>
     </motion.div>
   );

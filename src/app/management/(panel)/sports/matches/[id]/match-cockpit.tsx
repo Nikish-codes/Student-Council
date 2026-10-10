@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import type {
   CelebrationStyle,
+  SportDisplayFixture,
   SportDisplayOverlay,
   SportMatchEvent,
   SportMatchTimer,
@@ -27,6 +28,7 @@ import {
   replayMatchEvent,
   setMatchGoalStyle,
   setMatchOverlay,
+  setMatchTickerHidden,
   updateMatchScore,
   type MatchEventInput,
 } from "../actions";
@@ -42,6 +44,8 @@ type Props = {
   timer?: SportMatchTimer;
   overlay?: SportDisplayOverlay;
   goalStyle?: CelebrationStyle;
+  hideTicker?: boolean;
+  fixtures?: SportDisplayFixture[];
 };
 
 type Draft = {
@@ -104,6 +108,8 @@ export function MatchCockpit({
   timer,
   overlay,
   goalStyle,
+  hideTicker,
+  fixtures = [],
 }: Props) {
   const [liveA, setLiveA] = useState(scoreA);
   const [liveB, setLiveB] = useState(scoreB);
@@ -118,6 +124,10 @@ export function MatchCockpit({
     b: EMPTY_DRAFT,
   });
   const [overrideTime, setOverrideTime] = useState("");
+  const [tickerHidden, setTickerHidden] = useState(!!hideTicker);
+  const [upcomingId, setUpcomingId] = useState("");
+  const [customTitle, setCustomTitle] = useState("");
+  const [customSubtitle, setCustomSubtitle] = useState("");
   const [pending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState("");
   const [now, setNow] = useState(() => Date.now());
@@ -538,6 +548,116 @@ export function MatchCockpit({
             Clear screen
           </button>
         </div>
+        <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+          <input
+            value={customTitle}
+            onChange={(e) => setCustomTitle(e.target.value)}
+            placeholder="Custom headline"
+            className="rounded-lg border border-line/15 bg-bg px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+          />
+          <input
+            value={customSubtitle}
+            onChange={(e) => setCustomSubtitle(e.target.value)}
+            placeholder="Sub-line"
+            className="rounded-lg border border-line/15 bg-bg px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+          />
+          <button
+            type="button"
+            disabled={
+              pending || (!customTitle.trim() && !customSubtitle.trim())
+            }
+            onClick={() =>
+              applyOverlay(
+                {
+                  kind: "message",
+                  title: customTitle.trim() || "Announcement",
+                  subtitle: customSubtitle.trim(),
+                  since: Date.now(),
+                },
+                "Message shown",
+              )
+            }
+            className="rounded-lg border border-line/20 bg-surface px-5 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-ink transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
+          >
+            Show message
+          </button>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-[auto_1fr_auto]">
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() =>
+              applyOverlay(
+                {
+                  kind: "league",
+                  title: "Woxsen Football League",
+                  subtitle: "",
+                },
+                "League screen",
+              )
+            }
+            className="rounded-lg border border-line/15 bg-surface-2 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+          >
+            League screen
+          </button>
+          <select
+            value={upcomingId}
+            onChange={(e) => setUpcomingId(e.target.value)}
+            className="min-w-0 rounded-lg border border-line/15 bg-bg px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none"
+          >
+            <option value="">Select the next match…</option>
+            {fixtures.map((f) => (
+              <option key={f.matchId} value={String(f.matchId)}>
+                #{f.matchId} · {f.teamAName} vs {f.teamBName}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            disabled={pending || !upcomingId}
+            onClick={() => {
+              const fixture = fixtures.find(
+                (f) => String(f.matchId) === upcomingId,
+              );
+              if (!fixture) return;
+              applyOverlay(
+                {
+                  kind: "upcoming",
+                  title: "Coming Up",
+                  subtitle: fixture.round || "Next Match",
+                  fixture,
+                },
+                "Coming up shown",
+              );
+            }}
+            className="rounded-lg border border-sky-500/40 bg-sky-500/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-sky-300 hover:bg-sky-500/20 disabled:opacity-40"
+          >
+            Show coming up
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              const next = !tickerHidden;
+              setTickerHidden(next);
+              run(
+                () => setMatchTickerHidden(matchId, next),
+                next ? "Updates hidden" : "Updates shown",
+              );
+            }}
+            className="rounded-lg border border-line/15 bg-surface-2 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+          >
+            {tickerHidden ? "Show updates strip" : "Clear updates strip"}
+          </button>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-subtle">
+            The recent-events strip along the bottom of the big screen
+          </span>
+        </div>
+
         {liveOverlay.kind !== "none" && (
           <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.15em] text-amber-300">
             On screen now: {liveOverlay.title}

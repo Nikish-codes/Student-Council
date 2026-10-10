@@ -370,3 +370,19 @@ export async function setMatchGoalStyle(
     .where(eq(t.id, id));
   bust(id);
 }
+
+export async function setMatchTickerHidden(id: number, hidden: boolean) {
+  await requireSportsManager();
+  const existing = await db.query.sportsMatches.findFirst({
+    where: eq(t.id, id),
+    columns: { postMatch: true },
+  });
+  if (!existing) throw new Error("NOT_FOUND");
+  const postMatch: SportPostMatch = existing.postMatch || {};
+  postMatch.hideTicker = hidden;
+  await db
+    .update(t)
+    .set({ postMatch, updatedAt: new Date().toISOString() })
+    .where(eq(t.id, id));
+  bust(id);
+}
