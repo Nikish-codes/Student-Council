@@ -143,6 +143,9 @@ export type SportMatchEvent = {
   team: "a" | "b";
   type: string; // "goal" | "yellow" | "red" | "sub" | "timeout" | "point" | …
   description?: string;
+  player?: string;
+  jersey?: string;
+  assist?: string;
 };
 
 /** A post-match highlight photo or video thumbnail. */
