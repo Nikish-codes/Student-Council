@@ -22,7 +22,8 @@ function scorerLines(events: SportMatchEvent[], team: "a" | "b") {
     const creditedTo = ev.type === "own_goal" ? (ev.team === "a" ? "b" : "a") : ev.team;
     if (creditedTo !== team) continue;
 
-    const name = ev.player || ev.description || "Unknown";
+    const name = ev.player || ev.description;
+    if (!name) continue;
     const label =
       eventMinute(ev.time) > 0 ? `${eventMinute(ev.time)}′` : ev.time;
     const suffix = ev.type === "own_goal" ? " (OG)" : ev.type === "penalty_goal" ? " (P)" : "";
@@ -122,7 +123,7 @@ export function SportsLiveScoreboard({ match: initial }: { match: SportsMatch })
 
   const isLive = match.status === "live";
   const isFinished = match.status === "finished";
-  const hasScore = (isLive || isFinished) && match.scoreA != null && match.scoreB != null;
+  const hasScore = isLive || isFinished;
 
   const a = match.scoreA ?? 0;
   const b = match.scoreB ?? 0;

@@ -24,10 +24,7 @@ export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch })
   const clock = useMatchClock(match.postMatch?.timer);
   
   const matchTime = formatSportsMatchTime(match.matchDate);
-  const hasScore =
-    (match.status === "live" || match.status === "finished") &&
-    match.scoreA != null &&
-    match.scoreB != null;
+  const hasScore = match.status === "live" || match.status === "finished";
   const teamAName = match.teamAName || "Participant to be confirmed";
   const teamBName = match.teamBName || "Participant to be confirmed";
   const isLive = match.status === "live";

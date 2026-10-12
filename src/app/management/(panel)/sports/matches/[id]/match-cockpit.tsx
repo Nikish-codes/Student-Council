@@ -5,6 +5,7 @@ import {
   ArrowLeftRight,
   Flag,
   Minus,
+  Pencil,
   Plus,
   RotateCcw,
   Radio,
@@ -29,6 +30,7 @@ import {
   setMatchGoalStyle,
   setMatchOverlay,
   setMatchTickerHidden,
+  updateMatchEventAt,
   updateMatchScore,
   type MatchEventInput,
 } from "../actions";
@@ -97,6 +99,117 @@ function squadNames(events: SportMatchEvent[], team: "a" | "b"): string[] {
   );
 }
 
+type EventDraft = {
+  time: string;
+  team: "a" | "b";
+  type: string;
+  player: string;
+  jersey: string;
+  assist: string;
+};
+
+const EMPTY_EVENT_DRAFT: EventDraft = {
+  time: "",
+  team: "a",
+  type: "goal",
+  player: "",
+  jersey: "",
+  assist: "",
+};
+
+const EVENT_TYPE_OPTIONS = [
+  "goal",
+  "penalty_goal",
+  "own_goal",
+  "penalty_miss",
+  "yellow",
+  "second_yellow",
+  "red",
+  "sub",
+  "save",
+  "other",
+];
+
+function EventFields({
+  value,
+  onChange,
+  teamAName,
+  teamBName,
+  disabled,
+  footer,
+}: {
+  value: EventDraft;
+  onChange: (next: EventDraft) => void;
+  teamAName: string;
+  teamBName: string;
+  disabled: boolean;
+  footer: React.ReactNode;
+}) {
+  const set = (patch: Partial<EventDraft>) => onChange({ ...value, ...patch });
+  const field =
+    "rounded-lg border border-line/15 bg-bg px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none";
+
+  return (
+    <div className="space-y-2 rounded-xl border border-line/15 bg-surface-2 p-3">
+      <div className="grid gap-2 sm:grid-cols-[80px_1fr_1fr]">
+        <input
+          value={value.time}
+          onChange={(e) => set({ time: e.target.value })}
+          placeholder="23'"
+          disabled={disabled}
+          className={`${field} text-center font-mono`}
+        />
+        <select
+          value={value.team}
+          onChange={(e) => set({ team: e.target.value as "a" | "b" })}
+          disabled={disabled}
+          className={field}
+        >
+          <option value="a">{teamAName}</option>
+          <option value="b">{teamBName}</option>
+        </select>
+        <select
+          value={value.type}
+          onChange={(e) => set({ type: e.target.value })}
+          disabled={disabled}
+          className={field}
+        >
+          {EVENT_TYPE_OPTIONS.map((type) => (
+            <option key={type} value={type}>
+              {eventLabel(type)}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-[1fr_80px_1fr]">
+        <input
+          value={value.player}
+          onChange={(e) => set({ player: e.target.value })}
+          placeholder="Player name"
+          disabled={disabled}
+          className={field}
+        />
+        <input
+          value={value.jersey}
+          onChange={(e) => set({ jersey: e.target.value })}
+          placeholder="No."
+          inputMode="numeric"
+          disabled={disabled}
+          className={`${field} text-center font-mono`}
+        />
+        <input
+          value={value.assist}
+          onChange={(e) => set({ assist: e.target.value })}
+          placeholder="Assist (optional)"
+          disabled={disabled}
+          className={field}
+        />
+      </div>
+      <div className="flex flex-wrap items-center gap-3 pt-1">{footer}</div>
+    </div>
+  );
+}
+
 export function MatchCockpit({
   matchId,
   teamAName,
@@ -128,6 +241,12 @@ export function MatchCockpit({
   const [upcomingId, setUpcomingId] = useState("");
   const [customTitle, setCustomTitle] = useState("");
   const [customSubtitle, setCustomSubtitle] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [manualDraft, setManualDraft] = useState<EventDraft>(EMPTY_EVENT_DRAFT);
+  const [manualCounts, setManualCounts] = useState(false);
+  const [manualAnimates, setManualAnimates] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editDraft, setEditDraft] = useState<EventDraft>(EMPTY_EVENT_DRAFT);
   const [pending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState("");
   const [now, setNow] = useState(() => Date.now());
@@ -236,6 +355,82 @@ export function MatchCockpit({
     };
     setLiveEvents((prev) => [...prev, event]);
     run(() => addMatchEvent(matchId, event), "Display swapped");
+  }
+
+  function startEditing(index: number, event: SportMatchEvent) {
+    setAdding(false);
+    setEditingIndex(index);
+    setEditDraft({
+      time: event.time ?? "",
+      team: event.team,
+      type: event.type,
+      player: event.player ?? "",
+      jersey: event.jersey ?? "",
+      assist: event.assist ?? "",
+    });
+  }
+
+  function saveEditedEvent(index: number) {
+    if (!guard()) return;
+    const draft = editDraft;
+    setLiveEvents((prev) =>
+      prev.map((event, i) =>
+        i === index
+          ? {
+              ...event,
+              time: draft.time.trim(),
+              team: draft.team,
+              type: draft.type,
+              player: draft.player.trim() || undefined,
+              jersey: draft.jersey.trim() || undefined,
+              assist: draft.assist.trim() || undefined,
+            }
+          : event,
+      ),
+    );
+    setEditingIndex(null);
+    run(() => updateMatchEventAt(matchId, index, draft), "Event updated");
+  }
+
+  function addManualEvent() {
+    if (!guard()) return;
+    const draft = manualDraft;
+    const input: MatchEventInput = {
+      type: draft.type,
+      team: draft.team,
+      time: draft.time.trim() || stamp,
+      player: draft.player,
+      jersey: draft.jersey,
+      assist: draft.assist,
+      celebrate: manualAnimates,
+      countsOnScoreboard: manualCounts,
+    };
+
+    setLiveEvents((prev) => [
+      ...prev,
+      {
+        time: input.time ?? "",
+        team: draft.team,
+        type: draft.type,
+        player: draft.player || undefined,
+        jersey: draft.jersey || undefined,
+        assist: draft.assist || undefined,
+        celebrate: manualAnimates,
+      },
+    ]);
+    if (manualCounts) {
+      if (draft.type === "goal" || draft.type === "penalty_goal") {
+        if (draft.team === "a") setLiveA((v) => v + 1);
+        else setLiveB((v) => v + 1);
+      } else if (draft.type === "own_goal") {
+        if (draft.team === "a") setLiveB((v) => v + 1);
+        else setLiveA((v) => v + 1);
+      }
+    }
+
+    setManualDraft(EMPTY_EVENT_DRAFT);
+    setAdding(false);
+    run(() => logMatchEvent(matchId, input), "Event added");
   }
 
   const visibleEvents = liveEvents.filter((e) => !e.replay);
@@ -669,24 +864,111 @@ export function MatchCockpit({
       <div className="mt-6 space-y-3">
         <div className="flex items-center justify-between">
           <span className="kicker text-subtle">Event feed</span>
-          {visibleEvents.length > 0 && (
-            <span className="font-mono text-[11px] text-muted">
-              {visibleEvents.length} event
-              {visibleEvents.length > 1 ? "s" : ""} logged
-            </span>
-          )}
+          <div className="flex items-center gap-3">
+            {visibleEvents.length > 0 && (
+              <span className="font-mono text-[11px] text-muted">
+                {visibleEvents.length} event
+                {visibleEvents.length > 1 ? "s" : ""} logged
+              </span>
+            )}
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => {
+                setAdding((v) => !v);
+                setEditingIndex(null);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line/15 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+            >
+              <Plus className="h-3 w-3" />
+              {adding ? "Cancel" : "Add event"}
+            </button>
+          </div>
         </div>
+
+        {adding && (
+          <EventFields
+            value={manualDraft}
+            onChange={setManualDraft}
+            teamAName={teamAName}
+            teamBName={teamBName}
+            disabled={pending}
+            footer={
+              <>
+                <label className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-subtle">
+                  <input
+                    type="checkbox"
+                    checked={manualCounts}
+                    onChange={(e) => setManualCounts(e.target.checked)}
+                    className="h-4 w-4 accent-current"
+                  />
+                  Count on scoreboard
+                </label>
+                <label className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-subtle">
+                  <input
+                    type="checkbox"
+                    checked={manualAnimates}
+                    onChange={(e) => setManualAnimates(e.target.checked)}
+                    className="h-4 w-4 accent-current"
+                  />
+                  Animate on the big screen
+                </label>
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={addManualEvent}
+                  className="ml-auto rounded-lg border border-line/20 bg-surface px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-ink hover:border-accent hover:text-accent disabled:opacity-40"
+                >
+                  Add to feed
+                </button>
+              </>
+            }
+          />
+        )}
 
         {visibleEvents.length > 0 ? (
           <div className="divide-y divide-line/10 rounded-xl border border-line/15 bg-surface/30">
             {liveEvents.map((event, index) =>
-              event.replay ? null : (
+              event.replay ? null : editingIndex === index ? (
+                <div key={event.id ?? index} className="px-3 py-3">
+                  <EventFields
+                    value={editDraft}
+                    onChange={setEditDraft}
+                    teamAName={teamAName}
+                    teamBName={teamBName}
+                    disabled={pending}
+                    footer={
+                      <>
+                        <span className="font-mono text-[10px] uppercase tracking-wider text-subtle">
+                          Editing does not change the score
+                        </span>
+                        <button
+                          type="button"
+                          disabled={pending}
+                          onClick={() => setEditingIndex(null)}
+                          className="ml-auto rounded-lg border border-line/15 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          disabled={pending}
+                          onClick={() => saveEditedEvent(index)}
+                          className="rounded-lg border border-line/20 bg-surface px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-ink hover:border-accent hover:text-accent disabled:opacity-40"
+                        >
+                          Save
+                        </button>
+                      </>
+                    }
+                  />
+                </div>
+              ) : (
                 <div
                   key={event.id ?? index}
                   className="flex items-center gap-3 px-4 py-2.5 text-sm"
                 >
-                  <span className="font-mono text-xs font-semibold tabular-nums text-subtle">
-                    {event.time}
+                  <span className="w-10 shrink-0 font-mono text-xs font-semibold tabular-nums text-subtle">
+                    {event.time || "—"}
                   </span>
                   <span
                     className={cn(
@@ -710,6 +992,15 @@ export function MatchCockpit({
                         ? teamAName
                         : teamBName}
                   </span>
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() => startEditing(index, event)}
+                    title="Edit this event"
+                    className="rounded-lg p-1 text-subtle transition-colors hover:bg-line/10 hover:text-ink disabled:opacity-30"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
                   {event.id && (
                     <button
                       type="button"
