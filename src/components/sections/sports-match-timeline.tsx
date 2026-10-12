@@ -70,8 +70,7 @@ function Row({
   side: "left" | "right";
 }) {
   const right = side === "right";
-  const detail =
-    event.player || event.description || "";
+  const detail = event.player || event.description || "";
   const extra = [
     event.jersey ? `#${event.jersey}` : "",
     event.assist ? `assist ${event.assist}` : "",
@@ -81,7 +80,12 @@ function Row({
 
   return (
     <li className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-3 py-2.5">
-      <div className={cn("min-w-0", right ? "col-start-3 text-left" : "col-start-1 text-right")}>
+      <div
+        className={cn(
+          "row-start-1 min-w-0",
+          right ? "col-start-3 text-left" : "col-start-1 text-right",
+        )}
+      >
         <p className="truncate text-sm font-semibold text-ink">
           {detail || label(event.type)}
         </p>
@@ -91,10 +95,12 @@ function Row({
         </p>
       </div>
 
-      <div className="col-start-2 flex flex-col items-center gap-1">
+      <div className="col-start-2 row-start-1 flex flex-col items-center gap-1">
         <Marker type={event.type} />
         <span className="font-mono text-[10px] font-bold tabular-nums text-muted">
-          {eventMinute(event.time) > 0 ? `${eventMinute(event.time)}′` : event.time}
+          {eventMinute(event.time) > 0
+            ? `${eventMinute(event.time)}′`
+            : event.time}
         </span>
       </div>
     </li>
@@ -111,7 +117,11 @@ function Divider({ text }: { text: string }) {
   );
 }
 
-export function SportsMatchTimeline({ match: initial }: { match: SportsMatch }) {
+export function SportsMatchTimeline({
+  match: initial,
+}: {
+  match: SportsMatch;
+}) {
   const match = useLiveMatch(initial);
   const clock = useMatchClock(match.postMatch?.timer);
 
@@ -119,7 +129,9 @@ export function SportsMatchTimeline({ match: initial }: { match: SportsMatch }) 
   if (events.length === 0) return null;
 
   const halfAt = Math.floor((match.postMatch?.timer?.matchDuration || 90) / 2);
-  const ordered = [...events].sort((x, y) => eventMinute(x.time) - eventMinute(y.time));
+  const ordered = [...events].sort(
+    (x, y) => eventMinute(x.time) - eventMinute(y.time),
+  );
   const first = ordered.filter((e) => eventMinute(e.time) <= halfAt);
   const second = ordered.filter((e) => eventMinute(e.time) > halfAt);
 
