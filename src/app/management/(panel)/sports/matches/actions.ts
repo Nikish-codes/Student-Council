@@ -284,8 +284,8 @@ export async function logMatchEvent(id: number, input: MatchEventInput) {
   if (SCORING_TYPES.has(input.type) && input.countsOnScoreboard !== false) {
     const credited =
       input.type === "own_goal" ? (input.team === "a" ? "b" : "a") : input.team;
-    if (credited === "a") patch.scoreA = (existing.scoreA ?? 0) + 1;
-    else patch.scoreB = (existing.scoreB ?? 0) + 1;
+    patch.scoreA = (existing.scoreA ?? 0) + (credited === "a" ? 1 : 0);
+    patch.scoreB = (existing.scoreB ?? 0) + (credited === "b" ? 1 : 0);
   }
 
   await db.update(t).set(patch).where(eq(t.id, id));
@@ -383,6 +383,72 @@ export async function setMatchTickerHidden(id: number, hidden: boolean) {
   await db
     .update(t)
     .set({ postMatch, updatedAt: new Date().toISOString() })
+    .where(eq(t.id, id));
+  bust(id);
+}
+
+export type MatchEventPatch = {
+  time?: string;
+  team?: "a" | "b";
+  type?: string;
+  player?: string;
+  jersey?: string;
+  assist?: string;
+};
+
+export async function updateMatchEventAt(
+  id: number,
+  index: number,
+  patch: MatchEventPatch,
+) {
+  await requireSportsManager();
+  const existing = await db.query.sportsMatches.findFirst({
+    where: eq(t.id, id),
+    columns: { events: true },
+  });
+  if (!existing) throw new Error("NOT_FOUND");
+  const events = Array.isArray(existing.events) ? [...existing.events] : [];
+  const current = events[index];
+  if (!current) throw new Error("EVENT_NOT_FOUND");
+
+  const next: SportMatchEvent = {
+    ...current,
+    time: patch.time !== undefined ? patch.time.trim() : current.time,
+    team: patch.team ?? current.team,
+    type: patch.type ?? current.type,
+    player: patch.player?.trim() || undefined,
+    jersey: patch.jersey?.trim() || undefined,
+    assist: patch.assist?.trim() || undefined,
+  };
+  next.description = describe({
+    type: next.type,
+    team: next.team,
+    player: next.player,
+    jersey: next.jersey,
+  });
+
+  events[index] = next;
+  await db
+    .update(t)
+    .set({ events, updatedAt: new Date().toISOString() })
+    .where(eq(t.id, id));
+  bust(id);
+}
+
+export async function normaliseMatchScores(id: number) {
+  await requireSportsManager();
+  const existing = await db.query.sportsMatches.findFirst({
+    where: eq(t.id, id),
+    columns: { scoreA: true, scoreB: true },
+  });
+  if (!existing) throw new Error("NOT_FOUND");
+  await db
+    .update(t)
+    .set({
+      scoreA: existing.scoreA ?? 0,
+      scoreB: existing.scoreB ?? 0,
+      updatedAt: new Date().toISOString(),
+    })
     .where(eq(t.id, id));
   bust(id);
 }
