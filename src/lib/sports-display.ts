@@ -54,17 +54,16 @@ export function eventLabel(type: string): string {
   return EVENT_LABELS[type] ?? type.replace(/_/g, " ");
 }
 
-const FALLBACK_HUES = [205, 352, 150, 38, 272, 190, 12, 95];
+export const TEAM_A_COLOR = "#38bdf8";
+export const TEAM_B_COLOR = "#fb7185";
 
-export function teamColor(name: string, override?: string): string {
-  if (override) return override;
-  if (!name) return "hsl(205 90% 60%)";
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-  }
-  const hue = FALLBACK_HUES[hash % FALLBACK_HUES.length];
-  return `hsl(${hue} 85% 62%)`;
+const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
+
+export function teamColor(side: "a" | "b", override?: string): string {
+  const fallback = side === "a" ? TEAM_A_COLOR : TEAM_B_COLOR;
+  if (!override) return fallback;
+  const trimmed = override.trim();
+  return HEX.test(trimmed) ? trimmed : fallback;
 }
 
 export function eventKey(event: SportMatchEvent, index: number): string {
