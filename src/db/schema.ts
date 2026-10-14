@@ -186,7 +186,8 @@ export type SportDisplayOverlay = {
     | "halftime"
     | "fulltime"
     | "league"
-    | "upcoming";
+    | "upcoming"
+    | "win";
   preset?: string;
   title?: string;
   subtitle?: string;

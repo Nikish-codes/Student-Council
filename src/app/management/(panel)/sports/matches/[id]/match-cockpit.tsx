@@ -736,6 +736,19 @@ export function MatchCockpit({
           ))}
           <button
             type="button"
+            disabled={pending}
+            onClick={() =>
+              applyOverlay(
+                { kind: "win", title: "", subtitle: "" },
+                "Winner screen",
+              )
+            }
+            className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-amber-300 hover:bg-amber-400/20 disabled:opacity-40"
+          >
+            Winner screen
+          </button>
+          <button
+            type="button"
             disabled={pending || liveOverlay.kind === "none"}
             onClick={() => applyOverlay({ kind: "none" }, "Screen cleared")}
             className="ml-auto rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-red-300 hover:bg-red-500/20 disabled:opacity-40"

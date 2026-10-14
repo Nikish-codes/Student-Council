@@ -83,7 +83,7 @@ function UpcomingCard({ fixture }: { fixture: SportDisplayFixture }) {
 
 export function StatusOverlay({ overlay }: { overlay?: SportDisplayOverlay }) {
   const [now, setNow] = useState(() => Date.now());
-  const active = !!overlay && overlay.kind !== "none";
+  const active = !!overlay && overlay.kind !== "none" && overlay.kind !== "win";
 
   useEffect(() => {
     if (!active || !overlay?.since) return;

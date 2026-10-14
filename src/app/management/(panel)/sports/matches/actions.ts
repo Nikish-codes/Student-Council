@@ -413,6 +413,8 @@ export async function updateMatchEventAt(
 
   const next: SportMatchEvent = {
     ...current,
+    id: current.id ?? crypto.randomUUID(),
+    celebrate: false,
     time: patch.time !== undefined ? patch.time.trim() : current.time,
     team: patch.team ?? current.team,
     type: patch.type ?? current.type,
