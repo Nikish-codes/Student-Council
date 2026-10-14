@@ -209,6 +209,7 @@ export type SportPostMatch = {
   teamAColor?: string;
   teamBColor?: string;
   hideTicker?: boolean;
+  halfTimeBreak?: import("@/lib/schemas").SportHalfTimeBreak;
 };
 
 // ───────────────────────────────── Oval menu ─────────────────────────────────

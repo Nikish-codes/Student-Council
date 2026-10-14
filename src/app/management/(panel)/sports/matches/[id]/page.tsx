@@ -245,6 +245,7 @@ export default async function MatchEditor({
               overlay={row?.postMatch?.overlay}
               goalStyle={row?.postMatch?.goalStyle}
               hideTicker={row?.postMatch?.hideTicker}
+              halfTimeBreak={row?.postMatch?.halfTimeBreak}
               fixtures={fixtures}
             />
           </Fieldset>

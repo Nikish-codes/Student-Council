@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import type { SportDisplayFixture, SportDisplayOverlay } from "@/lib/schemas";
+import type {
+  SportDisplayFixture,
+  SportDisplayOverlay,
+  SportHalfTimeBreak,
+} from "@/lib/schemas";
+import { useBreakClock } from "@/lib/sports-clock";
 
 const ACCENT: Record<string, string> = {
   halt: "#f59e0b",
@@ -81,8 +86,17 @@ function UpcomingCard({ fixture }: { fixture: SportDisplayFixture }) {
   );
 }
 
-export function StatusOverlay({ overlay }: { overlay?: SportDisplayOverlay }) {
+export function StatusOverlay({
+  overlay,
+  halfTimeBreak,
+}: {
+  overlay?: SportDisplayOverlay;
+  halfTimeBreak?: SportHalfTimeBreak;
+}) {
   const [now, setNow] = useState(() => Date.now());
+  const countdown = useBreakClock(
+    overlay?.kind === "halftime" ? halfTimeBreak : undefined,
+  );
   const active = !!overlay && overlay.kind !== "none" && overlay.kind !== "win";
 
   useEffect(() => {
@@ -159,6 +173,37 @@ export function StatusOverlay({ overlay }: { overlay?: SportDisplayOverlay }) {
             >
               {overlay.subtitle}
             </motion.p>
+          ) : null}
+
+          {countdown ? (
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.45 }}
+              className="mt-[4vh] flex flex-col items-center gap-[1.6vh]"
+            >
+              <span className="font-mono text-[min(1.5vw,2.5vh)] uppercase tracking-[0.4em] text-white/45">
+                {countdown.done ? "Second half starting" : "Back in"}
+              </span>
+              <span
+                className="font-mono text-[min(11vw,19vh)] font-extrabold leading-none tracking-tighter tabular-nums text-white"
+                style={{
+                  textShadow: `0 0 70px ${accent}aa`,
+                  opacity: countdown.done ? 0.55 : 1,
+                }}
+              >
+                {countdown.label}
+              </span>
+              <div className="h-[0.7vh] w-[34vw] overflow-hidden rounded-full bg-white/12">
+                <div
+                  className="h-full rounded-full transition-[width] duration-500 ease-linear"
+                  style={{
+                    width: `${Math.round(countdown.progress * 100)}%`,
+                    background: accent,
+                  }}
+                />
+              </div>
+            </motion.div>
           ) : null}
 
           {isUpcoming && overlay.fixture ? (

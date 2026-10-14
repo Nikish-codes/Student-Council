@@ -16,10 +16,19 @@ import type {
   CelebrationStyle,
   SportDisplayFixture,
   SportDisplayOverlay,
+  SportHalfTimeBreak,
   SportMatchEvent,
   SportMatchTimer,
 } from "@/lib/schemas";
-import { readMatchClock } from "@/lib/sports-clock";
+import {
+  DEFAULT_HALF_TIME_MS,
+  newHalfTimeBreak,
+  pauseBreak,
+  readBreakClock,
+  readMatchClock,
+  seekBreak,
+  startBreak,
+} from "@/lib/sports-clock";
 import { eventLabel, HALT_PRESETS } from "@/lib/sports-display";
 import {
   addMatchEvent,
@@ -28,6 +37,7 @@ import {
   removeMatchEventById,
   replayMatchEvent,
   setMatchGoalStyle,
+  setMatchHalfTimeBreak,
   setMatchOverlay,
   setMatchTickerHidden,
   updateMatchEventAt,
@@ -48,6 +58,7 @@ type Props = {
   goalStyle?: CelebrationStyle;
   hideTicker?: boolean;
   fixtures?: SportDisplayFixture[];
+  halfTimeBreak?: SportHalfTimeBreak;
 };
 
 type Draft = {
@@ -223,6 +234,7 @@ export function MatchCockpit({
   goalStyle,
   hideTicker,
   fixtures = [],
+  halfTimeBreak,
 }: Props) {
   const [liveA, setLiveA] = useState(scoreA);
   const [liveB, setLiveB] = useState(scoreB);
@@ -247,6 +259,16 @@ export function MatchCockpit({
   const [manualAnimates, setManualAnimates] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editDraft, setEditDraft] = useState<EventDraft>(EMPTY_EVENT_DRAFT);
+  const [liveBreak, setLiveBreak] = useState<SportHalfTimeBreak | undefined>(
+    halfTimeBreak,
+  );
+  const [breakMins, setBreakMins] = useState(
+    String(
+      Math.round((halfTimeBreak?.durationMs ?? DEFAULT_HALF_TIME_MS) / 60000),
+    ),
+  );
+  const [jumpMins, setJumpMins] = useState("");
+  const [jumpSecs, setJumpSecs] = useState("");
   const [pending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState("");
   const [now, setNow] = useState(() => Date.now());
@@ -256,12 +278,13 @@ export function MatchCockpit({
   const isNew = Number.isNaN(matchId);
 
   useEffect(() => {
-    if (!timer?.running) return;
-    const id = setInterval(() => setNow(Date.now()), 1000);
+    if (!timer?.running && !liveBreak?.running) return;
+    const id = setInterval(() => setNow(Date.now()), 500);
     return () => clearInterval(id);
-  }, [timer?.running]);
+  }, [timer?.running, liveBreak?.running]);
 
   const clock = readMatchClock(timer, now);
+  const breakClock = readBreakClock(liveBreak, now);
   const stamp = overrideTime.trim() || (clock ? `${clock.minute + 1}'` : "");
 
   function guard(): boolean {
@@ -287,6 +310,19 @@ export function MatchCockpit({
     setLiveB(b);
     setLiveStatus(newStatus);
     run(() => updateMatchScore(matchId, a, b, newStatus), "Score saved");
+  }
+
+  function saveBreak(next: SportHalfTimeBreak | null, message: string) {
+    if (!guard()) return;
+    setLiveBreak(next ?? undefined);
+    run(() => setMatchHalfTimeBreak(matchId, next), message);
+  }
+
+  function currentBreak(): SportHalfTimeBreak {
+    return (
+      liveBreak ??
+      newHalfTimeBreak(Math.max(1, Number(breakMins) || 10) * 60000)
+    );
   }
 
   function scoreGoal(team: "a" | "b") {
@@ -691,6 +727,122 @@ export function MatchCockpit({
               </div>
             );
           })}
+        </div>
+      </div>
+
+      <div className="mt-6 space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <span className="kicker text-subtle">Half-time break</span>
+          <span className="font-mono text-2xl font-extrabold tabular-nums text-ink">
+            {breakClock ? breakClock.label : "--:--"}
+          </span>
+        </div>
+        <p className="text-xs text-subtle">
+          Counts down on the Half time card. Put that card up with the Half time
+          button below.
+        </p>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-subtle">
+            Length
+            <input
+              value={breakMins}
+              onChange={(e) => setBreakMins(e.target.value)}
+              inputMode="numeric"
+              className="w-16 rounded-lg border border-line/15 bg-bg px-2 py-1.5 text-center text-sm text-ink focus:border-accent focus:outline-none"
+            />
+            min
+          </label>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              const ms = Math.max(1, Number(breakMins) || 10) * 60000;
+              saveBreak(newHalfTimeBreak(ms), "Break set");
+            }}
+            className="rounded-lg border border-line/15 bg-surface-2 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+          >
+            Set &amp; reset
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              const brk = currentBreak();
+              saveBreak(
+                brk.running
+                  ? pauseBreak(brk, Date.now())
+                  : startBreak(brk, Date.now()),
+                brk.running ? "Break paused" : "Break running",
+              );
+            }}
+            className={cn(
+              "rounded-lg border px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider disabled:opacity-40",
+              liveBreak?.running
+                ? "border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20"
+                : "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20",
+            )}
+          >
+            {liveBreak?.running ? "Pause" : "Start"}
+          </button>
+          <button
+            type="button"
+            disabled={pending || !liveBreak}
+            onClick={() => saveBreak(null, "Break cleared")}
+            className="rounded-lg border border-line/15 bg-surface-2 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+          >
+            Clear
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-subtle">
+            Jump to
+          </span>
+          <input
+            value={jumpMins}
+            onChange={(e) => setJumpMins(e.target.value)}
+            placeholder="min"
+            inputMode="numeric"
+            className="w-16 rounded-lg border border-line/15 bg-bg px-2 py-1.5 text-center text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+          />
+          <input
+            value={jumpSecs}
+            onChange={(e) => setJumpSecs(e.target.value)}
+            placeholder="sec"
+            inputMode="numeric"
+            className="w-16 rounded-lg border border-line/15 bg-bg px-2 py-1.5 text-center text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+          />
+          <button
+            type="button"
+            disabled={pending || (jumpMins === "" && jumpSecs === "")}
+            onClick={() => {
+              const ms =
+                ((Number(jumpMins) || 0) * 60 + (Number(jumpSecs) || 0)) * 1000;
+              saveBreak(seekBreak(currentBreak(), ms, Date.now()), "Break set");
+              setJumpMins("");
+              setJumpSecs("");
+            }}
+            className="rounded-lg border border-line/20 bg-surface px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-ink hover:border-accent hover:text-accent disabled:opacity-40"
+          >
+            Jump
+          </button>
+          {[1, 5].map((m) => (
+            <button
+              key={m}
+              type="button"
+              disabled={pending}
+              onClick={() => {
+                const brk = currentBreak();
+                const now = Date.now();
+                const left = readBreakClock(brk, now)?.remainingMs ?? 0;
+                saveBreak(seekBreak(brk, left + m * 60000, now), `+${m} min`);
+              }}
+              className="rounded-lg border border-line/15 px-2.5 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+            >
+              +{m}m
+            </button>
+          ))}
         </div>
       </div>
 
