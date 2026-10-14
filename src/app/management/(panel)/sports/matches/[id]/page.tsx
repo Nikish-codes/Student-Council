@@ -246,6 +246,7 @@ export default async function MatchEditor({
               goalStyle={row?.postMatch?.goalStyle}
               hideTicker={row?.postMatch?.hideTicker}
               halfTimeBreak={row?.postMatch?.halfTimeBreak}
+              shootout={row?.postMatch?.shootout}
               fixtures={fixtures}
             />
           </Fieldset>

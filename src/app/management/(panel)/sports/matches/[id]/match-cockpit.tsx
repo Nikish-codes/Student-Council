@@ -19,6 +19,7 @@ import type {
   SportHalfTimeBreak,
   SportMatchEvent,
   SportMatchTimer,
+  SportShootout,
 } from "@/lib/schemas";
 import {
   DEFAULT_HALF_TIME_MS,
@@ -31,6 +32,12 @@ import {
 } from "@/lib/sports-clock";
 import { eventLabel, HALT_PRESETS } from "@/lib/sports-display";
 import {
+  addKick,
+  newShootout,
+  readShootout,
+  undoKick,
+} from "@/lib/sports-shootout";
+import {
   addMatchEvent,
   logMatchEvent,
   removeMatchEvent,
@@ -39,6 +46,7 @@ import {
   setMatchGoalStyle,
   setMatchHalfTimeBreak,
   setMatchOverlay,
+  setMatchShootout,
   setMatchTickerHidden,
   updateMatchEventAt,
   updateMatchScore,
@@ -59,6 +67,7 @@ type Props = {
   hideTicker?: boolean;
   fixtures?: SportDisplayFixture[];
   halfTimeBreak?: SportHalfTimeBreak;
+  shootout?: SportShootout;
 };
 
 type Draft = {
@@ -235,6 +244,7 @@ export function MatchCockpit({
   hideTicker,
   fixtures = [],
   halfTimeBreak,
+  shootout,
 }: Props) {
   const [liveA, setLiveA] = useState(scoreA);
   const [liveB, setLiveB] = useState(scoreB);
@@ -269,6 +279,9 @@ export function MatchCockpit({
   );
   const [jumpMins, setJumpMins] = useState("");
   const [jumpSecs, setJumpSecs] = useState("");
+  const [liveShootout, setLiveShootout] = useState<SportShootout | undefined>(
+    shootout,
+  );
   const [pending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState("");
   const [now, setNow] = useState(() => Date.now());
@@ -285,6 +298,7 @@ export function MatchCockpit({
 
   const clock = readMatchClock(timer, now);
   const breakClock = readBreakClock(liveBreak, now);
+  const shootoutState = liveShootout ? readShootout(liveShootout) : null;
   const stamp = overrideTime.trim() || (clock ? `${clock.minute + 1}'` : "");
 
   function guard(): boolean {
@@ -310,6 +324,20 @@ export function MatchCockpit({
     setLiveB(b);
     setLiveStatus(newStatus);
     run(() => updateMatchScore(matchId, a, b, newStatus), "Score saved");
+  }
+
+  function saveShootout(next: SportShootout | null, message: string) {
+    if (!guard()) return;
+    setLiveShootout(next ?? undefined);
+    run(() => setMatchShootout(matchId, next), message);
+  }
+
+  function recordKick(team: "a" | "b", scored: boolean) {
+    const base = liveShootout ?? newShootout("a");
+    saveShootout(
+      addKick(base, team, scored),
+      `${team === "a" ? teamAName : teamBName} ${scored ? "scored" : "missed"}`,
+    );
   }
 
   function saveBreak(next: SportHalfTimeBreak | null, message: string) {
@@ -847,6 +875,112 @@ export function MatchCockpit({
       </div>
 
       <div className="mt-6 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="kicker text-subtle">Penalty shootout</span>
+          {shootoutState ? (
+            <span className="font-mono text-sm text-muted">
+              <span className="text-2xl font-extrabold tabular-nums text-ink">
+                {shootoutState.scoreA} &ndash; {shootoutState.scoreB}
+              </span>
+              <span className="ml-3 uppercase tracking-wider">
+                {shootoutState.decided
+                  ? `${shootoutState.winner === "a" ? teamAName : teamBName} win`
+                  : shootoutState.suddenDeath
+                    ? "Sudden death"
+                    : `${shootoutState.nextTeam === "a" ? teamAName : teamBName} to kick`}
+              </span>
+            </span>
+          ) : null}
+        </div>
+
+        {!liveShootout ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-subtle">
+              First kick
+            </span>
+            {(["a", "b"] as const).map((team) => (
+              <button
+                key={team}
+                type="button"
+                disabled={pending}
+                onClick={() =>
+                  saveShootout(newShootout(team), "Shootout started")
+                }
+                className="rounded-lg border border-line/15 bg-surface-2 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+              >
+                {team === "a" ? teamAName : teamBName}
+              </button>
+            ))}
+            <span className="text-xs text-subtle">
+              Starts a shootout. Show it with the Penalties card below.
+            </span>
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {(["a", "b"] as const).map((team) => (
+                <div
+                  key={team}
+                  className={cn(
+                    "rounded-xl border p-3",
+                    shootoutState?.nextTeam === team
+                      ? "border-accent/40 bg-accent/5"
+                      : "border-line/15 bg-surface-2",
+                  )}
+                >
+                  <p className="mb-2 truncate text-sm font-semibold text-ink">
+                    {team === "a" ? teamAName : teamBName}
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      disabled={pending || shootoutState?.decided}
+                      onClick={() => recordKick(team, true)}
+                      className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-emerald-300 hover:bg-emerald-500/20 disabled:opacity-40"
+                    >
+                      Scored
+                    </button>
+                    <button
+                      type="button"
+                      disabled={pending || shootoutState?.decided}
+                      onClick={() => recordKick(team, false)}
+                      className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-red-300 hover:bg-red-500/20 disabled:opacity-40"
+                    >
+                      Missed
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                disabled={pending || !liveShootout.kicks.length}
+                onClick={() =>
+                  saveShootout(undoKick(liveShootout), "Last kick undone")
+                }
+                className="rounded-lg border border-line/15 bg-surface-2 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+              >
+                Undo last kick
+              </button>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => {
+                  if (confirm("Clear the shootout and all its kicks?")) {
+                    saveShootout(null, "Shootout cleared");
+                  }
+                }}
+                className="rounded-lg border border-line/15 bg-surface-2 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+              >
+                Clear shootout
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="mt-6 space-y-3">
         <span className="kicker text-subtle">Big screen cards</span>
         <div className="flex flex-wrap gap-2">
           {HALT_PRESETS.map((preset) => (
@@ -911,6 +1045,19 @@ export function MatchCockpit({
               {title}
             </button>
           ))}
+          <button
+            type="button"
+            disabled={pending || !liveShootout}
+            onClick={() =>
+              applyOverlay(
+                { kind: "penalties", title: "", subtitle: "" },
+                "Penalties screen",
+              )
+            }
+            className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-amber-300 hover:bg-amber-400/20 disabled:opacity-40"
+          >
+            Penalties
+          </button>
           <button
             type="button"
             disabled={pending}
