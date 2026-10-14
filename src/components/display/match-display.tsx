@@ -434,7 +434,13 @@ export function MatchDisplay({ match: initial }: { match: SportsMatch }) {
 
       <GoalCelebration cue={goalCue} />
       <CardCelebration cue={cardCue} />
-      <StatusOverlay overlay={match.postMatch?.overlay} />
+      <StatusOverlay
+        overlay={match.postMatch?.overlay}
+        halfTimeBreak={match.postMatch?.halfTimeBreak}
+        shootout={match.postMatch?.shootout}
+        teamA={{ name: match.teamAName, logo: match.teamALogo, color: colorA }}
+        teamB={{ name: match.teamBName, logo: match.teamBLogo, color: colorB }}
+      />
       <WinCelebration cue={winCue} />
     </div>
   );

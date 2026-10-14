@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { eventMinute, readMatchClock } from "./sports-clock";
+import {
+  eventMinute,
+  newHalfTimeBreak,
+  pauseBreak,
+  readBreakClock,
+  readMatchClock,
+  seekBreak,
+  startBreak,
+} from "./sports-clock";
 import type { SportMatchTimer } from "./schemas";
 
 const NOW = 1_700_000_000_000;
@@ -96,5 +104,57 @@ describe("eventMinute", () => {
     ["SYS", 0],
   ])("parses %s as %i", (input, expected) => {
     expect(eventMinute(input)).toBe(expected);
+  });
+});
+
+describe("half-time break", () => {
+  const TEN = 10 * 60000;
+
+  it("counts down from the configured length while paused", () => {
+    const c = readBreakClock(newHalfTimeBreak(TEN), NOW);
+    expect(c?.label).toBe("10:00");
+    expect(c?.done).toBe(false);
+    expect(c?.progress).toBe(0);
+  });
+
+  it("counts down against the wall clock once started", () => {
+    const brk = startBreak(newHalfTimeBreak(TEN), NOW);
+    const c = readBreakClock(brk, NOW + 3 * 60000);
+    expect(c?.label).toBe("07:00");
+    expect(c?.progress).toBeCloseTo(0.3, 5);
+  });
+
+  it("holds its remaining time across a pause and resume", () => {
+    const started = startBreak(newHalfTimeBreak(TEN), NOW);
+    const paused = pauseBreak(started, NOW + 4 * 60000);
+    expect(readBreakClock(paused, NOW + 9 * 60000)?.label).toBe("06:00");
+
+    const resumed = startBreak(paused, NOW + 9 * 60000);
+    expect(readBreakClock(resumed, NOW + 10 * 60000)?.label).toBe("05:00");
+  });
+
+  it("never reports less than zero", () => {
+    const brk = startBreak(newHalfTimeBreak(TEN), NOW);
+    const c = readBreakClock(brk, NOW + 60 * 60000);
+    expect(c?.remainingMs).toBe(0);
+    expect(c?.label).toBe("00:00");
+    expect(c?.done).toBe(true);
+  });
+
+  it("jumps to a given remaining time, running or not", () => {
+    const paused = seekBreak(newHalfTimeBreak(TEN), 90_000, NOW);
+    expect(readBreakClock(paused, NOW)?.label).toBe("01:30");
+
+    const running = seekBreak(startBreak(newHalfTimeBreak(TEN), NOW), 90_000, NOW);
+    expect(readBreakClock(running, NOW + 30_000)?.label).toBe("01:00");
+  });
+
+  it("clamps a negative jump to zero", () => {
+    const brk = seekBreak(newHalfTimeBreak(TEN), -5000, NOW);
+    expect(readBreakClock(brk, NOW)?.label).toBe("00:00");
+  });
+
+  it("returns null without a break", () => {
+    expect(readBreakClock(undefined, NOW)).toBeNull();
   });
 });

@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import type { SportDisplayFixture, SportDisplayOverlay } from "@/lib/schemas";
+import type {
+  SportDisplayFixture,
+  SportDisplayOverlay,
+  SportHalfTimeBreak,
+  SportShootout,
+} from "@/lib/schemas";
+import { PenaltyShootout, type ShootoutSide } from "./penalty-shootout";
+import { useBreakClock } from "@/lib/sports-clock";
 
 const ACCENT: Record<string, string> = {
   halt: "#f59e0b",
@@ -10,6 +17,7 @@ const ACCENT: Record<string, string> = {
   kickoff: "#22c55e",
   halftime: "#a855f7",
   fulltime: "#ffffff",
+  penalties: "#f4c860",
   league: "#ffffff",
   upcoming: "#38bdf8",
 };
@@ -81,8 +89,23 @@ function UpcomingCard({ fixture }: { fixture: SportDisplayFixture }) {
   );
 }
 
-export function StatusOverlay({ overlay }: { overlay?: SportDisplayOverlay }) {
+export function StatusOverlay({
+  overlay,
+  halfTimeBreak,
+  shootout,
+  teamA,
+  teamB,
+}: {
+  overlay?: SportDisplayOverlay;
+  halfTimeBreak?: SportHalfTimeBreak;
+  shootout?: SportShootout;
+  teamA: ShootoutSide;
+  teamB: ShootoutSide;
+}) {
   const [now, setNow] = useState(() => Date.now());
+  const countdown = useBreakClock(
+    overlay?.kind === "halftime" ? halfTimeBreak : undefined,
+  );
   const active = !!overlay && overlay.kind !== "none" && overlay.kind !== "win";
 
   useEffect(() => {
@@ -96,6 +119,7 @@ export function StatusOverlay({ overlay }: { overlay?: SportDisplayOverlay }) {
   const accent = ACCENT[overlay.kind] ?? "#ffffff";
   const isLeague = overlay.kind === "league";
   const isUpcoming = overlay.kind === "upcoming";
+  const isPenalties = overlay.kind === "penalties" && !!shootout;
 
   return (
     <AnimatePresence>
@@ -109,7 +133,7 @@ export function StatusOverlay({ overlay }: { overlay?: SportDisplayOverlay }) {
       >
         <div className="absolute inset-0 bg-black/[0.94] backdrop-blur-xl" />
 
-        {isLeague || isUpcoming ? (
+        {isLeague || isUpcoming || isPenalties ? (
           <motion.div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: "url(/sports/stadium.webp)" }}
@@ -128,89 +152,127 @@ export function StatusOverlay({ overlay }: { overlay?: SportDisplayOverlay }) {
           />
         )}
 
-        <motion.div
-          className="relative z-10 flex max-h-full flex-col items-center px-[4vw] text-center"
-          initial={{ y: 40, scale: 0.94, opacity: 0 }}
-          animate={{ y: 0, scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 150, damping: 18 }}
-        >
+        {isPenalties && shootout ? (
+          <PenaltyShootout shootout={shootout} teamA={teamA} teamB={teamB} />
+        ) : (
           <motion.div
-            className="mb-[4vh] h-[0.9vh] rounded-full"
-            style={{ background: accent, boxShadow: `0 0 40px ${accent}` }}
-            initial={{ width: 0 }}
-            animate={{ width: "22vw" }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-          />
-
-          <h1
-            className="text-[min(6.5vw,11vh)] font-extrabold uppercase leading-[0.95] tracking-tight text-white"
-            style={{ textShadow: `0 0 80px ${accent}55` }}
+            className="relative z-10 flex max-h-full flex-col items-center px-[4vw] text-center"
+            initial={{ y: 40, scale: 0.94, opacity: 0 }}
+            animate={{ y: 0, scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 150, damping: 18 }}
           >
-            {overlay.title || "Match Paused"}
-          </h1>
-
-          {overlay.subtitle ? (
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25, duration: 0.4 }}
-              className="mt-[3vh] font-mono text-[min(4.4vw,7.2vh)] font-bold uppercase leading-[1.05] tracking-[0.12em]"
-              style={{ color: accent }}
-            >
-              {overlay.subtitle}
-            </motion.p>
-          ) : null}
-
-          {isUpcoming && overlay.fixture ? (
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35, duration: 0.5 }}
-              className="mt-[5vh]"
-            >
-              <UpcomingCard fixture={overlay.fixture} />
-            </motion.div>
-          ) : null}
+              className="mb-[4vh] h-[0.9vh] rounded-full"
+              style={{ background: accent, boxShadow: `0 0 40px ${accent}` }}
+              initial={{ width: 0 }}
+              animate={{ width: "22vw" }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+            />
 
-          {overlay.kind === "halt" && overlay.since ? (
+            <h1
+              className="text-[min(6.5vw,11vh)] font-extrabold uppercase leading-[0.95] tracking-tight text-white"
+              style={{ textShadow: `0 0 80px ${accent}55` }}
+            >
+              {overlay.title || "Match Paused"}
+            </h1>
+
+            {overlay.subtitle ? (
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25, duration: 0.4 }}
+                className="mt-[3vh] font-mono text-[min(4.4vw,7.2vh)] font-bold uppercase leading-[1.05] tracking-[0.12em]"
+                style={{ color: accent }}
+              >
+                {overlay.subtitle}
+              </motion.p>
+            ) : null}
+
+            {countdown ? (
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.45 }}
+                className="mt-[4vh] flex flex-col items-center gap-[1.6vh]"
+              >
+                <span className="font-mono text-[min(1.5vw,2.5vh)] uppercase tracking-[0.4em] text-white/45">
+                  {countdown.done ? "Second half starting" : "Back in"}
+                </span>
+                <span
+                  className="font-mono text-[min(11vw,19vh)] font-extrabold leading-none tracking-tighter tabular-nums text-white"
+                  style={{
+                    textShadow: `0 0 70px ${accent}aa`,
+                    opacity: countdown.done ? 0.55 : 1,
+                  }}
+                >
+                  {countdown.label}
+                </span>
+                <div className="h-[0.7vh] w-[34vw] overflow-hidden rounded-full bg-white/12">
+                  <div
+                    className="h-full rounded-full transition-[width] duration-500 ease-linear"
+                    style={{
+                      width: `${Math.round(countdown.progress * 100)}%`,
+                      background: accent,
+                    }}
+                  />
+                </div>
+              </motion.div>
+            ) : null}
+
+            {isUpcoming && overlay.fixture ? (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35, duration: 0.5 }}
+                className="mt-[5vh]"
+              >
+                <UpcomingCard fixture={overlay.fixture} />
+              </motion.div>
+            ) : null}
+
+            {overlay.kind === "halt" && overlay.since ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.45 }}
+                className="mt-[5vh] flex items-center gap-5 rounded-full border-2 px-12 py-5"
+                style={{
+                  borderColor: `${accent}66`,
+                  background: `${accent}12`,
+                }}
+              >
+                <span className="relative flex h-4 w-4">
+                  <span
+                    className="absolute inline-flex h-full w-full rounded-full opacity-75 motion-safe:animate-ping"
+                    style={{ background: accent }}
+                  />
+                  <span
+                    className="relative inline-flex h-4 w-4 rounded-full"
+                    style={{ background: accent }}
+                  />
+                </span>
+                <span className="font-mono text-[min(1.7vw,2.8vh)] uppercase tracking-[0.3em] text-white/60">
+                  Stopped for
+                </span>
+                <span className="font-mono text-[min(3vw,5vh)] font-extrabold tabular-nums text-white">
+                  {elapsed(overlay.since, now)}
+                </span>
+              </motion.div>
+            ) : null}
+
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.45 }}
-              className="mt-[5vh] flex items-center gap-5 rounded-full border-2 px-12 py-5"
-              style={{ borderColor: `${accent}66`, background: `${accent}12` }}
-            >
-              <span className="relative flex h-4 w-4">
-                <span
-                  className="absolute inline-flex h-full w-full rounded-full opacity-75 motion-safe:animate-ping"
-                  style={{ background: accent }}
-                />
-                <span
-                  className="relative inline-flex h-4 w-4 rounded-full"
-                  style={{ background: accent }}
-                />
-              </span>
-              <span className="font-mono text-[min(1.7vw,2.8vh)] uppercase tracking-[0.3em] text-white/60">
-                Stopped for
-              </span>
-              <span className="font-mono text-[min(3vw,5vh)] font-extrabold tabular-nums text-white">
-                {elapsed(overlay.since, now)}
-              </span>
-            </motion.div>
-          ) : null}
-
-          <motion.div
-            className="mt-[5vh] h-[3px] rounded-full bg-white/15"
-            initial={{ width: 0 }}
-            animate={{ width: "46vw" }}
-            transition={{ duration: 0.9, delay: 0.3 }}
-          />
-          {isLeague ? null : (
-            <p className="mt-[2.5vh] font-mono text-[min(1.3vw,2.2vh)] uppercase tracking-[0.45em] text-white/35">
-              Woxsen Football League
-            </p>
-          )}
-        </motion.div>
+              className="mt-[5vh] h-[3px] rounded-full bg-white/15"
+              initial={{ width: 0 }}
+              animate={{ width: "46vw" }}
+              transition={{ duration: 0.9, delay: 0.3 }}
+            />
+            {isLeague ? null : (
+              <p className="mt-[2.5vh] font-mono text-[min(1.3vw,2.2vh)] uppercase tracking-[0.45em] text-white/35">
+                Woxsen Football League
+              </p>
+            )}
+          </motion.div>
+        )}
       </motion.div>
     </AnimatePresence>
   );

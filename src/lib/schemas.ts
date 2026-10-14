@@ -242,6 +242,26 @@ export const sportDisplayFixtureSchema = z.object({
 });
 export type SportDisplayFixture = z.infer<typeof sportDisplayFixtureSchema>;
 
+export const sportHalfTimeBreakSchema = z.object({
+  running: z.boolean(),
+  endsAt: z.number().nullable(),
+  remainingMs: z.number(),
+  durationMs: z.number(),
+});
+export type SportHalfTimeBreak = z.infer<typeof sportHalfTimeBreakSchema>;
+
+export const sportShootoutKickSchema = z.object({
+  team: z.enum(["a", "b"]),
+  scored: z.boolean(),
+});
+export type SportShootoutKick = z.infer<typeof sportShootoutKickSchema>;
+
+export const sportShootoutSchema = z.object({
+  firstTeam: z.enum(["a", "b"]),
+  kicks: z.array(sportShootoutKickSchema),
+});
+export type SportShootout = z.infer<typeof sportShootoutSchema>;
+
 export const sportDisplayOverlaySchema = z.object({
   kind: z.enum([
     "none",
@@ -253,6 +273,7 @@ export const sportDisplayOverlaySchema = z.object({
     "league",
     "upcoming",
     "win",
+    "penalties",
   ]),
   preset: z.string().optional(),
   title: z.string().optional(),
@@ -276,6 +297,8 @@ export const sportPostMatchSchema = z.object({
   teamAColor: z.string().optional(),
   teamBColor: z.string().optional(),
   hideTicker: z.boolean().optional(),
+  halfTimeBreak: sportHalfTimeBreakSchema.optional(),
+  shootout: sportShootoutSchema.optional(),
 });
 export type SportPostMatch = z.infer<typeof sportPostMatchSchema>;
 

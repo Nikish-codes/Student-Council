@@ -16,11 +16,27 @@ import type {
   CelebrationStyle,
   SportDisplayFixture,
   SportDisplayOverlay,
+  SportHalfTimeBreak,
   SportMatchEvent,
   SportMatchTimer,
+  SportShootout,
 } from "@/lib/schemas";
-import { readMatchClock } from "@/lib/sports-clock";
+import {
+  DEFAULT_HALF_TIME_MS,
+  newHalfTimeBreak,
+  pauseBreak,
+  readBreakClock,
+  readMatchClock,
+  seekBreak,
+  startBreak,
+} from "@/lib/sports-clock";
 import { eventLabel, HALT_PRESETS } from "@/lib/sports-display";
+import {
+  addKick,
+  newShootout,
+  readShootout,
+  undoKick,
+} from "@/lib/sports-shootout";
 import {
   addMatchEvent,
   logMatchEvent,
@@ -28,7 +44,9 @@ import {
   removeMatchEventById,
   replayMatchEvent,
   setMatchGoalStyle,
+  setMatchHalfTimeBreak,
   setMatchOverlay,
+  setMatchShootout,
   setMatchTickerHidden,
   updateMatchEventAt,
   updateMatchScore,
@@ -48,6 +66,8 @@ type Props = {
   goalStyle?: CelebrationStyle;
   hideTicker?: boolean;
   fixtures?: SportDisplayFixture[];
+  halfTimeBreak?: SportHalfTimeBreak;
+  shootout?: SportShootout;
 };
 
 type Draft = {
@@ -223,6 +243,8 @@ export function MatchCockpit({
   goalStyle,
   hideTicker,
   fixtures = [],
+  halfTimeBreak,
+  shootout,
 }: Props) {
   const [liveA, setLiveA] = useState(scoreA);
   const [liveB, setLiveB] = useState(scoreB);
@@ -247,6 +269,19 @@ export function MatchCockpit({
   const [manualAnimates, setManualAnimates] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editDraft, setEditDraft] = useState<EventDraft>(EMPTY_EVENT_DRAFT);
+  const [liveBreak, setLiveBreak] = useState<SportHalfTimeBreak | undefined>(
+    halfTimeBreak,
+  );
+  const [breakMins, setBreakMins] = useState(
+    String(
+      Math.round((halfTimeBreak?.durationMs ?? DEFAULT_HALF_TIME_MS) / 60000),
+    ),
+  );
+  const [jumpMins, setJumpMins] = useState("");
+  const [jumpSecs, setJumpSecs] = useState("");
+  const [liveShootout, setLiveShootout] = useState<SportShootout | undefined>(
+    shootout,
+  );
   const [pending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState("");
   const [now, setNow] = useState(() => Date.now());
@@ -256,12 +291,14 @@ export function MatchCockpit({
   const isNew = Number.isNaN(matchId);
 
   useEffect(() => {
-    if (!timer?.running) return;
-    const id = setInterval(() => setNow(Date.now()), 1000);
+    if (!timer?.running && !liveBreak?.running) return;
+    const id = setInterval(() => setNow(Date.now()), 500);
     return () => clearInterval(id);
-  }, [timer?.running]);
+  }, [timer?.running, liveBreak?.running]);
 
   const clock = readMatchClock(timer, now);
+  const breakClock = readBreakClock(liveBreak, now);
+  const shootoutState = liveShootout ? readShootout(liveShootout) : null;
   const stamp = overrideTime.trim() || (clock ? `${clock.minute + 1}'` : "");
 
   function guard(): boolean {
@@ -287,6 +324,33 @@ export function MatchCockpit({
     setLiveB(b);
     setLiveStatus(newStatus);
     run(() => updateMatchScore(matchId, a, b, newStatus), "Score saved");
+  }
+
+  function saveShootout(next: SportShootout | null, message: string) {
+    if (!guard()) return;
+    setLiveShootout(next ?? undefined);
+    run(() => setMatchShootout(matchId, next), message);
+  }
+
+  function recordKick(team: "a" | "b", scored: boolean) {
+    const base = liveShootout ?? newShootout("a");
+    saveShootout(
+      addKick(base, team, scored),
+      `${team === "a" ? teamAName : teamBName} ${scored ? "scored" : "missed"}`,
+    );
+  }
+
+  function saveBreak(next: SportHalfTimeBreak | null, message: string) {
+    if (!guard()) return;
+    setLiveBreak(next ?? undefined);
+    run(() => setMatchHalfTimeBreak(matchId, next), message);
+  }
+
+  function currentBreak(): SportHalfTimeBreak {
+    return (
+      liveBreak ??
+      newHalfTimeBreak(Math.max(1, Number(breakMins) || 10) * 60000)
+    );
   }
 
   function scoreGoal(team: "a" | "b") {
@@ -695,6 +759,228 @@ export function MatchCockpit({
       </div>
 
       <div className="mt-6 space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <span className="kicker text-subtle">Half-time break</span>
+          <span className="font-mono text-2xl font-extrabold tabular-nums text-ink">
+            {breakClock ? breakClock.label : "--:--"}
+          </span>
+        </div>
+        <p className="text-xs text-subtle">
+          Counts down on the Half time card. Put that card up with the Half time
+          button below.
+        </p>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-subtle">
+            Length
+            <input
+              value={breakMins}
+              onChange={(e) => setBreakMins(e.target.value)}
+              inputMode="numeric"
+              className="w-16 rounded-lg border border-line/15 bg-bg px-2 py-1.5 text-center text-sm text-ink focus:border-accent focus:outline-none"
+            />
+            min
+          </label>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              const ms = Math.max(1, Number(breakMins) || 10) * 60000;
+              saveBreak(newHalfTimeBreak(ms), "Break set");
+            }}
+            className="rounded-lg border border-line/15 bg-surface-2 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+          >
+            Set &amp; reset
+          </button>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              const brk = currentBreak();
+              saveBreak(
+                brk.running
+                  ? pauseBreak(brk, Date.now())
+                  : startBreak(brk, Date.now()),
+                brk.running ? "Break paused" : "Break running",
+              );
+            }}
+            className={cn(
+              "rounded-lg border px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider disabled:opacity-40",
+              liveBreak?.running
+                ? "border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20"
+                : "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20",
+            )}
+          >
+            {liveBreak?.running ? "Pause" : "Start"}
+          </button>
+          <button
+            type="button"
+            disabled={pending || !liveBreak}
+            onClick={() => saveBreak(null, "Break cleared")}
+            className="rounded-lg border border-line/15 bg-surface-2 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+          >
+            Clear
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-subtle">
+            Jump to
+          </span>
+          <input
+            value={jumpMins}
+            onChange={(e) => setJumpMins(e.target.value)}
+            placeholder="min"
+            inputMode="numeric"
+            className="w-16 rounded-lg border border-line/15 bg-bg px-2 py-1.5 text-center text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+          />
+          <input
+            value={jumpSecs}
+            onChange={(e) => setJumpSecs(e.target.value)}
+            placeholder="sec"
+            inputMode="numeric"
+            className="w-16 rounded-lg border border-line/15 bg-bg px-2 py-1.5 text-center text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none"
+          />
+          <button
+            type="button"
+            disabled={pending || (jumpMins === "" && jumpSecs === "")}
+            onClick={() => {
+              const ms =
+                ((Number(jumpMins) || 0) * 60 + (Number(jumpSecs) || 0)) * 1000;
+              saveBreak(seekBreak(currentBreak(), ms, Date.now()), "Break set");
+              setJumpMins("");
+              setJumpSecs("");
+            }}
+            className="rounded-lg border border-line/20 bg-surface px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-ink hover:border-accent hover:text-accent disabled:opacity-40"
+          >
+            Jump
+          </button>
+          {[1, 5].map((m) => (
+            <button
+              key={m}
+              type="button"
+              disabled={pending}
+              onClick={() => {
+                const brk = currentBreak();
+                const now = Date.now();
+                const left = readBreakClock(brk, now)?.remainingMs ?? 0;
+                saveBreak(seekBreak(brk, left + m * 60000, now), `+${m} min`);
+              }}
+              className="rounded-lg border border-line/15 px-2.5 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+            >
+              +{m}m
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-6 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="kicker text-subtle">Penalty shootout</span>
+          {shootoutState ? (
+            <span className="font-mono text-sm text-muted">
+              <span className="text-2xl font-extrabold tabular-nums text-ink">
+                {shootoutState.scoreA} &ndash; {shootoutState.scoreB}
+              </span>
+              <span className="ml-3 uppercase tracking-wider">
+                {shootoutState.decided
+                  ? `${shootoutState.winner === "a" ? teamAName : teamBName} win`
+                  : shootoutState.suddenDeath
+                    ? "Sudden death"
+                    : `${shootoutState.nextTeam === "a" ? teamAName : teamBName} to kick`}
+              </span>
+            </span>
+          ) : null}
+        </div>
+
+        {!liveShootout ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-subtle">
+              First kick
+            </span>
+            {(["a", "b"] as const).map((team) => (
+              <button
+                key={team}
+                type="button"
+                disabled={pending}
+                onClick={() =>
+                  saveShootout(newShootout(team), "Shootout started")
+                }
+                className="rounded-lg border border-line/15 bg-surface-2 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+              >
+                {team === "a" ? teamAName : teamBName}
+              </button>
+            ))}
+            <span className="text-xs text-subtle">
+              Starts a shootout. Show it with the Penalties card below.
+            </span>
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {(["a", "b"] as const).map((team) => (
+                <div
+                  key={team}
+                  className={cn(
+                    "rounded-xl border p-3",
+                    shootoutState?.nextTeam === team
+                      ? "border-accent/40 bg-accent/5"
+                      : "border-line/15 bg-surface-2",
+                  )}
+                >
+                  <p className="mb-2 truncate text-sm font-semibold text-ink">
+                    {team === "a" ? teamAName : teamBName}
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      disabled={pending || shootoutState?.decided}
+                      onClick={() => recordKick(team, true)}
+                      className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-emerald-300 hover:bg-emerald-500/20 disabled:opacity-40"
+                    >
+                      Scored
+                    </button>
+                    <button
+                      type="button"
+                      disabled={pending || shootoutState?.decided}
+                      onClick={() => recordKick(team, false)}
+                      className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-red-300 hover:bg-red-500/20 disabled:opacity-40"
+                    >
+                      Missed
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                disabled={pending || !liveShootout.kicks.length}
+                onClick={() =>
+                  saveShootout(undoKick(liveShootout), "Last kick undone")
+                }
+                className="rounded-lg border border-line/15 bg-surface-2 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+              >
+                Undo last kick
+              </button>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => {
+                  if (confirm("Clear the shootout and all its kicks?")) {
+                    saveShootout(null, "Shootout cleared");
+                  }
+                }}
+                className="rounded-lg border border-line/15 bg-surface-2 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted hover:border-line/40 hover:text-ink disabled:opacity-40"
+              >
+                Clear shootout
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="mt-6 space-y-3">
         <span className="kicker text-subtle">Big screen cards</span>
         <div className="flex flex-wrap gap-2">
           {HALT_PRESETS.map((preset) => (
@@ -759,6 +1045,19 @@ export function MatchCockpit({
               {title}
             </button>
           ))}
+          <button
+            type="button"
+            disabled={pending || !liveShootout}
+            onClick={() =>
+              applyOverlay(
+                { kind: "penalties", title: "", subtitle: "" },
+                "Penalties screen",
+              )
+            }
+            className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-amber-300 hover:bg-amber-400/20 disabled:opacity-40"
+          >
+            Penalties
+          </button>
           <button
             type="button"
             disabled={pending}

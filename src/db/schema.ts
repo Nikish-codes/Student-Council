@@ -187,7 +187,8 @@ export type SportDisplayOverlay = {
     | "fulltime"
     | "league"
     | "upcoming"
-    | "win";
+    | "win"
+    | "penalties";
   preset?: string;
   title?: string;
   subtitle?: string;
@@ -209,6 +210,8 @@ export type SportPostMatch = {
   teamAColor?: string;
   teamBColor?: string;
   hideTicker?: boolean;
+  halfTimeBreak?: import("@/lib/schemas").SportHalfTimeBreak;
+  shootout?: import("@/lib/schemas").SportShootout;
 };
 
 // ───────────────────────────────── Oval menu ─────────────────────────────────

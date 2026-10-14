@@ -454,3 +454,43 @@ export async function normaliseMatchScores(id: number) {
     .where(eq(t.id, id));
   bust(id);
 }
+
+export async function setMatchHalfTimeBreak(
+  id: number,
+  halfTimeBreak: import("@/lib/schemas").SportHalfTimeBreak | null,
+) {
+  await requireSportsManager();
+  const existing = await db.query.sportsMatches.findFirst({
+    where: eq(t.id, id),
+    columns: { postMatch: true },
+  });
+  if (!existing) throw new Error("NOT_FOUND");
+  const postMatch: SportPostMatch = existing.postMatch || {};
+  if (halfTimeBreak) postMatch.halfTimeBreak = halfTimeBreak;
+  else delete postMatch.halfTimeBreak;
+  await db
+    .update(t)
+    .set({ postMatch, updatedAt: new Date().toISOString() })
+    .where(eq(t.id, id));
+  bust(id);
+}
+
+export async function setMatchShootout(
+  id: number,
+  shootout: import("@/lib/schemas").SportShootout | null,
+) {
+  await requireSportsManager();
+  const existing = await db.query.sportsMatches.findFirst({
+    where: eq(t.id, id),
+    columns: { postMatch: true },
+  });
+  if (!existing) throw new Error("NOT_FOUND");
+  const postMatch: SportPostMatch = existing.postMatch || {};
+  if (shootout) postMatch.shootout = shootout;
+  else delete postMatch.shootout;
+  await db
+    .update(t)
+    .set({ postMatch, updatedAt: new Date().toISOString() })
+    .where(eq(t.id, id));
+  bust(id);
+}
