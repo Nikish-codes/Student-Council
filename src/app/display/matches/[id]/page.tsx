@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MatchDisplay } from "@/components/display/match-display";
-import { getSportsMatches, getSportsPageConfig } from "@/lib/content";
+import { getSportsMatches } from "@/lib/content";
 
 export const revalidate = 5;
 
@@ -33,6 +33,5 @@ export default async function DisplayPage({
   const matches = await getSportsMatches();
   const match = matches.find((m) => m.id === Number(id));
   if (!match) notFound();
-  const config = await getSportsPageConfig();
-  return <MatchDisplay match={match} academyLogo={config.academyLogo} />;
+  return <MatchDisplay match={match} />;
 }

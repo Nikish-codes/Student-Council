@@ -17,6 +17,7 @@ import { CardCelebration, type CardCue } from "./card-celebration";
 import { EventTicker } from "./event-ticker";
 import { GoalCelebration, type GoalCue } from "./goal-celebration";
 import { StatusOverlay } from "./status-overlay";
+import { WinCelebration, type WinCue } from "./win-celebration";
 
 const POLL_MS = 1500;
 const FETCH_TIMEOUT_MS = 4000;
@@ -50,13 +51,7 @@ function Score({ value, color }: { value: number; color: string }) {
   );
 }
 
-export function MatchDisplay({
-  match: initial,
-  academyLogo,
-}: {
-  match: SportsMatch;
-  academyLogo?: string;
-}) {
+export function MatchDisplay({ match: initial }: { match: SportsMatch }) {
   const [match, setMatch] = useState<SportsMatch>(initial);
   const [offline, setOffline] = useState(false);
   const [now, setNow] = useState(() => Date.now());
@@ -66,6 +61,8 @@ export function MatchDisplay({
   );
   const [queue, setQueue] = useState<SportMatchEvent[]>([]);
   const [active, setActive] = useState<SportMatchEvent | null>(null);
+  const lastStatus = useRef(initial.status);
+  const [winPlaying, setWinPlaying] = useState(false);
 
   const poll = useCallback(async () => {
     try {
@@ -153,6 +150,19 @@ export function MatchDisplay({
   }, [active, goalStyle]);
 
   useEffect(() => {
+    if (lastStatus.current !== "finished" && match.status === "finished") {
+      setWinPlaying(true);
+    }
+    lastStatus.current = match.status;
+  }, [match.status]);
+
+  useEffect(() => {
+    if (!winPlaying) return;
+    const id = setTimeout(() => setWinPlaying(false), 12000);
+    return () => clearTimeout(id);
+  }, [winPlaying]);
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "f" && e.key !== "F") return;
       if (document.fullscreenElement) document.exitFullscreen();
@@ -206,6 +216,37 @@ export function MatchDisplay({
         }
       : null;
 
+  const winnerSide =
+    (match.scoreA ?? 0) === (match.scoreB ?? 0)
+      ? null
+      : (match.scoreA ?? 0) > (match.scoreB ?? 0)
+        ? ("a" as const)
+        : ("b" as const);
+
+  const showWin = winPlaying || match.postMatch?.overlay?.kind === "win";
+
+  const winCue: WinCue | null = showWin
+    ? {
+        teamName:
+          match.postMatch?.winnerName ||
+          (winnerSide === "a"
+            ? match.teamAName
+            : winnerSide === "b"
+              ? match.teamBName
+              : ""),
+        teamLogo:
+          winnerSide === "a"
+            ? match.teamALogo
+            : winnerSide === "b"
+              ? match.teamBLogo
+              : "",
+        color: winnerSide === "b" ? colorB : colorA,
+        scoreLine: `${match.teamAName} ${match.scoreA ?? 0} — ${match.scoreB ?? 0} ${match.teamBName}`,
+        title: match.postMatch?.winnerTitle || undefined,
+        drawn: winnerSide === null && !match.postMatch?.winnerName,
+      }
+    : null;
+
   const cardCue: CardCue | null =
     active && activeIsCard
       ? {
@@ -238,16 +279,14 @@ export function MatchDisplay({
           className="h-full w-full object-contain object-left"
         />
       </div>
-      {academyLogo ? (
-        <div className="absolute right-10 top-9 z-40 h-20 w-36 xl:h-28 xl:w-52">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={academyLogo}
-            alt="Sports Academy"
-            className="h-full w-full object-contain object-right"
-          />
-        </div>
-      ) : null}
+      <div className="absolute right-10 top-9 z-40 h-20 w-36 xl:h-28 xl:w-52">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/sports/academy-crest.png"
+          alt="Woxsen Sports Academy"
+          className="h-full w-full object-contain object-right"
+        />
+      </div>
 
       {offline ? (
         <div className="absolute left-1/2 top-4 z-[70] -translate-x-1/2 rounded-full border border-red-500/50 bg-red-950/80 px-5 py-1.5 font-mono text-xs uppercase tracking-[0.3em] text-red-300 backdrop-blur">
@@ -396,6 +435,7 @@ export function MatchDisplay({
       <GoalCelebration cue={goalCue} />
       <CardCelebration cue={cardCue} />
       <StatusOverlay overlay={match.postMatch?.overlay} />
+      <WinCelebration cue={winCue} />
     </div>
   );
 }

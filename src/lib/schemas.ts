@@ -252,6 +252,7 @@ export const sportDisplayOverlaySchema = z.object({
     "fulltime",
     "league",
     "upcoming",
+    "win",
   ]),
   preset: z.string().optional(),
   title: z.string().optional(),
