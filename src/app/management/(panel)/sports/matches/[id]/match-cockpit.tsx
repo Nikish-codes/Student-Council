@@ -289,6 +289,27 @@ export function MatchCockpit({
     run(() => updateMatchScore(matchId, a, b, newStatus), "Score saved");
   }
 
+  function scoreGoal(team: "a" | "b") {
+    if (!guard()) return;
+    if (team === "a") setLiveA((v) => v + 1);
+    else setLiveB((v) => v + 1);
+    setLiveEvents((prev) => [
+      ...prev,
+      { time: stamp, team, type: "goal", celebrate: true },
+    ]);
+    run(
+      () =>
+        logMatchEvent(matchId, {
+          type: "goal",
+          team,
+          time: stamp,
+          celebrate: true,
+          countsOnScoreboard: true,
+        }),
+      "Goal logged",
+    );
+  }
+
   function logEvent(team: "a" | "b", type: string) {
     if (!guard()) return;
     const draft = drafts[team];
@@ -489,11 +510,7 @@ export function MatchCockpit({
               <button
                 type="button"
                 disabled={pending || isFinished}
-                onClick={() =>
-                  team === "a"
-                    ? setScore(liveA + 1, liveB, liveStatus)
-                    : setScore(liveA, liveB + 1, liveStatus)
-                }
+                onClick={() => scoreGoal(team)}
                 className="grid h-10 w-10 place-items-center rounded-full border border-line/15 text-muted hover:border-line/40 hover:text-ink disabled:opacity-30"
               >
                 <Plus className="h-4 w-4" />
@@ -502,6 +519,14 @@ export function MatchCockpit({
           </div>
         ))}
       </div>
+
+      <p className="mt-3 text-xs text-subtle">
+        <span className="font-semibold text-muted">+</span> scores and plays the
+        goal animation on the big screen.{" "}
+        <span className="font-semibold text-muted">&minus;</span> corrects the
+        score without touching the screen. To put a name on the animation, use
+        the team panels below.
+      </p>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
         {!isLive && !isFinished && (
