@@ -1047,6 +1047,19 @@ export function MatchCockpit({
           ))}
           <button
             type="button"
+            disabled={pending}
+            onClick={() =>
+              applyOverlay(
+                { kind: "champions", title: "", subtitle: "" },
+                "Champions screen",
+              )
+            }
+            className="rounded-lg border border-yellow-400/50 bg-yellow-400/10 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-yellow-200 hover:bg-yellow-400/20 disabled:opacity-40"
+          >
+            Champions
+          </button>
+          <button
+            type="button"
             disabled={pending || !liveShootout}
             onClick={() =>
               applyOverlay(

@@ -18,6 +18,8 @@ import { EventTicker } from "./event-ticker";
 import { GoalCelebration, type GoalCue } from "./goal-celebration";
 import { StatusOverlay } from "./status-overlay";
 import { WinCelebration, type WinCue } from "./win-celebration";
+import { ChampionsScreen, type ChampionsCue } from "./champions-screen";
+import { readShootout } from "@/lib/sports-shootout";
 
 const POLL_MS = 1500;
 const FETCH_TIMEOUT_MS = 4000;
@@ -247,6 +249,28 @@ export function MatchDisplay({ match: initial }: { match: SportsMatch }) {
       }
     : null;
 
+  const shootoutWinner = match.postMatch?.shootout
+    ? readShootout(match.postMatch.shootout).winner
+    : null;
+
+  const championSide = shootoutWinner ?? winnerSide;
+
+  const showChampions = match.postMatch?.overlay?.kind === "champions";
+
+  const championsCue: ChampionsCue | null =
+    showChampions && championSide
+      ? {
+          teamName: championSide === "a" ? match.teamAName : match.teamBName,
+          teamLogo: championSide === "a" ? match.teamALogo : match.teamBLogo,
+          color: championSide === "a" ? colorA : colorB,
+          season: String(
+            match.matchDate ? new Date(match.matchDate).getFullYear() : "",
+          ),
+          subtitle:
+            match.postMatch?.overlay?.subtitle || match.competitionTitle,
+        }
+      : null;
+
   const cardCue: CardCue | null =
     active && activeIsCard
       ? {
@@ -271,22 +295,26 @@ export function MatchDisplay({ match: initial }: { match: SportsMatch }) {
         }}
       />
 
-      <div className="absolute left-10 top-9 z-40 h-20 w-36 xl:h-28 xl:w-52">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/brand/sc-white.png"
-          alt="Student Council"
-          className="h-full w-full object-contain object-left"
-        />
-      </div>
-      <div className="absolute right-10 top-9 z-40 h-20 w-36 xl:h-28 xl:w-52">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/sports/academy-crest.png"
-          alt="Woxsen Sports Academy"
-          className="h-full w-full object-contain object-right"
-        />
-      </div>
+      {showChampions ? null : (
+        <>
+          <div className="absolute left-10 top-9 z-40 h-[min(6vw,10vh)] w-[min(8vw,13vh)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/sports/council-crest.png"
+              alt="Student Council"
+              className="h-full w-full object-contain object-left"
+            />
+          </div>
+          <div className="absolute right-10 top-9 z-40 h-[min(6vw,10vh)] w-[min(8vw,13vh)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/sports/academy-crest.png"
+              alt="Woxsen Sports Academy"
+              className="h-full w-full object-contain object-right"
+            />
+          </div>
+        </>
+      )}
 
       {offline ? (
         <div className="absolute left-1/2 top-4 z-[70] -translate-x-1/2 rounded-full border border-red-500/50 bg-red-950/80 px-5 py-1.5 font-mono text-xs uppercase tracking-[0.3em] text-red-300 backdrop-blur">
@@ -442,6 +470,7 @@ export function MatchDisplay({ match: initial }: { match: SportsMatch }) {
         teamB={{ name: match.teamBName, logo: match.teamBLogo, color: colorB }}
       />
       <WinCelebration cue={winCue} />
+      <ChampionsScreen cue={championsCue} />
     </div>
   );
 }
