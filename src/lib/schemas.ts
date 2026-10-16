@@ -274,6 +274,7 @@ export const sportDisplayOverlaySchema = z.object({
     "upcoming",
     "win",
     "penalties",
+    "champions",
   ]),
   preset: z.string().optional(),
   title: z.string().optional(),

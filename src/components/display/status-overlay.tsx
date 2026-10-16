@@ -106,7 +106,11 @@ export function StatusOverlay({
   const countdown = useBreakClock(
     overlay?.kind === "halftime" ? halfTimeBreak : undefined,
   );
-  const active = !!overlay && overlay.kind !== "none" && overlay.kind !== "win";
+  const active =
+    !!overlay &&
+    overlay.kind !== "none" &&
+    overlay.kind !== "win" &&
+    overlay.kind !== "champions";
 
   useEffect(() => {
     if (!active || !overlay?.since) return;

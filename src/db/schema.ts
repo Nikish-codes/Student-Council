@@ -188,7 +188,8 @@ export type SportDisplayOverlay = {
     | "league"
     | "upcoming"
     | "win"
-    | "penalties";
+    | "penalties"
+    | "champions";
   preset?: string;
   title?: string;
   subtitle?: string;
