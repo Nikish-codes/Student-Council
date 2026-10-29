@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import {
+  OvalWeekMismatchError,
   extractSpreadsheetWeek,
   isSpreadsheetFile,
 } from "@/lib/oval-spreadsheet";
@@ -11,7 +12,7 @@ import { requireOvalManager } from "@/lib/rbac";
 export const runtime = "nodejs";
 export const maxDuration = 240;
 
-const MAX_BYTES = 15 * 1024 * 1024;
+const MAX_BYTES = 4 * 1024 * 1024;
 export async function POST(request: Request) {
   let user;
   try {
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const limit = rateLimit(`oval-spreadsheet:${user.id}`, 6, 10 * 60_000);
+  const limit = rateLimit(`oval-spreadsheet:${user.id}`, 30, 10 * 60_000);
   if (!limit.ok) {
     return NextResponse.json(
       { error: "Too many extraction attempts. Please wait a few minutes." },
@@ -39,13 +40,16 @@ export async function POST(request: Request) {
   }
   if (file.size > MAX_BYTES) {
     return NextResponse.json(
-      { error: "File is larger than 15 MB" },
+      { error: "File is larger than 4 MB" },
       { status: 413 },
     );
   }
   if (!isSpreadsheetFile(file)) {
     return NextResponse.json(
-      { error: "Use the standard Oval XLS, XLSX, CSV, or TSV template" },
+      {
+        error:
+          "Upload the menu as an Excel (.xlsx / .xls) or CSV file. Photos and PDFs can't be read yet.",
+      },
       { status: 415 },
     );
   }
@@ -65,14 +69,22 @@ export async function POST(request: Request) {
 
   try {
     const bytes = new Uint8Array(await file.arrayBuffer());
+    const warnings: string[] = [];
     const week = extractSpreadsheetWeek(
       bytes,
       weekStart,
       file.name,
       file.type || "application/octet-stream",
+      warnings,
     );
-    return NextResponse.json({ week });
+    return NextResponse.json({ week, warnings });
   } catch (error) {
+    if (error instanceof OvalWeekMismatchError) {
+      return NextResponse.json(
+        { error: error.message, weekStart: error.weekStart },
+        { status: 409 },
+      );
+    }
     console.error("[oval/extract] failed:", error);
     const message =
       error instanceof Error ? error.message : "Extraction failed";

@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import { OVAL_MEALS, createEmptyWeek } from "./oval-menu";
 import {
+  OvalWeekMismatchError,
   extractSpreadsheetRowsWeek,
   extractSpreadsheetWeek,
 } from "./oval-spreadsheet";
@@ -113,23 +114,121 @@ describe("Oval spreadsheet extraction", () => {
     ).toBe(true);
   });
 
-  it("rejects a workbook whose fixed row structure was changed", () => {
-    const rows = ovalWeekToRows(createEmptyWeek("2026-08-17"));
-    rows[4][0] = "BREAD MOVED";
-    rows[4][1] = "Bread moved";
+  it("imports the mess's current sheet layout with its typos and moved Jain block", () => {
+    const rows = JSON.parse(
+      readFileSync(
+        new URL("../test/fixtures/oval-week-2026-10-26.json", import.meta.url),
+        "utf8",
+      ),
+    ) as string[][];
+    const warnings: string[] = [];
+    const week = extractSpreadsheetRowsWeek(
+      rows,
+      "2026-10-26",
+      "WhatsApp menu.xlsx",
+      XLSX_MIME,
+      warnings,
+    );
 
-    expect(() =>
-      extractSpreadsheetRowsWeek(rows, "2026-08-17", "changed.xlsx", XLSX_MIME),
-    ).toThrow("Expected “Bread” at spreadsheet row 5");
+    expect(warnings).toEqual([]);
+    expect(week.days[0].meals.breakfast.map((item) => item.category)).toEqual([
+      "Eggs",
+      "Bread",
+      "Cereals & Sprouts",
+      "B / Item",
+      "Accompaniment",
+      "Detox Water",
+      "Hot Beverage",
+    ]);
+    expect(week.days[2].meals.lunch).toMatchObject([
+      { category: "Cold Beverage", dish: "Lemon Juice" },
+      { category: "Salad", dish: "Onion salad / Lemon" },
+      { category: "Veg 2 (Gravy)", dish: "Curd Rice" },
+      { category: "Lentil", dish: "Mirch ka Salan" },
+      { category: "Rice 1", dish: "Chicken Dum Biryani" },
+      { category: "Rice 2", dish: "Veg Dum Biryani" },
+      { category: "Accompaniment", dish: "Mix Veg Raita / Pickle" },
+      { category: "Dessert", dish: "Coconut Laddu" },
+    ]);
+    expect(week.days[6].meals.jain_lunch).toMatchObject([
+      { category: "Veg", dish: "Capsicum Paneer" },
+      { category: "Lentil", dish: "Dal Fry" },
+    ]);
+    expect(week.days[6].meals.jain_dinner).toMatchObject([
+      { category: "Veg", dish: "Cabbage Tomato" },
+      { category: "Lentil", dish: "Mix Dal Tadka" },
+    ]);
+    expect(week.days[4].meals.dinner.map((item) => item.dish)).toContain(
+      "Gongura Chicken Curry",
+    );
+    const items = week.days.flatMap((day) =>
+      OVAL_MEALS.flatMap((meal) => day.meals[meal.id]),
+    );
+    expect(items.every((item) => !item.needsReview)).toBe(true);
+    expect(items.some((item) => item.dish.includes("*"))).toBe(false);
   });
 
-  it("rejects a valid matrix uploaded into the wrong selected week", () => {
+  it("keeps unknown rows for review instead of rejecting the sheet", () => {
+    const rows = ovalWeekToRows(createEmptyWeek("2026-08-17"));
+    rows[4] = ["BREAD MOVED", "", "Toast", "", "", "", "", "", ""];
+    rows.splice(5, 0, ["SPECIAL", "", "", "Pongal", "", "", "", "", ""]);
+    const warnings: string[] = [];
+
+    const week = extractSpreadsheetRowsWeek(
+      rows,
+      "2026-08-17",
+      "changed.xlsx",
+      XLSX_MIME,
+      warnings,
+    );
+
+    expect(week.days[0].meals.breakfast).toMatchObject([
+      { category: "Bread Moved", dish: "Toast", needsReview: true },
+    ]);
+    expect(week.days[1].meals.breakfast).toMatchObject([
+      { category: "Special", dish: "Pongal", needsReview: true },
+    ]);
+    expect(warnings.join(" ")).toContain("Bread Moved, Special");
+  });
+
+  it("tells the uploader which week a sheet belongs to", () => {
     const bytes = readFileSync(
       new URL("../test/fixtures/weekly-menu-matrix.xlsx", import.meta.url),
     );
 
     expect(() =>
       extractSpreadsheetWeek(bytes, "2026-08-24", "wrong-week.xlsx", XLSX_MIME),
-    ).toThrow("selected week expects 24 Aug");
+    ).toThrow(OvalWeekMismatchError);
+    expect(() =>
+      extractSpreadsheetWeek(bytes, "2026-08-24", "wrong-week.xlsx", XLSX_MIME),
+    ).toThrow("This sheet is for the week of 17 Aug");
+  });
+
+  it("reads numeric dates and sheets without a DATE label", () => {
+    const rows = JSON.parse(
+      readFileSync(
+        new URL("../test/fixtures/oval-week-2026-10-26.json", import.meta.url),
+        "utf8",
+      ),
+    ) as string[][];
+    rows[1] = [
+      "",
+      "10/26/26",
+      "10/27/26",
+      "10/28/26",
+      "10/29/26",
+      "10/30/26",
+      "10/31/26",
+      "11/1/26",
+    ];
+
+    expect(() =>
+      extractSpreadsheetRowsWeek(
+        rows,
+        "2026-11-02",
+        "us-dates.xlsx",
+        XLSX_MIME,
+      ),
+    ).toThrow("This sheet is for the week of 26 Oct");
   });
 });

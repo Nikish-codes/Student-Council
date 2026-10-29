@@ -152,12 +152,14 @@ export function OvalWeekEditor({
 
   function chooseFile(file: File | null) {
     if (!file) return;
-    if (file.size > 15 * 1024 * 1024) {
-      toast.error("The menu file must be 15 MB or smaller");
+    if (file.size > 4 * 1024 * 1024) {
+      toast.error("The menu file must be 4 MB or smaller");
       return;
     }
     if (!/\.(xlsx?|csv|tsv)$/i.test(file.name)) {
-      toast.error("Choose an XLS, XLSX, CSV, or TSV spreadsheet");
+      toast.error(
+        "Choose the menu as an Excel (.xlsx / .xls) or CSV file. Photos and PDFs can't be read yet.",
+      );
       return;
     }
     setSourceFile(file);
@@ -185,15 +187,33 @@ export function OvalWeekEditor({
       });
       const body = (await response.json()) as {
         week?: OvalWeekDraft;
+        warnings?: string[];
+        weekStart?: string;
         error?: string;
       };
+      if (response.status === 409 && body.weekStart) {
+        const target = body.weekStart;
+        toast.error(body.error, {
+          duration: 15000,
+          action: {
+            label: "Open that week",
+            onClick: () => {
+              window.location.href = `/management/oval?week=${target}`;
+            },
+          },
+        });
+        return;
+      }
       if (!response.ok || !body.week) {
         throw new Error(body.error || "Spreadsheet extraction failed");
       }
       setWeek(body.week);
       setSelectedIndex(0);
       setSelectedMeal("all");
-      toast.success("Seven weekday columns mapped into five meal sections.");
+      toast.success("Menu imported as a draft. Review each day, then save.");
+      for (const warning of body.warnings ?? []) {
+        toast.warning(warning, { duration: 12000 });
+      }
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Menu extraction failed",
@@ -210,8 +230,9 @@ export function OvalWeekEditor({
           <p className="kicker text-subtle">Import the whole week</p>
           <h2 className="display mt-2 text-3xl">Source to structured menu</h2>
           <p className="mt-4 max-w-lg text-sm leading-relaxed text-muted">
-            XLSX sheets are read directly by weekday column and fixed meal row.
-            No OCR or paid service is involved. Importing only creates a draft.
+            Upload the mess&apos;s weekly Excel sheet as it is. Rows are matched by
+            their names, so small changes to the layout are fine. Importing
+            only creates a draft.
           </p>
         </div>
         <div
@@ -238,10 +259,10 @@ export function OvalWeekEditor({
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-ink">
-                  {sourceFile?.name ?? "Drop the committee sheet here"}
+                  {sourceFile?.name ?? "Drop the weekly menu sheet here"}
                 </p>
                 <p className="mt-1 text-xs text-subtle">
-                  Standard Oval XLS, XLSX, CSV or TSV · up to 15 MB
+                  Excel (.xlsx / .xls) or CSV · up to 4 MB
                 </p>
               </div>
             </div>
