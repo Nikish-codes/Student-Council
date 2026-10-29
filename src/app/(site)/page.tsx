@@ -14,7 +14,7 @@ import { isEventPast } from "@/lib/event-status";
 // ISR: time-sensitive (event "isLive" / "In N days" / "upcoming" math is
 // computed at render). Refresh at most once a minute so the page advances
 // without a redeploy.
-export const revalidate = 60;
+export const revalidate = 300;
 
 export default async function HomePage() {
   const [upcoming, allClubs, council, homepage, settings] =

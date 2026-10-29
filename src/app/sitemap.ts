@@ -9,7 +9,7 @@ import {
 
 // Matches the canonical URLs (www is primary; the apex 308-redirects to it, so
 // sitemap entries must be the final URLs to avoid wasted redirect crawls).
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = "https://www.woxsenstudentcouncil.in";

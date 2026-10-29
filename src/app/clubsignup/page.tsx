@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getClubs, getClubCategories } from "@/lib/content";
 import { ClubSignupDirectory } from "./signup-directory";
 
-export const revalidate = 60;
+export const revalidate = 300;
 export const metadata: Metadata = {
   title: "Join a club · Woxsen Student Council",
   description:

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateSportsHub } from "@/lib/revalidate-sports";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
@@ -15,7 +16,8 @@ function optNum(fd: FormData, k: string): number | null {
 }
 
 function bust() {
-  ["/sports", "/management/sports", "/management/sports/people"].forEach((p) =>
+  revalidateSportsHub();
+  ["/management/sports", "/management/sports/people"].forEach((p) =>
     revalidatePath(p),
   );
 }

@@ -8,8 +8,18 @@ import type {
   OvalMenuItem,
 } from "@/db/schema";
 
-export const OVAL_TIMEZONE = "Asia/Kolkata";
-export const OVAL_RELEASE_HOUR = 4;
+import {
+  OVAL_RELEASE_HOUR,
+  getKolkataMinutes,
+  getOvalServiceDate,
+} from "@/lib/oval-date";
+
+export {
+  OVAL_RELEASE_HOUR,
+  OVAL_TIMEZONE,
+  getKolkataMinutes,
+  getOvalServiceDate,
+} from "@/lib/oval-date";
 
 export const OVAL_MEALS: ReadonlyArray<{
   id: OvalMealId;
@@ -101,42 +111,6 @@ export const ovalWeekDraftSchema = z.object({
 
 export type OvalWeekDraft = z.infer<typeof ovalWeekDraftSchema>;
 
-function dateParts(date: Date, timeZone = OVAL_TIMEZONE) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-  }).formatToParts(date);
-  const value = (type: Intl.DateTimeFormatPartTypes) =>
-    Number(parts.find((part) => part.type === type)?.value ?? 0);
-  return {
-    year: value("year"),
-    month: value("month"),
-    day: value("day"),
-    hour: value("hour"),
-    minute: value("minute"),
-  };
-}
-
-function isoFromParts(parts: { year: number; month: number; day: number }) {
-  return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
-}
-
-/** The campus service day changes at 04:00 Asia/Kolkata, not at midnight. */
-export function getOvalServiceDate(now = new Date()): string {
-  const shifted = new Date(now.getTime() - OVAL_RELEASE_HOUR * 60 * 60 * 1000);
-  return isoFromParts(dateParts(shifted));
-}
-
-export function getKolkataMinutes(now = new Date()): number {
-  const parts = dateParts(now);
-  return parts.hour * 60 + parts.minute;
-}
-
 export type OvalMealPhase = "completed" | "serving" | "upcoming" | "later";
 
 export function getOvalMealPhases(
@@ -175,6 +149,22 @@ export function getOvalMealPhases(
     ...core,
     jain_lunch: core.lunch,
     jain_dinner: core.dinner,
+  };
+}
+
+export function getOvalMealPhasesFor(
+  serviceDate: string,
+  now = new Date(),
+): Record<OvalMealId, OvalMealPhase> {
+  const today = getOvalServiceDate(now);
+  if (serviceDate === today) return getOvalMealPhases(now);
+  const phase: OvalMealPhase = serviceDate < today ? "completed" : "later";
+  return {
+    breakfast: phase,
+    lunch: phase,
+    dinner: phase,
+    jain_lunch: phase,
+    jain_dinner: phase,
   };
 }
 

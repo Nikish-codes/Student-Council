@@ -1,10 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateSportsHub } from "@/lib/revalidate-sports";
+import { after } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { sportsPageConfig as t } from "@/db/schema";
 import { requireSportsManager } from "@/lib/rbac";
+import { publishLiveScores } from "@/lib/live-scores";
 
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 function json<T>(fd: FormData, k: string, fallback: T): T {
@@ -50,6 +53,10 @@ export async function saveSportsSettings(fd: FormData) {
     ? s(fd, "calendarDescription")
     : (existing?.calendarDescription ?? "");
 
+  const liveScoresEnabled = fd.has("liveScoresField")
+    ? fd.get("liveScoresEnabled") === "on"
+    : (existing?.liveScoresEnabled ?? false);
+
   // Upsert the single config row (id = 1).
   if (existing) {
     await db
@@ -61,6 +68,7 @@ export async function saveSportsSettings(fd: FormData) {
         calendarDescription,
         tagline,
         galleryImageIds,
+        liveScoresEnabled,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(t.id, existing.id));
@@ -73,12 +81,18 @@ export async function saveSportsSettings(fd: FormData) {
       calendarDescription,
       tagline,
       galleryImageIds,
+      liveScoresEnabled,
     });
   }
 
+  if (liveScoresEnabled !== (existing?.liveScoresEnabled ?? false)) {
+    revalidatePath("/sports", "layout");
+    revalidatePath("/display/matches/[id]", "page");
+    if (liveScoresEnabled) after(publishLiveScores);
+  }
+
+  revalidateSportsHub();
   [
-    "/sports",
-    "/sports/calendar",
     "/management/sports",
     "/management/sports/settings",
     "/management/sports/calendar",

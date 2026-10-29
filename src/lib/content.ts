@@ -1045,6 +1045,7 @@ export interface SportsMatch {
   scoreB: number | undefined;
   events: SportMatchEvent[];
   postMatch: SportPostMatch;
+  liveUpdates?: boolean;
 }
 
 export interface SportsPerson {
@@ -1067,6 +1068,7 @@ export interface SportsPageConfig {
   calendarImage: string;
   calendarTitle: string;
   calendarDescription: string;
+  liveScoresEnabled: boolean;
 }
 
 // ─────────────── mappers ───────────────
@@ -1313,6 +1315,21 @@ export const getSportsTeams = cache(async (): Promise<SportsTeam[]> => {
   return rows.map(mapTeam);
 });
 
+export const getLiveScoresEnabled = cache(async (): Promise<boolean> => {
+  const row = await db.query.sportsPageConfig.findFirst({
+    columns: { liveScoresEnabled: true },
+  });
+  return row?.liveScoresEnabled ?? false;
+});
+
+function withLiveUpdates(match: SportsMatch, enabled: boolean): SportsMatch {
+  return {
+    ...match,
+    liveUpdates:
+      enabled && (match.status === "live" || match.status === "scheduled"),
+  };
+}
+
 export const getSportsMatches = cache(
   async (opts?: {
     tournamentId?: number;
@@ -1348,7 +1365,8 @@ export const getSportsMatches = cache(
           (m.matchDate && Number(m.matchDate.slice(0, 4)) === opts.year),
       );
     }
-    return matches;
+    const live = await getLiveScoresEnabled();
+    return matches.map((m) => withLiveUpdates(m, live));
   },
 );
 
@@ -1370,7 +1388,7 @@ export const getSportsMatch = cache(
       (row.leagueId && row.league?.status !== "published")
     )
       return undefined;
-    return mapMatch(row);
+    return withLiveUpdates(mapMatch(row), await getLiveScoresEnabled());
   },
 );
 
@@ -1407,6 +1425,7 @@ export const getSportsPageConfig = cache(
       calendarImage: mediaUrl(row?.calendarImage),
       calendarTitle: asString(row?.calendarTitle),
       calendarDescription: asString(row?.calendarDescription),
+      liveScoresEnabled: row?.liveScoresEnabled ?? false,
     };
   },
 );

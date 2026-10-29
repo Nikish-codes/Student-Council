@@ -2,7 +2,12 @@ import { db } from "@/db/client";
 import { requireSportsManager } from "@/lib/rbac";
 import { mediaOptions } from "@/lib/media-options";
 import { EditorShell, Fieldset } from "@/components/management/page-header";
-import { TextField, MediaField, SaveBar } from "@/components/management/fields";
+import {
+  TextField,
+  MediaField,
+  CheckboxField,
+  SaveBar,
+} from "@/components/management/fields";
 import { GalleryPicker } from "./gallery-picker";
 import { saveSportsSettings } from "./actions";
 
@@ -24,6 +29,18 @@ export default async function SportsSettingsPage() {
       title="Sports page settings"
       action={action}
     >
+      <Fieldset
+        title="Live scores"
+        hint="Turn on only while matches are being played. When off, match cards stop polling for scores and the big-screen display (/display/matches/…) is disabled, which keeps the site inside the free hosting limits."
+      >
+        <input type="hidden" name="liveScoresField" value="1" />
+        <CheckboxField
+          name="liveScoresEnabled"
+          label="Enable live scores and the big-screen display"
+          defaultChecked={config?.liveScoresEnabled ?? false}
+        />
+      </Fieldset>
+
       <Fieldset
         title="Branding"
         hint="Academy logo + tagline shown on the /sports page."

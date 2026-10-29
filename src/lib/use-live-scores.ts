@@ -12,16 +12,23 @@ export type LiveScoreUpdate = {
   events?: SportsMatch["events"];
 };
 
+export const LIVE_SCORES_URL =
+  process.env.NEXT_PUBLIC_LIVE_SCORES_URL || "/api/sports/scores";
+
+const POLL_MS = 5000;
+
 let cachedScores: LiveScoreUpdate[] | null = null;
 let lastFetchTime = 0;
+let timer: ReturnType<typeof setInterval> | null = null;
 const subscribers = new Set<(scores: LiveScoreUpdate[]) => void>();
 
 function pollScores() {
+  if (document.hidden) return;
   const now = Date.now();
-  if (now - lastFetchTime < 5000) return; // Deduplicate calls within 5s
+  if (now - lastFetchTime < POLL_MS - 500) return;
   lastFetchTime = now;
 
-  fetch("/api/sports/scores")
+  fetch(LIVE_SCORES_URL)
     .then((res) => {
       if (!res.ok) throw new Error("Failed to fetch");
       return res.json();
@@ -35,24 +42,33 @@ function pollScores() {
     });
 }
 
-// Global polling loop
-if (typeof window !== "undefined") {
-  setInterval(() => {
-    if (subscribers.size > 0) {
-      pollScores();
-    }
-  }, 5000);
+function onVisible() {
+  if (!document.hidden) pollScores();
+}
+
+function startPolling() {
+  if (timer) return;
+  timer = setInterval(pollScores, POLL_MS);
+  document.addEventListener("visibilitychange", onVisible);
+}
+
+function stopPolling() {
+  if (!timer) return;
+  clearInterval(timer);
+  timer = null;
+  document.removeEventListener("visibilitychange", onVisible);
 }
 
 export function useLiveMatch(initialMatch: SportsMatch): SportsMatch {
   const [match, setMatch] = useState<SportsMatch>(initialMatch);
+  const tracked = Boolean(initialMatch.liveUpdates);
 
   useEffect(() => {
+    if (!tracked) return;
     const handler = (scores: LiveScoreUpdate[]) => {
       const update = scores.find((s) => s.id === initialMatch.id);
       if (update) {
         setMatch((prev) => {
-          // Only update if something changed to avoid unnecessary re-renders
           if (
             prev.status === update.status &&
             prev.scoreA === update.scoreA &&
@@ -75,8 +91,8 @@ export function useLiveMatch(initialMatch: SportsMatch): SportsMatch {
     };
 
     subscribers.add(handler);
+    startPolling();
 
-    // Initial sync
     if (cachedScores) {
       handler(cachedScores);
     } else {
@@ -85,8 +101,9 @@ export function useLiveMatch(initialMatch: SportsMatch): SportsMatch {
 
     return () => {
       subscribers.delete(handler);
+      if (subscribers.size === 0) stopPolling();
     };
-  }, [initialMatch.id]);
+  }, [initialMatch.id, tracked]);
 
   return match;
 }

@@ -21,7 +21,7 @@ import { cn, formatDate } from "@/lib/utils";
 import { getEventTiming } from "@/lib/event-status";
 
 // ISR: "Live now" / "In N days" status is time-sensitive.
-export const revalidate = 60;
+export const revalidate = 300;
 
 export async function generateStaticParams() {
   const events = await getEvents();

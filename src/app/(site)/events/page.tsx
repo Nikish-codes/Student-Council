@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 // ISR: the now/upcoming/past split depends on the current time.
-export const revalidate = 60;
+export const revalidate = 300;
 
 export default async function EventsPage() {
   const all = await getEvents();

@@ -17,6 +17,7 @@
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 import { authConfig } from "@/auth.config";
+import { getOvalServiceDate } from "@/lib/oval-date";
 import {
   requiredPasswordDestination,
   restrictedPanelDestination,
@@ -86,6 +87,21 @@ export default auth((req) => {
   // Panels and the teaser page itself are always reachable.
   if (isPanel || pathname === "/coming-soon") return NextResponse.next();
 
+  const legacyYear = searchParams.get("year");
+  if (
+    legacyYear &&
+    /^\d{4}$/.test(legacyYear) &&
+    (pathname === "/sports" || pathname === "/sports/calendar")
+  ) {
+    const url = req.nextUrl.clone();
+    url.pathname =
+      pathname === "/sports"
+        ? `/sports/year/${legacyYear}`
+        : `/sports/calendar/${legacyYear}`;
+    url.searchParams.delete("year");
+    return NextResponse.redirect(url, 308);
+  }
+
   // Redirect root to /sports during soft launch.
   if (pathname === "/") {
     const url = req.nextUrl.clone();
@@ -93,8 +109,15 @@ export default auth((req) => {
     return NextResponse.redirect(url);
   }
 
+  const allow = () =>
+    pathname === "/oval"
+      ? NextResponse.rewrite(
+          new URL(`/oval/${getOvalServiceDate()}`, req.nextUrl),
+        )
+      : NextResponse.next();
+
   // 2) Coming-soon gate for the public surface.
-  if (!GATE_ON) return NextResponse.next();
+  if (!GATE_ON) return allow();
 
   // A) Preview key present in the URL → set the unlock cookie, then continue on
   //    a clean URL (strip the key so it isn't left lying around).
@@ -124,7 +147,7 @@ export default auth((req) => {
 
   // For non-sports pages, require authentication or preview access.
   // Logged-in users, preview cookie holders, or crawlers can access all pages.
-  if (isLoggedIn || hasPreviewCookie || isCrawler) return NextResponse.next();
+  if (isLoggedIn || hasPreviewCookie || isCrawler) return allow();
 
   // Everyone else visiting any other page → redirect to /sports (the only public page).
   const url = req.nextUrl.clone();

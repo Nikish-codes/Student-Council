@@ -12,6 +12,7 @@ vi.mock("@/db/client", () => ({
   },
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/server", () => ({ after: vi.fn() }));
 vi.mock("next/navigation", () => ({
   redirect: (path: string) => {
     throw new Error("REDIRECT:" + path);

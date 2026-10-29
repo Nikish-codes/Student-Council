@@ -20,8 +20,9 @@ import { StatusOverlay } from "./status-overlay";
 import { WinCelebration, type WinCue } from "./win-celebration";
 import { ChampionsScreen, type ChampionsCue } from "./champions-screen";
 import { readShootout } from "@/lib/sports-shootout";
+import { LIVE_SCORES_URL } from "@/lib/use-live-scores";
 
-const POLL_MS = 1500;
+const POLL_MS = 3000;
 const FETCH_TIMEOUT_MS = 4000;
 
 type ScoreRow = {
@@ -70,8 +71,7 @@ export function MatchDisplay({ match: initial }: { match: SportsMatch }) {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-      const res = await fetch(`/api/sports/scores?t=${Date.now()}`, {
-        cache: "no-store",
+      const res = await fetch(LIVE_SCORES_URL, {
         signal: controller.signal,
       });
       clearTimeout(timeout);

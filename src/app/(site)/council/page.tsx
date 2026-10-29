@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     "The 2026/27 Woxsen Student Council — one council, one job: every voice gets heard.",
 };
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 export default async function CouncilPage() {
   const [members, president, sections, faqs, groupPhoto] = await Promise.all([

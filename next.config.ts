@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
+const r2PublicUrl = (process.env.R2_PUBLIC_URL || "").replace(/\/$/, "");
+const r2Origin = r2PublicUrl ? new URL(r2PublicUrl).origin : "";
+
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_LIVE_SCORES_URL: r2PublicUrl
+      ? `${r2PublicUrl}/live/scores.json`
+      : "",
+  },
   serverExternalPackages: [
     "@libsql/client",
     "@libsql/core",
@@ -63,7 +71,7 @@ const nextConfig: NextConfig = {
       // aligned with img-src (R2 + Cloudinary are both https).
       "media-src 'self' https:",
       "font-src 'self' data:",
-      "connect-src 'self' data: https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://vitals.vercel-insights.com https://va.vercel-scripts.com https://*.r2.cloudflarestorage.com",
+      `connect-src 'self' data: ${r2Origin} https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://vitals.vercel-insights.com https://va.vercel-scripts.com https://*.r2.cloudflarestorage.com`,
       "frame-src https://api.razorpay.com https://checkout.razorpay.com https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
       "object-src 'none'",
       "base-uri 'self'",
@@ -114,9 +122,10 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    formats: ["image/avif", "image/webp"],
-    deviceSizes: [360, 480, 640, 828, 1080, 1280, 1600, 1920, 2400],
-    imageSizes: [64, 96, 128, 256, 384, 512],
+    formats: ["image/webp"],
+    deviceSizes: [640, 828, 1200, 1920],
+    imageSizes: [64, 128, 256, 384],
+    qualities: [40, 75, 90],
     minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       // R2 media custom domain (bucket served by Cloudflare).

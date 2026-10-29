@@ -6,7 +6,7 @@ import { SportsMatchTimeline } from "@/components/sections/sports-match-timeline
 import { getSportsMatches } from "@/lib/content";
 import { ArrowLeft } from "lucide-react";
 
-export const revalidate = 10;
+export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;

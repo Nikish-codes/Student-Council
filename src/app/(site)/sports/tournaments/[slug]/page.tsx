@@ -15,7 +15,7 @@ import {
   type SportType,
 } from "@/lib/schemas";
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 export async function generateStaticParams() {
   const tournaments = await getSportsTournaments();

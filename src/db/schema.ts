@@ -1062,6 +1062,9 @@ export const sportsPageConfig = sqliteTable("mp_sports_page_config", {
   galleryImageIds: text("gallery_image_ids", { mode: "json" })
     .$type<number[]>()
     .default([]),
+  liveScoresEnabled: integer("live_scores_enabled", { mode: "boolean" })
+    .notNull()
+    .default(false),
   createdAt,
   updatedAt,
 });

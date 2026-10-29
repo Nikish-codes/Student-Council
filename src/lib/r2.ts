@@ -57,6 +57,23 @@ export async function uploadToR2(
   return publicUrl(key);
 }
 
+export async function putPublicR2Object(
+  key: string,
+  body: string,
+  contentType: string,
+  cacheControl: string,
+): Promise<void> {
+  await client().send(
+    new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET || "",
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+      CacheControl: cacheControl,
+    }),
+  );
+}
+
 export async function createR2UploadUrl(
   key: string,
   contentType: string,

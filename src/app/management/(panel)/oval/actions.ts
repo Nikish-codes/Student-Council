@@ -21,7 +21,7 @@ function field(formData: FormData, key: string): string {
 }
 
 function revalidateOval() {
-  revalidatePath("/oval");
+  revalidatePath("/oval/[date]", "page");
   revalidatePath("/management/oval");
 }
 

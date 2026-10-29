@@ -4,10 +4,10 @@
 // video is not in this manifest (e.g. before the script has been run).
 
 export const RECAP_VIDEO_R2: Record<string, string> = {
-  "halloween-25-recap.mp4": "https://pub-88f0a7c5d200469fa7dbb8f90c605d45.r2.dev/recap/halloween-25-recap.mp4",
-  "infinity-26-aftermovie.mp4": "https://pub-88f0a7c5d200469fa7dbb8f90c605d45.r2.dev/recap/infinity-26-aftermovie.mp4",
-  "infinity-26-wrap.mp4": "https://pub-88f0a7c5d200469fa7dbb8f90c605d45.r2.dev/recap/infinity-26-wrap.mp4",
-  "utopia-esports.mp4": "https://pub-88f0a7c5d200469fa7dbb8f90c605d45.r2.dev/recap/utopia-esports.mp4"
+  "halloween-25-recap.mp4": "https://media.woxsenstudentcouncil.in/recap/halloween-25-recap.mp4",
+  "infinity-26-aftermovie.mp4": "https://media.woxsenstudentcouncil.in/recap/infinity-26-aftermovie.mp4",
+  "infinity-26-wrap.mp4": "https://media.woxsenstudentcouncil.in/recap/infinity-26-wrap.mp4",
+  "utopia-esports.mp4": "https://media.woxsenstudentcouncil.in/recap/utopia-esports.mp4"
 };
 
 /** R2 URL for a recap video, or the /public Vercel path as a fallback. */

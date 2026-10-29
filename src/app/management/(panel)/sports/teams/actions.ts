@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateSportsHub } from "@/lib/revalidate-sports";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
@@ -11,12 +12,10 @@ import { uniqueSlug, slugify } from "@/lib/slug";
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 
 function bust() {
-  [
-    "/sports",
-    "/sports/calendar",
-    "/management/sports",
-    "/management/sports/teams",
-  ].forEach((p) => revalidatePath(p));
+  revalidateSportsHub();
+  ["/management/sports", "/management/sports/teams"].forEach((p) =>
+    revalidatePath(p),
+  );
   revalidatePath("/sports/tournaments/[slug]", "page");
   revalidatePath("/sports/leagues/[slug]", "page");
 }

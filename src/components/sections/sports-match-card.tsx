@@ -194,7 +194,7 @@ export function SportsMatchCard({ match: initialMatch }: { match: SportsMatch })
         <span className="truncate pl-2 text-right">{match.venue || "TBA"}</span>
       </footer>
       </div>
-      <Link href={`/sports/matches/${match.id}`} className="absolute inset-0 z-10" aria-label={`View match details for ${teamAName} vs ${teamBName}`} />
+      <Link href={`/sports/matches/${match.id}`} prefetch={false} className="absolute inset-0 z-10" aria-label={`View match details for ${teamAName} vs ${teamBName}`} />
     </article>
   );
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateSportsHub } from "@/lib/revalidate-sports";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
@@ -66,9 +67,8 @@ const DIVISIONS: SportDivision[] = [
 ];
 
 function bust(...slugs: (string | undefined)[]) {
+  revalidateSportsHub();
   [
-    "/sports",
-    "/sports/calendar",
     "/sports/tournaments",
     "/management/sports",
     "/management/sports/tournaments",

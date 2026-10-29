@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
@@ -13,6 +14,8 @@ import {
 import { requireSportsDelete, requireSportsManager } from "@/lib/rbac";
 import type { SportType, SportMatchStatus } from "@/lib/schemas";
 import { parseMatchParticipants } from "@/lib/sports-results";
+import { revalidateSportsHub } from "@/lib/revalidate-sports";
+import { publishLiveScores } from "@/lib/live-scores";
 
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 function optNum(fd: FormData, k: string): number | null {
@@ -54,22 +57,45 @@ const STATUSES: SportMatchStatus[] = [
   "cancelled",
 ];
 
+function bustMatchPages(matchId: number) {
+  revalidateSportsHub();
+  ["/management/sports", "/management/sports/matches"].forEach((p) =>
+    revalidatePath(p),
+  );
+  revalidatePath(`/management/sports/matches/${matchId}`);
+  revalidatePath(`/sports/matches/${matchId}`);
+  revalidatePath(`/display/matches/${matchId}`);
+  after(publishLiveScores);
+}
+
 function bust(matchId?: number) {
-  [
-    "/sports",
-    "/sports/calendar",
-    "/management/sports",
-    "/management/sports/matches",
-  ].forEach((p) => revalidatePath(p));
+  if (matchId) bustMatchPages(matchId);
+  else {
+    revalidateSportsHub();
+    ["/management/sports", "/management/sports/matches"].forEach((p) =>
+      revalidatePath(p),
+    );
+    revalidatePath("/sports/matches/[id]", "page");
+    revalidatePath("/display/matches/[id]", "page");
+    after(publishLiveScores);
+  }
   revalidatePath("/sports/tournaments/[slug]", "page");
   revalidatePath("/sports/leagues/[slug]", "page");
-  if (matchId) {
-    revalidatePath(`/management/sports/matches/${matchId}`);
-    revalidatePath(`/sports/matches/${matchId}`);
-    revalidatePath(`/display/matches/${matchId}`);
-  }
-  revalidatePath("/sports/matches/[id]", "page");
-  revalidatePath("/display/matches/[id]", "page");
+}
+
+async function bustLive(matchId: number) {
+  bustMatchPages(matchId);
+  const row = await db.query.sportsMatches.findFirst({
+    where: eq(t.id, matchId),
+    columns: { id: true },
+    with: {
+      tournament: { columns: { slug: true } },
+      league: { columns: { slug: true } },
+    },
+  });
+  if (row?.tournament?.slug)
+    revalidatePath(`/sports/tournaments/${row.tournament.slug}`);
+  if (row?.league?.slug) revalidatePath(`/sports/leagues/${row.league.slug}`);
 }
 
 export async function saveMatch(id: number | null, fd: FormData) {
@@ -166,7 +192,7 @@ export async function updateMatchScore(
     .update(t)
     .set({ scoreA, scoreB, status, updatedAt: new Date().toISOString() })
     .where(eq(t.id, id));
-  bust(id);
+  await bustLive(id);
 }
 
 /** Append a match event (goal, card, etc.) for the live feed. */
@@ -183,7 +209,7 @@ export async function addMatchEvent(id: number, event: SportMatchEvent) {
     .update(t)
     .set({ events, updatedAt: new Date().toISOString() })
     .where(eq(t.id, id));
-  bust(id);
+  await bustLive(id);
 }
 
 /** Remove a match event by index (for correcting mistakes in the cockpit). */
@@ -200,7 +226,7 @@ export async function removeMatchEvent(id: number, index: number) {
     .update(t)
     .set({ events, updatedAt: new Date().toISOString() })
     .where(eq(t.id, id));
-  bust(id);
+  await bustLive(id);
 }
 
 export async function deleteMatch(id: number) {
@@ -225,7 +251,7 @@ export async function updateMatchTimer(id: number, timer: import("@/lib/schemas"
     .update(t)
     .set({ postMatch, updatedAt: new Date().toISOString() })
     .where(eq(t.id, id));
-  bust(id);
+  await bustLive(id);
 }
 
 const SCORING_TYPES = new Set(["goal", "own_goal", "penalty_goal"]);
@@ -289,7 +315,7 @@ export async function logMatchEvent(id: number, input: MatchEventInput) {
   }
 
   await db.update(t).set(patch).where(eq(t.id, id));
-  bust(id);
+  await bustLive(id);
 }
 
 export async function replayMatchEvent(id: number, eventId: string) {
@@ -312,7 +338,7 @@ export async function replayMatchEvent(id: number, eventId: string) {
     .update(t)
     .set({ events, updatedAt: new Date().toISOString() })
     .where(eq(t.id, id));
-  bust(id);
+  await bustLive(id);
 }
 
 export async function removeMatchEventById(id: number, eventId: string) {
@@ -330,7 +356,7 @@ export async function removeMatchEventById(id: number, eventId: string) {
       updatedAt: new Date().toISOString(),
     })
     .where(eq(t.id, id));
-  bust(id);
+  await bustLive(id);
 }
 
 export async function setMatchOverlay(id: number, overlay: SportDisplayOverlay) {
@@ -349,7 +375,7 @@ export async function setMatchOverlay(id: number, overlay: SportDisplayOverlay) 
     .update(t)
     .set({ postMatch, updatedAt: new Date().toISOString() })
     .where(eq(t.id, id));
-  bust(id);
+  await bustLive(id);
 }
 
 export async function setMatchGoalStyle(
@@ -368,7 +394,7 @@ export async function setMatchGoalStyle(
     .update(t)
     .set({ postMatch, updatedAt: new Date().toISOString() })
     .where(eq(t.id, id));
-  bust(id);
+  await bustLive(id);
 }
 
 export async function setMatchTickerHidden(id: number, hidden: boolean) {
@@ -384,7 +410,7 @@ export async function setMatchTickerHidden(id: number, hidden: boolean) {
     .update(t)
     .set({ postMatch, updatedAt: new Date().toISOString() })
     .where(eq(t.id, id));
-  bust(id);
+  await bustLive(id);
 }
 
 export type MatchEventPatch = {
@@ -434,7 +460,7 @@ export async function updateMatchEventAt(
     .update(t)
     .set({ events, updatedAt: new Date().toISOString() })
     .where(eq(t.id, id));
-  bust(id);
+  await bustLive(id);
 }
 
 export async function normaliseMatchScores(id: number) {
@@ -452,7 +478,7 @@ export async function normaliseMatchScores(id: number) {
       updatedAt: new Date().toISOString(),
     })
     .where(eq(t.id, id));
-  bust(id);
+  await bustLive(id);
 }
 
 export async function setMatchHalfTimeBreak(
@@ -472,7 +498,7 @@ export async function setMatchHalfTimeBreak(
     .update(t)
     .set({ postMatch, updatedAt: new Date().toISOString() })
     .where(eq(t.id, id));
-  bust(id);
+  await bustLive(id);
 }
 
 export async function setMatchShootout(
@@ -492,5 +518,5 @@ export async function setMatchShootout(
     .update(t)
     .set({ postMatch, updatedAt: new Date().toISOString() })
     .where(eq(t.id, id));
-  bust(id);
+  await bustLive(id);
 }

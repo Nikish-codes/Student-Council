@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "All Woxsen Sports Academy leagues — multi-round competitions with standings.",
 };
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 export default async function LeaguesPage() {
   const leagues = await getSportsLeagues();
