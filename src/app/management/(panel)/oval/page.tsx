@@ -42,17 +42,25 @@ export default async function OvalManagementPage({
   const statuses = Object.fromEntries(
     rows.map((row) => [
       row.menuDate,
-      { status: row.status, approvedAt: row.approvedAt },
+      {
+        status: row.status,
+        approvedAt: row.approvedAt,
+        live: Boolean(row.publishedMeals) || row.status === "approved",
+      },
     ]),
   );
+  const approvedWeek = Number(params.approvedWeek);
+  const skipped = Number(params.skipped) || 0;
   const notice =
     params.saved === "1"
-      ? "Weekly menu saved. Changed days are drafts until approved."
-      : typeof params.approved === "string"
-        ? `${formatOvalDate(params.approved)} approved for its 4:00 AM release.`
-        : typeof params.draft === "string"
-          ? `${formatOvalDate(params.draft)} returned to draft.`
-          : undefined;
+      ? "Weekly menu saved. Changed days stay drafts, and students keep seeing the last approved menu until you approve them."
+      : typeof params.approvedWeek === "string"
+        ? `${approvedWeek} day${approvedWeek === 1 ? "" : "s"} approved and published.${skipped ? ` ${skipped} day${skipped === 1 ? "" : "s"} still need fixes before approval.` : ""}`
+        : typeof params.approved === "string"
+          ? `${formatOvalDate(params.approved)} approved for its 4:00 AM release.`
+          : typeof params.draft === "string"
+            ? `${formatOvalDate(params.draft)} returned to draft.`
+            : undefined;
 
   return (
     <div className="space-y-9">
@@ -61,7 +69,12 @@ export default async function OvalManagementPage({
           <p className="kicker text-subtle">Dining · Oval</p>
           <h1 className="display mt-1 text-3xl">Weekly menu desk</h1>
           <p className="mt-3 max-w-2xl text-sm text-muted">
-            Week of {formatOvalDate(weekStart, { day: "numeric", month: "long", year: "numeric" })}
+            Week of{" "}
+            {formatOvalDate(weekStart, {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
           </p>
         </div>
         <Link
@@ -73,7 +86,10 @@ export default async function OvalManagementPage({
         </Link>
       </header>
 
-      <nav className="flex flex-wrap items-center justify-between gap-3 border-y border-line/10 py-3" aria-label="Choose menu week">
+      <nav
+        className="flex flex-wrap items-center justify-between gap-3 border-y border-line/10 py-3"
+        aria-label="Choose menu week"
+      >
         <Link
           href={`/management/oval?week=${addIsoDays(weekStart, -7)}`}
           className="inline-flex min-h-10 items-center gap-2 rounded-full px-3 text-xs font-medium text-muted hover:text-ink"

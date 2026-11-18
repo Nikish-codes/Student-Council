@@ -33,11 +33,17 @@ import {
   type OvalWeekDraft,
 } from "@/lib/oval-menu";
 import { cn } from "@/lib/utils";
-import { approveOvalDay, returnOvalDayToDraft, saveOvalWeek } from "./actions";
+import {
+  approveOvalDay,
+  approveOvalWeek,
+  returnOvalDayToDraft,
+  saveOvalWeek,
+} from "./actions";
 
 type StatusMap = Record<
   string,
-  { status: OvalDayStatus; approvedAt: string | null } | undefined
+  | { status: OvalDayStatus; approvedAt: string | null; live: boolean }
+  | undefined
 >;
 
 const DIETS: Array<{ id: OvalDiet; label: string; short: string }> = [
@@ -85,6 +91,10 @@ export function OvalWeekEditor({
     !dirty &&
     selectedStatus?.status !== "approved" &&
     approvalErrors.length === 0;
+  const pendingDays = week.days.filter(
+    (day) =>
+      statuses[day.menuDate] && statuses[day.menuDate]?.status !== "approved",
+  ).length;
   const visibleMeals =
     selectedMeal === "all"
       ? OVAL_MEALS
@@ -230,8 +240,8 @@ export function OvalWeekEditor({
           <p className="kicker text-subtle">Import the whole week</p>
           <h2 className="display mt-2 text-3xl">Source to structured menu</h2>
           <p className="mt-4 max-w-lg text-sm leading-relaxed text-muted">
-            Upload the mess&apos;s weekly Excel sheet as it is. Rows are matched by
-            their names, so small changes to the layout are fine. Importing
+            Upload the mess&apos;s weekly Excel sheet as it is. Rows are matched
+            by their names, so small changes to the layout are fine. Importing
             only creates a draft.
           </p>
         </div>
@@ -301,6 +311,7 @@ export function OvalWeekEditor({
         <div className="flex gap-2 overflow-x-auto pb-2" aria-label="Week days">
           {week.days.map((day, index) => {
             const status = statuses[day.menuDate]?.status ?? "draft";
+            const live = statuses[day.menuDate]?.live ?? false;
             const flags = countOvalReviewFlags(day.meals);
             const isCurrent = day.menuDate === serviceDate;
             const isNext = day.menuDate === addIsoDays(serviceDate, 1);
@@ -341,7 +352,9 @@ export function OvalWeekEditor({
                     ? `${flags} to review`
                     : status === "approved"
                       ? "Approved"
-                      : "Draft"}
+                      : live
+                        ? "Draft · old menu live"
+                        : "Draft"}
                 </span>
               </button>
             );
@@ -437,8 +450,8 @@ export function OvalWeekEditor({
 
           {dirty ? (
             <div className="rounded-2xl bg-amber-500/10 p-5 text-sm text-amber-500">
-              Save changes before approving. Editing an approved day safely
-              returns it to draft.
+              Save changes before approving. Students keep seeing the last
+              approved menu until you approve the new one.
             </div>
           ) : null}
 
@@ -471,7 +484,7 @@ export function OvalWeekEditor({
                 type="submit"
                 className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-line/20 px-5 text-sm font-medium text-ink hover:border-line/45"
               >
-                Return day to draft
+                Remove day from public site
               </button>
             </form>
           ) : (
@@ -490,6 +503,19 @@ export function OvalWeekEditor({
               </button>
             </form>
           )}
+          {pendingDays > 0 ? (
+            <form action={approveOvalWeek}>
+              <input type="hidden" name="weekStart" value={week.weekStart} />
+              <button
+                type="submit"
+                disabled={dirty}
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-accent px-5 text-sm font-medium text-accent-ink disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <CheckCircle2 className="h-4 w-4" /> Approve whole week (
+                {pendingDays})
+              </button>
+            </form>
+          ) : null}
           {!canApprove && selectedStatus?.status !== "approved" ? (
             <p className="text-xs leading-relaxed text-subtle">
               {dirty

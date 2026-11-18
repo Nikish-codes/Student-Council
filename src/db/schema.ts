@@ -1088,6 +1088,9 @@ export const ovalMenuDays = sqliteTable(
         jain_lunch: [],
         jain_dinner: [],
       }),
+    publishedMeals: text("published_meals", {
+      mode: "json",
+    }).$type<OvalMeals>(),
     sourceName: text("source_name"),
     sourceMimeType: text("source_mime_type"),
     importMethod: text("import_method")

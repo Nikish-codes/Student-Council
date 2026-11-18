@@ -2,11 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { eq, inArray } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { ovalMenuDays } from "@/db/schema";
 import { logAudit } from "@/lib/audit";
+import { getOvalServiceDate } from "@/lib/oval-date";
 import {
   addIsoDays,
   getWeekStart,
@@ -15,14 +17,26 @@ import {
   validateApprovableMeals,
 } from "@/lib/oval-menu";
 import { requireOvalManager } from "@/lib/rbac";
+import { siteUrl } from "@/lib/site-url";
 
 function field(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
 }
 
-function revalidateOval() {
-  revalidatePath("/oval/[date]", "page");
+function refreshPublicOval(dates: string[]) {
   revalidatePath("/management/oval");
+  for (const date of dates) revalidatePath(`/oval/${date}`);
+  const today = getOvalServiceDate();
+  if (!dates.includes(today)) return;
+  after(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      await fetch(`${siteUrl()}/oval/${today}`, {
+        cache: "no-store",
+        redirect: "manual",
+      });
+    } catch {}
+  });
 }
 
 export async function saveOvalWeek(formData: FormData) {
@@ -120,7 +134,7 @@ export async function saveOvalWeek(formData: FormData) {
     },
   });
 
-  revalidateOval();
+  revalidatePath("/management/oval");
   redirect(`/management/oval?week=${draft.weekStart}&saved=1`);
 }
 
@@ -142,6 +156,7 @@ export async function approveOvalDay(formData: FormData) {
     .update(ovalMenuDays)
     .set({
       status: "approved",
+      publishedMeals: normalizeOvalMeals(row.meals),
       approvedByUserId: Number(user.id),
       approvedAt: now,
       updatedAt: now,
@@ -153,8 +168,56 @@ export async function approveOvalDay(formData: FormData) {
     action: "oval.day.approved",
     targetId: menuDate,
   });
-  revalidateOval();
+  refreshPublicOval([menuDate]);
   redirect(`/management/oval?week=${row.weekStart}&approved=${menuDate}`);
+}
+
+export async function approveOvalWeek(formData: FormData) {
+  const user = await requireOvalManager();
+  const weekStart = field(formData, "weekStart");
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(weekStart) ||
+    getWeekStart(weekStart) !== weekStart
+  )
+    throw new Error("Invalid week");
+
+  const rows = await db
+    .select()
+    .from(ovalMenuDays)
+    .where(eq(ovalMenuDays.weekStart, weekStart));
+  const approved: string[] = [];
+  let skipped = 0;
+  const now = new Date().toISOString();
+  for (const row of rows) {
+    if (row.status === "approved") continue;
+    const meals = normalizeOvalMeals(row.meals);
+    if (validateApprovableMeals(meals).length) {
+      skipped += 1;
+      continue;
+    }
+    await db
+      .update(ovalMenuDays)
+      .set({
+        status: "approved",
+        publishedMeals: meals,
+        approvedByUserId: Number(user.id),
+        approvedAt: now,
+        updatedAt: now,
+      })
+      .where(eq(ovalMenuDays.menuDate, row.menuDate));
+    approved.push(row.menuDate);
+  }
+
+  await logAudit({
+    actorUserId: Number(user.id),
+    action: "oval.week.approved",
+    targetId: weekStart,
+    meta: { approved, skipped },
+  });
+  refreshPublicOval(approved);
+  redirect(
+    `/management/oval?week=${weekStart}&approvedWeek=${approved.length}&skipped=${skipped}`,
+  );
 }
 
 export async function returnOvalDayToDraft(formData: FormData) {
@@ -169,6 +232,7 @@ export async function returnOvalDayToDraft(formData: FormData) {
     .update(ovalMenuDays)
     .set({
       status: "draft",
+      publishedMeals: null,
       approvedByUserId: null,
       approvedAt: null,
       updatedAt: new Date().toISOString(),
@@ -179,6 +243,6 @@ export async function returnOvalDayToDraft(formData: FormData) {
     action: "oval.day.returned_to_draft",
     targetId: menuDate,
   });
-  revalidateOval();
+  refreshPublicOval([menuDate]);
   redirect(`/management/oval?week=${row.weekStart}&draft=${menuDate}`);
 }

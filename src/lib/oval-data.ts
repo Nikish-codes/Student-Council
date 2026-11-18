@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { ovalMenuDays, type DbOvalMenuDay } from "@/db/schema";
@@ -16,14 +16,14 @@ export async function getApprovedOvalDay(
   menuDate: string,
 ): Promise<DbOvalMenuDay | null> {
   try {
-    const row =
-      (await db.query.ovalMenuDays.findFirst({
-        where: and(
-          eq(ovalMenuDays.menuDate, menuDate),
-          eq(ovalMenuDays.status, "approved"),
-        ),
-      })) ?? null;
-    return row ? { ...row, meals: normalizeOvalMeals(row.meals) } : null;
+    const row = await db.query.ovalMenuDays.findFirst({
+      where: eq(ovalMenuDays.menuDate, menuDate),
+    });
+    const published =
+      row?.publishedMeals ?? (row?.status === "approved" ? row.meals : null);
+    return row && published
+      ? { ...row, meals: normalizeOvalMeals(published) }
+      : null;
   } catch (error) {
     // A deployment may briefly run new code before its migration. Public users
     // get the honest unavailable state instead of a 500 page during that window.
