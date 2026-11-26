@@ -161,7 +161,9 @@ export function OvalDailyMenu({
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
           <p>
             <strong className="font-semibold text-accent">Important:</strong>{" "}
-            The menu is subject to change at any time.
+            The Oval staff can change any dish, including the main item, at any
+            time. What is served can be different from the menu shown here,
+            depending on the availability of ingredients and resources.
           </p>
         </div>
 
