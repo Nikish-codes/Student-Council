@@ -43,7 +43,7 @@ export function MemberPortrait({
       alt={name}
       fill
       sizes={sizes}
-      quality={78}
+      quality={75}
       loading={priority ? "eager" : "lazy"}
       priority={priority}
       onError={() => setErrored(true)}

@@ -50,7 +50,7 @@ export function CouncilGroupPhoto({
                 alt="Woxsen Student Council 2026/27 group portrait"
                 fill
                 sizes="(min-width: 1536px) 1560px, (min-width: 1024px) calc(100vw - 6rem), calc(100vw - 2.5rem)"
-                quality={88}
+                quality={90}
                 // `contain` on a frame that already matches the image is a
                 // no-op today, and insurance against the next upload having a
                 // different shape.

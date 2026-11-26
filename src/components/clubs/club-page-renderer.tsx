@@ -362,7 +362,7 @@ function StageWorld({ club, upcoming, past, leads }: WorldProps) {
                   fill
                   priority
                   sizes="(min-width: 1536px) 1400px, 100vw"
-                  quality={95}
+                  quality={90}
                   className="object-cover object-center"
                 />
               </div>
@@ -841,7 +841,7 @@ function ExhibitionWorld({ club, upcoming, past, leads }: WorldProps) {
             fill
             priority
             sizes="100vw"
-            quality={92}
+            quality={90}
             className="object-contain"
           />
         ) : (

@@ -230,7 +230,7 @@ export default async function ClubDetailPage({
               // ((min-width:1280px) 320px) — a full-bleed banner served at 320px
               // is the blurry-upscale bug this replaces.
               sizes="(min-width: 1536px) 1536px, 100vw"
-              quality={88}
+              quality={90}
               className="object-cover"
             />
           </div>

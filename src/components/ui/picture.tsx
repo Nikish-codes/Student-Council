@@ -35,7 +35,7 @@ export function Picture({
   className,
   priority,
   sizes = "(min-width: 1280px) 320px, (min-width: 768px) 50vw, 100vw",
-  quality = 78,
+  quality = 75,
   ...props
 }: PictureProps) {
   const [errored, setErrored] = React.useState(false);
