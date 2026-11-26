@@ -57,7 +57,7 @@ export default async function OvalManagementPage({
       : typeof params.approvedWeek === "string"
         ? `${approvedWeek} day${approvedWeek === 1 ? "" : "s"} approved and published.${skipped ? ` ${skipped} day${skipped === 1 ? "" : "s"} still need fixes before approval.` : ""}`
         : typeof params.approved === "string"
-          ? `${formatOvalDate(params.approved)} approved for its 4:00 AM release.`
+          ? `${formatOvalDate(params.approved)} approved. It goes live at 10:00 PM the night before.`
           : typeof params.draft === "string"
             ? `${formatOvalDate(params.draft)} returned to draft.`
             : undefined;

@@ -524,8 +524,8 @@ export function OvalWeekEditor({
             </p>
           ) : null}
           <p className="text-xs leading-relaxed text-subtle">
-            Approved days become public automatically at 4:00 AM on their
-            service date. Other days remain private.
+            Approved days become public automatically at 10:00 PM the night
+            before their service date. Other days remain private.
           </p>
         </aside>
       </section>

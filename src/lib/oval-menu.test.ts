@@ -11,14 +11,20 @@ import {
 } from "./oval-menu";
 
 describe("Oval service date", () => {
-  it("keeps the previous day before the 4 AM Kolkata boundary", () => {
-    expect(getOvalServiceDate(new Date("2026-08-16T21:59:00.000Z"))).toBe(
+  it("keeps the same day until 10 PM Kolkata", () => {
+    expect(getOvalServiceDate(new Date("2026-08-16T16:29:00.000Z"))).toBe(
       "2026-08-16",
     );
   });
 
-  it("switches at exactly 4 AM Kolkata", () => {
-    expect(getOvalServiceDate(new Date("2026-08-16T22:30:00.000Z"))).toBe(
+  it("switches to the next day at exactly 10 PM Kolkata", () => {
+    expect(getOvalServiceDate(new Date("2026-08-16T16:30:00.000Z"))).toBe(
+      "2026-08-17",
+    );
+  });
+
+  it("stays on that day after midnight", () => {
+    expect(getOvalServiceDate(new Date("2026-08-16T20:30:00.000Z"))).toBe(
       "2026-08-17",
     );
   });
@@ -50,14 +56,20 @@ describe("Oval dietary and approval rules", () => {
 });
 
 describe("Oval meal phases", () => {
-  it("keeps every previous-day service completed before the 4 AM rollover", () => {
-    expect(getOvalMealPhases(new Date("2026-08-16T21:00:00.000Z"))).toEqual({
-      breakfast: "completed",
-      lunch: "completed",
-      dinner: "completed",
-      jain_lunch: "completed",
-      jain_dinner: "completed",
-    });
+  it("shows the next day's breakfast as up next after the 10 PM rollover", () => {
+    const upcomingDay = {
+      breakfast: "upcoming",
+      lunch: "later",
+      dinner: "later",
+      jain_lunch: "later",
+      jain_dinner: "later",
+    };
+    expect(getOvalMealPhases(new Date("2026-08-16T17:00:00.000Z"))).toEqual(
+      upcomingDay,
+    );
+    expect(getOvalMealPhases(new Date("2026-08-16T21:00:00.000Z"))).toEqual(
+      upcomingDay,
+    );
   });
 
   it("identifies the currently serving meal in Kolkata", () => {

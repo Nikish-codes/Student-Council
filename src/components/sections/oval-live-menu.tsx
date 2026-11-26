@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 
 import type { DbOvalMenuDay, OvalMealId } from "@/db/schema";
 import { OvalDailyMenu } from "@/components/sections/oval-daily-menu";
-import { getOvalMealPhasesFor, type OvalMealPhase } from "@/lib/oval-menu";
+import {
+  getKolkataDate,
+  getOvalMealPhasesFor,
+  type OvalMealPhase,
+} from "@/lib/oval-menu";
 
 export function OvalLiveMenu({
   serviceDate,
@@ -16,13 +20,24 @@ export function OvalLiveMenu({
   initialPhases: Record<OvalMealId, OvalMealPhase>;
 }) {
   const [phases, setPhases] = useState(initialPhases);
+  const [tomorrow, setTomorrow] = useState(false);
 
   useEffect(() => {
-    const update = () => setPhases(getOvalMealPhasesFor(serviceDate));
+    const update = () => {
+      setPhases(getOvalMealPhasesFor(serviceDate));
+      setTomorrow(serviceDate > getKolkataDate());
+    };
     update();
     const id = setInterval(update, 60_000);
     return () => clearInterval(id);
   }, [serviceDate]);
 
-  return <OvalDailyMenu serviceDate={serviceDate} day={day} phases={phases} />;
+  return (
+    <OvalDailyMenu
+      serviceDate={serviceDate}
+      day={day}
+      phases={phases}
+      tomorrow={tomorrow}
+    />
+  );
 }

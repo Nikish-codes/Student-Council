@@ -9,14 +9,15 @@ import type {
 } from "@/db/schema";
 
 import {
-  OVAL_RELEASE_HOUR,
+  OVAL_ROLLOVER_HOUR,
   getKolkataMinutes,
   getOvalServiceDate,
 } from "@/lib/oval-date";
 
 export {
-  OVAL_RELEASE_HOUR,
+  OVAL_ROLLOVER_HOUR,
   OVAL_TIMEZONE,
+  getKolkataDate,
   getKolkataMinutes,
   getOvalServiceDate,
 } from "@/lib/oval-date";
@@ -117,13 +118,13 @@ export function getOvalMealPhases(
   now = new Date(),
 ): Record<OvalMealId, OvalMealPhase> {
   const minute = getKolkataMinutes(now);
-  if (minute < OVAL_RELEASE_HOUR * 60) {
+  if (minute >= OVAL_ROLLOVER_HOUR * 60) {
     return {
-      breakfast: "completed",
-      lunch: "completed",
-      dinner: "completed",
-      jain_lunch: "completed",
-      jain_dinner: "completed",
+      breakfast: "upcoming",
+      lunch: "later",
+      dinner: "later",
+      jain_lunch: "later",
+      jain_dinner: "later",
     };
   }
   let nextFound = false;

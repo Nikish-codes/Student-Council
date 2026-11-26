@@ -81,11 +81,11 @@ function DietMark({
     </span>
   );
 }
-function phaseCopy(phase: OvalMealPhase) {
+function phaseCopy(phase: OvalMealPhase, tomorrow = false) {
   if (phase === "serving") return "Serving now";
-  if (phase === "upcoming") return "Up next";
+  if (phase === "upcoming") return tomorrow ? "First tomorrow" : "Up next";
   if (phase === "completed") return "Service completed";
-  return "Later today";
+  return tomorrow ? "Tomorrow" : "Later today";
 }
 
 function MenuItemRow({ item }: { item: OvalMenuItem }) {
@@ -110,12 +110,15 @@ export function OvalDailyMenu({
   serviceDate,
   day,
   phases,
+  tomorrow = false,
 }: {
   serviceDate: string;
   day: DbOvalMenuDay | null;
   phases: Record<OvalMealId, OvalMealPhase>;
+  tomorrow?: boolean;
 }) {
   const dateLabel = formatOvalDate(serviceDate);
+  const dayWord = tomorrow ? "Tomorrow" : "Today";
   return (
     <div className="pb-28 pt-32 sm:pt-40">
       <section className="container">
@@ -125,7 +128,7 @@ export function OvalDailyMenu({
               <UtensilsCrossed className="h-4 w-4 text-accent" />
               <span>Oval mess</span>
               <span aria-hidden>·</span>
-              <span>Today&apos;s menu</span>
+              <span>{dayWord}&apos;s menu</span>
             </div>
             <h1 className="display mt-5 max-w-5xl text-5xl/[0.92] sm:text-7xl/[0.9]">
               {dateLabel.split(",")[0]},
@@ -135,7 +138,7 @@ export function OvalDailyMenu({
             </h1>
             <p className="mt-6 max-w-2xl text-pretty text-muted">
               Breakfast, lunch, dinner, and Jain choices for this service day.
-              The day&apos;s menu is available each morning.
+              The next day&apos;s menu goes up at 10 PM each night.
             </p>
           </div>
           <div className="border-l border-line/20 pl-5 text-sm text-muted">
@@ -168,7 +171,7 @@ export function OvalDailyMenu({
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
               <div>
                 <h2 className="font-medium text-ink">
-                  Today&apos;s menu is awaiting confirmation
+                  {dayWord}&apos;s menu is awaiting confirmation
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
                   The Food Committee has not approved this service day yet.
@@ -176,11 +179,15 @@ export function OvalDailyMenu({
                 </p>
               </div>
             </div>
-            <ServiceLine meals={null} phases={phases} />
+            <ServiceLine meals={null} phases={phases} tomorrow={tomorrow} />
           </div>
         ) : (
           <div className="mx-auto mt-16 max-w-5xl">
-            <ServiceLine meals={day.meals} phases={phases} />
+            <ServiceLine
+              meals={day.meals}
+              phases={phases}
+              tomorrow={tomorrow}
+            />
           </div>
         )}
       </section>
@@ -191,9 +198,11 @@ export function OvalDailyMenu({
 function ServiceLine({
   meals,
   phases,
+  tomorrow,
 }: {
   meals: DbOvalMenuDay["meals"] | null;
   phases: Record<OvalMealId, OvalMealPhase>;
+  tomorrow: boolean;
 }) {
   return (
     <div className="relative">
@@ -236,7 +245,7 @@ function ServiceLine({
                   active ? "text-accent" : "text-subtle",
                 )}
               >
-                {phaseCopy(phase)}
+                {phaseCopy(phase, tomorrow)}
               </span>
             </div>
             <div className="border-y border-line/10">
