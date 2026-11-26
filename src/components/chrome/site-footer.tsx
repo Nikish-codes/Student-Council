@@ -5,22 +5,21 @@ const FOOTER_NAV = [
   {
     title: "Explore",
     items: [
-      { href: "/", label: "Home", disabled: true },
-      { href: "/oval", label: "Oval", disabled: true },
+      { href: "/", label: "Home" },
+      { href: "/oval", label: "Oval" },
       { href: "/sports", label: "Sports" },
-      { href: "/council", label: "Council", disabled: true },
-      { href: "/events", label: "Events", disabled: true },
-      { href: "/clubs", label: "Clubs", disabled: true },
-      { href: "/support", label: "Support", disabled: true },
+      { href: "/council", label: "Council" },
+      { href: "/events", label: "Events" },
+      { href: "/clubs", label: "Clubs" },
+      { href: "/support", label: "Support" },
     ],
   },
   {
     title: "Support",
     items: [
-      { href: "/support#gateway", label: "Gateway", disabled: true },
-      { href: "/support#bridge", label: "Bridge", disabled: true },
-      { href: "/support#career-connect", label: "Career Connect", disabled: true },
-      { href: "/support#grievance-form", label: "Grievance", disabled: true },
+      { href: "/support", label: "Find a department" },
+      { href: "/support#grievance-form", label: "Raise a grievance" },
+      { href: "/clubsignup", label: "Club sign-up" },
     ],
   },
   {
@@ -74,24 +73,12 @@ export function SiteFooter() {
                 <ul className="mt-5 space-y-3">
                   {col.items.map((item) => (
                     <li key={item.href}>
-                      {item.disabled ? (
-                        <span
-                          className="prose-link text-sm text-subtle/50 cursor-not-allowed"
-                          title="Coming soon"
-                        >
-                          {item.label}
-                          <span className="ml-1 align-super font-mono text-[9px] uppercase tracking-[0.15em] text-subtle/40">
-                            soon
-                          </span>
-                        </span>
-                      ) : (
-                        <Link
-                          href={item.href}
-                          className="prose-link text-sm text-muted transition-colors hover:text-ink"
-                        >
-                          {item.label}
-                        </Link>
-                      )}
+                      <Link
+                        href={item.href}
+                        className="prose-link text-sm text-muted transition-colors hover:text-ink"
+                      >
+                        {item.label}
+                      </Link>
                     </li>
                   ))}
                 </ul>

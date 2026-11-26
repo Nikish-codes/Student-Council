@@ -92,12 +92,15 @@ export function EventsAlmanac({
 
   // Past events arrive in ascending date order; flip to newest-first for the
   // archive-style browse. Now/Upcoming stay ascending for month grouping.
-  const pool: EventItem[] =
-    view === "now"
-      ? live
-      : view === "upcoming"
-        ? upcoming
-        : [...past].reverse();
+  const pool = React.useMemo<EventItem[]>(
+    () =>
+      view === "now"
+        ? live
+        : view === "upcoming"
+          ? upcoming
+          : [...past].reverse(),
+    [view, live, upcoming, past],
+  );
 
   const filtered = React.useMemo(
     () => (cat === "all" ? pool : pool.filter((e) => e.category === cat)),
@@ -105,7 +108,8 @@ export function EventsAlmanac({
   );
 
   const groups = React.useMemo<Group[]>(
-    () => (view === "past" ? groupByYearDesc(filtered) : groupByMonth(filtered)),
+    () =>
+      view === "past" ? groupByYearDesc(filtered) : groupByMonth(filtered),
     [filtered, view],
   );
 
@@ -188,34 +192,42 @@ export function EventsAlmanac({
             if (date) {
               gsap.set(date, { opacity: 1 });
               if (!reduced) {
-                gsap.from(date, {
-                  x: -40,
-                  opacity: 0,
-                  duration: 1,
-                  ease: "expo.out",
-                  scrollTrigger: {
-                    trigger: slab,
-                    start: "top 85%",
-                    once: true,
+                gsap.fromTo(
+                  date,
+                  { x: -40, opacity: 0 },
+                  {
+                    x: 0,
+                    opacity: 1,
+                    duration: 1,
+                    ease: "expo.out",
+                    scrollTrigger: {
+                      trigger: slab,
+                      start: "top 85%",
+                      once: true,
+                    },
                   },
-                });
+                );
               }
             }
             if (meta.length) {
               gsap.set(meta, { opacity: 1 });
               if (!reduced) {
-                gsap.from(meta, {
-                  y: 24,
-                  opacity: 0,
-                  duration: 0.8,
-                  ease: "expo.out",
-                  stagger: 0.06,
-                  scrollTrigger: {
-                    trigger: slab,
-                    start: "top 85%",
-                    once: true,
+                gsap.fromTo(
+                  meta,
+                  { y: 24, opacity: 0 },
+                  {
+                    y: 0,
+                    opacity: 1,
+                    duration: 0.8,
+                    ease: "expo.out",
+                    stagger: 0.06,
+                    scrollTrigger: {
+                      trigger: slab,
+                      start: "top 85%",
+                      once: true,
+                    },
                   },
-                });
+                );
               }
             }
           });
@@ -333,13 +345,19 @@ export function EventsAlmanac({
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState view={view} upcomingCount={upcoming.length} setView={setView} />
+        <EmptyState
+          view={view}
+          upcomingCount={upcoming.length}
+          setView={setView}
+        />
       ) : (
         <div className="grid grid-cols-1 gap-x-12 lg:grid-cols-12">
           {/* Sticky group rail */}
           <aside className="hidden lg:col-span-3 lg:block">
             <div className="sticky top-32 flex flex-col gap-2">
-              <span className="kicker mb-3 text-sm tracking-[0.2em]">{railLabel}</span>
+              <span className="kicker mb-3 text-sm tracking-[0.2em]">
+                {railLabel}
+              </span>
               {groups.map((g) => {
                 const isActive = activeKey === g.key;
                 return (
@@ -503,10 +521,7 @@ function EmptyState({
 
 function LiveDot({ className }: { className?: string }) {
   return (
-    <span
-      className={cn("relative inline-flex h-2 w-2", className)}
-      aria-hidden
-    >
+    <span className={cn("relative inline-flex h-2 w-2", className)} aria-hidden>
       <span className="absolute inset-0 rounded-full bg-accent opacity-75 animate-ping" />
       <span
         className="relative inline-flex h-2 w-2 rounded-full bg-accent"

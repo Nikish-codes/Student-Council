@@ -78,9 +78,6 @@ Env lives in `.env.local` (loaded by `drizzle.config.ts` too). Copy from
 | `TICKET_SECRET` | HMAC secret for ticket QR signing (falls back to `AUTH_SECRET`) |
 | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `NEXT_PUBLIC_RAZORPAY_KEY_ID` | Razorpay payments |
 | `NEXT_PUBLIC_SITE_URL` | Public base URL for absolute ticket links + QR payloads |
-| `COMING_SOON` | `on` (default) gates the public site behind /coming-soon; `off` reveals it |
-| `SITE_PREVIEW_KEY` | Optional shareable preview key (`?preview=<key>` unlocks for 30 days) |
-| `NEXT_PUBLIC_LAUNCH_DATE` | Optional ISO date for the coming-soon countdown |
 | `DISCORD_WEBHOOK_URL` | Optional: on-publish event notification |
 | `SEED_SUPER_ADMIN_EMAIL`, `SEED_SUPER_ADMIN_PASSWORD` | One-time admin seed (remove after) |
 | `PAYLOAD_SECRET` | Legacy Payload CMS (still shares the DB) |
@@ -149,9 +146,6 @@ portal/
 │   │   │   │       ├── page.tsx
 │   │   │   │       ├── actions.ts
 │   │   │   │       └── scanner.tsx   # @zxing/browser QR scanner
-│   │   ├── coming-soon/              # Coming-soon teaser (gated by COMING_SOON env)
-│   │   │   ├── page.tsx
-│   │   │   └── teaser.tsx
 │   │   ├── t/                        # Attendee ticket pages
 │   │   │   ├── [code]/               # /t/[code] — ticket by QR code
 │   │   │   │   ├── page.tsx
@@ -174,7 +168,7 @@ portal/
 │   │   └── globals.css              # Design tokens, boot overlay, FOUC guard, components
 │   ├── auth.ts                       # Full Auth.js (Node): Credentials + bcrypt + lockout
 │   ├── auth.config.ts                # Edge-safe Auth.js config (no bcrypt/db) for middleware
-│   ├── middleware.ts                 # Coming-soon gate + panel protection (edge)
+│   ├── middleware.ts                 # Panel protection + legacy redirects (edge)
 │   ├── components/
 │   │   ├── chrome/                   # Site chrome
 │   │   │   ├── site-header.tsx       # Nav, theme toggle, announcements ticker
@@ -415,13 +409,12 @@ Reordering actions exist for highlights, FAQs, and council members
 
 ### Middleware — `src/middleware.ts`
 
-Two jobs (edge runtime):
-1. **Panel protection**: `/management/**` and `/eventmanagement/**` require a
-   session; redirect to `/management/login` otherwise.
-2. **Coming-soon gate** (`COMING_SOON` env, on by default): anonymous visitors
-   see only `/coming-soon`. Logged-in team (any role) sees the real site. A
-   `?preview=<SITE_PREVIEW_KEY>` URL drops a 30-day unlock cookie for
-   stakeholders without accounts. Set `COMING_SOON=off` to reveal the site.
+- **Panel protection**: `/management/**`, `/eventmanagement/**` and
+  `/club-management/**` require a session; redirect to `/management/login`
+  otherwise.
+- **Public site** is open to everyone. `/coming-soon` 308-redirects to `/`,
+  `/sports?year=` redirects to `/sports/year/[year]`, and `/oval` is rewritten
+  to `/oval/[today]`.
 
 ### Media
 

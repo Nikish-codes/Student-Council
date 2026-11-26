@@ -8,16 +8,16 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-type NavItem = { href: string; label: string; disabled?: boolean };
+type NavItem = { href: string; label: string };
 
 const NAV: NavItem[] = [
-  { href: "/", label: "Home", disabled: true },
-  { href: "/oval", label: "Oval", disabled: true },
+  { href: "/", label: "Home" },
+  { href: "/oval", label: "Oval" },
   { href: "/sports", label: "Sports" },
-  { href: "/council", label: "Council", disabled: true },
-  { href: "/events", label: "Events", disabled: true },
-  { href: "/clubs", label: "Clubs", disabled: true },
-  { href: "/support", label: "Support", disabled: true },
+  { href: "/council", label: "Council" },
+  { href: "/events", label: "Events" },
+  { href: "/clubs", label: "Clubs" },
+  { href: "/support", label: "Support" },
 ];
 
 export function SiteHeader() {
@@ -61,21 +61,6 @@ export function SiteHeader() {
               item.href === "/"
                 ? pathname === "/"
                 : pathname?.startsWith(item.href);
-            if (item.disabled) {
-              return (
-                <span
-                  key={item.href}
-                  aria-disabled="true"
-                  className="relative rounded-full px-4 py-2 text-sm text-subtle/60 transition-colors duration-300"
-                  title="Coming soon"
-                >
-                  {item.label}
-                  <span className="ml-1 align-super font-mono text-[9px] uppercase tracking-[0.15em] text-subtle/50">
-                    soon
-                  </span>
-                </span>
-              );
-            }
             return (
               <Link
                 key={item.href}
@@ -95,8 +80,8 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden md:block">
-          <Button size="sm" variant="outline" disabled className="cursor-not-allowed opacity-40">
-            Raise a concern
+          <Button size="sm" variant="outline" asChild>
+            <Link href="/support#grievance-form">Raise a concern</Link>
           </Button>
         </div>
 
@@ -125,32 +110,19 @@ export function SiteHeader() {
                 </Dialog.Close>
               </div>
               <nav className="flex flex-col gap-1">
-                {NAV.map((item) =>
-                  item.disabled ? (
-                    <span
-                      key={item.href}
-                      aria-disabled="true"
-                      className="display flex items-center gap-3 rounded-xl px-3 py-3 text-3xl text-subtle/50"
-                    >
-                      {item.label}
-                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtle/40">
-                        soon
-                      </span>
-                    </span>
-                  ) : (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="display block rounded-xl px-3 py-3 text-3xl text-ink hover:bg-line/[0.04]"
-                    >
-                      {item.label}
-                    </Link>
-                  ),
-                )}
+                {NAV.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="display block rounded-xl px-3 py-3 text-3xl text-ink hover:bg-line/[0.04]"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
               </nav>
               <div className="mt-6 border-t border-line/10 pt-6">
-                <Button size="md" className="w-full opacity-40 cursor-not-allowed" disabled>
-                  Raise a concern
+                <Button size="md" className="w-full" asChild>
+                  <Link href="/support#grievance-form">Raise a concern</Link>
                 </Button>
               </div>
             </Dialog.Content>

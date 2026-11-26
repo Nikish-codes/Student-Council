@@ -1,18 +1,7 @@
 /**
- * Edge middleware — two jobs:
- *
- * 1. Protect the ops surfaces (`/management/**`, `/eventmanagement/**`) behind a
- *    session, using the edge-safe auth config (no bcrypt/db).
- * 2. "Coming soon" gate: while enabled, anyone hitting the public domain sees
- *    ONLY /coming-soon. The real site stays reachable for:
- *      - logged-in team members (any role — a valid session unlocks everything),
- *      - anyone with the shareable preview link (`?preview=<SITE_PREVIEW_KEY>`,
- *        which drops an unlock cookie for stakeholders without accounts),
- *      - search-engine crawlers (so the real site can be indexed while the
- *        teaser is still up for humans).
- *
- * Toggle the gate off (reveal the site to the world) by setting COMING_SOON=off
- * in the environment — no code change or redeploy of source needed.
+ * Edge middleware: protects the ops surfaces (`/management/**`,
+ * `/eventmanagement/**`, `/club-management/**`) behind a session, redirects
+ * legacy URLs, and pins `/oval` to the current service date.
  */
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
@@ -25,25 +14,10 @@ import {
 
 const { auth } = NextAuth(authConfig);
 
-// Gate is ON by default; only the literal "off" reveals the site to everyone.
-const GATE_ON = process.env.COMING_SOON !== "off";
-// Optional secret preview key for sharing the real site with people who can't
-// log in. Unset (empty) → no preview-link bypass exists.
-const PREVIEW_KEY = process.env.SITE_PREVIEW_KEY;
-const PREVIEW_COOKIE = "sc_preview";
-
-// Search crawlers pass the coming-soon gate so the real site keeps getting
-// indexed while humans still see the teaser. Matched on user-agent, since edge
-// middleware can't verify crawlers by reverse DNS; a spoofed UA would slip
-// through too, which is an accepted trade-off for a teaser gate.
-const SEARCH_BOTS =
-  /(Googlebot|Google-InspectionTool|AdsBot|Mediapartners|Bingbot|bingpreview|YandexBot|DuckDuckBot|Baiduspider|Applebot|facebookexternalhit|LinkedInBot|Twitterbot|Slurp)/;
-
 export default auth((req) => {
   const { pathname, searchParams } = req.nextUrl;
   const isLoggedIn = !!req.auth?.user;
   const role = req.auth?.user?.role;
-  // The signup directory is a public entry point, including during previews.
   if (pathname === "/clubsignup") return NextResponse.next();
 
   const isPanel =
@@ -84,8 +58,14 @@ export default auth((req) => {
     return NextResponse.redirect(url);
   }
 
-  // Panels and the teaser page itself are always reachable.
-  if (isPanel || pathname === "/coming-soon") return NextResponse.next();
+  if (isPanel) return NextResponse.next();
+
+  if (pathname === "/coming-soon") {
+    const url = req.nextUrl.clone();
+    url.pathname = "/";
+    url.search = "";
+    return NextResponse.redirect(url, 308);
+  }
 
   const legacyYear = searchParams.get("year");
   if (
@@ -102,57 +82,13 @@ export default auth((req) => {
     return NextResponse.redirect(url, 308);
   }
 
-  // Redirect root to /sports during soft launch.
-  if (pathname === "/") {
-    const url = req.nextUrl.clone();
-    url.pathname = "/sports";
-    return NextResponse.redirect(url);
+  if (pathname === "/oval") {
+    return NextResponse.rewrite(
+      new URL(`/oval/${getOvalServiceDate()}`, req.nextUrl),
+    );
   }
 
-  const allow = () =>
-    pathname === "/oval"
-      ? NextResponse.rewrite(
-          new URL(`/oval/${getOvalServiceDate()}`, req.nextUrl),
-        )
-      : NextResponse.next();
-
-  // 2) Coming-soon gate for the public surface.
-  if (!GATE_ON) return allow();
-
-  // A) Preview key present in the URL → set the unlock cookie, then continue on
-  //    a clean URL (strip the key so it isn't left lying around).
-  if (PREVIEW_KEY && searchParams.get("preview") === PREVIEW_KEY) {
-    const url = req.nextUrl.clone();
-    url.searchParams.delete("preview");
-    const res = NextResponse.redirect(url);
-    res.cookies.set(PREVIEW_COOKIE, PREVIEW_KEY, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: true,
-      path: "/",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-    });
-    return res;
-  }
-
-  // B) Unlocked visitors: logged-in team OR holders of a valid preview cookie.
-  const hasPreviewCookie =
-    !!PREVIEW_KEY && req.cookies.get(PREVIEW_COOKIE)?.value === PREVIEW_KEY;
-
-  // B1) Search crawlers see the real site so indexing never stops (but only if unlocked).
-  const isCrawler = SEARCH_BOTS.test(req.headers.get("user-agent") ?? "");
-
-  // /sports is always open — it's the only live section during soft launch.
-  if (pathname.startsWith("/sports")) return NextResponse.next();
-
-  // For non-sports pages, require authentication or preview access.
-  // Logged-in users, preview cookie holders, or crawlers can access all pages.
-  if (isLoggedIn || hasPreviewCookie || isCrawler) return allow();
-
-  // Everyone else visiting any other page → redirect to /sports (the only public page).
-  const url = req.nextUrl.clone();
-  url.pathname = "/sports";
-  return NextResponse.redirect(url);
+  return NextResponse.next();
 });
 
 export const config = {
